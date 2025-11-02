@@ -56,7 +56,7 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-cache
-        admin-dashboard: bash
+        shell: bash
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
@@ -142,7 +142,7 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-cache
-        admin-dashboard: bash
+        shell: bash
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
@@ -226,7 +226,7 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-cache
-        admin-dashboard: bash
+        shell: bash
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
