@@ -18,12 +18,12 @@ export interface StaticSiteProps {
   environmentName: string;
 
   /**
-   * Domain name for the site (e.g., app.skilltree.io, storybook.skilltree.io)
+   * Domain name for the site (e.g., app.synth-tree.com, storybook.synth-tree.com)
    */
   domainName: string;
 
   /**
-   * Hosted zone name (e.g., skilltree.io)
+   * Hosted zone name (e.g., synth-tree.com)
    */
   hostedZoneName: string;
 
@@ -84,7 +84,7 @@ export class StaticSite extends Construct {
   public readonly distribution: cloudfront.IDistribution;
 
   /**
-   * The full website URL (e.g., https://app.skilltree.io)
+   * The full website URL (e.g., https://app.synth-tree.com)
    */
   public readonly websiteUrl: string;
 

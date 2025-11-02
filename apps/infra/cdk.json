@@ -17,12 +17,12 @@
   "context": {
     "environment": "dev",
     "dev": {
-      "domain": "dev.skilltree.io",
-      "hostedZoneName": "skilltree.io"
+      "domain": "dev.synth-tree.com",
+      "hostedZoneName": "synth-tree.com"
     },
     "prod": {
-      "domain": "app.skilltree.io",
-      "hostedZoneName": "skilltree.io"
+      "domain": "app.synth-tree.com",
+      "hostedZoneName": "synth-tree.com"
     },
     "@aws-cdk/aws-signer:signingProfileNamePassedToCfn": true,
     "@aws-cdk/aws-ecs-patterns:secGroupsDisablesImplicitOpenListener": true,

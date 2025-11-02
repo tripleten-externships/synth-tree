@@ -26,8 +26,8 @@ export interface StorybookStackProps extends cdk.StackProps {
  * It uses the reusable StaticSite construct for all infrastructure.
  *
  * Domains:
- * - Dev: storybook.dev.skilltree.io
- * - Prod: storybook.skilltree.io
+ * - Dev: storybook.dev.synth-tree.com
+ * - Prod: storybook.synth-tree.com
  *
  * Build Output:
  * - Storybook is built from the UI package

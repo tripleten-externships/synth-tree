@@ -88,7 +88,7 @@ export class ApiStack extends cdk.Stack {
     // ========================================
 
     /**
-     * Look up the existing Route53 hosted zone for skilltree.io
+     * Look up the existing Route53 hosted zone for synth-tree.com
      * This must exist before deploying the stack
      */
     const hostedZone = route53.HostedZone.fromLookup(this, "HostedZone", {

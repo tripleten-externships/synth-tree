@@ -192,7 +192,7 @@ jobs:
       - name: Build frontend
         working-directory: apps/admin-dashboard
         env:
-          VITE_API_URL: https://api.dev.skilltree.io
+          VITE_API_URL: https://api.dev.synth-tree.com
           VITE_ENVIRONMENT: dev
         run: |
           echo "Building frontend..."

@@ -26,8 +26,8 @@ export interface FrontendStackProps extends cdk.StackProps {
  * It uses the reusable StaticSite construct for all infrastructure.
  *
  * Domains:
- * - Dev: dev.skilltree.io
- * - Prod: app.skilltree.io
+ * - Dev: dev.synth-tree.com
+ * - Prod: app.synth-tree.com
  *
  * Build Output:
  * - Frontend app is built with Vite

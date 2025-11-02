@@ -72,10 +72,10 @@ export const devConfig: EnvironmentConfig = {
   region: "us-east-1",
 
   // Domains
-  domain: "dev.skilltree.io",
-  apiDomain: "api.dev.skilltree.io",
-  storybookDomain: "storybook.dev.skilltree.io",
-  hostedZoneName: "skilltree.io",
+  domain: "dev.synth-tree.com",
+  apiDomain: "api.dev.synth-tree.com",
+  storybookDomain: "storybook.dev.synth-tree.com",
+  hostedZoneName: "synth-tree.com",
 
   // VPC - 10.0.0.0/16
   vpcCidr: "10.0.0.0/16",
@@ -137,10 +137,10 @@ export const prodConfig: EnvironmentConfig = {
   region: "us-east-1",
 
   // Domains
-  domain: "app.skilltree.io",
-  apiDomain: "api.skilltree.io",
-  storybookDomain: "storybook.skilltree.io",
-  hostedZoneName: "skilltree.io",
+  domain: "app.synth-tree.com",
+  apiDomain: "api.synth-tree.com",
+  storybookDomain: "storybook.synth-tree.com",
+  hostedZoneName: "synth-tree.com",
 
   // VPC - 10.0.0.0/16
   vpcCidr: "10.0.0.0/16",

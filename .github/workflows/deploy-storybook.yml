@@ -277,7 +277,7 @@ jobs:
           sleep 10
 
           # Verify deployment via custom domain
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://storybook.skilltree.io || echo "000")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://storybook.synth-tree.com || echo "000")
 
           if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
             echo "✅ Deployment verified (status: $STATUS)"

@@ -215,7 +215,7 @@ jobs:
           sleep 30
 
           HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://api.dev.skilltree.io/health || echo "000")
+            https://api.dev.synth-tree.com/health || echo "000")
 
           if [ "$HEALTH_STATUS" != "200" ]; then
             echo "❌ Health check failed with status: $HEALTH_STATUS"
@@ -430,7 +430,7 @@ jobs:
           sleep 30
 
           HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://api.skilltree.io/health || echo "000")
+            https://api.synth-tree.com/health || echo "000")
 
           if [ "$HEALTH_STATUS" != "200" ]; then
             echo "❌ Health check failed with status: $HEALTH_STATUS"

@@ -141,8 +141,8 @@ Environment secrets: None (use repository secrets)
 
 **Health Check Endpoints:**
 
-- Dev: `https://api.dev.skilltree.io/health`
-- Prod: `https://api.skilltree.io/health`
+- Dev: `https://api.dev.synth-tree.com/health`
+- Prod: `https://api.synth-tree.com/health`
 
 ### 3. Frontend Deployment (`deploy-frontend.yml`)
 
@@ -184,7 +184,7 @@ Environment secrets: None (use repository secrets)
 **Deployment URLs:**
 
 - Dev: CloudFront distribution URL
-- Prod: `https://storybook.skilltree.io`
+- Prod: `https://storybook.synth-tree.com`
 
 ### 5. PR Validation (`pr-validation.yml`)
 

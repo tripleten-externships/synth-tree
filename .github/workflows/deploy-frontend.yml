@@ -72,7 +72,7 @@ jobs:
       - name: Build frontend
         working-directory: apps/admin-dashboard
         env:
-          VITE_API_URL: https://api.dev.skilltree.io
+          VITE_API_URL: https://api.dev.synth-tree.com
           VITE_ENVIRONMENT: dev
           VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
@@ -217,7 +217,7 @@ jobs:
       - name: Build frontend
         working-directory: apps/admin-dashboard
         env:
-          VITE_API_URL: https://api.skilltree.io
+          VITE_API_URL: https://api.synth-tree.com
           VITE_ENVIRONMENT: prod
           VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
@@ -305,7 +305,7 @@ jobs:
           sleep 10
 
           # Verify deployment via custom domain
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://skilltree.io || echo "000")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://synth-tree.com || echo "000")
 
           if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
             echo "✅ Deployment verified (status: $STATUS)"
