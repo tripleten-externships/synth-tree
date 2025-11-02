@@ -1,0 +1,329 @@
+name: Deploy Infrastructure
+
+on:
+  pull_request:
+    paths:
+      - "apps/infra/**"
+      - ".github/workflows/deploy-infrastructure.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/infra/**"
+      - ".github/workflows/deploy-infrastructure.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: deploy-infrastructure-${{ github.event.inputs.environment || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  cdk-diff:
+    name: CDK Diff (Preview Changes)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build CDK
+        working-directory: apps/infra
+        run: pnpm build
+
+      - name: Generate CDK diff
+        id: cdk-diff
+        working-directory: apps/infra
+        continue-on-error: true
+        run: |
+          npx cdk diff --context environment=dev --all 2>&1 | tee diff-output.txt
+          echo "diff_exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with diff
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const diffPath = 'apps/infra/diff-output.txt';
+            let diff = 'No diff output generated';
+
+            if (fs.existsSync(diffPath)) {
+              diff = fs.readFileSync(diffPath, 'utf8');
+              // Truncate if too long for GitHub comment
+              if (diff.length > 60000) {
+                diff = diff.substring(0, 60000) + '\n\n... (truncated)';
+              }
+            }
+
+            const exitCode = '${{ steps.cdk-diff.outputs.diff_exit_code }}';
+            const status = exitCode === '0' ? '✅ No changes' : '📝 Changes detected';
+
+            const body = `## CDK Diff - ${status}\n\n<details><summary>View diff</summary>\n\n\`\`\`\n${diff}\n\`\`\`\n\n</details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' && 
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check CDK bootstrap
+        working-directory: apps/infra
+        run: |
+          echo "Checking CDK bootstrap status..."
+          if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
+            echo "⚠️ CDK not bootstrapped. Run: npx cdk bootstrap"
+            exit 1
+          fi
+          echo "✅ CDK bootstrap verified"
+
+      - name: Build and deploy to dev
+        working-directory: apps/infra
+        run: |
+          pnpm build
+          npx cdk deploy \
+            --context environment=dev \
+            --all \
+            --require-approval never \
+            --concurrency 3 \
+            --progress events
+
+      - name: Save deployment outputs
+        id: outputs
+        run: |
+          aws cloudformation describe-stacks \
+            --region ${{ env.AWS_REGION }} \
+            --query 'Stacks[?starts_with(StackName, `dev-`)].{Name:StackName, Outputs:Outputs}' \
+            > deployment-outputs-dev.json
+
+          echo "Deployment outputs saved"
+          cat deployment-outputs-dev.json
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev-deployment-outputs
+          path: deployment-outputs-dev.json
+          retention-days: 30
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    needs: deploy-dev
+    environment: prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check CDK bootstrap
+        working-directory: apps/infra
+        run: |
+          echo "Checking CDK bootstrap status..."
+          if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
+            echo "⚠️ CDK not bootstrapped. Run: npx cdk bootstrap"
+            exit 1
+          fi
+          echo "✅ CDK bootstrap verified"
+
+      - name: Build and deploy to prod
+        working-directory: apps/infra
+        run: |
+          pnpm build
+          npx cdk deploy \
+            --context environment=prod \
+            --all \
+            --require-approval never \
+            --concurrency 3 \
+            --progress events
+
+      - name: Save deployment outputs
+        id: outputs
+        run: |
+          aws cloudformation describe-stacks \
+            --region ${{ env.AWS_REGION }} \
+            --query 'Stacks[?starts_with(StackName, `prod-`)].{Name:StackName, Outputs:Outputs}' \
+            > deployment-outputs-prod.json
+
+          echo "Deployment outputs saved"
+          cat deployment-outputs-prod.json
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-deployment-outputs
+          path: deployment-outputs-prod.json
+          retention-days: 90
+
+  drift-detection:
+    name: Drift Detection
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ matrix.environment == 'dev' && secrets.AWS_ACCESS_KEY_ID_DEV || secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ matrix.environment == 'dev' && secrets.AWS_SECRET_ACCESS_KEY_DEV || secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Detect stack drift
+        run: |
+          STACKS="${{ matrix.environment }}-Network ${{ matrix.environment }}-Database ${{ matrix.environment }}-Api ${{ matrix.environment }}-Frontend ${{ matrix.environment }}-Storybook"
+
+          for stack in $STACKS; do
+            echo "Checking drift for $stack..."
+            
+            if aws cloudformation describe-stacks --stack-name $stack > /dev/null 2>&1; then
+              DRIFT_ID=$(aws cloudformation detect-stack-drift --stack-name $stack --query StackDriftDetectionId --output text)
+              
+              # Wait for drift detection to complete
+              sleep 10
+              
+              STATUS=$(aws cloudformation describe-stack-drift-detection-status \
+                --stack-drift-detection-id $DRIFT_ID \
+                --query StackDriftStatus --output text)
+              
+              if [ "$STATUS" != "IN_SYNC" ]; then
+                echo "::warning::Drift detected in $stack - Status: $STATUS"
+              else
+                echo "✅ $stack is in sync"
+              fi
+            else
+              echo "⚠️ Stack $stack does not exist - skipping"
+            fi
+          done

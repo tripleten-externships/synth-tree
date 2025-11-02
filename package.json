@@ -1,0 +1,17 @@
+{
+  "name": "skilltree-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "dev": "pnpm db:start && pnpm --filter ./apps/admin-dashboard dev",
+    "storybook": "pnpm --filter ./packages/ui storybook",
+    "build": "pnpm -r build"
+  },
+  "packageManager": "pnpm@10.17.1"
+}

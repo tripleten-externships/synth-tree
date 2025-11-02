@@ -1,0 +1,293 @@
+name: Deploy Storybook
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/ui/**"
+      - "packages/theme/**"
+      - ".github/workflows/deploy-storybook.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-storybook-${{ github.event.inputs.environment || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        working-directory: packages/ui
+        run: |
+          echo "Building Storybook for dev environment..."
+          pnpm build-storybook
+
+          # Verify build output
+          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+            echo "❌ Build failed - storybook-static directory is empty"
+            exit 1
+          fi
+
+          echo "✅ Storybook build completed successfully"
+          ls -lah storybook-static/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and CloudFront distribution
+        id: infra
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name dev-Storybook \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name dev-Storybook \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+          echo "S3 Bucket: $BUCKET"
+          echo "CloudFront Distribution: $DIST_ID"
+
+      - name: Sync to S3
+        working-directory: packages/ui
+        env:
+          BUCKET: ${{ steps.infra.outputs.bucket }}
+        run: |
+          echo "Syncing Storybook to S3..."
+
+          # Sync all files with long cache (Storybook handles cache-busting via filenames)
+          aws s3 sync storybook-static/ s3://$BUCKET/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable"
+
+          echo "✅ Files synced to S3"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Creating CloudFront invalidation..."
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $DIST_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "✅ CloudFront cache invalidated"
+
+      - name: Verify deployment
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Waiting for invalidation to complete..."
+          sleep 10
+
+          # Get CloudFront domain
+          DOMAIN=$(aws cloudfront get-distribution \
+            --id $DIST_ID \
+            --query 'Distribution.DomainName' \
+            --output text)
+
+          echo "CloudFront Domain: $DOMAIN"
+
+          # Verify deployment
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN || echo "000")
+
+          if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
+            echo "✅ Deployment verified (status: $STATUS)"
+          else
+            echo "⚠️ Verification returned status: $STATUS"
+          fi
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    needs: deploy-dev
+    environment: prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        working-directory: packages/ui
+        run: |
+          echo "Building Storybook for prod environment..."
+          pnpm build-storybook
+
+          # Verify build output
+          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+            echo "❌ Build failed - storybook-static directory is empty"
+            exit 1
+          fi
+
+          echo "✅ Storybook build completed successfully"
+          ls -lah storybook-static/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and CloudFront distribution
+        id: infra
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name prod-Storybook \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name prod-Storybook \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+          echo "S3 Bucket: $BUCKET"
+          echo "CloudFront Distribution: $DIST_ID"
+
+      - name: Sync to S3
+        working-directory: packages/ui
+        env:
+          BUCKET: ${{ steps.infra.outputs.bucket }}
+        run: |
+          echo "Syncing Storybook to S3..."
+
+          # Sync all files with long cache (Storybook handles cache-busting via filenames)
+          aws s3 sync storybook-static/ s3://$BUCKET/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable"
+
+          echo "✅ Files synced to S3"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Creating CloudFront invalidation..."
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $DIST_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "✅ CloudFront cache invalidated"
+
+      - name: Verify deployment
+        run: |
+          echo "Waiting for invalidation to complete..."
+          sleep 10
+
+          # Verify deployment via custom domain
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://storybook.skilltree.io || echo "000")
+
+          if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
+            echo "✅ Deployment verified (status: $STATUS)"
+          else
+            echo "⚠️ Verification returned status: $STATUS"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-storybook-build
+          path: packages/ui/storybook-static
+          retention-days: 30

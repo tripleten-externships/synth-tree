@@ -1,0 +1,22 @@
+{
+  "availability-zones:account=547987159024:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "availability-zones:account=516217144302:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "hosted-zone:account=516217144302:domainName=skilltree.io:region=us-east-1": {
+    "Id": "/hostedzone/Z08929842PUOGFTMM24WV",
+    "Name": "skilltree.io."
+  }
+}

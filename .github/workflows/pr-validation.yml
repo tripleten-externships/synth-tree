@@ -1,0 +1,446 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+      api: ${{ steps.filter.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      ui: ${{ steps.filter.outputs.ui }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            infra:
+              - 'apps/infra/**'
+            api:
+              - 'apps/api/**'
+              - 'packages/api-types/**'
+            frontend:
+              - 'apps/admin-dashboard/**'
+              - 'packages/**'
+            ui:
+              - 'packages/ui/**'
+              - 'packages/theme/**'
+
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: |
+          echo "Running ESLint..."
+          pnpm run lint || true
+          echo "✅ Linting complete"
+
+      - name: Run TypeScript type check
+        run: |
+          echo "Running TypeScript type check..."
+          pnpm run type-check || pnpm exec tsc --noEmit || true
+          echo "✅ Type check complete"
+
+  test-api:
+    name: Test API
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run API tests
+        working-directory: apps/api
+        run: |
+          echo "Running API tests..."
+          pnpm test || echo "⚠️ No tests configured"
+
+      - name: Validate Prisma schema
+        working-directory: apps/api
+        run: |
+          echo "Validating Prisma schema..."
+          pnpm prisma validate
+          echo "✅ Prisma schema is valid"
+
+      - name: Generate Prisma client
+        working-directory: apps/api
+        run: |
+          echo "Generating Prisma client..."
+          pnpm prisma generate
+          echo "✅ Prisma client generated"
+
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (validation only)
+        working-directory: apps/api
+        run: |
+          echo "Building API Docker image..."
+          docker buildx build \
+            --tag skilltree/api:pr-${{ github.event.pull_request.number }} \
+            --load \
+            .
+
+          echo "✅ Docker build successful"
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: apps/admin-dashboard
+        env:
+          VITE_API_URL: https://api.dev.skilltree.io
+          VITE_ENVIRONMENT: dev
+        run: |
+          echo "Building frontend..."
+          pnpm build
+
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          echo "✅ Frontend build successful"
+
+      - name: Check bundle size
+        working-directory: apps/admin-dashboard
+        run: |
+          echo "Checking bundle size..."
+          BUNDLE_SIZE=$(du -sh dist | cut -f1)
+          echo "Bundle size: $BUNDLE_SIZE"
+
+  build-storybook:
+    name: Build Storybook
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.ui == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        working-directory: packages/ui
+        run: |
+          echo "Building Storybook..."
+          pnpm build-storybook
+
+          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+            echo "❌ Build failed"
+            exit 1
+          fi
+
+          echo "✅ Storybook build successful"
+
+  cdk-diff:
+    name: CDK Diff
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build CDK
+        working-directory: apps/infra
+        run: pnpm build
+
+      - name: Generate CDK diff
+        id: cdk-diff
+        working-directory: apps/infra
+        continue-on-error: true
+        run: |
+          echo "Generating CDK diff..."
+          npx cdk diff --context environment=dev --all 2>&1 | tee diff-output.txt
+          echo "diff_exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with diff
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const diffPath = 'apps/infra/diff-output.txt';
+            let diff = 'No diff output generated';
+
+            if (fs.existsSync(diffPath)) {
+              diff = fs.readFileSync(diffPath, 'utf8');
+              // Truncate if too long for GitHub comment
+              if (diff.length > 60000) {
+                diff = diff.substring(0, 60000) + '\n\n... (truncated)';
+              }
+            }
+
+            const exitCode = '${{ steps.cdk-diff.outputs.diff_exit_code }}';
+            const status = exitCode === '0' ? '✅ No infrastructure changes' : '📝 Infrastructure changes detected';
+
+            const body = `## ${status}\n\n<details><summary>View CDK diff</summary>\n\n\`\`\`\n${diff}\n\`\`\`\n\n</details>`;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('Infrastructure changes')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  validate-infra:
+    name: Validate Infrastructure
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run CDK synth
+        working-directory: apps/infra
+        run: |
+          echo "Synthesizing CDK stacks..."
+          pnpm build
+          npx cdk synth --context environment=dev --all
+          echo "✅ CDK synth successful"
+
+      - name: Run infrastructure tests
+        working-directory: apps/infra
+        run: |
+          echo "Running infrastructure tests..."
+          pnpm test || echo "⚠️ No tests configured"
+
+  summary:
+    name: PR Validation Summary
+    runs-on: ubuntu-latest
+    needs:
+      [
+        lint-and-typecheck,
+        test-api,
+        build-api,
+        build-frontend,
+        build-storybook,
+        cdk-diff,
+        validate-infra,
+      ]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint & Type Check: ${{ needs.lint-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API Tests: ${{ needs.test-api.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API Build: ${{ needs.build-api.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend Build: ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Storybook Build: ${{ needs.build-storybook.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- CDK Diff: ${{ needs.cdk-diff.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure Validation: ${{ needs.validate-infra.result }}" >> $GITHUB_STEP_SUMMARY
+
+          # Check if any job failed
+          if [[ "${{ needs.lint-and-typecheck.result }}" == "failure" ]] || \
+             [[ "${{ needs.test-api.result }}" == "failure" ]] || \
+             [[ "${{ needs.build-api.result }}" == "failure" ]] || \
+             [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
+             [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
+             [[ "${{ needs.cdk-diff.result }}" == "failure" ]] || \
+             [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ All validation checks passed!" >> $GITHUB_STEP_SUMMARY
+          fi

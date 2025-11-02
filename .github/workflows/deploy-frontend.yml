@@ -1,0 +1,321 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/admin-dashboard/**"
+      - "packages/**"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-frontend-${{ github.event.inputs.environment || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: apps/admin-dashboard
+        env:
+          VITE_API_URL: https://api.dev.skilltree.io
+          VITE_ENVIRONMENT: dev
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          echo "Building frontend for dev environment..."
+          pnpm build
+
+          # Verify build output
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed - dist directory is empty"
+            exit 1
+          fi
+
+          echo "✅ Build completed successfully"
+          ls -lah dist/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and CloudFront distribution
+        id: infra
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name dev-Frontend \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name dev-Frontend \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+          echo "S3 Bucket: $BUCKET"
+          echo "CloudFront Distribution: $DIST_ID"
+
+      - name: Sync to S3
+        working-directory: apps/admin-dashboard
+        env:
+          BUCKET: ${{ steps.infra.outputs.bucket }}
+        run: |
+          echo "Syncing static assets to S3..."
+
+          # Sync all files except index.html with long cache
+          aws s3 sync dist/ s3://$BUCKET/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" \
+            --exclude "*.map"
+
+          # Upload index.html with no cache
+          aws s3 cp dist/index.html s3://$BUCKET/index.html \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --content-type "text/html"
+
+          echo "✅ Files synced to S3"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Creating CloudFront invalidation..."
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $DIST_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "✅ CloudFront cache invalidated"
+
+      - name: Verify deployment
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Waiting for invalidation to complete..."
+          sleep 10
+
+          # Get CloudFront domain
+          DOMAIN=$(aws cloudfront get-distribution \
+            --id $DIST_ID \
+            --query 'Distribution.DomainName' \
+            --output text)
+
+          echo "CloudFront Domain: $DOMAIN"
+
+          # Verify deployment
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN || echo "000")
+
+          if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
+            echo "✅ Deployment verified (status: $STATUS)"
+          else
+            echo "⚠️ Verification returned status: $STATUS"
+          fi
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    needs: deploy-dev
+    environment: prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        admin-dashboard: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        working-directory: apps/admin-dashboard
+        env:
+          VITE_API_URL: https://api.skilltree.io
+          VITE_ENVIRONMENT: prod
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          echo "Building frontend for prod environment..."
+          pnpm build
+
+          # Verify build output
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed - dist directory is empty"
+            exit 1
+          fi
+
+          echo "✅ Build completed successfully"
+          ls -lah dist/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and CloudFront distribution
+        id: infra
+        run: |
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name prod-Frontend \
+            --query 'Stacks[0].Outputs[?OutputKey==`BucketName`].OutputValue' \
+            --output text)
+
+          DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name prod-Frontend \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+
+          echo "S3 Bucket: $BUCKET"
+          echo "CloudFront Distribution: $DIST_ID"
+
+      - name: Sync to S3
+        working-directory: apps/admin-dashboard
+        env:
+          BUCKET: ${{ steps.infra.outputs.bucket }}
+        run: |
+          echo "Syncing static assets to S3..."
+
+          # Sync all files except index.html with long cache
+          aws s3 sync dist/ s3://$BUCKET/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" \
+            --exclude "*.map"
+
+          # Upload index.html with no cache
+          aws s3 cp dist/index.html s3://$BUCKET/index.html \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --content-type "text/html"
+
+          echo "✅ Files synced to S3"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Creating CloudFront invalidation..."
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $DIST_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "✅ CloudFront cache invalidated"
+
+      - name: Verify deployment
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Waiting for invalidation to complete..."
+          sleep 10
+
+          # Verify deployment via custom domain
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://skilltree.io || echo "000")
+
+          if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
+            echo "✅ Deployment verified (status: $STATUS)"
+          else
+            echo "⚠️ Verification returned status: $STATUS"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-frontend-build
+          path: apps/admin-dashboard/dist
+          retention-days: 30

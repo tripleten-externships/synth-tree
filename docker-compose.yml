@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: skilltree-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: skilltree
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+# Database Connection Information:
+# ================================
+# Host: localhost
+# Port: 5432
+# Database: skilltree
+# User: postgres
+# Password: postgres
+#
+# Prisma Connection String:
+# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/skilltree?schema=public"
+#
+# Usage:
+# ------
+# Start the database:
+#   docker compose up -d
+#
+# Stop the database:
+#   docker compose down
+#
+# Stop and remove volumes (WARNING: deletes all data):
+#   docker compose down -v
+#
+# View logs:
+#   docker compose logs -f postgres
+#
+# Access PostgreSQL CLI:
+#   docker compose exec postgres psql -U postgres -d skilltree

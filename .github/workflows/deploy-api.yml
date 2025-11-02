@@ -1,0 +1,467 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - "packages/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      skip_migrations:
+        description: "Skip database migrations"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-api-${{ github.event.inputs.environment || 'auto' }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  deploy-dev:
+    name: Deploy to Dev
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    environment: dev
+    outputs:
+      image-uri: ${{ steps.image.outputs.uri }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build, tag, and push image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: skilltree/api-dev
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: apps/api
+        run: |
+          # Build with cache
+          docker buildx build \
+            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache \
+            --cache-to type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache,mode=max \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --push \
+            .
+
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Output image URI
+        id: image
+        run: echo "uri=${{ steps.build-image.outputs.image }}" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js for migrations
+        if: ${{ !inputs.skip_migrations }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        if: ${{ !inputs.skip_migrations }}
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        if: ${{ !inputs.skip_migrations }}
+        working-directory: apps/api
+        run: pnpm install --frozen-lockfile
+
+      - name: Get database credentials
+        if: ${{ !inputs.skip_migrations }}
+        id: db-creds
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id dev/database/credentials \
+            --query SecretString --output text)
+
+          USERNAME=$(echo $SECRET | jq -r .username)
+          PASSWORD=$(echo $SECRET | jq -r .password)
+          HOST=$(echo $SECRET | jq -r .host)
+          PORT=$(echo $SECRET | jq -r .port)
+          DATABASE=$(echo $SECRET | jq -r .dbname // .database)
+
+          echo "::add-mask::$PASSWORD"
+          DATABASE_URL="postgresql://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}"
+          echo "::add-mask::$DATABASE_URL"
+          echo "url=$DATABASE_URL" >> $GITHUB_OUTPUT
+
+      - name: Run Prisma migrations
+        if: ${{ !inputs.skip_migrations }}
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ steps.db-creds.outputs.url }}
+        run: |
+          echo "Running Prisma migrations..."
+          pnpm prisma migrate deploy
+          echo "✅ Migrations completed successfully"
+
+      - name: Get ECS cluster and service info
+        id: ecs-info
+        run: |
+          CLUSTER=$(aws cloudformation describe-stacks \
+            --stack-name dev-Api \
+            --query 'Stacks[0].Outputs[?OutputKey==`ClusterName`].OutputValue' \
+            --output text)
+
+          SERVICE=$(aws cloudformation describe-stacks \
+            --stack-name dev-Api \
+            --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
+            --output text)
+
+          echo "cluster=${CLUSTER:-dev-api-cluster}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE:-dev-api-service}" >> $GITHUB_OUTPUT
+
+      - name: Update ECS task definition
+        id: task-def
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+        run: |
+          # Get current task definition
+          TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster $CLUSTER \
+            --services ${{ steps.ecs-info.outputs.service }} \
+            --query 'services[0].taskDefinition' \
+            --output text)
+
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition $TASK_DEF_ARN \
+            --query 'taskDefinition')
+
+          # Update container image
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE | 
+             del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          # Register new task definition
+          NEW_TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "task-definition=$NEW_TASK_ARN" >> $GITHUB_OUTPUT
+          echo "✅ New task definition registered: $NEW_TASK_ARN"
+
+      - name: Deploy to ECS
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+          TASK_DEF: ${{ steps.task-def.outputs.task-definition }}
+        run: |
+          echo "Updating ECS service..."
+          aws ecs update-service \
+            --cluster $CLUSTER \
+            --service $SERVICE \
+            --task-definition $TASK_DEF \
+            --force-new-deployment \
+            --desired-count 2
+
+          echo "✅ ECS service update initiated"
+
+      - name: Wait for deployment to stabilize
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+        run: |
+          echo "Waiting for service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster $CLUSTER \
+            --services $SERVICE
+
+          echo "✅ Service is stable"
+
+      - name: Verify deployment health
+        id: verify
+        run: |
+          echo "Waiting for new tasks to be healthy..."
+          sleep 30
+
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://api.dev.skilltree.io/health || echo "000")
+
+          if [ "$HEALTH_STATUS" != "200" ]; then
+            echo "❌ Health check failed with status: $HEALTH_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Health check passed (status: $HEALTH_STATUS)"
+
+      - name: Rollback on failure
+        if: failure() && steps.verify.outcome == 'failure'
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+        run: |
+          echo "⚠️ Rolling back to previous task definition..."
+
+          # Get previous task definition
+          PREV_TASK=$(aws ecs describe-services \
+            --cluster $CLUSTER \
+            --services $SERVICE \
+            --query 'services[0].deployments[1].taskDefinition' \
+            --output text)
+
+          if [ "$PREV_TASK" != "None" ] && [ -n "$PREV_TASK" ]; then
+            aws ecs update-service \
+              --cluster $CLUSTER \
+              --service $SERVICE \
+              --task-definition $PREV_TASK \
+              --force-new-deployment
+            
+            echo "✅ Rollback initiated to: $PREV_TASK"
+          else
+            echo "⚠️ No previous task definition found"
+          fi
+
+  deploy-prod:
+    name: Deploy to Prod
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
+    needs: deploy-dev
+    environment: prod
+    outputs:
+      image-uri: ${{ steps.image.outputs.uri }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build, tag, and push image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: skilltree/api-prod
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: apps/api
+        run: |
+          # Build with cache
+          docker buildx build \
+            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache \
+            --cache-to type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache,mode=max \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --push \
+            .
+
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Output image URI
+        id: image
+        run: echo "uri=${{ steps.build-image.outputs.image }}" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js for migrations
+        if: ${{ !inputs.skip_migrations }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        if: ${{ !inputs.skip_migrations }}
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        if: ${{ !inputs.skip_migrations }}
+        working-directory: apps/api
+        run: pnpm install --frozen-lockfile
+
+      - name: Get database credentials
+        if: ${{ !inputs.skip_migrations }}
+        id: db-creds
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value \
+            --secret-id prod/database/credentials \
+            --query SecretString --output text)
+
+          USERNAME=$(echo $SECRET | jq -r .username)
+          PASSWORD=$(echo $SECRET | jq -r .password)
+          HOST=$(echo $SECRET | jq -r .host)
+          PORT=$(echo $SECRET | jq -r .port)
+          DATABASE=$(echo $SECRET | jq -r .dbname // .database)
+
+          echo "::add-mask::$PASSWORD"
+          DATABASE_URL="postgresql://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}"
+          echo "::add-mask::$DATABASE_URL"
+          echo "url=$DATABASE_URL" >> $GITHUB_OUTPUT
+
+      - name: Run Prisma migrations
+        if: ${{ !inputs.skip_migrations }}
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ steps.db-creds.outputs.url }}
+        run: |
+          echo "Running Prisma migrations..."
+          pnpm prisma migrate deploy
+          echo "✅ Migrations completed successfully"
+
+      - name: Get ECS cluster and service info
+        id: ecs-info
+        run: |
+          CLUSTER=$(aws cloudformation describe-stacks \
+            --stack-name prod-Api \
+            --query 'Stacks[0].Outputs[?OutputKey==`ClusterName`].OutputValue' \
+            --output text)
+
+          SERVICE=$(aws cloudformation describe-stacks \
+            --stack-name prod-Api \
+            --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
+            --output text)
+
+          echo "cluster=${CLUSTER:-prod-api-cluster}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE:-prod-api-service}" >> $GITHUB_OUTPUT
+
+      - name: Update ECS task definition
+        id: task-def
+        env:
+          IMAGE_URI: ${{ steps.image.outputs.uri }}
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+        run: |
+          # Get current task definition
+          TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster $CLUSTER \
+            --services ${{ steps.ecs-info.outputs.service }} \
+            --query 'services[0].taskDefinition' \
+            --output text)
+
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition $TASK_DEF_ARN \
+            --query 'taskDefinition')
+
+          # Update container image
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE | 
+             del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+          # Register new task definition
+          NEW_TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "task-definition=$NEW_TASK_ARN" >> $GITHUB_OUTPUT
+          echo "✅ New task definition registered: $NEW_TASK_ARN"
+
+      - name: Deploy to ECS
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+          TASK_DEF: ${{ steps.task-def.outputs.task-definition }}
+        run: |
+          echo "Updating ECS service..."
+          aws ecs update-service \
+            --cluster $CLUSTER \
+            --service $SERVICE \
+            --task-definition $TASK_DEF \
+            --force-new-deployment \
+            --desired-count 2
+
+          echo "✅ ECS service update initiated"
+
+      - name: Wait for deployment to stabilize
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+        run: |
+          echo "Waiting for service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster $CLUSTER \
+            --services $SERVICE
+
+          echo "✅ Service is stable"
+
+      - name: Verify deployment health
+        id: verify
+        run: |
+          echo "Waiting for new tasks to be healthy..."
+          sleep 30
+
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://api.skilltree.io/health || echo "000")
+
+          if [ "$HEALTH_STATUS" != "200" ]; then
+            echo "❌ Health check failed with status: $HEALTH_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Health check passed (status: $HEALTH_STATUS)"
+
+      - name: Rollback on failure
+        if: failure() && steps.verify.outcome == 'failure'
+        env:
+          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
+          SERVICE: ${{ steps.ecs-info.outputs.service }}
+        run: |
+          echo "⚠️ Rolling back to previous task definition..."
+
+          # Get previous task definition
+          PREV_TASK=$(aws ecs describe-services \
+            --cluster $CLUSTER \
+            --services $SERVICE \
+            --query 'services[0].deployments[1].taskDefinition' \
+            --output text)
+
+          if [ "$PREV_TASK" != "None" ] && [ -n "$PREV_TASK" ]; then
+            aws ecs update-service \
+              --cluster $CLUSTER \
+              --service $SERVICE \
+              --task-definition $PREV_TASK \
+              --force-new-deployment
+            
+            echo "✅ Rollback initiated to: $PREV_TASK"
+          else
+            echo "⚠️ No previous task definition found"
+          fi

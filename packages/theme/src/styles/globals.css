@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Use https://tweakcn.com/editor/theme to customize the theme */
+
+@layer base {
+  :root {
+    --background: 0 0% 99.2157%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 99.2157%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 98.8235%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 257.9412 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214.2857 24.1379% 94.3137%;
+    --secondary-foreground: 0 0% 3.1373%;
+    --muted: 0 0% 96.0784%;
+    --muted-foreground: 0 0% 32.1569%;
+    --accent: 221.3793 100% 94.3137%;
+    --accent-foreground: 216.3158 76% 49.0196%;
+    --success: 142 69% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 48%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 358.4416 74.7573% 59.6078%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 17.0732% 91.9608%;
+    --input: 0 0% 92.1569%;
+    --ring: 0 0% 0%;
+    --chart-1: 148.0952 53.3898% 53.7255%;
+    --chart-2: 257.9412 100% 60%;
+    --chart-3: 24.8571 98.1308% 58.0392%;
+    --chart-4: 217.0787 76.7241% 54.5098%;
+    --chart-5: 0 0% 45.4902%;
+    --sidebar: 210 42.8571% 97.2549%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 92.1569%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 92.1569%;
+    --sidebar-ring: 0 0% 0%;
+    --font-sans: Roboto, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: Roboto Serif, ui-serif, serif;
+    --font-mono: Roboto Mono, ui-monospace, monospace;
+    --radius: 1.4rem;
+    --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-sm: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 2px 4px -1px hsl(0 0% 0% / 0.16);
+    --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 4px 6px -1px hsl(0 0% 0% / 0.16);
+    --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 8px 10px -1px hsl(0 0% 0% / 0.16);
+    --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
+    --tracking-normal: -0.025em;
+    --spacing: 0.27rem;
+  }
+
+  .dark {
+    --background: 225 7.1429% 10.9804%;
+    --foreground: 0 0% 94.1176%;
+    --card: 228 6.8493% 14.3137%;
+    --card-foreground: 0 0% 94.1176%;
+    --popover: 228 6.8493% 14.3137%;
+    --popover-foreground: 0 0% 94.1176%;
+    --primary: 257.6687 100% 68.0392%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 226.6667 9.6774% 18.2353%;
+    --secondary-foreground: 0 0% 94.1176%;
+    --muted: 226.6667 9.6774% 18.2353%;
+    --muted-foreground: 0 0% 62.7451%;
+    --accent: 217.2414 32.5843% 17.451%;
+    --accent-foreground: 208.209 100% 73.7255%;
+    --success: 141.8919 69.1589% 58.0392%;
+    --success-foreground: 0 0% 100%;
+    --warning: 24.8571 98.1308% 58.0392%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 90.604% 70.7843%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222.8571 6.422% 21.3725%;
+    --input: 222.8571 6.422% 21.3725%;
+    --ring: 257.6687 100% 68.0392%;
+    --chart-1: 141.8919 69.1589% 58.0392%;
+    --chart-2: 257.6687 100% 68.0392%;
+    --chart-3: 0 93.5484% 81.7647%;
+    --chart-4: 217.5484 87.5706% 65.2941%;
+    --chart-5: 0 0% 62.7451%;
+    --sidebar: 240 4.3478% 9.0196%;
+    --sidebar-foreground: 0 0% 94.1176%;
+    --sidebar-primary: 257.6687 100% 68.0392%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 226.6667 9.6774% 18.2353%;
+    --sidebar-accent-foreground: 257.6687 100% 68.0392%;
+    --sidebar-border: 222.8571 6.422% 21.3725%;
+    --sidebar-ring: 257.6687 100% 68.0392%;
+    --font-sans: Roboto, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: Roboto Serif, ui-serif, serif;
+    --font-mono: Roboto Mono, ui-monospace, monospace;
+    --radius: 1.4rem;
+    --shadow-2xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-xs: 0px 2px 3px 0px hsl(0 0% 0% / 0.08);
+    --shadow-sm: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 1px 2px -1px hsl(0 0% 0% / 0.16);
+    --shadow-md: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 2px 4px -1px hsl(0 0% 0% / 0.16);
+    --shadow-lg: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 4px 6px -1px hsl(0 0% 0% / 0.16);
+    --shadow-xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.16),
+      0px 8px 10px -1px hsl(0 0% 0% / 0.16);
+    --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+/* Custom animations for shadcn/ui components */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
