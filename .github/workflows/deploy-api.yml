@@ -88,52 +88,6 @@ jobs:
         id: image
         run: echo "uri=${{ steps.build-image.outputs.image }}" >> $GITHUB_OUTPUT
 
-      - name: Setup Node.js for migrations
-        if: ${{ !inputs.skip_migrations }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        if: ${{ !inputs.skip_migrations }}
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        if: ${{ !inputs.skip_migrations }}
-        working-directory: apps/api
-        run: pnpm install --frozen-lockfile
-
-      - name: Get database credentials
-        if: ${{ !inputs.skip_migrations }}
-        id: db-creds
-        run: |
-          SECRET=$(aws secretsmanager get-secret-value \
-            --secret-id dev/database/credentials \
-            --query SecretString --output text)
-
-          USERNAME=$(echo $SECRET | jq -r .username)
-          PASSWORD=$(echo $SECRET | jq -r .password)
-          HOST=$(echo $SECRET | jq -r .host)
-          PORT=$(echo $SECRET | jq -r .port)
-          DATABASE=$(echo $SECRET | jq -r '.dbname // .database')
-
-          echo "::add-mask::$PASSWORD"
-          DATABASE_URL="postgresql://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}"
-          echo "::add-mask::$DATABASE_URL"
-          echo "url=$DATABASE_URL" >> $GITHUB_OUTPUT
-
-      - name: Run Prisma migrations
-        if: ${{ !inputs.skip_migrations }}
-        working-directory: apps/api
-        env:
-          DATABASE_URL: ${{ steps.db-creds.outputs.url }}
-        run: |
-          echo "Running Prisma migrations..."
-          pnpm prisma migrate deploy
-          echo "✅ Migrations completed successfully"
-
       - name: Get ECS cluster and service info
         id: ecs-info
         run: |
@@ -303,52 +257,6 @@ jobs:
       - name: Output image URI
         id: image
         run: echo "uri=${{ steps.build-image.outputs.image }}" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js for migrations
-        if: ${{ !inputs.skip_migrations }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        if: ${{ !inputs.skip_migrations }}
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        if: ${{ !inputs.skip_migrations }}
-        working-directory: apps/api
-        run: pnpm install --frozen-lockfile
-
-      - name: Get database credentials
-        if: ${{ !inputs.skip_migrations }}
-        id: db-creds
-        run: |
-          SECRET=$(aws secretsmanager get-secret-value \
-            --secret-id prod/database/credentials \
-            --query SecretString --output text)
-
-          USERNAME=$(echo $SECRET | jq -r .username)
-          PASSWORD=$(echo $SECRET | jq -r .password)
-          HOST=$(echo $SECRET | jq -r .host)
-          PORT=$(echo $SECRET | jq -r .port)
-          DATABASE=$(echo $SECRET | jq -r '.dbname // .database')
-
-          echo "::add-mask::$PASSWORD"
-          DATABASE_URL="postgresql://${USERNAME}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}"
-          echo "::add-mask::$DATABASE_URL"
-          echo "url=$DATABASE_URL" >> $GITHUB_OUTPUT
-
-      - name: Run Prisma migrations
-        if: ${{ !inputs.skip_migrations }}
-        working-directory: apps/api
-        env:
-          DATABASE_URL: ${{ steps.db-creds.outputs.url }}
-        run: |
-          echo "Running Prisma migrations..."
-          pnpm prisma migrate deploy
-          echo "✅ Migrations completed successfully"
 
       - name: Get ECS cluster and service info
         id: ecs-info
