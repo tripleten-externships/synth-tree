@@ -68,7 +68,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: skilltree/api-dev
+          ECR_REPOSITORY: dev-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build with cache from monorepo root
@@ -284,7 +284,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: skilltree/api-prod
+          ECR_REPOSITORY: prod-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build with cache from monorepo root

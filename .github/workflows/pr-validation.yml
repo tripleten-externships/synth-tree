@@ -149,7 +149,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64 \
             --file apps/api/Dockerfile \
-            --tag skilltree/api:pr-${{ github.event.pull_request.number }} \
+            --tag api:pr-${{ github.event.pull_request.number }} \
             --load \
             .
 
