@@ -47,6 +47,20 @@ skilltree-monorepo/
 - **`@skilltree/api-types`** - Auto-generated TypeScript types from GraphQL schema for type-safe API consumption
 - **`@skilltree/config`** - Shared configuration and utility functions used across apps
 
+### Environments
+
+#### Development
+
+- [GraphQL API](https://api.dev.synth-tree.com/)
+- [Storybook](https://storybook.dev.synth-tree.com/)
+- [Admin Dashboard](https://dev.synth-tree.com/)
+
+#### Production
+
+- [GraphQL API](https://api.synth-tree.com/)
+- [Storybook](https://storybook.synth-tree.com/?path=/docs/ui-badge--docs)
+- [Admin Dashboard](https://app.synth-tree.com/auth/login)
+
 ## 🛠️ Tech Stack
 
 ### Frontend
