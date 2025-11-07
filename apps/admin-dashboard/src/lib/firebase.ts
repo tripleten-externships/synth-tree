@@ -19,7 +19,8 @@ export {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  type User as FirebaseUser
 } from "firebase/auth";
 
 export default app;
