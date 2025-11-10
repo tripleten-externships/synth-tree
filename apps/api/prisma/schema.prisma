@@ -49,3 +49,5 @@ model User {
   // progress     Progress[]
   // rewards      Reward[]
 }
+
+model Lesson {}

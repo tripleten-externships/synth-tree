@@ -11,6 +11,9 @@
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
     "postinstall": "prisma generate"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
