@@ -51,7 +51,6 @@ async function main() {
   // Create SkillTrees
   const skillTree1 = await prisma.skilltree.create({});
   const skillTree2 = await prisma.skilltree.create({});
-  const skillTree3 = await prisma.skilltree.create({});
 }
 
 main()
