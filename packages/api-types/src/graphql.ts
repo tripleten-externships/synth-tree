@@ -23,6 +23,23 @@ export type BatchPayload = {
   count: Scalars['Int']['output'];
 };
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type BoolFilter = {
+  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  not?: InputMaybe<NestedBoolFilter>;
+};
+
+export type BoolWithAggregatesFilter = {
+  _count?: InputMaybe<NestedIntFilter>;
+  _max?: InputMaybe<NestedBoolFilter>;
+  _min?: InputMaybe<NestedBoolFilter>;
+  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  not?: InputMaybe<NestedBoolWithAggregatesFilter>;
+};
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -73,6 +90,258 @@ export type EnumRoleWithAggregatesFilter = {
   notIn?: InputMaybe<Array<Role>>;
 };
 
+export type Lesson = {
+  __typename?: 'Lesson';
+  author?: Maybe<User>;
+  content?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  published?: Maybe<Scalars['Boolean']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type LessonCountOrderByAggregateInput = {
+  authorId?: InputMaybe<SortOrder>;
+  content?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  published?: InputMaybe<SortOrder>;
+  title?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
+export type LessonCreateInput = {
+  author: UserCreateNestedOneWithoutLessonsInput;
+  content: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type LessonCreateManyAuthorInput = {
+  content: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type LessonCreateManyAuthorInputEnvelope = {
+  data: Array<LessonCreateManyAuthorInput>;
+  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type LessonCreateManyInput = {
+  authorId: Scalars['String']['input'];
+  content: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type LessonCreateNestedManyWithoutAuthorInput = {
+  connect?: InputMaybe<Array<LessonWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<LessonCreateOrConnectWithoutAuthorInput>>;
+  create?: InputMaybe<Array<LessonCreateWithoutAuthorInput>>;
+  createMany?: InputMaybe<LessonCreateManyAuthorInputEnvelope>;
+};
+
+export type LessonCreateOrConnectWithoutAuthorInput = {
+  create: LessonCreateWithoutAuthorInput;
+  where: LessonWhereUniqueInput;
+};
+
+export type LessonCreateWithoutAuthorInput = {
+  content: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type LessonListRelationFilter = {
+  every?: InputMaybe<LessonWhereInput>;
+  none?: InputMaybe<LessonWhereInput>;
+  some?: InputMaybe<LessonWhereInput>;
+};
+
+export type LessonMaxOrderByAggregateInput = {
+  authorId?: InputMaybe<SortOrder>;
+  content?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  published?: InputMaybe<SortOrder>;
+  title?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
+export type LessonMinOrderByAggregateInput = {
+  authorId?: InputMaybe<SortOrder>;
+  content?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  published?: InputMaybe<SortOrder>;
+  title?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
+export type LessonOrderByRelationAggregateInput = {
+  _count?: InputMaybe<SortOrder>;
+};
+
+export type LessonOrderByWithAggregationInput = {
+  _count?: InputMaybe<LessonCountOrderByAggregateInput>;
+  _max?: InputMaybe<LessonMaxOrderByAggregateInput>;
+  _min?: InputMaybe<LessonMinOrderByAggregateInput>;
+  authorId?: InputMaybe<SortOrder>;
+  content?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  published?: InputMaybe<SortOrder>;
+  title?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
+export type LessonOrderByWithRelationInput = {
+  author?: InputMaybe<UserOrderByWithRelationInput>;
+  authorId?: InputMaybe<SortOrder>;
+  content?: InputMaybe<SortOrder>;
+  createdAt?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  published?: InputMaybe<SortOrder>;
+  title?: InputMaybe<SortOrder>;
+  updatedAt?: InputMaybe<SortOrder>;
+};
+
+export enum LessonScalarFieldEnum {
+  AuthorId = 'authorId',
+  Content = 'content',
+  CreatedAt = 'createdAt',
+  Id = 'id',
+  Published = 'published',
+  Title = 'title',
+  UpdatedAt = 'updatedAt'
+}
+
+export type LessonScalarWhereInput = {
+  AND?: InputMaybe<Array<LessonScalarWhereInput>>;
+  NOT?: InputMaybe<Array<LessonScalarWhereInput>>;
+  OR?: InputMaybe<Array<LessonScalarWhereInput>>;
+  authorId?: InputMaybe<StringFilter>;
+  content?: InputMaybe<StringFilter>;
+  createdAt?: InputMaybe<DateTimeFilter>;
+  id?: InputMaybe<StringFilter>;
+  published?: InputMaybe<BoolFilter>;
+  title?: InputMaybe<StringFilter>;
+  updatedAt?: InputMaybe<DateTimeFilter>;
+};
+
+export type LessonScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<LessonScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<LessonScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<LessonScalarWhereWithAggregatesInput>>;
+  authorId?: InputMaybe<StringWithAggregatesFilter>;
+  content?: InputMaybe<StringWithAggregatesFilter>;
+  createdAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+  id?: InputMaybe<StringWithAggregatesFilter>;
+  published?: InputMaybe<BoolWithAggregatesFilter>;
+  title?: InputMaybe<StringWithAggregatesFilter>;
+  updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+};
+
+export type LessonUpdateInput = {
+  author?: InputMaybe<UserUpdateOneRequiredWithoutLessonsNestedInput>;
+  content?: InputMaybe<StringFieldUpdateOperationsInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  published?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  title?: InputMaybe<StringFieldUpdateOperationsInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type LessonUpdateManyMutationInput = {
+  content?: InputMaybe<StringFieldUpdateOperationsInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  published?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  title?: InputMaybe<StringFieldUpdateOperationsInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type LessonUpdateManyWithWhereWithoutAuthorInput = {
+  data: LessonUpdateManyMutationInput;
+  where: LessonScalarWhereInput;
+};
+
+export type LessonUpdateManyWithoutAuthorNestedInput = {
+  connect?: InputMaybe<Array<LessonWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<LessonCreateOrConnectWithoutAuthorInput>>;
+  create?: InputMaybe<Array<LessonCreateWithoutAuthorInput>>;
+  createMany?: InputMaybe<LessonCreateManyAuthorInputEnvelope>;
+  delete?: InputMaybe<Array<LessonWhereUniqueInput>>;
+  deleteMany?: InputMaybe<Array<LessonScalarWhereInput>>;
+  disconnect?: InputMaybe<Array<LessonWhereUniqueInput>>;
+  set?: InputMaybe<Array<LessonWhereUniqueInput>>;
+  update?: InputMaybe<Array<LessonUpdateWithWhereUniqueWithoutAuthorInput>>;
+  updateMany?: InputMaybe<Array<LessonUpdateManyWithWhereWithoutAuthorInput>>;
+  upsert?: InputMaybe<Array<LessonUpsertWithWhereUniqueWithoutAuthorInput>>;
+};
+
+export type LessonUpdateWithWhereUniqueWithoutAuthorInput = {
+  data: LessonUpdateWithoutAuthorInput;
+  where: LessonWhereUniqueInput;
+};
+
+export type LessonUpdateWithoutAuthorInput = {
+  content?: InputMaybe<StringFieldUpdateOperationsInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  published?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  title?: InputMaybe<StringFieldUpdateOperationsInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type LessonUpsertWithWhereUniqueWithoutAuthorInput = {
+  create: LessonCreateWithoutAuthorInput;
+  update: LessonUpdateWithoutAuthorInput;
+  where: LessonWhereUniqueInput;
+};
+
+export type LessonWhereInput = {
+  AND?: InputMaybe<Array<LessonWhereInput>>;
+  NOT?: InputMaybe<Array<LessonWhereInput>>;
+  OR?: InputMaybe<Array<LessonWhereInput>>;
+  author?: InputMaybe<UserWhereInput>;
+  authorId?: InputMaybe<StringFilter>;
+  content?: InputMaybe<StringFilter>;
+  createdAt?: InputMaybe<DateTimeFilter>;
+  id?: InputMaybe<StringFilter>;
+  published?: InputMaybe<BoolFilter>;
+  title?: InputMaybe<StringFilter>;
+  updatedAt?: InputMaybe<DateTimeFilter>;
+};
+
+export type LessonWhereUniqueInput = {
+  AND?: InputMaybe<Array<LessonWhereInput>>;
+  NOT?: InputMaybe<Array<LessonWhereInput>>;
+  OR?: InputMaybe<Array<LessonWhereInput>>;
+  author?: InputMaybe<UserWhereInput>;
+  authorId?: InputMaybe<StringFilter>;
+  content?: InputMaybe<StringFilter>;
+  createdAt?: InputMaybe<DateTimeFilter>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<BoolFilter>;
+  title?: InputMaybe<StringFilter>;
+  updatedAt?: InputMaybe<DateTimeFilter>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createManyUser: Array<User>;
@@ -121,6 +390,19 @@ export type MutationUpsertOneUserArgs = {
   create: UserCreateInput;
   update: UserUpdateInput;
   where: UserWhereUniqueInput;
+};
+
+export type NestedBoolFilter = {
+  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  not?: InputMaybe<NestedBoolFilter>;
+};
+
+export type NestedBoolWithAggregatesFilter = {
+  _count?: InputMaybe<NestedIntFilter>;
+  _max?: InputMaybe<NestedBoolFilter>;
+  _min?: InputMaybe<NestedBoolFilter>;
+  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
 export type NestedDateTimeFilter = {
@@ -264,6 +546,9 @@ export type Query = {
   findFirstUser?: Maybe<User>;
   findManyUser: Array<User>;
   findUniqueUser?: Maybe<User>;
+  lesson?: Maybe<Lesson>;
+  lessons?: Maybe<Array<Lesson>>;
+  lessonsByAuthor?: Maybe<Array<Lesson>>;
 };
 
 
@@ -299,6 +584,22 @@ export type QueryFindManyUserArgs = {
 
 export type QueryFindUniqueUserArgs = {
   where: UserWhereUniqueInput;
+};
+
+
+export type QueryLessonArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryLessonsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryLessonsByAuthorArgs = {
+  authorId: Scalars['String']['input'];
 };
 
 export enum QueryMode {
@@ -398,10 +699,21 @@ export type User = {
   createdAt: Scalars['DateTime']['output'];
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  lessons: Array<Lesson>;
   name?: Maybe<Scalars['String']['output']>;
   photoUrl?: Maybe<Scalars['String']['output']>;
   role: Role;
   updatedAt: Scalars['DateTime']['output'];
+};
+
+
+export type UserLessonsArgs = {
+  cursor?: InputMaybe<LessonWhereUniqueInput>;
+  distinct?: InputMaybe<Array<LessonScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<LessonOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<LessonWhereInput>;
 };
 
 export type UserCountOrderByAggregateInput = {
@@ -418,6 +730,7 @@ export type UserCreateInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
+  lessons?: InputMaybe<LessonCreateNestedManyWithoutAuthorInput>;
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<Role>;
@@ -425,6 +738,27 @@ export type UserCreateInput = {
 };
 
 export type UserCreateManyInput = {
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  email: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  role?: InputMaybe<Role>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type UserCreateNestedOneWithoutLessonsInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutLessonsInput>;
+  create?: InputMaybe<UserCreateWithoutLessonsInput>;
+};
+
+export type UserCreateOrConnectWithoutLessonsInput = {
+  create: UserCreateWithoutLessonsInput;
+  where: UserWhereUniqueInput;
+};
+
+export type UserCreateWithoutLessonsInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
@@ -471,6 +805,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: InputMaybe<SortOrder>;
   email?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  lessons?: InputMaybe<LessonOrderByRelationAggregateInput>;
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
@@ -486,6 +821,11 @@ export enum UserScalarFieldEnum {
   Role = 'role',
   UpdatedAt = 'updatedAt'
 }
+
+export type UserScalarRelationFilter = {
+  is?: InputMaybe<UserWhereInput>;
+  isNot?: InputMaybe<UserWhereInput>;
+};
 
 export type UserScalarWhereWithAggregatesInput = {
   AND?: InputMaybe<Array<UserScalarWhereWithAggregatesInput>>;
@@ -504,6 +844,7 @@ export type UserUpdateInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  lessons?: InputMaybe<LessonUpdateManyWithoutAuthorNestedInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
@@ -520,6 +861,35 @@ export type UserUpdateManyMutationInput = {
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
 
+export type UserUpdateOneRequiredWithoutLessonsNestedInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutLessonsInput>;
+  create?: InputMaybe<UserCreateWithoutLessonsInput>;
+  update?: InputMaybe<UserUpdateToOneWithWhereWithoutLessonsInput>;
+  upsert?: InputMaybe<UserUpsertWithoutLessonsInput>;
+};
+
+export type UserUpdateToOneWithWhereWithoutLessonsInput = {
+  data: UserUpdateWithoutLessonsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+export type UserUpdateWithoutLessonsInput = {
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserUpsertWithoutLessonsInput = {
+  create: UserCreateWithoutLessonsInput;
+  update: UserUpdateWithoutLessonsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
 export type UserWhereInput = {
   AND?: InputMaybe<Array<UserWhereInput>>;
   NOT?: InputMaybe<Array<UserWhereInput>>;
@@ -527,6 +897,7 @@ export type UserWhereInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   email?: InputMaybe<StringFilter>;
   id?: InputMaybe<StringFilter>;
+  lessons?: InputMaybe<LessonListRelationFilter>;
   name?: InputMaybe<StringNullableFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
   role?: InputMaybe<EnumRoleFilter>;
@@ -540,6 +911,7 @@ export type UserWhereUniqueInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   email?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
+  lessons?: InputMaybe<LessonListRelationFilter>;
   name?: InputMaybe<StringNullableFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
   role?: InputMaybe<EnumRoleFilter>;

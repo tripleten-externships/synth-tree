@@ -43,9 +43,23 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lessons   Lesson[] @relation("UserLessons")
 
   // Example placeholders for future relationships
   // lessons      Lesson[]    @relation("AuthorLessons")
   // progress     Progress[]
   // rewards      Reward[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relation to User (author)
+  authorId    String
+  author      User     @relation("UserLessons", fields: [authorId], references: [id])
 }
