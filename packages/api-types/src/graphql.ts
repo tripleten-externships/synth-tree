@@ -92,14 +92,13 @@ export type EnumRoleWithAggregatesFilter = {
 
 export type Lesson = {
   __typename?: 'Lesson';
-  author: User;
-  authorId: Scalars['String']['output'];
-  content: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
-  published: Scalars['Boolean']['output'];
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
+  author?: Maybe<User>;
+  content?: Maybe<Scalars['String']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  published?: Maybe<Scalars['Boolean']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type LessonCountOrderByAggregateInput = {
@@ -345,25 +344,13 @@ export type LessonWhereUniqueInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createManyLesson: Array<Lesson>;
   createManyUser: Array<User>;
-  createOneLesson: Lesson;
   createOneUser: User;
-  deleteManyLesson?: Maybe<BatchPayload>;
   deleteManyUser?: Maybe<BatchPayload>;
-  deleteOneLesson?: Maybe<Lesson>;
   deleteOneUser?: Maybe<User>;
-  updateManyLesson: BatchPayload;
   updateManyUser: BatchPayload;
-  updateOneLesson?: Maybe<Lesson>;
   updateOneUser?: Maybe<User>;
-  upsertOneLesson: Lesson;
   upsertOneUser: User;
-};
-
-
-export type MutationCreateManyLessonArgs = {
-  data: Array<LessonCreateInput>;
 };
 
 
@@ -372,18 +359,8 @@ export type MutationCreateManyUserArgs = {
 };
 
 
-export type MutationCreateOneLessonArgs = {
-  data: LessonCreateInput;
-};
-
-
 export type MutationCreateOneUserArgs = {
   data: UserCreateInput;
-};
-
-
-export type MutationDeleteManyLessonArgs = {
-  where: LessonWhereInput;
 };
 
 
@@ -392,19 +369,8 @@ export type MutationDeleteManyUserArgs = {
 };
 
 
-export type MutationDeleteOneLessonArgs = {
-  where: LessonWhereUniqueInput;
-};
-
-
 export type MutationDeleteOneUserArgs = {
   where: UserWhereUniqueInput;
-};
-
-
-export type MutationUpdateManyLessonArgs = {
-  data: LessonUpdateManyMutationInput;
-  where?: InputMaybe<LessonWhereInput>;
 };
 
 
@@ -414,22 +380,9 @@ export type MutationUpdateManyUserArgs = {
 };
 
 
-export type MutationUpdateOneLessonArgs = {
-  data: LessonUpdateInput;
-  where: LessonWhereUniqueInput;
-};
-
-
 export type MutationUpdateOneUserArgs = {
   data: UserUpdateInput;
   where: UserWhereUniqueInput;
-};
-
-
-export type MutationUpsertOneLessonArgs = {
-  create: LessonCreateInput;
-  update: LessonUpdateInput;
-  where: LessonWhereUniqueInput;
 };
 
 
@@ -589,24 +542,13 @@ export enum NullsOrder {
 
 export type Query = {
   __typename?: 'Query';
-  countLesson: Scalars['Int']['output'];
   countUser: Scalars['Int']['output'];
-  findFirstLesson?: Maybe<Lesson>;
   findFirstUser?: Maybe<User>;
-  findManyLesson: Array<Lesson>;
   findManyUser: Array<User>;
-  findUniqueLesson?: Maybe<Lesson>;
   findUniqueUser?: Maybe<User>;
-};
-
-
-export type QueryCountLessonArgs = {
-  cursor?: InputMaybe<LessonWhereUniqueInput>;
-  distinct?: InputMaybe<Array<LessonScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<LessonOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<LessonWhereInput>;
+  lesson?: Maybe<Lesson>;
+  lessons?: Maybe<Array<Lesson>>;
+  lessonsByAuthor?: Maybe<Array<Lesson>>;
 };
 
 
@@ -620,16 +562,6 @@ export type QueryCountUserArgs = {
 };
 
 
-export type QueryFindFirstLessonArgs = {
-  cursor?: InputMaybe<LessonWhereUniqueInput>;
-  distinct?: InputMaybe<Array<LessonScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<LessonOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<LessonWhereInput>;
-};
-
-
 export type QueryFindFirstUserArgs = {
   cursor?: InputMaybe<UserWhereUniqueInput>;
   distinct?: InputMaybe<Array<UserScalarFieldEnum>>;
@@ -637,16 +569,6 @@ export type QueryFindFirstUserArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<UserWhereInput>;
-};
-
-
-export type QueryFindManyLessonArgs = {
-  cursor?: InputMaybe<LessonWhereUniqueInput>;
-  distinct?: InputMaybe<Array<LessonScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<LessonOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<LessonWhereInput>;
 };
 
 
@@ -660,13 +582,24 @@ export type QueryFindManyUserArgs = {
 };
 
 
-export type QueryFindUniqueLessonArgs = {
-  where: LessonWhereUniqueInput;
+export type QueryFindUniqueUserArgs = {
+  where: UserWhereUniqueInput;
 };
 
 
-export type QueryFindUniqueUserArgs = {
-  where: UserWhereUniqueInput;
+export type QueryLessonArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryLessonsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryLessonsByAuthorArgs = {
+  authorId: Scalars['String']['input'];
 };
 
 export enum QueryMode {
