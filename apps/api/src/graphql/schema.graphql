@@ -74,14 +74,13 @@ input EnumRoleWithAggregatesFilter {
 }
 
 type Lesson {
-  author: User!
-  authorId: String!
-  content: String!
-  createdAt: DateTime!
-  id: ID!
-  published: Boolean!
-  title: String!
-  updatedAt: DateTime!
+  author: User
+  content: String
+  createdAt: DateTime
+  id: ID
+  published: Boolean
+  title: String
+  updatedAt: DateTime
 }
 
 input LessonCountOrderByAggregateInput {
@@ -326,19 +325,12 @@ input LessonWhereUniqueInput {
 }
 
 type Mutation {
-  createManyLesson(data: [LessonCreateInput!]!): [Lesson!]!
   createManyUser(data: [UserCreateInput!]!): [User!]!
-  createOneLesson(data: LessonCreateInput!): Lesson!
   createOneUser(data: UserCreateInput!): User!
-  deleteManyLesson(where: LessonWhereInput!): BatchPayload
   deleteManyUser(where: UserWhereInput!): BatchPayload
-  deleteOneLesson(where: LessonWhereUniqueInput!): Lesson
   deleteOneUser(where: UserWhereUniqueInput!): User
-  updateManyLesson(data: LessonUpdateManyMutationInput!, where: LessonWhereInput): BatchPayload!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
-  updateOneLesson(data: LessonUpdateInput!, where: LessonWhereUniqueInput!): Lesson
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
-  upsertOneLesson(create: LessonCreateInput!, update: LessonUpdateInput!, where: LessonWhereUniqueInput!): Lesson!
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
 }
 
@@ -491,14 +483,13 @@ enum NullsOrder {
 }
 
 type Query {
-  countLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): Int!
   countUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): Int!
-  findFirstLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): Lesson
   findFirstUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): User
-  findManyLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): [Lesson!]!
   findManyUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
-  findUniqueLesson(where: LessonWhereUniqueInput!): Lesson
   findUniqueUser(where: UserWhereUniqueInput!): User
+  lesson(id: ID!): Lesson
+  lessons(limit: Int, offset: Int): [Lesson!]
+  lessonsByAuthor(authorId: String!): [Lesson!]
 }
 
 enum QueryMode {
