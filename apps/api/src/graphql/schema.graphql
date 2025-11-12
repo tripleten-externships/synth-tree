@@ -4,6 +4,23 @@ type BatchPayload {
   count: Int!
 }
 
+input BoolFieldUpdateOperationsInput {
+  set: Boolean
+}
+
+input BoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input BoolWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedBoolFilter
+  _min: NestedBoolFilter
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
+}
+
 scalar DateTime
 
 input DateTimeFieldUpdateOperationsInput {
@@ -56,14 +73,286 @@ input EnumRoleWithAggregatesFilter {
   notIn: [Role!]
 }
 
+type Lesson {
+  author: User!
+  authorId: String!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  published: Boolean!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input LessonCountOrderByAggregateInput {
+  authorId: SortOrder
+  content: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  published: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input LessonCreateInput {
+  author: UserCreateNestedOneWithoutLessonsInput!
+  content: String!
+  createdAt: DateTime
+  id: String
+  published: Boolean
+  title: String!
+  updatedAt: DateTime
+}
+
+input LessonCreateManyAuthorInput {
+  content: String!
+  createdAt: DateTime
+  id: String
+  published: Boolean
+  title: String!
+  updatedAt: DateTime
+}
+
+input LessonCreateManyAuthorInputEnvelope {
+  data: [LessonCreateManyAuthorInput!]!
+  skipDuplicates: Boolean
+}
+
+input LessonCreateManyInput {
+  authorId: String!
+  content: String!
+  createdAt: DateTime
+  id: String
+  published: Boolean
+  title: String!
+  updatedAt: DateTime
+}
+
+input LessonCreateNestedManyWithoutAuthorInput {
+  connect: [LessonWhereUniqueInput!]
+  connectOrCreate: [LessonCreateOrConnectWithoutAuthorInput!]
+  create: [LessonCreateWithoutAuthorInput!]
+  createMany: LessonCreateManyAuthorInputEnvelope
+}
+
+input LessonCreateOrConnectWithoutAuthorInput {
+  create: LessonCreateWithoutAuthorInput!
+  where: LessonWhereUniqueInput!
+}
+
+input LessonCreateWithoutAuthorInput {
+  content: String!
+  createdAt: DateTime
+  id: String
+  published: Boolean
+  title: String!
+  updatedAt: DateTime
+}
+
+input LessonListRelationFilter {
+  every: LessonWhereInput
+  none: LessonWhereInput
+  some: LessonWhereInput
+}
+
+input LessonMaxOrderByAggregateInput {
+  authorId: SortOrder
+  content: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  published: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input LessonMinOrderByAggregateInput {
+  authorId: SortOrder
+  content: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  published: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input LessonOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input LessonOrderByWithAggregationInput {
+  _count: LessonCountOrderByAggregateInput
+  _max: LessonMaxOrderByAggregateInput
+  _min: LessonMinOrderByAggregateInput
+  authorId: SortOrder
+  content: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  published: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input LessonOrderByWithRelationInput {
+  author: UserOrderByWithRelationInput
+  authorId: SortOrder
+  content: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  published: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+enum LessonScalarFieldEnum {
+  authorId
+  content
+  createdAt
+  id
+  published
+  title
+  updatedAt
+}
+
+input LessonScalarWhereInput {
+  AND: [LessonScalarWhereInput!]
+  NOT: [LessonScalarWhereInput!]
+  OR: [LessonScalarWhereInput!]
+  authorId: StringFilter
+  content: StringFilter
+  createdAt: DateTimeFilter
+  id: StringFilter
+  published: BoolFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input LessonScalarWhereWithAggregatesInput {
+  AND: [LessonScalarWhereWithAggregatesInput!]
+  NOT: [LessonScalarWhereWithAggregatesInput!]
+  OR: [LessonScalarWhereWithAggregatesInput!]
+  authorId: StringWithAggregatesFilter
+  content: StringWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  id: StringWithAggregatesFilter
+  published: BoolWithAggregatesFilter
+  title: StringWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input LessonUpdateInput {
+  author: UserUpdateOneRequiredWithoutLessonsNestedInput
+  content: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  published: BoolFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input LessonUpdateManyMutationInput {
+  content: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  published: BoolFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input LessonUpdateManyWithWhereWithoutAuthorInput {
+  data: LessonUpdateManyMutationInput!
+  where: LessonScalarWhereInput!
+}
+
+input LessonUpdateManyWithoutAuthorNestedInput {
+  connect: [LessonWhereUniqueInput!]
+  connectOrCreate: [LessonCreateOrConnectWithoutAuthorInput!]
+  create: [LessonCreateWithoutAuthorInput!]
+  createMany: LessonCreateManyAuthorInputEnvelope
+  delete: [LessonWhereUniqueInput!]
+  deleteMany: [LessonScalarWhereInput!]
+  disconnect: [LessonWhereUniqueInput!]
+  set: [LessonWhereUniqueInput!]
+  update: [LessonUpdateWithWhereUniqueWithoutAuthorInput!]
+  updateMany: [LessonUpdateManyWithWhereWithoutAuthorInput!]
+  upsert: [LessonUpsertWithWhereUniqueWithoutAuthorInput!]
+}
+
+input LessonUpdateWithWhereUniqueWithoutAuthorInput {
+  data: LessonUpdateWithoutAuthorInput!
+  where: LessonWhereUniqueInput!
+}
+
+input LessonUpdateWithoutAuthorInput {
+  content: StringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  published: BoolFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input LessonUpsertWithWhereUniqueWithoutAuthorInput {
+  create: LessonCreateWithoutAuthorInput!
+  update: LessonUpdateWithoutAuthorInput!
+  where: LessonWhereUniqueInput!
+}
+
+input LessonWhereInput {
+  AND: [LessonWhereInput!]
+  NOT: [LessonWhereInput!]
+  OR: [LessonWhereInput!]
+  author: UserWhereInput
+  authorId: StringFilter
+  content: StringFilter
+  createdAt: DateTimeFilter
+  id: StringFilter
+  published: BoolFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input LessonWhereUniqueInput {
+  AND: [LessonWhereInput!]
+  NOT: [LessonWhereInput!]
+  OR: [LessonWhereInput!]
+  author: UserWhereInput
+  authorId: StringFilter
+  content: StringFilter
+  createdAt: DateTimeFilter
+  id: String
+  published: BoolFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
 type Mutation {
+  createManyLesson(data: [LessonCreateInput!]!): [Lesson!]!
   createManyUser(data: [UserCreateInput!]!): [User!]!
+  createOneLesson(data: LessonCreateInput!): Lesson!
   createOneUser(data: UserCreateInput!): User!
+  deleteManyLesson(where: LessonWhereInput!): BatchPayload
   deleteManyUser(where: UserWhereInput!): BatchPayload
+  deleteOneLesson(where: LessonWhereUniqueInput!): Lesson
   deleteOneUser(where: UserWhereUniqueInput!): User
+  updateManyLesson(data: LessonUpdateManyMutationInput!, where: LessonWhereInput): BatchPayload!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
+  updateOneLesson(data: LessonUpdateInput!, where: LessonWhereUniqueInput!): Lesson
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  upsertOneLesson(create: LessonCreateInput!, update: LessonUpdateInput!, where: LessonWhereUniqueInput!): Lesson!
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
+}
+
+input NestedBoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input NestedBoolWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedBoolFilter
+  _min: NestedBoolFilter
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
 }
 
 input NestedDateTimeFilter {
@@ -202,9 +491,13 @@ enum NullsOrder {
 }
 
 type Query {
+  countLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): Int!
   countUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): Int!
+  findFirstLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): Lesson
   findFirstUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): User
+  findManyLesson(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): [Lesson!]!
   findManyUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
+  findUniqueLesson(where: LessonWhereUniqueInput!): Lesson
   findUniqueUser(where: UserWhereUniqueInput!): User
 }
 
@@ -304,6 +597,7 @@ type User {
   createdAt: DateTime!
   email: String!
   id: ID!
+  lessons(cursor: LessonWhereUniqueInput, distinct: [LessonScalarFieldEnum!], orderBy: [LessonOrderByWithRelationInput!], skip: Int, take: Int, where: LessonWhereInput): [Lesson!]!
   name: String
   photoUrl: String
   role: Role!
@@ -324,6 +618,7 @@ input UserCreateInput {
   createdAt: DateTime
   email: String!
   id: String!
+  lessons: LessonCreateNestedManyWithoutAuthorInput
   name: String
   photoUrl: String
   role: Role
@@ -331,6 +626,27 @@ input UserCreateInput {
 }
 
 input UserCreateManyInput {
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  photoUrl: String
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserCreateNestedOneWithoutLessonsInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutLessonsInput
+  create: UserCreateWithoutLessonsInput
+}
+
+input UserCreateOrConnectWithoutLessonsInput {
+  create: UserCreateWithoutLessonsInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateWithoutLessonsInput {
   createdAt: DateTime
   email: String!
   id: String!
@@ -377,6 +693,7 @@ input UserOrderByWithRelationInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  lessons: LessonOrderByRelationAggregateInput
   name: SortOrder
   photoUrl: SortOrder
   role: SortOrder
@@ -391,6 +708,11 @@ enum UserScalarFieldEnum {
   photoUrl
   role
   updatedAt
+}
+
+input UserScalarRelationFilter {
+  is: UserWhereInput
+  isNot: UserWhereInput
 }
 
 input UserScalarWhereWithAggregatesInput {
@@ -410,6 +732,7 @@ input UserUpdateInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  lessons: LessonUpdateManyWithoutAuthorNestedInput
   name: NullableStringFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
@@ -426,6 +749,35 @@ input UserUpdateManyMutationInput {
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
 
+input UserUpdateOneRequiredWithoutLessonsNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutLessonsInput
+  create: UserCreateWithoutLessonsInput
+  update: UserUpdateToOneWithWhereWithoutLessonsInput
+  upsert: UserUpsertWithoutLessonsInput
+}
+
+input UserUpdateToOneWithWhereWithoutLessonsInput {
+  data: UserUpdateWithoutLessonsInput!
+  where: UserWhereInput
+}
+
+input UserUpdateWithoutLessonsInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  role: EnumRoleFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserUpsertWithoutLessonsInput {
+  create: UserCreateWithoutLessonsInput!
+  update: UserUpdateWithoutLessonsInput!
+  where: UserWhereInput
+}
+
 input UserWhereInput {
   AND: [UserWhereInput!]
   NOT: [UserWhereInput!]
@@ -433,6 +785,7 @@ input UserWhereInput {
   createdAt: DateTimeFilter
   email: StringFilter
   id: StringFilter
+  lessons: LessonListRelationFilter
   name: StringNullableFilter
   photoUrl: StringNullableFilter
   role: EnumRoleFilter
@@ -446,6 +799,7 @@ input UserWhereUniqueInput {
   createdAt: DateTimeFilter
   email: String
   id: String
+  lessons: LessonListRelationFilter
   name: StringNullableFilter
   photoUrl: StringNullableFilter
   role: EnumRoleFilter

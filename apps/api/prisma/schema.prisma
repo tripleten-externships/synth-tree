@@ -43,6 +43,7 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lessons   Lesson[] @relation("UserLessons")
 
   // Example placeholders for future relationships
   // lessons      Lesson[]    @relation("AuthorLessons")
@@ -60,5 +61,5 @@ model Lesson {
 
   // Relation to User (author)
   authorId    String
-  author      User     @relation(fields: [authorId], references: [id])
+  author      User     @relation("UserLessons", fields: [authorId], references: [id])
 }
