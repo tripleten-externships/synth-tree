@@ -3,6 +3,8 @@ version: "3.8"
 services:
   postgres:
     image: postgres:16-alpine
+    # force linux/amd64 to avoid client/server os/arch mismatch on Windows hosts
+    platform: linux/amd64
     container_name: skilltree-postgres
     restart: unless-stopped
     ports:

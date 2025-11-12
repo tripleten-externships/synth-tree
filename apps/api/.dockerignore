@@ -87,3 +87,4 @@ docker-compose*.yml
 .npmrc
 .yarnrc
 .nvmrc
+copilot-instructions.md
