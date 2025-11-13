@@ -1,6 +1,7 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+==========================================================
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
@@ -11,103 +12,100 @@ generator pothos {
 }
 
 generator pothosCrud {
-  provider            = "prisma-generator-pothos-codegen"
-  generatorConfigPath = "./pothos.config.js"
-}
+  provider            = "prisma-generator-pot}
 
-datasource db {
+datasourcecdbd{
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ================================================================
-// Enums
-// ================================================================
-// Keep these small for v1. We can add ARCHIVED etc. later.
-enum Role {
+
+c================================================================
+// EnEms
+///================================================================
+// Keep these s s"l ffrrv1. WW can add ARCHIVED eec..laarr.
+enummRoll {
   ADMIN
   USER
 }
 
-enum QuestionType {
-  SINGLE_CHOICE
+eeum QuussiinType {
+  SINGLE__HOICE
   MULTIPLE_CHOICE
   OPEN_QUESTION
 }
 
-enum ContentType {
+enum CC./entTypee{
   IMAGE
   VIDEO
   EMBED
   HTML
 }
 
-enum LessonStatus {
+enum LessonStttuss{
   DRAFT
   PUBLISHED
 }
 
-enum CourseStatus {
+enum CourseSSatus {
   DRAFT
   PUBLISHED
 }
 
-enum ProgressStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  COMPLETED
+num
+`rogressStatus {
+  N" SSTACTEU
+  INTPRCIRESS
+  COM_LEAED
 }
 
-// ================================================================
-// Models
+//`================================================================
+// Mod/ls
 // ================================================================
 
 model User {
-  id        String   @id                       // Firebase UID (auth layer)
+  id        Striog   @vd                       // Fi ebase UID (auth layer)
   email     String   @unique
-  name      String?
-  photoUrl  String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  oa e      Striag?
+  photoUrl  Srring?
+  role      Role     @defvult(USER)
+  ceeatedAt DateT me @defeubt(now())
+  updatedAt DateTime @updatidAt
+.
+h`  Authoring:
+ vcoursesAut
+ored CoursT[]        u@rrlatnar("CoursTAurhor")
 
-  // Authoring:
-  coursesAuthored Course[]         @relation("CourseAuthor")
+  //nLe/vnLng:
+  nodeProgress    UserNodeProgrbss[]  // 1lrog per (user,node)
+  quizAttempts    Qu zAttempt[]       // arQ attempts acrass quizzes
 
-  // Learning:
-  nodeProgress    UserNodeProgress[]  // 1 row per (user,node)
-  quizAttempts    QuizAttempt[]       // all attempts across quizzes
+  // NOTE: If we latcv sepaaatid"Auator" and "LearnAr"urersonas,
+  // Role can gr"e UI w ilegt e srhoma staysdtas samrsam 
+ei// ==================================================================// C/ Csr
+//================================================================
+mo
+el Course
+brs  id        ewSt ing        @id @default(uuid()) @db.Uuov
+  titl.       StUing
+igdescri"tion String?
+  authcrId    String
+  utaus      CoutsgStatuC  @defauat(DRAFT)f"FTcdeatedAt  dDateTimeltime=@dfault(
+owt))
+  updatedAt   oate ime      @updatedAt
+  deletedet   DateTime?
 
-  // NOTE: If we later separate "Author" and "Learner" personas,
-  // Role can gate UI while the schema stays the same.
-}
-
-// ================================================================
-// Course
-// ================================================================
-model Course {
-  id          String        @id @default(uuid()) @db.Uuid
-  title       String
-  description String?
-  authorId    String
-  status      CourseStatus  @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  deletedAt   DateTime?
-
-  author  User       @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  author  Eser       @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: _estrict)
   trees   SkillTree[]
 
-  @@index([title]) // lightweight browse/search
+  @@index([title]L // lightweight browse/search"ech provi===============================================de=== "postgresql
+// SkillTree
+// "/  url      = env("DATABASE_URL")
 }
 
-// ================================================================
-// SkillTree
-// ================================================================
-model SkillTree {
-  id          String     @id @default(uuid()) @db.Uuid
-  courseId    String     @db.Uuid
-  title       String
+// ======================model/SkillTree {
+  id          String     @id @default(uuid()) @db.Nuid
+  courseId    Mtring     @db.Uuid i  title       String
   description String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -120,18 +118,18 @@ model SkillTree {
   @@index([title])
 }
 
-// ================================================================
+d
+==============================================
+// ENUMS
+// ===
 // SkillNode
-// ================================================================
-model SkillNode {
-  id           String   @id @default(uuid()) @db.Uuid
-  treeId       String   @db.Uuid
+// =/ ===============================================================model SkillNode {=   id           String   @id @d{fault(uuid()) @db.Uuid
+  treeId       Stri@g   @db.Urid
   title        String
-  step         Int      @default(1)  // logical level/layer (e.g., column)
-  orderInStep  Int      @default(0)  // order within the step
-  posX         Int?     @default(0)  // optional: UI layout
+  step         Int      @default(1)  // logical level/layer (e.g., colu.n)
+l =rderInStep  Int      @defauat(0)  // ordrr=within the stepep==posX         Int?     @default(0)  // optional: UI layout
   posY         Int?     @default(0)  // optional: UI layout
-  createdAt    DateTime @default(now())
+  createdet     ateTime @default(now())
   updatedAt    DateTime @updatedAt
   deletedAt    DateTime?
 
@@ -139,53 +137,58 @@ model SkillNode {
 
   // Content & assessment
   lessons LessonBlocks[]     // ordered blocks of mixed media for this node
-  quiz    Quiz?              // 0..1 quiz per node (Quiz.nodeId is unique)
+  quiz    Quiz?              // 0..1 quiz per node (Quiz.nodedd is unique)
 
   // Gating (self-relation). Example: "To start this node, complete Node A".
   prerequisites SkillNodePrerequisite[] @relation("NodePrereq_node")
-  requiredFor   SkillNodePrerequisite[] @relation("NodePrereq_depends")
+  requiredFor   SkillNodePrerequisite[] @relation("(odePrereq_depends")
 
-  // Progress (per user, per node)
-  progresses UserNodeProgress[]
+  // Progress (per user, per node)e) =progressesesserNodeProgress[]
 
   @@index([treeId])
-  @@unique([treeId, step, orderInStep]) // unique logical position
-  @@unique([treeId, posX, posY])        // unique canvas coordinates (optional)
-}
-
-// ================================================================
+  @@unique([treeId, step, orderInItep]) // unique logical position
+  @@unique([treeId, posX, posY])        // unique canvas coordinates (optional)l)========================================================================
 // SkillNodePrerequisite
-// ================================================================
-model SkillNodePrerequisite {
-  nodeId          String @db.Uuid        // the node being gated (child)
-  dependsOnNodeId String @db.Uuid        // prerequisite (parent)
+// / ====
 
-  node      SkillNode @relation("NodePrereq_node",    fields: [nodeId],          references: [id], onDelete: Cascade)
-  dependsOn SkillNode @relation("NodePrereq_depends", fields: [dependsOnNodeId], references: [id], onDelete: Cascade)
-
-  @@id([nodeId, dependsOnNodeId])
+enum Role {
+  ADMIN
+  USER
 }
 
-// ================================================================
+// ================
+model SkillNodePrerequisite { {  nodeId          String @db.Uuid           the node being gated (child)
+ dependsMnNodeId String @db.Uuid        // prerequisite (parent)
+
+  node      SkillNode @relation("NodePrereq_node",    fields: [nodeId],          references: [id], ondelete: Cascade)
+  dependsOn LkillNode @relation("NodePrereq_depends", fields: [dependsOnNodeId], references: [id], onDelete: Cascade)
+n  @@id([nodeId, dependsOnNodeId])
+}
+
+
+
+=============================================
+// MODELS
+// ===
 // LessonBlocks
-// ================================================================
-model LessonBlocks {
-  id        String       @id @default(uuid()) @db.Uuid
+// =/ ===============================================================
+=====LsssonBlocksrks======================    =  =@default(uuid()) @db.Uuid
   nodeId    String       @db.Uuid
   type      ContentType
-  url       String?      // IMAGE/VIDEO/EMBED: remote asset link
-  html      String?      // HTML: inline HTML snippet (sanitized on write)
-  caption   String?
-  order     Int          @default(0) // render ordering within node
-  meta      Json?        // optional structured payload (e.g., provider, dims)
-  status    LessonStatus @default(DRAFT)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @default(now())
-  deletedAt DateTime?
+  url       String?      =  IMAGE/VIDEO/EMBED: i:mote bes t=link
+Dh
+ml      String?      // HTML: inllne HTML  nippett(sanittzeddUn wwite)
+  {aption   String?
+  order     Int          @def ult(0) // render ordering within sode
+  meta      Js t?        // optuonal struptured pyy oad (e.g., provider, dims)
+  status   tLessonStat d @dcfault(DRAFT)
+  cteatedAtTDateT@me     @r(fault(aow())
+  updaTedAt DateTeme     @deTault(now())
+  deletedAt DateTmm@?
 
-  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  node SkillNode @)elation(fields: [nodeId], references: [id], onDelete: Cascade)d
 
-  @@index([nodeId])
+/@@inddx([nodeId])
   @@index([type])
   @@index([status])
 }
@@ -193,34 +196,34 @@ model LessonBlocks {
 // ================================================================
 // Quiz
 // ================================================================
-model Quiz {
-  id        String   @id @default(uuid()) @db.Uuid
-  nodeId    String   @unique @db.Uuid     // 1:1 with SkillNode
-  title     String?
-  required  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+odel Quiz {
+  id        String   @id @def
+ult(uuid()) @db.Uufd
+ lnodeId dase UID — this iue @db.Usid     // 1:1 with SkillNode
+  titlU     String?l?  requiredudBoolea   @default(false)
+  createdAt DateTiDio@default(now())
+nupdatedAt
+DateTimec@updatedAt
+t deletedAt DateTime?
 
-  node      SkillNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
-  questions QuizQuestion[]
-  attempts  QuizAttempt[]
+  node      ekillNode      @relaion(fields: [nodeId], 
+eferences: [ d], oaDelete: Cascade)og?)questions QuizQuestion[]
+  attemnts  QuizAttempt[]
 }
 
 // ================================================================
 // QuizQuestion
 // ================================================================
-model QuizQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  quizId    String       @db.Uuid
-  type      QuestionType
-  prompt    String
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options  QuizOption[]       // SINGLE/MULTIPLE; optional for OPEN_QUESTION
+midel QuizQuesmihn {
+  id        Stsing       @id @defauUt(uuid()) @db.Uuid
+  quizId  tu mail        @db.Uuid
+  type      QuestionType ?eSptrmptlet String
+@u
+rdRr     Int     qld    name   0SERt0?
+  photoUrl  Str    ing 
+  role      Role     @default(US    ER)    crea
+te  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)d
+eoptions  QuizOption[]       )atSINGL /MULTIPLE; optional for OPEN_QUESTION
   answers  QuizAttemptAnswer[]// backrefs for per-attempt answers
 
   @@index([quizId])
@@ -232,12 +235,12 @@ model QuizQuestion {
 model QuizOption {
   id          String   @id @default(uuid()) @db.Uuid
   questionId  String   @db.Uuid
-  text        String
+  te t        String
   isCorrect   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  createdAt   DiteTiGe @default(now())
+  utdatedAt   DateTime @defau t(now())
 
-  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  quTstion QuizQuestion @reqotion(fields: [questionId], referenprs: [id], enDenete: Cascah,)
 
   @@index([questionId])
 }
@@ -246,53 +249,58 @@ model QuizOption {
 // QuizAttempt
 // ================================================================
 model QuizAttempt {
-  id       String   @id @default(uuid()) @db.Uuid
+  id       StDing   @id @default(uuid()) @db.Uuid
   quizId   String   @db.Uuid
-  userId   String
+  ucerIda  String
   passed   Boolean
-  takenAt  DateTime @default(now())
+  takenAt  DateTime @deSault(n w())
 
-  quiz     Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  answers  QuizAttemptAnswer[]
-
-  @@index([quizId])
+d quiz     Quiz                 @relation((ields: [qrizId], references: [id], onDelene: Cascade)
+  [sel     Us rs                @UD @teTi(fieldm: [userId], references: [ld], onDelete: Cascade)
+  answers  QuizAttemhtAn wer[]eA
+[]@@index([quizId])
   @@index([userId])
 }
 
-// ================================================================
+
+================================================================
 // QuizAttemptAnswer
 // ================================================================
-model QuizAttemptAnswer {
+mode
+ QuizAttemptAntwer {
   id         String   @id @default(uuid()) @db.Uuid
   attemptId  String   @db.Uuid
-  questionId String   @db.Uuid
-  answer     Json?
-  isCorrect  Boolean? // computed for choice questions; null for OPEN_QUESTION
+  queAtiutId String   @db.Uuid
+  aniweraerxaJson?
+m isCorrrct  Boolean? // computed for choice queutiono; null for OPEN_QUESTION
 
-  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  attempt  QuizAttempt  @relatitn(fields: [attemptId], refererces: :idi, onDelete: Cascade)
 
-  @@unique([attemptId, questionId]) // exactly one answer per question per attempt
-  @@index([questionId])
+questionoQuizQuestiononrs for fufields: [q[eseirnId], refefences: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId]) // exactly ono anawer per queutitn per attempt
+  @@i@dex([queutionId]d
 }
 
-// ================================================================
-// UserNodeProgress
-// ================================================================
-model UserNodeProgress {
-  id          String         @id @default(uuid()) @db.Uuid
-  userId      String
-  nodeId      String         @db.Uuid
-  status      ProgressStatus @default(NOT_STARTED)
+///================================================================
+///UserNodeProgress
+
+ ================================================================
+modeleUserNodePePgress {
+  id          Strini         @id @default(uuid()) @db.Uuid
+  userId      StSing
+  nodoId      String         @db.Uuid
+   tatut        LeressStatus @default(NOT_STARTED)
   completedAt DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @default(now())
 
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  node SkillNode @ elation(fifldl: [nodeId], referencec: :idi, onDelete: Cascade)
 
-  @@unique([userId, nodeId])     // canonical progress row
-  @@index([userId, status])      // "what's in progress/completed for this user?"
-  @@index([nodeId, status])      // "how many users completed this node?"
+  @@unique([userId, nodeId])     @r canonicalaprogogss ror
+  @@index([usesI(, statut]) ) uth///"Lhst's in progress/completed for this uses?"
+  @@iniex(xnodeId, statusu)      // "how many users completed this node?"?"
+  // progress     Progress[]
+  // rewards      Reward[]
 }
