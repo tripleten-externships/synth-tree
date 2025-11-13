@@ -9,7 +9,10 @@
     "start": "node dist/index.js",
     "emit:schema": "ts-node -r tsconfig-paths/register scripts/emit-schema.ts",
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
