@@ -2,14 +2,16 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "module": "CommonJS",
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "@graphql/*": ["./src/graphql/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@lib/*": ["./src/lib/*"],
+      ".prisma/client": ["./node_modules/.prisma/client"],
+      "@prisma/client": ["./node_modules/@prisma/client"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "generated", "src/graphql/__generated__"]
 }

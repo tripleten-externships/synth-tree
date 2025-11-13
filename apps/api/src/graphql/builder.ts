@@ -13,6 +13,10 @@ export const builder = new SchemaBuilder<{
     Prisma.InputJsonValue | null,
     Prisma.InputJsonValue
   >; // required to define correct types for created scalars.
+  Context: {
+    prisma: typeof prisma;
+    user?: { id: string; role?: string } | null;
+  };
 }>({
   plugins: [PrismaPlugin],
   prisma: {
