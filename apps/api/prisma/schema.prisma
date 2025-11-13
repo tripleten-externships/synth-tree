@@ -1,6 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// ================================================================
+// Generators & Datasource
+// ================================================================
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
@@ -13,8 +13,6 @@ generator pothos {
 generator pothosCrud {
   provider            = "prisma-generator-pothos-codegen"
   generatorConfigPath = "./pothos.config.js"
-  // You may also set the `generatorConfigPath` via the `POTHOS_CRUD_CONFIG_PATH` environment variable.
-  // The environment variable will override the path hardcoded here.
 }
 
 datasource db {
@@ -22,21 +20,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// ENUMS
-// ============================================================================
-
+// ================================================================
+// Enums
+// ================================================================
+// Keep these small for v1. We can add ARCHIVED etc. later.
 enum Role {
   ADMIN
   USER
 }
 
-// ============================================================================
-// MODELS
-// ============================================================================
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  OPEN_QUESTION
+}
+
+enum ContentType {
+  IMAGE
+  VIDEO
+  EMBED
+  HTML
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+// ================================================================
+// Models
+// ================================================================
 
 model User {
-  id        String   @id // Firebase UID — this is your canonical user identifier
+  id        String   @id                       // Firebase UID (auth layer)
   email     String   @unique
   name      String?
   photoUrl  String?
@@ -44,8 +71,228 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Example placeholders for future relationships
-  // lessons      Lesson[]    @relation("AuthorLessons")
-  // progress     Progress[]
-  // rewards      Reward[]
+  // Authoring:
+  coursesAuthored Course[]         @relation("CourseAuthor")
+
+  // Learning:
+  nodeProgress    UserNodeProgress[]  // 1 row per (user,node)
+  quizAttempts    QuizAttempt[]       // all attempts across quizzes
+
+  // NOTE: If we later separate "Author" and "Learner" personas,
+  // Role can gate UI while the schema stays the same.
+}
+
+// ================================================================
+// Course
+// ================================================================
+model Course {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  authorId    String
+  status      CourseStatus  @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  author  User       @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  trees   SkillTree[]
+
+  @@index([title]) // lightweight browse/search
+}
+
+// ================================================================
+// SkillTree
+// ================================================================
+model SkillTree {
+  id          String     @id @default(uuid()) @db.Uuid
+  courseId    String     @db.Uuid
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  course Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  nodes  SkillNode[]
+
+  @@index([courseId])
+  @@index([title])
+}
+
+// ================================================================
+// SkillNode
+// ================================================================
+model SkillNode {
+  id           String   @id @default(uuid()) @db.Uuid
+  treeId       String   @db.Uuid
+  title        String
+  step         Int      @default(1)  // logical level/layer (e.g., column)
+  orderInStep  Int      @default(0)  // order within the step
+  posX         Int?     @default(0)  // optional: UI layout
+  posY         Int?     @default(0)  // optional: UI layout
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  tree   SkillTree @relation(fields: [treeId], references: [id], onDelete: Cascade)
+
+  // Content & assessment
+  lessons LessonBlocks[]     // ordered blocks of mixed media for this node
+  quiz    Quiz?              // 0..1 quiz per node (Quiz.nodeId is unique)
+
+  // Gating (self-relation). Example: "To start this node, complete Node A".
+  prerequisites SkillNodePrerequisite[] @relation("NodePrereq_node")
+  requiredFor   SkillNodePrerequisite[] @relation("NodePrereq_depends")
+
+  // Progress (per user, per node)
+  progresses UserNodeProgress[]
+
+  @@index([treeId])
+  @@unique([treeId, step, orderInStep]) // unique logical position
+  @@unique([treeId, posX, posY])        // unique canvas coordinates (optional)
+}
+
+// ================================================================
+// SkillNodePrerequisite
+// ================================================================
+model SkillNodePrerequisite {
+  nodeId          String @db.Uuid        // the node being gated (child)
+  dependsOnNodeId String @db.Uuid        // prerequisite (parent)
+
+  node      SkillNode @relation("NodePrereq_node",    fields: [nodeId],          references: [id], onDelete: Cascade)
+  dependsOn SkillNode @relation("NodePrereq_depends", fields: [dependsOnNodeId], references: [id], onDelete: Cascade)
+
+  @@id([nodeId, dependsOnNodeId])
+}
+
+// ================================================================
+// LessonBlocks
+// ================================================================
+model LessonBlocks {
+  id        String       @id @default(uuid()) @db.Uuid
+  nodeId    String       @db.Uuid
+  type      ContentType
+  url       String?      // IMAGE/VIDEO/EMBED: remote asset link
+  html      String?      // HTML: inline HTML snippet (sanitized on write)
+  caption   String?
+  order     Int          @default(0) // render ordering within node
+  meta      Json?        // optional structured payload (e.g., provider, dims)
+  status    LessonStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now())
+  deletedAt DateTime?
+
+  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId])
+  @@index([type])
+  @@index([status])
+}
+
+// ================================================================
+// Quiz
+// ================================================================
+model Quiz {
+  id        String   @id @default(uuid()) @db.Uuid
+  nodeId    String   @unique @db.Uuid     // 1:1 with SkillNode
+  title     String?
+  required  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  node      SkillNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+// ================================================================
+// QuizQuestion
+// ================================================================
+model QuizQuestion {
+  id        String       @id @default(uuid()) @db.Uuid
+  quizId    String       @db.Uuid
+  type      QuestionType
+  prompt    String
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options  QuizOption[]       // SINGLE/MULTIPLE; optional for OPEN_QUESTION
+  answers  QuizAttemptAnswer[]// backrefs for per-attempt answers
+
+  @@index([quizId])
+}
+
+// ================================================================
+// QuizOption
+// ================================================================
+model QuizOption {
+  id          String   @id @default(uuid()) @db.Uuid
+  questionId  String   @db.Uuid
+  text        String
+  isCorrect   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+// ================================================================
+// QuizAttempt
+// ================================================================
+model QuizAttempt {
+  id       String   @id @default(uuid()) @db.Uuid
+  quizId   String   @db.Uuid
+  userId   String
+  passed   Boolean
+  takenAt  DateTime @default(now())
+
+  quiz     Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers  QuizAttemptAnswer[]
+
+  @@index([quizId])
+  @@index([userId])
+}
+
+// ================================================================
+// QuizAttemptAnswer
+// ================================================================
+model QuizAttemptAnswer {
+  id         String   @id @default(uuid()) @db.Uuid
+  attemptId  String   @db.Uuid
+  questionId String   @db.Uuid
+  answer     Json?
+  isCorrect  Boolean? // computed for choice questions; null for OPEN_QUESTION
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId]) // exactly one answer per question per attempt
+  @@index([questionId])
+}
+
+// ================================================================
+// UserNodeProgress
+// ================================================================
+model UserNodeProgress {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String
+  nodeId      String         @db.Uuid
+  status      ProgressStatus @default(NOT_STARTED)
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now())
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, nodeId])     // canonical progress row
+  @@index([userId, status])      // "what's in progress/completed for this user?"
+  @@index([nodeId, status])      // "how many users completed this node?"
 }
