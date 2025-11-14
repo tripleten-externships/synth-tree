@@ -1,8 +1,8 @@
 import { builder } from "./builder";
 import { prisma } from "@lib/prisma";
-// Generated Prisma objects live under ./__generated__/ and Pothos can reference them by model name.
+// Pothos + Prisma resolvers; keep thin and delegate to Prisma.
 
-// Input types
+// Input types (GraphQL validation)
 const CreateSkillTreeInput = builder.inputType("CreateSkillTreeInput", {
   fields: (t) => ({
     courseId: t.string({ required: true }),
@@ -34,7 +34,7 @@ const UpdateSkillNodeInput = builder.inputType("UpdateSkillNodeInput", {
   }),
 });
 
-// Authorization helper
+// Auth (ADMIN only); throws if not admin.
 function assertAdmin(ctx: { user?: { id: string; role?: string } | null }) {
   if (!ctx.user || ctx.user.role !== "ADMIN") {
     throw new Error("Forbidden: admin access required");
@@ -42,6 +42,7 @@ function assertAdmin(ctx: { user?: { id: string; role?: string } | null }) {
 }
 
 // Queries (typed via prismaField)
+// skillTree: fetch by id; include nodes
 builder.queryField("skillTree", (t) =>
   t.prismaField({
     type: "SkillTree",
@@ -55,6 +56,7 @@ builder.queryField("skillTree", (t) =>
   })
 );
 
+// skillTrees: list all; include nodes
 builder.queryField("skillTrees", (t) =>
   t.prismaField({
     type: ["SkillTree"],
@@ -63,6 +65,7 @@ builder.queryField("skillTrees", (t) =>
 );
 
 // Mutations (admin-only)
+// createSkillTree: admin create; GraphQL validates input; Prisma call = any
 builder.mutationField("createSkillTree", (t) =>
   t.prismaField({
     type: "SkillTree",
@@ -74,6 +77,7 @@ builder.mutationField("createSkillTree", (t) =>
   })
 );
 
+// createSkillNode: admin create node; then create prerequisites via createMany (skipDuplicates)
 builder.mutationField("createSkillNode", (t) =>
   t.prismaField({
     type: "SkillNode",
@@ -88,6 +92,7 @@ builder.mutationField("createSkillNode", (t) =>
             nodeId: node.id,
             dependsOnNodeId: depId,
           })),
+          // Avoid failing if duplicates are attempted (idempotent wiring)
           skipDuplicates: true,
         });
       }
@@ -96,6 +101,7 @@ builder.mutationField("createSkillNode", (t) =>
   })
 );
 
+// updateSkillNode: admin update; GraphQL validates fields; Prisma call = any
 builder.mutationField("updateSkillNode", (t) =>
   t.prismaField({
     type: "SkillNode",
