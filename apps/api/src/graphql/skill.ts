@@ -1,6 +1,14 @@
 import { builder } from "./builder";
 import { prisma } from "@lib/prisma";
-// Pothos + Prisma resolvers; keep thin and delegate to Prisma.
+
+// How it works:
+// 1. Queries (skillTree, skillTrees) fetch SkillTree + nodes from DB (no auth needed).
+// 2. Mutations (createSkillTree, createSkillNode, updateSkillNode) require ADMIN auth.
+// 3. Input validation ensures required fields (courseId, treeId, title) are non-empty.
+// 4. createSkillNode prevents circular dependencies (node != its own prerequisite).
+// 5. createSkillNode wraps node + prerequisites in a transaction (all-or-nothing).
+// 6. updateSkillNode verifies target node exists before updating.
+// 7. All Prisma calls use typed client (no escape hatches); include: { nodes: true } eagerly loads relationships.
 
 // Input types (GraphQL validation)
 const CreateSkillTreeInput = builder.inputType("CreateSkillTreeInput", {
