@@ -41,6 +41,35 @@ function assertAdmin(ctx: { user?: { id: string; role?: string } | null }) {
   }
 }
 
+// Validate input fields; throw on missing required fields.
+function validateCreateSkillTree(input: any) {
+  if (!input.courseId || input.courseId.trim() === "") {
+    throw new Error("Validation: courseId is required and cannot be empty");
+  }
+  if (!input.title || input.title.trim() === "") {
+    throw new Error("Validation: title is required and cannot be empty");
+  }
+}
+
+function validateCreateSkillNode(input: any) {
+  if (!input.treeId || input.treeId.trim() === "") {
+    throw new Error("Validation: treeId is required and cannot be empty");
+  }
+  if (!input.title || input.title.trim() === "") {
+    throw new Error("Validation: title is required and cannot be empty");
+  }
+}
+
+// Check for circular prerequisite dependencies (node cannot depend on itself).
+async function checkCircularDependencies(
+  nodeId: string,
+  prerequisiteIds: string[]
+) {
+  if (prerequisiteIds.includes(nodeId)) {
+    throw new Error("Validation: node cannot be its own prerequisite");
+  }
+}
+
 // Queries (typed via prismaField)
 // skillTree: fetch by id; include nodes
 builder.queryField("skillTree", (t) =>
@@ -65,43 +94,52 @@ builder.queryField("skillTrees", (t) =>
 );
 
 // Mutations (admin-only)
-// createSkillTree: admin create; GraphQL validates input; Prisma call = any
+// createSkillTree: admin create; validate input; Prisma call = any
 builder.mutationField("createSkillTree", (t) =>
   t.prismaField({
     type: "SkillTree",
     args: { input: t.arg({ type: CreateSkillTreeInput, required: true }) },
     resolve: (_query, _root, { input }, ctx) => {
       assertAdmin(ctx);
+      validateCreateSkillTree(input as any);
       return prisma.skillTree.create({ data: input as any });
     },
   })
 );
 
-// createSkillNode: admin create node; then create prerequisites via createMany (skipDuplicates)
+// createSkillNode: admin create node + prerequisites in transaction (all-or-nothing).
 builder.mutationField("createSkillNode", (t) =>
   t.prismaField({
     type: "SkillNode",
     args: { input: t.arg({ type: CreateSkillNodeInput, required: true }) },
     resolve: async (_query, _root, { input }, ctx) => {
       assertAdmin(ctx);
+      validateCreateSkillNode(input as any);
       const { prerequisiteIds, ...rest } = input as any;
-      const node = await prisma.skillNode.create({ data: rest });
+      // Check for circular deps before transaction
       if (prerequisiteIds && prerequisiteIds.length > 0) {
-        await prisma.skillNodePrerequisite.createMany({
-          data: prerequisiteIds.map((depId: string) => ({
-            nodeId: node.id,
-            dependsOnNodeId: depId,
-          })),
-          // Avoid failing if duplicates are attempted (idempotent wiring)
-          skipDuplicates: true,
-        });
+        await checkCircularDependencies(rest.id || "new", prerequisiteIds);
       }
+      // Wrap in transaction: if prereqs fail, node creation rolls back
+      const node = await prisma.$transaction(async (tx) => {
+        const createdNode = await tx.skillNode.create({ data: rest });
+        if (prerequisiteIds && prerequisiteIds.length > 0) {
+          await tx.skillNodePrerequisite.createMany({
+            data: prerequisiteIds.map((depId: string) => ({
+              nodeId: createdNode.id,
+              dependsOnNodeId: depId,
+            })),
+            skipDuplicates: true,
+          });
+        }
+        return createdNode;
+      });
       return node;
     },
   })
 );
 
-// updateSkillNode: admin update; GraphQL validates fields; Prisma call = any
+// updateSkillNode: admin update; validate id exists; Prisma call = any
 builder.mutationField("updateSkillNode", (t) =>
   t.prismaField({
     type: "SkillNode",
@@ -111,8 +149,16 @@ builder.mutationField("updateSkillNode", (t) =>
     },
     resolve: async (_query, _root, { id, input }, ctx) => {
       assertAdmin(ctx);
+      const nodeId = String(id);
+      // Verify node exists before update
+      const exists = await prisma.skillNode.findUnique({
+        where: { id: nodeId },
+      });
+      if (!exists) {
+        throw new Error(`Validation: SkillNode with id '${nodeId}' not found`);
+      }
       const data = input as any;
-      return prisma.skillNode.update({ where: { id: String(id) }, data });
+      return prisma.skillNode.update({ where: { id: nodeId }, data });
     },
   })
 );
