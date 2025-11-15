@@ -36,6 +36,12 @@ export {
 } from "./components/ui/select";
 export { Toaster, toast } from "./components/ui/sonner";
 
+// Form components - ST-34
+export { Label } from "./components/ui/label"; // Form labeling (Radix)
+export { Textarea, textareaVariants } from "./components/ui/textarea"; // Multi-line w/ variants
+export { Checkbox, checkboxVariants } from "./components/ui/checkbox"; // Binary select (Radix)
+export { Switch, switchVariants } from "./components/ui/switch"; // Toggle (Radix)
+
 // Export utilities
 export { cn, cnUI } from "./utils";
 
