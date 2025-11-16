@@ -13,8 +13,7 @@ const meta: Meta<typeof Textarea> = {
     layout: "centered",
     docs: {
       description: {
-        component:
-          "Textarea: size/resize/state variants. Multi-line input w/ RHF integration.",
+        component: "Textarea: size/resize/state variants. Multi-line input w/ RHF integration.",
       },
     },
   },
@@ -80,27 +79,15 @@ export const ResizeOptions: Story = {
       </div>
       <div>
         <Label htmlFor="vertical">Vertical resize</Label>
-        <Textarea
-          id="vertical"
-          resize="vertical"
-          placeholder="Can be resized vertically"
-        />
+        <Textarea id="vertical" resize="vertical" placeholder="Can be resized vertically" />
       </div>
       <div>
         <Label htmlFor="horizontal">Horizontal resize</Label>
-        <Textarea
-          id="horizontal"
-          resize="horizontal"
-          placeholder="Can be resized horizontally"
-        />
+        <Textarea id="horizontal" resize="horizontal" placeholder="Can be resized horizontally" />
       </div>
       <div>
         <Label htmlFor="both">Both directions</Label>
-        <Textarea
-          id="both"
-          resize="both"
-          placeholder="Can be resized in both directions"
-        />
+        <Textarea id="both" resize="both" placeholder="Can be resized in both directions" />
       </div>
     </div>
   ),
@@ -112,11 +99,7 @@ export const States: Story = {
     <div className="space-y-4 w-80">
       <div>
         <Label htmlFor="default-state">Default</Label>
-        <Textarea
-          id="default-state"
-          state="default"
-          placeholder="Default state"
-        />
+        <Textarea id="default-state" state="default" placeholder="Default state" />
       </div>
       <div>
         <Label htmlFor="error-state">Error</Label>
@@ -124,11 +107,7 @@ export const States: Story = {
       </div>
       <div>
         <Label htmlFor="success-state">Success</Label>
-        <Textarea
-          id="success-state"
-          state="success"
-          placeholder="Success state"
-        />
+        <Textarea id="success-state" state="success" placeholder="Success state" />
       </div>
       <div>
         <Label htmlFor="disabled-state">Disabled</Label>
@@ -141,11 +120,7 @@ export const States: Story = {
 // RHF integration w/ validation + error states
 export const WithReactHookForm: Story = {
   render: () => {
-    const {
-      control,
-      handleSubmit,
-      formState: { errors },
-    } = useForm({
+    const { control, handleSubmit, formState: { errors } } = useForm({
       defaultValues: {
         message: "",
       },
@@ -162,12 +137,9 @@ export const WithReactHookForm: Story = {
           <Controller
             name="message"
             control={control}
-            rules={{
+            rules={{ 
               required: "Message is required",
-              minLength: {
-                value: 10,
-                message: "Message must be at least 10 characters",
-              },
+              minLength: { value: 10, message: "Message must be at least 10 characters" }
             }}
             render={({ field }) => (
               <Textarea
@@ -179,9 +151,7 @@ export const WithReactHookForm: Story = {
             )}
           />
           {errors.message && (
-            <p className="text-sm text-destructive mt-1">
-              {errors.message.message}
-            </p>
+            <p className="text-sm text-destructive mt-1">{errors.message.message}</p>
           )}
         </div>
         <Button type="submit">Submit</Button>

@@ -8,6 +8,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { schema } from "./schema";
 import { admin } from "./firebase";
+import { prisma } from "./lib/prisma";
 
 interface Context extends BaseContext {
   user?: {
@@ -60,7 +61,7 @@ async function start() {
             role: decoded.role || "user",
           };
         }
-        return { user };
+        return { user, prisma };
       },
     })
   );

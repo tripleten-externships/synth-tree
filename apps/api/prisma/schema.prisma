@@ -44,8 +44,28 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Admin UI customizations
+  uiCustomizations UIComponentCustomization[]
+
   // Example placeholders for future relationships
   // lessons      Lesson[]    @relation("AuthorLessons")
   // progress     Progress[]
   // rewards      Reward[]
+}
+
+// UI component customization storage
+model UIComponentCustomization {
+  id           String   @id @default(uuid())
+  instanceId   String   @unique // Component instance ID
+  componentType String  // Component type
+  settings     Json     // Component settings (width, height, etc.)
+  createdBy    String   // Admin Firebase UID
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  creator      User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([componentType])
+  @@index([instanceId])
 }

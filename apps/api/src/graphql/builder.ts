@@ -6,8 +6,18 @@ import { Scalars } from "prisma-generator-pothos-codegen";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@lib/prisma";
 
+interface Context {
+  user?: {
+    id: string;
+    email?: string;
+    role: string;
+  };
+  prisma: typeof prisma; // Auto-CRUD support
+}
+
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
+  Context: Context;
   Scalars: Scalars<
     Prisma.Decimal,
     Prisma.InputJsonValue | null,
