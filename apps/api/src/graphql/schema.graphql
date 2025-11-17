@@ -21,6 +21,11 @@ input BoolWithAggregatesFilter {
   not: NestedBoolWithAggregatesFilter
 }
 
+input CreateLessonInput {
+  content: String!
+  title: String!
+}
+
 scalar DateTime
 
 input DateTimeFieldUpdateOperationsInput {
@@ -325,10 +330,14 @@ input LessonWhereUniqueInput {
 }
 
 type Mutation {
+  createLesson(input: CreateLessonInput): Lesson
   createManyUser(data: [UserCreateInput!]!): [User!]!
   createOneUser(data: UserCreateInput!): User!
+  deleteLesson(id: ID): Lesson
   deleteManyUser(where: UserWhereInput!): BatchPayload
   deleteOneUser(where: UserWhereUniqueInput!): User
+  publishLesson(id: ID): Lesson
+  updateLesson(id: ID, input: UpdateLessonInput): Lesson
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
@@ -582,6 +591,11 @@ enum TransactionIsolationLevel {
   ReadUncommitted
   RepeatableRead
   Serializable
+}
+
+input UpdateLessonInput {
+  content: String
+  title: String
 }
 
 type User {
