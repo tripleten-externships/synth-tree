@@ -40,6 +40,11 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
+export type CreateLessonInput = {
+  content: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+};
+
 export type DateTimeFieldUpdateOperationsInput = {
   set?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -344,13 +349,22 @@ export type LessonWhereUniqueInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createLesson?: Maybe<Lesson>;
   createManyUser: Array<User>;
   createOneUser: User;
+  deleteLesson?: Maybe<Lesson>;
   deleteManyUser?: Maybe<BatchPayload>;
   deleteOneUser?: Maybe<User>;
+  publishLesson?: Maybe<Lesson>;
+  updateLesson?: Maybe<Lesson>;
   updateManyUser: BatchPayload;
   updateOneUser?: Maybe<User>;
   upsertOneUser: User;
+};
+
+
+export type MutationCreateLessonArgs = {
+  input?: InputMaybe<CreateLessonInput>;
 };
 
 
@@ -364,6 +378,11 @@ export type MutationCreateOneUserArgs = {
 };
 
 
+export type MutationDeleteLessonArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type MutationDeleteManyUserArgs = {
   where: UserWhereInput;
 };
@@ -371,6 +390,17 @@ export type MutationDeleteManyUserArgs = {
 
 export type MutationDeleteOneUserArgs = {
   where: UserWhereUniqueInput;
+};
+
+
+export type MutationPublishLessonArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type MutationUpdateLessonArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  input?: InputMaybe<UpdateLessonInput>;
 };
 
 
@@ -693,6 +723,11 @@ export enum TransactionIsolationLevel {
   RepeatableRead = 'RepeatableRead',
   Serializable = 'Serializable'
 }
+
+export type UpdateLessonInput = {
+  content?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type User = {
   __typename?: 'User';
