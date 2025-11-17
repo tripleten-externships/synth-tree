@@ -35,6 +35,38 @@ React 19 + Vite 7 + TS + Tailwind. Uses `@skilltree/ui` and `@skilltree/theme`.
 - `/profile` - User profile page (protected)
 - Any other URL - 404 Not Found
 
-## Env
+## Getting Started
 
-Copy .env.example to .env and adjust VITE_API_URL if needed.
+First time setup:
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. The default settings should work fine. Only change `VITE_API_URL` if your API runs on a different port.
+
+## Running the App
+
+**For development (while coding):**
+
+```bash
+pnpm dev
+```
+
+This starts the app at http://localhost:5174 and auto-refreshes when you save changes.
+
+**To build for production (like deploying to a real website):**
+
+```bash
+pnpm build
+```
+
+This creates a `dist` folder with optimized files ready to deploy. The files are smaller and faster than the dev version.
+
+**To test the production build locally:**
+
+```bash
+pnpm preview
+```
+
+This lets you see what the production version looks like at http://localhost:4173 before deploying it.
