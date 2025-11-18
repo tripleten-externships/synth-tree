@@ -37,16 +37,10 @@ export {
 export { Toaster, toast } from "./components/ui/sonner";
 
 // Form components - ST-34
-export { Label } from "./components/ui/label";
-export { Textarea, textareaVariants } from "./components/ui/textarea";
-export { Checkbox, checkboxVariants } from "./components/ui/checkbox";
-export { Switch, switchVariants } from "./components/ui/switch";
-export { CustomizableTextarea } from "./components/ui/customizable-textarea";
-export { EditableTextarea } from "./components/ui/editable-textarea";
-export { TextareaCustomizationModal } from "./components/ui/textarea-customization-modal";
-
-// UI customization hooks
-export { useUICustomization, useUISettings } from "./hooks/useUICustomization";
+export { Label } from "./components/ui/label"; // Form labeling (Radix)
+export { Textarea } from "./components/ui/textarea"; // Resizable modal textarea
+export { Checkbox, checkboxVariants } from "./components/ui/checkbox"; // Binary select (Radix)
+export { Switch, switchVariants } from "./components/ui/switch"; // Toggle (Radix)
 
 // Export utilities
 export { cn, cnUI } from "./utils";
