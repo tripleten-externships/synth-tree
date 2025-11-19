@@ -20,19 +20,41 @@ interface FirebaseConfig {
 // Firebase configuration - safe to expose in client-side code
 // Firebase API keys are designed to be public and are used for identification, not authentication
 // Security is handled by Firebase Security Rules and Authentication
+// const firebaseConfig: FirebaseConfig = {
+//   // Environment variables for build-time configuration (Vite will inline these during build)
+//   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key-here",
+//   authDomain:
+//     import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
+//   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project-id",
+//   storageBucket:
+//     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
+//   messagingSenderId:
+//     import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+//   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
+//   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, // Optional for Analytics
+// };
+
 const firebaseConfig: FirebaseConfig = {
   // Environment variables for build-time configuration (Vite will inline these during build)
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key-here",
-  authDomain:
-    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project-id",
-  storageBucket:
-    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-  messagingSenderId:
-    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, // Optional for Analytics
 };
+
+// console.log("Firebase API key: ", import.meta.env.VITE_FIREBASE_API_KEY);
+// console.log("Auth Domain: ", import.meta.env.VITE_FIREBASE_AUTH_DOMAIN);
+// console.log("Project ID: ", import.meta.env.VITE_FIREBASE_PROJECT_ID);
+// console.log("Storage Bucket: ", import.meta.env.VITE_FIREBASE_STORAGE_BUCKET);
+// console.log(
+//   "Messaging Sender ID: ",
+//   import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID
+// );
+// console.log("App ID: ", import.meta.env.VITE_FIREBASE_APP_ID);
+// console.log("Measurement ID: ", import.meta.env.VITE_FIREBASE_MEASUREMENT_ID);
 
 // Validate that we have the required configuration
 const validateConfig = (config: FirebaseConfig): void => {

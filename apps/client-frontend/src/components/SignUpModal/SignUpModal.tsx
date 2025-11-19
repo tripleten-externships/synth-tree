@@ -1,9 +1,6 @@
 import React from "react";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
-
-// interface SignUpModalProps {
-//   title: "Sign up to start learning";
-// }
+import GoogleButton from "../GoogleButton/GoogleButton";
 
 const SignUpModal: React.FC = () => {
   return (
@@ -54,9 +51,10 @@ const SignUpModal: React.FC = () => {
           <button className="signup-modal__btn signup-modal__btn_login">
             Log In
           </button>
-          {/* Continue with Google Button */}
           {/* Continue with Facebook Button */}
         </form>
+        {/* Continue with Google Button */}
+        <GoogleButton></GoogleButton>
       </ModalWithForm>
     </div>
   );
