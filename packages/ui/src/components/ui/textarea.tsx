@@ -1,5 +1,16 @@
 import * as React from "react";
-import { cn } from "../../utils";
+import { cn } from "@/utils";
+
+// COMMENTED OUT - Modular architecture imports (testing original working code)
+// import { useTextareaDimensions } from "./textarea/hooks/useTextareaDimensions";
+// import { useTextareaDrag } from "./textarea/hooks/useTextareaDrag";
+// import { useLabelPosition } from "./textarea/hooks/useLabelPosition";
+// import { useGlobalMouseEvents } from "./textarea/hooks/useGlobalMouseEvents";
+// import { ResizeDirection } from "./textarea/utils/resize-calculations";
+// import { calculateTransparentBlockDimensions, calculateLabelEdgePosition } from "./textarea/utils/positioning-calculations";
+
+// TESTING: Using original working code to compare functionality
+type ResizeDirection = 'north' | 'east' | 'south' | 'west' | 'northeast' | 'northwest' | 'southeast' | 'southwest';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   /** Label text displayed above the textarea */
@@ -20,8 +31,6 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
   maxHeight?: number;
 }
 
-type ResizeDirection = 'north' | 'east' | 'south' | 'west' | 'northeast' | 'northwest' | 'southeast' | 'southwest';
-
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({
     className,
@@ -38,6 +47,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     onBlur,
     ...props
   }, ref) => {
+    // ORIGINAL WORKING STATE - Direct state management
     const [textareaDimensions, setTextareaDimensions] = React.useState({
       width: initialWidth,
       height: initialHeight,
@@ -53,28 +63,234 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const [isSustainedClick, setIsSustainedClick] = React.useState(false);
     const [dragOffset, setDragOffset] = React.useState({ x: 0, y: 0 });
     const [isTrackingForDrag, setIsTrackingForDrag] = React.useState(false);
-    const [labelPosition, setLabelPosition] = React.useState({ angle: 225, distance: 50 }); // Start at top-left (225° = northwest)
-  const [blockExpansion, setBlockExpansion] = React.useState(50); // Start with 50px expansion for safe clearance
+    const [labelPosition, setLabelPosition] = React.useState({ angle: 225, distance: 50 });
+    const [blockExpansion, setBlockExpansion] = React.useState(50);
     const [isDraggingLabel, setIsDraggingLabel] = React.useState(false);
-  const [dragLabelDimensions, setDragLabelDimensions] = React.useState<{ width: number; height: number } | null>(null);
+    const [dragLabelDimensions, setDragLabelDimensions] = React.useState<{ width: number; height: number } | null>(null);
     const [currentResizeDirection, setCurrentResizeDirection] = React.useState<ResizeDirection | null>(null);
     const [hoveredResizeEdge, setHoveredResizeEdge] = React.useState<string[]>([]);
     const [isTextareaFocused, setIsTextareaFocused] = React.useState(false);
+    const [initialResizeBounds, setInitialResizeBounds] = React.useState<DOMRect | null>(null);
     const textareaContainerRef = React.useRef<HTMLDivElement>(null);
+    
+    // Refs to access current state in event handlers
+    const textareaDimensionsRef = React.useRef(textareaDimensions);
+    const textareaPositionRef = React.useRef(textareaPosition);
+    const currentResizeDirectionRef = React.useRef(currentResizeDirection);
+    const initialResizeBoundsRef = React.useRef(initialResizeBounds);
+    
+    // Update refs when state changes
+    React.useEffect(() => {
+      textareaDimensionsRef.current = textareaDimensions;
+    }, [textareaDimensions]);
+    
+    React.useEffect(() => {
+      textareaPositionRef.current = textareaPosition;
+    }, [textareaPosition]);
+    
+    React.useEffect(() => {
+      currentResizeDirectionRef.current = currentResizeDirection;
+    }, [currentResizeDirection]);
+    
+    React.useEffect(() => {
+      initialResizeBoundsRef.current = initialResizeBounds;
+    }, [initialResizeBounds]);
 
+    // Debug effect to check DOM updates after state changes
+    React.useEffect(() => {
+      if (isResizingActive) {
+        const container = textareaContainerRef.current;
+        if (container) {
+          const computedStyle = window.getComputedStyle(container);
+          const rect = container.getBoundingClientRect();
+          const parentRect = container.parentElement?.getBoundingClientRect();
+          console.log('DOM DEBUG EFFECT: Actual rendered values after state update', {
+            direction: currentResizeDirection,
+            computedTransform: computedStyle.transform,
+            computedWidth: computedStyle.width,
+            computedHeight: computedStyle.height,
+            boundingRect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            parentRect: parentRect ? { x: parentRect.x, y: parentRect.y, width: parentRect.width, height: parentRect.height } : null,
+            eastEdgeFromRect: rect.x + rect.width,
+            eastEdgeFromState: textareaPosition.x + textareaDimensions.width,
+            expectedDOMEastEdge: parentRect ? (parentRect.x + textareaPosition.x + textareaDimensions.width) : 'no-parent',
+            eastEdgeDiscrepancy: parentRect ? 
+              Math.abs((rect.x + rect.width) - (parentRect.x + textareaPosition.x + textareaDimensions.width)) : 'no-parent',
+            stateValues: { 
+              x: textareaPosition.x, 
+              y: textareaPosition.y, 
+              width: textareaDimensions.width, 
+              height: textareaDimensions.height 
+            }
+          });
+        }
+      }
+    }, [textareaDimensions, textareaPosition, isResizingActive, currentResizeDirection]);
+
+    // ORIGINAL WORKING HANDLERS
     const handleResizeStart = React.useCallback((e: React.MouseEvent, direction: ResizeDirection) => {
       e.preventDefault();
+      e.stopPropagation();
+      
+      // Capture INITIAL container bounds when resize starts
+      if (textareaContainerRef.current) {
+        const initialBounds = textareaContainerRef.current.getBoundingClientRect();
+        setInitialResizeBounds(initialBounds);
+        initialResizeBoundsRef.current = initialBounds;
+        console.log('FIXED: Capturing initial bounds for', direction, {
+          left: initialBounds.left,
+          right: initialBounds.right,
+          top: initialBounds.top,
+          bottom: initialBounds.bottom
+        });
+      }
+      
       setIsResizingActive(true);
       setCurrentResizeDirection(direction);
-    }, []);
+      currentResizeDirectionRef.current = direction;
+      
+      // Add mouse event listeners immediately when resize starts
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        if (!textareaContainerRef.current || !initialResizeBoundsRef.current) return;
+        
+        const currentDirection = currentResizeDirectionRef.current;
+        if (!currentDirection) return;
+        
+        console.log('CONTROLLED: Resize move during mouse down - ', currentDirection);
+        const containerBounds = initialResizeBoundsRef.current; // Use FIXED bounds
+        const currentDimensions = textareaDimensionsRef.current;
+        const currentPosition = textareaPositionRef.current;
+        
+        let newWidth = currentDimensions.width;
+        let newHeight = currentDimensions.height;
+        let newX = currentPosition.x;
+        let newY = currentPosition.y;
+        
+        // Handle horizontal resize directions - Fixed east edge approach
+        if (currentDirection.includes('east')) {
+          // East resize: keep position same, just change width (similar approach to west but simpler)
+          // Get parent container bounds to convert coordinates properly
+          const container = textareaContainerRef.current;
+          const parentElement = container?.parentElement;
+          if (!parentElement) return;
+          
+          const parentRect = parentElement.getBoundingClientRect();
+          
+          // Convert mouse position to parent-relative coordinates
+          const mouseRelativeToParent = moveEvent.clientX - parentRect.left;
+          
+          // Calculate new width: distance from current left edge to mouse (in parent coordinates)
+          const proposedWidth = Math.max(minWidth, Math.min(maxWidth, mouseRelativeToParent - currentPosition.x));
+          newWidth = proposedWidth;
+          // Don't change newX for east resize - keep position fixed
+          
+          console.log('CONTROLLED: East resize', { 
+            mouseX: moveEvent.clientX,
+            mouseRelativeToParent,
+            parentLeft: parentRect.left,
+            currentLeftEdge: currentPosition.x,
+            currentWidth: currentDimensions.width,
+            proposedWidth,
+            currentX: currentPosition.x,
+            newX: currentPosition.x, // unchanged for east resize
+          });
+        }
+        if (currentDirection.includes('west')) {
+          // West resize: Calculate width based on mouse position to maintain east edge
+          // Get parent container bounds to convert coordinates properly
+          const container = textareaContainerRef.current;
+          const parentElement = container?.parentElement;
+          if (!parentElement) return;
+          
+          const parentRect = parentElement.getBoundingClientRect();
+          
+          // Convert mouse position to parent-relative coordinates  
+          const mouseRelativeToParent = moveEvent.clientX - parentRect.left;
+          
+          // Calculate current east edge in parent-relative coordinates
+          const currentEastEdgeRelativeToParent = currentPosition.x + currentDimensions.width;
+          
+          // Calculate new width: distance from mouse to current east edge (in parent coordinates)
+          const proposedWidth = Math.max(minWidth, Math.min(maxWidth, currentEastEdgeRelativeToParent - mouseRelativeToParent));
+          const actualWidthChange = proposedWidth - currentDimensions.width;
+          newWidth = proposedWidth;
+          newX = currentPosition.x - actualWidthChange;
+          
+          console.log('CONTROLLED: West resize', { 
+            mouseX: moveEvent.clientX,
+            mouseRelativeToParent,
+            parentLeft: parentRect.left,
+            currentEastEdgeRelativeToParent,
+            currentWidth: currentDimensions.width,
+            proposedWidth,
+            actualWidthChange,
+            currentX: currentPosition.x,
+            newX,
+            calculatedNewX: currentPosition.x - actualWidthChange
+          });
+        }
+        
+        // Handle vertical resize directions
+        if (currentDirection.includes('south')) {
+          newHeight = Math.max(minHeight, Math.min(maxHeight, moveEvent.clientY - containerBounds.top));
+        }
+        if (currentDirection.includes('north')) {
+          const proposedHeight = Math.max(minHeight, Math.min(maxHeight, containerBounds.bottom - moveEvent.clientY));
+          const heightDiff = proposedHeight - newHeight;
+          newHeight = proposedHeight;
+          newY = currentPosition.y - heightDiff;
+        }
+        
+        setTextareaDimensions({ width: newWidth, height: newHeight });
+        setTextareaPosition({ x: newX, y: newY });
+        
+        console.log('CONTROLLED: State update', {
+          direction: currentDirection,
+          newDimensions: { width: newWidth, height: newHeight },
+          newPosition: { x: newX, y: newY },
+          previousPosition: { x: currentPosition.x, y: currentPosition.y }
+        });
+        console.log('CONTROLLED: State update VALUES', 
+          'direction:', currentDirection,
+          'newWidth:', newWidth, 
+          'newHeight:', newHeight,
+          'newX:', newX, 
+          'newY:', newY,
+          'prevX:', currentPosition.x, 
+          'prevY:', currentPosition.y,
+          'widthChange:', newWidth - currentDimensions.width,
+          'xChange:', newX - currentPosition.x
+        );
+      };
+      
+      const handleMouseUp = () => {
+        console.log('CONTROLLED: Mouse up during resize - cleaning up');
+        setIsResizingActive(false);
+        setCurrentResizeDirection(null);
+        setInitialResizeBounds(null);
+        currentResizeDirectionRef.current = null;
+        initialResizeBoundsRef.current = null;
+        
+        // Remove event listeners
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      
+      // Add event listeners to document
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }, [minWidth, maxWidth, minHeight, maxHeight]);
 
     // Textarea mouse handlers for drag detection
     const handleTextareaMouseDown = React.useCallback((e: React.MouseEvent) => {
+      console.log('ORIGINAL: Textarea mouse down');
+      
       // Check if there's already selected text - if so, don't activate drag
       const textarea = e.currentTarget as HTMLTextAreaElement;
       const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
       
       if (hasSelection) {
+        console.log('ORIGINAL: Has selection, allowing normal text behavior');
         return; // Let normal text selection behavior continue
       }
       
@@ -88,7 +304,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         rect.bottom - e.clientY < edgeThreshold
       );
       
-      if (isNearEdge) return; // Let resize handle this
+      if (isNearEdge) {
+        console.log('ORIGINAL: Near edge, letting resize handle');
+        return; // Let resize handle this
+      }
       
       const startTime = Date.now();
       const startPosition = { x: e.clientX, y: e.clientY };
@@ -103,7 +322,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         
         setDragOffset({ x: offsetX, y: offsetY });
         
-        console.log('Transform Drag Start:', {
+        console.log('ORIGINAL: Transform Drag Start:', {
           clickPosition: { x: e.clientX, y: e.clientY },
           containerVisualPosition: { left: containerRect.left, top: containerRect.top },
           calculatedOffset: { x: offsetX, y: offsetY }
@@ -116,6 +335,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       
       // Start immediate tracking with delayed activation
       const dragTimer = setTimeout(() => {
+        console.log('ORIGINAL: Drag timer activated - starting sustained click');
         // Check if we're still tracking (not cancelled by movement or mouse up)
         setIsSustainedClick(true);
         setIsDraggingActive(true);
@@ -144,7 +364,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       e.preventDefault();
       e.stopPropagation();
       
-      console.log('🎯 LABEL CLICKED! Mouse down detected on draggable label');
+      console.log('ORIGINAL: 🏷️ LABEL CLICKED! Mouse down detected on draggable label');
       
       // Only change cursor, no colors
       const target = e.currentTarget as HTMLElement;
@@ -170,7 +390,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       });
       
       const labelTimer = setTimeout(() => {
-        console.log('🎯 LABEL DRAG ACTIVATED!');
+        console.log('ORIGINAL: 🏷️ LABEL DRAG ACTIVATED!');
         
         // Capture current label dimensions before starting drag
         const labelElement = target as HTMLElement;
@@ -235,13 +455,16 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         finalX = blockLeft + (progress * blockWidth);
       }
       
-      console.log('Transparent block edge pinning:', { 
+      console.log('ORIGINAL: Transparent block edge pinning:', { 
         angle: labelPosition.angle, 
         normalizedAngle,
         blockExpansion,
         blockDimensions: { width: blockWidth, height: blockHeight },
         blockPosition: { left: blockLeft, top: blockTop },
         labelEdgePosition: { x: finalX, y: finalY },
+        finalCalculatedPosition: { x: finalX, y: finalY },
+        textareaDimensions: textareaDimensions,
+        textareaPosition: textareaPosition,
         pinningEdge: normalizedAngle >= 315 || normalizedAngle < 45 ? 'right' :
                     normalizedAngle >= 45 && normalizedAngle < 135 ? 'bottom' :
                     normalizedAngle >= 135 && normalizedAngle < 225 ? 'left' : 'top'
@@ -254,49 +477,17 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       };
     }, [textareaDimensions, labelPosition, blockExpansion]);
 
+    // ORIGINAL WORKING MOUSE MOVE EFFECT - Now handled directly in resize start
     React.useEffect(() => {
-      if (!isResizingActive && !isDraggingActive && !isTrackingForDrag && !isDraggingLabel) return;
+      // Only handle drag and label drag in this effect now
+      if (!isDraggingActive && !isTrackingForDrag && !isDraggingLabel) return;
 
       const handleMouseMove = (e: MouseEvent) => {
         if (!textareaContainerRef.current) return;
 
-        if (isResizingActive && currentResizeDirection) {
-          // Handle resize logic
-          const containerBounds = textareaContainerRef.current.getBoundingClientRect();
-          let newWidth = textareaDimensions.width;
-          let newHeight = textareaDimensions.height;
-          let newX = textareaPosition.x;
-          let newY = textareaPosition.y;
-
-          // Handle horizontal resize directions
-          if (currentResizeDirection.includes('east')) {
-            newWidth = Math.max(minWidth, Math.min(maxWidth, e.clientX - containerBounds.left));
-          }
-          if (currentResizeDirection.includes('west')) {
-            const proposedWidth = Math.max(minWidth, Math.min(maxWidth, containerBounds.right - e.clientX));
-            const widthDiff = proposedWidth - newWidth;
-            newWidth = proposedWidth;
-            newX = textareaPosition.x - widthDiff;
-          }
-
-          // Handle vertical resize directions
-          if (currentResizeDirection.includes('south')) {
-            newHeight = Math.max(minHeight, Math.min(maxHeight, e.clientY - containerBounds.top));
-          }
-          if (currentResizeDirection.includes('north')) {
-            const proposedHeight = Math.max(minHeight, Math.min(maxHeight, containerBounds.bottom - e.clientY));
-            const heightDiff = proposedHeight - newHeight;
-            newHeight = proposedHeight;
-            newY = textareaPosition.y - heightDiff;
-          }
-
-          setTextareaDimensions({ width: newWidth, height: newHeight });
-          setTextareaPosition({ x: newX, y: newY });
-        }
-
         if (isDraggingActive && isSustainedClick) {
+          console.log('ORIGINAL: Active drag move');
           // Handle active drag - calculate new transform position
-          // The new position should be where the mouse is minus the offset
           const parentRect = textareaContainerRef.current?.parentElement?.getBoundingClientRect();
           
           let newPosition;
@@ -314,7 +505,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             };
           }
           
-          console.log('Transform Drag Move:', {
+          console.log('ORIGINAL: Transform Drag Move:', {
             mouse: { x: e.clientX, y: e.clientY },
             parentRect: parentRect ? { left: parentRect.left, top: parentRect.top } : null,
             offset: dragOffset,
@@ -331,6 +522,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           
           // If user moves mouse while tracking, cancel drag intent (they're selecting text)
           if (moveDistance > 5) {
+            console.log('ORIGINAL: Movement detected during tracking, cancelling drag intent');
             setIsTrackingForDrag(false);
             // Clear the drag timer since user is clearly selecting text
             const textareaElements = document.querySelectorAll('textarea');
@@ -352,7 +544,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             let newAngle = (dragData.startAngle + angleDiff) % 360;
             if (newAngle < 0) newAngle += 360;
             
-            console.log('Label rotation:', { currentMouseAngle, angleDiff, newAngle });
+            console.log('ORIGINAL: Label rotation:', { currentMouseAngle, angleDiff, newAngle });
             
             setLabelPosition(prev => ({ ...prev, angle: newAngle }));
           } else {
@@ -372,7 +564,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             const minExpansion = 5; // Minimal distance since edges are pinned
             const newExpansion = Math.max(minExpansion, prev + deltaExpansion);
             
-            console.log('Block expansion adjustment:', {
+            console.log('ORIGINAL: Block expansion adjustment:', {
               delta: deltaExpansion,
               oldExpansion: prev,
               newExpansion,
@@ -385,77 +577,20 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       };
 
       const handleMouseUp = () => {
-        console.log('Mouse up - cleaning up drag states');
+        console.log('ORIGINAL: Mouse up - cleaning up all drag states');
         setIsResizingActive(false);
         setIsDraggingActive(false);
         setIsSustainedClick(false);
         setIsTrackingForDrag(false);
-        
-        // Check if label is off-screen and snap back if needed - only when drag is released
-        if (isDraggingLabel) {
-          const containerRect = textareaContainerRef.current?.getBoundingClientRect();
-          if (containerRect) {
-            const screenMargin = 50; // Keep label 50px from screen edges
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            
-            // Calculate current label position
-            const blockWidth = textareaDimensions.width + (blockExpansion * 2);
-            const blockHeight = textareaDimensions.height + (blockExpansion * 2);
-            
-            // Check if label would be off-screen
-            const isOffScreen = [
-              // Right edge
-              containerRect.left + blockWidth > screenWidth - screenMargin,
-              // Bottom edge  
-              containerRect.top + blockHeight > screenHeight - screenMargin,
-              // Left edge
-              containerRect.left - blockExpansion < screenMargin,
-              // Top edge
-              containerRect.top - blockExpansion < screenMargin
-            ].some(Boolean);
-            
-            if (isOffScreen) {
-              // Calculate maximum safe expansion
-              const maxSafeExpansion = Math.min(
-                (screenWidth - containerRect.left - textareaDimensions.width - screenMargin) / 2,
-                (screenHeight - containerRect.top - textareaDimensions.height - screenMargin) / 2,
-                containerRect.left - screenMargin,
-                containerRect.top - screenMargin
-              );
-              
-              const safeExpansion = Math.max(5, maxSafeExpansion); // Minimal distance with edge pinning
-              
-              console.log('Label off-screen, snapping back:', {
-                currentExpansion: blockExpansion,
-                safeExpansion,
-                screenDimensions: { width: screenWidth, height: screenHeight },
-                containerPosition: { left: containerRect.left, top: containerRect.top }
-              });
-              
-              setBlockExpansion(safeExpansion);
-            }
-          }
-        }
-        
         setIsDraggingLabel(false);
-        setDragLabelDimensions(null); // Clear captured dimensions
+        setDragLabelDimensions(null);
         setCurrentResizeDirection(null);
         
         // Re-enable text selection
         document.body.style.userSelect = '';
         document.body.style.webkitUserSelect = '';
         
-        // Reset label styles
-        const allLabelElements = document.querySelectorAll('[data-label-draggable]');
-        allLabelElements.forEach(label => {
-          const labelEl = label as HTMLElement;
-          labelEl.style.cursor = '';
-          labelEl.style.backgroundColor = '';
-          labelEl.style.transform = '';
-        });
-        
-        // Clear any pending drag timers
+        // Clear any pending timers
         const textareaElements = document.querySelectorAll('textarea');
         textareaElements.forEach(textarea => {
           const timer = (textarea as any).__dragTimer;
@@ -465,7 +600,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           }
         });
         
-        // Clear label timers
         const labelElements = document.querySelectorAll('[data-label-draggable]');
         labelElements.forEach(label => {
           const timer = (label as any).__labelTimer;
@@ -488,7 +622,16 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         document.removeEventListener('mouseup', handleMouseUp);
         document.removeEventListener('wheel', handleWheel);
       };
-    }, [isResizingActive, isDraggingActive, isTrackingForDrag, isDraggingLabel, currentResizeDirection, textareaDimensions, minWidth, maxWidth, minHeight, maxHeight, dragOffset, dragStartPosition, blockExpansion]);
+    }, [isResizingActive, isDraggingActive, isTrackingForDrag, isDraggingLabel, currentResizeDirection, textareaDimensions, minWidth, maxWidth, minHeight, maxHeight, dragOffset, dragStartPosition, textareaPosition]);
+
+    console.log('ORIGINAL: Component render - state:', {
+      textareaDimensions,
+      textareaPosition,
+      isResizingActive,
+      isDraggingActive,
+      isSustainedClick,
+      isTrackingForDrag
+    });
 
     const labelRelativePos = getLabelRelativePosition();
 
@@ -498,50 +641,52 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div
           ref={textareaContainerRef}
           className={cn(
-            "textarea-field__resizable-container relative inline-block",
+            "textarea-field__resizable-container absolute inline-block",
             isResizingActive && "textarea-field__resizable-container--resizing select-none",
             isDraggingActive && "textarea-field__resizable-container--dragging select-none"
           )}
           style={{
             width: textareaDimensions.width,
             height: textareaDimensions.height,
-            transform: `translate(${textareaPosition.x}px, ${textareaPosition.y}px)`,
-            transformOrigin: 'top left'
+            left: `${textareaPosition.x}px`,
+            top: `${textareaPosition.y}px`
           }}
           onMouseLeave={() => setHoveredResizeEdge([])}
         >
           {/* Debug: Test element to verify container positioning */}
-          <div className="absolute top-0 right-0 w-4 h-4 bg-green-500 z-50"></div>
+          <div className="absolute top-0 right-0 w-4 h-4 bg-transparent z-10"></div>
+          
+          {/* Debug: Position info overlay */}
+          {isResizingActive && (
+            <div className="absolute top-[-60px] left-0 bg-black text-white p-2 text-xs font-mono z-50 pointer-events-none">
+              <div>X: {textareaPosition.x.toFixed(2)}</div>
+              <div>W: {textareaDimensions.width.toFixed(2)}</div>
+              <div>East: {(textareaPosition.x + textareaDimensions.width).toFixed(2)}</div>
+            </div>
+          )}
           
           {/* Combined detection area and visual label */}
           <div
             className={cn(
               "absolute px-2 py-1 font-sans font-medium text-3xl rounded select-none cursor-pointer z-50",
-              isDraggingLabel && "cursor-grabbing transition-none" // Disable transitions during drag
+              isDraggingLabel && "cursor-grabbing transition-none"
             )}
             style={{
               left: `${labelRelativePos.x}px`,
               top: `${labelRelativePos.y}px`,
-              // Transform based on which edge we're pinned to
               transform: (() => {
                 const normalizedAngle = ((labelPosition.angle % 360) + 360) % 360;
                 if (normalizedAngle >= 315 || normalizedAngle < 45) {
-                  // Right edge: anchor by left side of label
                   return 'translateY(-50%)';
                 } else if (normalizedAngle >= 45 && normalizedAngle < 135) {
-                  // Bottom edge: anchor by top of label
                   return 'translateX(-50%)';
                 } else if (normalizedAngle >= 135 && normalizedAngle < 225) {
-                  // Left edge: anchor by right side of label
                   return 'translate(-100%, -50%)';
                 } else {
-                  // Top edge: anchor by bottom of label
                   return 'translate(-50%, -100%)';
                 }
               })(),
-              // Conditional dimensions: fixed during drag, auto otherwise
               ...(isDraggingLabel && dragLabelDimensions ? {
-                // Fixed dimensions during drag
                 width: `${dragLabelDimensions.width}px`,
                 height: `${dragLabelDimensions.height}px`,
                 minWidth: `${dragLabelDimensions.width}px`,
@@ -552,11 +697,9 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
               } : {
-                // Auto dimensions when not dragging
                 minWidth: '60px',
                 whiteSpace: 'nowrap'
               }),
-              // Always applied styles
               boxSizing: 'border-box',
               flexShrink: '0',
               flexGrow: '0'
@@ -567,13 +710,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           >
             {label} (drag me)
           </div>
+          
           {/* Header Section */}
           <div 
             className="textarea-field__header absolute top-0 left-0 right-0 px-3 py-2 font-sans font-semibold text-xl z-10 cursor-default"
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             onMouseDown={(e) => {
-              // Prevent any default drag behavior on header
               e.preventDefault();
             }}
           >
@@ -593,15 +736,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               "disabled:cursor-not-allowed disabled:opacity-50",
               className
             )}
-            placeholder={props.placeholder || "Text area"}
-            onFocus={handleTextareaFocus}
-            onBlur={handleTextareaBlur}
-            onMouseDown={handleTextareaMouseDown}
             style={{
               cursor: isSustainedClick ? 'grabbing' : 'text',
               userSelect: isSustainedClick ? 'none' : 'text'
             }}
-            {...props}
+            onMouseDown={handleTextareaMouseDown}
+            onFocus={() => setIsTextareaFocused(true)}
+            onBlur={() => setIsTextareaFocused(false)}
           />
 
           {/* Resize Handles - Edge Detectors */}
@@ -617,6 +758,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             } : {}}
             onMouseEnter={() => setHoveredResizeEdge(['north'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: North edge clicked');
               e.stopPropagation();
               handleResizeStart(e, 'north');
             }}
@@ -624,7 +766,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           
           <div
             className={cn(
-              "textarea-field__resize-edge textarea-field__resize-edge--east absolute inset-y-0 right-0 w-1 cursor-e-resize z-20",
+              "textarea-field__resize-edge textarea-field__resize-edge--east resize-handle-east absolute inset-y-0 right-0 w-1 cursor-e-resize z-20",
               hoveredResizeEdge.indexOf('east') !== -1 && !isTextareaFocused && "textarea-field__resize-edge--hovered border-r-2 border-ring"
             )}
             style={hoveredResizeEdge.indexOf('east') !== -1 && !isTextareaFocused ? {
@@ -634,6 +776,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             } : {}}
             onMouseEnter={() => setHoveredResizeEdge(['east'])}
             onMouseDown={(e) => {
+              console.log('ABSOLUTE: East edge clicked - will fix LEFT edge');
               e.stopPropagation();
               handleResizeStart(e, 'east');
             }}
@@ -651,6 +794,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             } : {}}
             onMouseEnter={() => setHoveredResizeEdge(['south'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: South edge clicked');
               e.stopPropagation();
               handleResizeStart(e, 'south');
             }}
@@ -658,7 +802,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           
           <div
             className={cn(
-              "textarea-field__resize-edge textarea-field__resize-edge--west absolute inset-y-0 left-0 w-1 cursor-w-resize z-20",
+              "textarea-field__resize-edge textarea-field__resize-edge--west resize-handle-west absolute inset-y-0 left-0 w-1 cursor-w-resize z-20",
               hoveredResizeEdge.indexOf('west') !== -1 && !isTextareaFocused && "textarea-field__resize-edge--hovered border-l-2 border-ring"
             )}
             style={hoveredResizeEdge.indexOf('west') !== -1 && !isTextareaFocused ? {
@@ -668,6 +812,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             } : {}}
             onMouseEnter={() => setHoveredResizeEdge(['west'])}
             onMouseDown={(e) => {
+              console.log('ABSOLUTE: West edge clicked - will fix RIGHT edge');
               e.stopPropagation();
               handleResizeStart(e, 'west');
             }}
@@ -678,6 +823,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className="textarea-field__resize-corner textarea-field__resize-corner--northwest absolute top-0 left-0 w-2 h-2 cursor-nw-resize z-20"
             onMouseEnter={() => setHoveredResizeEdge(['north', 'west'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: Northwest corner clicked');
               e.stopPropagation();
               handleResizeStart(e, 'northwest');
             }}
@@ -686,6 +832,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className="textarea-field__resize-corner textarea-field__resize-corner--northeast absolute top-0 right-0 w-2 h-2 cursor-ne-resize z-20"
             onMouseEnter={() => setHoveredResizeEdge(['north', 'east'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: Northeast corner clicked');
               e.stopPropagation();
               handleResizeStart(e, 'northeast');
             }}
@@ -694,6 +841,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className="textarea-field__resize-corner textarea-field__resize-corner--southwest absolute bottom-0 left-0 w-2 h-2 cursor-sw-resize z-20"
             onMouseEnter={() => setHoveredResizeEdge(['south', 'west'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: Southwest corner clicked');
               e.stopPropagation();
               handleResizeStart(e, 'southwest');
             }}
@@ -702,6 +850,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className="textarea-field__resize-corner textarea-field__resize-corner--southeast absolute bottom-0 right-0 w-2 h-2 cursor-se-resize z-20"
             onMouseEnter={() => setHoveredResizeEdge(['south', 'east'])}
             onMouseDown={(e) => {
+              console.log('ORIGINAL: Southeast corner clicked');
               e.stopPropagation();
               handleResizeStart(e, 'southeast');
             }}
