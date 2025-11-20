@@ -64,7 +64,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     label: "Label", // Always provide label for accessibility
-    title: "Title",
     textarea: "",
     initialWidth: 400,
     initialHeight: 200,
@@ -74,8 +73,11 @@ export const Default: Story = {
     maxHeight: 600,
     placeholder:
       "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance\n\nKeyboard controls:\n• Ctrl+Arrows: Resize textarea\n• Shift+Arrows: Move textarea\n• Ctrl+Shift+Arrows: Move label\n• PageUp/PageDown: Adjust label distance",
-    // Add aria-label for extra accessibility if label is hidden
     "aria-label": "Text input area for notes and instructions",
+    "aria-labelledby": "synth-textarea-label",
+    title: "Text input area for notes and instructions",
+    id: "synth-textarea",
+    role: "presentation",
   },
 };
 
@@ -85,7 +87,6 @@ export const Default: Story = {
 export const WithLabelOnly: Story = {
   args: {
     label: "Label",
-    title: undefined,
     textarea: "",
     initialWidth: 400,
     initialHeight: 200,
@@ -95,6 +96,10 @@ export const WithLabelOnly: Story = {
     maxHeight: 600,
     placeholder: "Type your text here...",
     "aria-label": "Text input area for notes",
+    "aria-labelledby": "synth-textarea-label",
+    title: "Text input area for notes",
+    id: "synth-textarea",
+    role: "presentation",
   },
 };
 
@@ -103,8 +108,7 @@ export const WithLabelOnly: Story = {
  */
 export const WithTitleOnly: Story = {
   args: {
-    label: undefined,
-    title: "Title",
+    title: "Text input area for instructions",
     textarea: "",
     initialWidth: 400,
     initialHeight: 200,
@@ -114,6 +118,8 @@ export const WithTitleOnly: Story = {
     maxHeight: 600,
     placeholder: "Type your text here...",
     "aria-label": "Text input area for instructions",
+    id: "synth-textarea",
+    role: "presentation",
   },
 };
 
@@ -122,8 +128,6 @@ export const WithTitleOnly: Story = {
  */
 export const WithPlaceholderOnly: Story = {
   args: {
-    label: undefined,
-    title: undefined,
     textarea: "",
     initialWidth: 400,
     initialHeight: 200,
@@ -133,5 +137,8 @@ export const WithPlaceholderOnly: Story = {
     maxHeight: 600,
     placeholder: "Type your text here...",
     "aria-label": "Text input area",
+    title: "Text input area",
+    id: "synth-textarea",
+    role: "presentation",
   },
 };
