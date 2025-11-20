@@ -9,7 +9,10 @@
     "start": "node dist/index.js",
     "emit:schema": "ts-node -r tsconfig-paths/register scripts/emit-schema.ts",
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:backup": "bash scripts/db-backup.sh",
+    "db:restore":"bash scripts/db-restore.sh",
+    "db:reset": "bash scripts/db-reset.sh"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
