@@ -1,3 +1,4 @@
+This file has been deleted.
 // Customizable Textarea Stories - ST-34 Extension
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
