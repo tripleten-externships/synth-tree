@@ -11,24 +11,18 @@ type ResizeDirection =
   | "southwest";
 
 export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "textarea"> {
+  /**text blocks */
   label?: string;
-
   title?: string;
-
+  textarea?: React.ReactNode;
   initialWidth?: number;
-
   initialHeight?: number;
-  /** Minimum width constraint */
+  /**  constraints */
   minWidth?: number;
-  /** Minimum height constraint */
   minHeight?: number;
-  /** Maximum width constraint */
   maxWidth?: number;
-  /** Maximum height constraint */
   maxHeight?: number;
-  /** Textarea value/content (controlled) */
-  value?: string;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -47,6 +41,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       onFocus,
       onBlur,
       value,
+      textarea,
       ...props
     },
     ref
@@ -581,77 +576,87 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           }}
           onMouseLeave={() => setHoveredResizeEdge([])}
         >
-          {/* ...existing code... */}
-
-          {/* Combined detection area and visual label */}
-          <div
-            className={cn(
-              "absolute px-2 py-1 font-sans font-medium text-3xl rounded select-none cursor-pointer z-50",
-              isDraggingLabel && "cursor-grabbing transition-none"
-            )}
-            style={{
-              left: `${labelRelativePos.x}px`,
-              top: `${labelRelativePos.y}px`,
-              transform: (() => {
-                const normalizedAngle =
-                  ((labelPosition.angle % 360) + 360) % 360;
-                if (normalizedAngle >= 315 || normalizedAngle < 45) {
-                  return "translateY(-50%)";
-                } else if (normalizedAngle >= 45 && normalizedAngle < 135) {
-                  return "translateX(-50%)";
-                } else if (normalizedAngle >= 135 && normalizedAngle < 225) {
-                  return "translate(-100%, -50%)";
-                } else {
-                  return "translate(-50%, -100%)";
-                }
-              })(),
-              ...(isDraggingLabel && dragLabelDimensions
-                ? {
-                    width: `${dragLabelDimensions.width}px`,
-                    height: `${dragLabelDimensions.height}px`,
-                    minWidth: `${dragLabelDimensions.width}px`,
-                    maxWidth: `${dragLabelDimensions.width}px`,
-                    minHeight: `${dragLabelDimensions.height}px`,
-                    maxHeight: `${dragLabelDimensions.height}px`,
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
+          {/* Combined detection area and visual label (hide if label is empty) */}
+          {label !== "" && (
+            <label
+              className={cn(
+                "absolute px-2 py-1 font-sans font-medium text-3xl rounded select-none cursor-pointer z-50",
+                isDraggingLabel && "cursor-grabbing transition-none"
+              )}
+              style={{
+                left: `${labelRelativePos.x}px`,
+                top: `${labelRelativePos.y}px`,
+                transform: (() => {
+                  const normalizedAngle =
+                    ((labelPosition.angle % 360) + 360) % 360;
+                  if (normalizedAngle >= 315 || normalizedAngle < 45) {
+                    return "translateY(-50%)";
+                  } else if (normalizedAngle >= 45 && normalizedAngle < 135) {
+                    return "translateX(-50%)";
+                  } else if (normalizedAngle >= 135 && normalizedAngle < 225) {
+                    return "translate(-100%, -50%)";
+                  } else {
+                    return "translate(-50%, -100%)";
                   }
-                : {
-                    minWidth: "60px",
-                    whiteSpace: "nowrap",
-                  }),
-              boxSizing: "border-box",
-              flexShrink: "0",
-              flexGrow: "0",
-            }}
-            onMouseDown={handleLabelMouseDown}
-            data-label-draggable
-            title={`Click and hold to drag label around textarea`}
-          >
-            {label}
-          </div>
+                })(),
+                ...(isDraggingLabel && dragLabelDimensions
+                  ? {
+                      width: `${dragLabelDimensions.width}px`,
+                      height: `${dragLabelDimensions.height}px`,
+                      minWidth: `${dragLabelDimensions.width}px`,
+                      maxWidth: `${dragLabelDimensions.width}px`,
+                      minHeight: `${dragLabelDimensions.height}px`,
+                      maxHeight: `${dragLabelDimensions.height}px`,
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                    }
+                  : {
+                      minWidth: "60px",
+                      whiteSpace: "nowrap",
+                    }),
+                boxSizing: "border-box",
+                flexShrink: "0",
+                flexGrow: "0",
+              }}
+              onMouseDown={handleLabelMouseDown}
+              data-label-draggable
+              title={`Click and hold to drag label around textarea`}
+              htmlFor={id || "synth-textarea"}
+            >
+              {label}
+            </label>
+          )}
 
-          {/* Header Section */}
-          <div
-            className="textarea-field__header absolute top-0 left-0 right-0 px-3 py-2 font-sans font-semibold text-xl z-10 cursor-default"
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            onMouseDown={(e) => {
-              e.preventDefault();
-            }}
-          >
-            <span className="textarea-field__title select-none pointer-events-none">
-              {title}
-            </span>
-          </div>
+          {/* Header Section (hide if title is empty) */}
+          {title !== "" && (
+            <div
+              className="textarea-field__header absolute top-0 left-0 right-0 px-3 py-2 font-sans font-semibold text-xl z-10 cursor-default"
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              title={title}
+            >
+              <span className="textarea-field__title select-none pointer-events-none">
+                {title}
+              </span>
+            </div>
+          )}
+
+          {/* Section below header/title for custom content (only if ReactNode, not string) */}
+          {React.isValidElement(textarea) && (
+            <div className="textarea-field__custom-content absolute left-0 right-0 px-3 py-2 z-10">
+              {textarea}
+            </div>
+          )}
 
           {/* Input Element */}
           <textarea
             ref={ref}
             id={id}
-            value={value}
-            {...props}
+            value={typeof textarea === "string" ? textarea : value}
             className={cn(
               "textarea-field__input w-full h-full bg-background text-foreground rounded-md px-3 py-2 pt-12",
               "font-sans font-normal text-lg",
@@ -667,6 +672,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             onMouseDown={handleTextareaMouseDown}
             onFocus={() => setIsTextareaFocused(true)}
             onBlur={() => setIsTextareaFocused(false)}
+            {...props}
           />
 
           {/* Resize Handles - Edge Detectors */}
