@@ -35,9 +35,9 @@ export function calculateTransparentBlockDimensions(
   textareaDimensions: { width: number; height: number },
   blockExpansion: number
 ): TransparentBlockDimensions {
-  const blockWidth = textareaDimensions.width + (blockExpansion * 2);
-  const blockHeight = textareaDimensions.height + (blockExpansion * 2);
-  
+  const blockWidth = textareaDimensions.width + blockExpansion * 2;
+  const blockHeight = textareaDimensions.height + blockExpansion * 2;
+
   return {
     width: blockWidth,
     height: blockHeight,
@@ -52,38 +52,47 @@ export function calculateTransparentBlockDimensions(
 export function calculateLabelEdgePosition(
   labelAngle: number,
   blockDimensions: TransparentBlockDimensions
-): { x: number; y: number; edge: 'north' | 'east' | 'south' | 'west' } {
+): { x: number; y: number; edge: "north" | "east" | "south" | "west" } {
   const normalizedAngle = ((labelAngle % 360) + 360) % 360;
   let finalX: number;
   let finalY: number;
-  let edge: 'north' | 'east' | 'south' | 'west';
-  
+  let edge: "north" | "east" | "south" | "west";
+
   if (normalizedAngle >= 315 || normalizedAngle < 45) {
     // Right edge of block - label's west edge pinned to block's east edge
-    edge = 'east';
+    edge = "east";
     finalX = blockDimensions.left + blockDimensions.width;
-    const progress = normalizedAngle < 45 ? normalizedAngle / 45 : (normalizedAngle - 315) / 45;
-    finalY = blockDimensions.top + (progress * blockDimensions.height);
+    const progress =
+      normalizedAngle < 45
+        ? normalizedAngle / 45
+        : (normalizedAngle - 315) / 45;
+    finalY = blockDimensions.top + progress * blockDimensions.height;
   } else if (normalizedAngle >= 45 && normalizedAngle < 135) {
     // Bottom edge of block - label's north edge pinned to block's south edge
-    edge = 'south';
+    edge = "south";
     finalY = blockDimensions.top + blockDimensions.height;
     const progress = (normalizedAngle - 45) / 90;
-    finalX = blockDimensions.left + blockDimensions.width - (progress * blockDimensions.width);
+    finalX =
+      blockDimensions.left +
+      blockDimensions.width -
+      progress * blockDimensions.width;
   } else if (normalizedAngle >= 135 && normalizedAngle < 225) {
     // Left edge of block - label's east edge pinned to block's west edge
-    edge = 'west';
+    edge = "west";
     finalX = blockDimensions.left;
     const progress = (normalizedAngle - 135) / 90;
-    finalY = blockDimensions.top + blockDimensions.height - (progress * blockDimensions.height);
+    finalY =
+      blockDimensions.top +
+      blockDimensions.height -
+      progress * blockDimensions.height;
   } else {
     // Top edge of block - label's south edge pinned to block's north edge
-    edge = 'north';
+    edge = "north";
     finalY = blockDimensions.top;
     const progress = (normalizedAngle - 225) / 90;
-    finalX = blockDimensions.left + (progress * blockDimensions.width);
+    finalX = blockDimensions.left + progress * blockDimensions.width;
   }
-  
+
   return { x: finalX, y: finalY, edge };
 }
 
@@ -91,23 +100,23 @@ export function calculateLabelEdgePosition(
  * Calculates the CSS transform string for label positioning based on edge
  */
 export function calculateLabelTransformString(
-  edge: 'north' | 'east' | 'south' | 'west'
+  edge: "north" | "east" | "south" | "west"
 ): string {
   switch (edge) {
-    case 'east':
+    case "east":
       // Right edge: anchor by left side of label
-      return 'translateY(-50%)';
-    case 'south':
+      return "translateY(-50%)";
+    case "south":
       // Bottom edge: anchor by top of label
-      return 'translateX(-50%)';
-    case 'west':
+      return "translateX(-50%)";
+    case "west":
       // Left edge: anchor by right side of label
-      return 'translate(-100%, -50%)';
-    case 'north':
+      return "translate(-100%, -50%)";
+    case "north":
       // Top edge: anchor by bottom of label
-      return 'translate(-50%, -100%)';
+      return "translate(-50%, -100%)";
     default:
-      return 'translate(-50%, -50%)';
+      return "translate(-50%, -50%)";
   }
 }
 
@@ -121,16 +130,18 @@ export function isLabelPositionOffScreen(
   screenBoundaries: ScreenBoundaries
 ): boolean {
   const { marginThreshold } = screenBoundaries;
-  
+
   return [
     // Right edge
-    containerRect.left + blockDimensions.width > screenBoundaries.width - marginThreshold,
-    // Bottom edge  
-    containerRect.top + blockDimensions.height > screenBoundaries.height - marginThreshold,
+    containerRect.left + blockDimensions.width >
+      screenBoundaries.width - marginThreshold,
+    // Bottom edge
+    containerRect.top + blockDimensions.height >
+      screenBoundaries.height - marginThreshold,
     // Left edge
     containerRect.left + blockDimensions.left < marginThreshold,
     // Top edge
-    containerRect.top + blockDimensions.top < marginThreshold
+    containerRect.top + blockDimensions.top < marginThreshold,
   ].some(Boolean);
 }
 
@@ -144,14 +155,22 @@ export function calculateMaxSafeExpansion(
   minimumExpansion: number
 ): number {
   const { marginThreshold } = screenBoundaries;
-  
+
   const maxSafeExpansion = Math.min(
-    (screenBoundaries.width - containerRect.left - textareaDimensions.width - marginThreshold) / 2,
-    (screenBoundaries.height - containerRect.top - textareaDimensions.height - marginThreshold) / 2,
+    (screenBoundaries.width -
+      containerRect.left -
+      textareaDimensions.width -
+      marginThreshold) /
+      2,
+    (screenBoundaries.height -
+      containerRect.top -
+      textareaDimensions.height -
+      marginThreshold) /
+      2,
     containerRect.left - marginThreshold,
     containerRect.top - marginThreshold
   );
-  
+
   return Math.max(minimumExpansion, maxSafeExpansion);
 }
 
@@ -164,5 +183,5 @@ export function calculateAngleFromMousePosition(
   centerX: number,
   centerY: number
 ): number {
-  return Math.atan2(mouseY - centerY, mouseX - centerX) * 180 / Math.PI;
+  return (Math.atan2(mouseY - centerY, mouseX - centerX) * 180) / Math.PI;
 }

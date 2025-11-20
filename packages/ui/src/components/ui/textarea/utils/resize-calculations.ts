@@ -3,15 +3,15 @@
  * Uses top, bottom, left, right boundaries for cleaner resize logic
  */
 
-export type ResizeDirection = 
-  | 'north' 
-  | 'east' 
-  | 'south' 
-  | 'west' 
-  | 'northeast' 
-  | 'northwest' 
-  | 'southeast' 
-  | 'southwest';
+export type ResizeDirection =
+  | "north"
+  | "east"
+  | "south"
+  | "west"
+  | "northeast"
+  | "northwest"
+  | "southeast"
+  | "southwest";
 
 export interface TextareaBoundaries {
   top: number;
@@ -41,7 +41,7 @@ export function isMouseNearResizeEdge(
 ): boolean {
   const rect = mouseEvent.currentTarget.getBoundingClientRect();
   const { clientX, clientY } = mouseEvent;
-  
+
   return (
     clientX - rect.left < edgeThreshold ||
     rect.right - clientX < edgeThreshold ||
@@ -61,13 +61,13 @@ export function calculateResizedBoundaries(
   constraints: BoundaryConstraints
 ): TextareaBoundaries {
   let newBoundaries = { ...currentBoundaries };
-  
+
   // Get mouse position relative to the viewport
   const mouseX = mouseData.clientX;
   const mouseY = mouseData.clientY;
 
   // Handle horizontal resize directions
-  if (direction.includes('east')) {
+  if (direction.includes("east")) {
     // Moving right edge - extend or shrink from current left boundary
     const newWidth = Math.max(
       constraints.minWidth,
@@ -75,8 +75,8 @@ export function calculateResizedBoundaries(
     );
     newBoundaries.right = currentBoundaries.left + newWidth;
   }
-  
-  if (direction.includes('west')) {
+
+  if (direction.includes("west")) {
     // Moving left edge - maintain right boundary, adjust left
     const newWidth = Math.max(
       constraints.minWidth,
@@ -86,7 +86,7 @@ export function calculateResizedBoundaries(
   }
 
   // Handle vertical resize directions
-  if (direction.includes('north')) {
+  if (direction.includes("north")) {
     // Moving top edge - maintain bottom boundary, adjust top
     const minTotalHeight = constraints.minHeight + 40; // Include header space
     const maxTotalHeight = constraints.maxHeight + 40;
@@ -96,8 +96,8 @@ export function calculateResizedBoundaries(
     );
     newBoundaries.top = currentBoundaries.bottom - newHeight;
   }
-  
-  if (direction.includes('south')) {
+
+  if (direction.includes("south")) {
     // Moving bottom edge - extend or shrink from current top boundary
     const minTotalHeight = constraints.minHeight + 40; // Include header space
     const maxTotalHeight = constraints.maxHeight + 40;
@@ -114,10 +114,13 @@ export function calculateResizedBoundaries(
 /**
  * Calculate dimensions from boundaries
  */
-export function getDimensionsFromBoundaries(boundaries: TextareaBoundaries): { width: number; height: number } {
+export function getDimensionsFromBoundaries(boundaries: TextareaBoundaries): {
+  width: number;
+  height: number;
+} {
   return {
     width: boundaries.right - boundaries.left,
-    height: boundaries.bottom - boundaries.top
+    height: boundaries.bottom - boundaries.top,
   };
 }
 
@@ -126,17 +129,17 @@ export function getDimensionsFromBoundaries(boundaries: TextareaBoundaries): { w
  */
 export function getResizeCursorStyle(direction: ResizeDirection): string {
   const cursorMap: Record<ResizeDirection, string> = {
-    north: 'n-resize',
-    east: 'e-resize',
-    south: 's-resize',
-    west: 'w-resize',
-    northeast: 'ne-resize',
-    northwest: 'nw-resize',
-    southeast: 'se-resize',
-    southwest: 'sw-resize',
+    north: "n-resize",
+    east: "e-resize",
+    south: "s-resize",
+    west: "w-resize",
+    northeast: "ne-resize",
+    northwest: "nw-resize",
+    southeast: "se-resize",
+    southwest: "sw-resize",
   };
-  
-  return cursorMap[direction] || 'default';
+
+  return cursorMap[direction] || "default";
 }
 
 /**
@@ -144,15 +147,15 @@ export function getResizeCursorStyle(direction: ResizeDirection): string {
  */
 export function getHoveredResizeEdges(direction: ResizeDirection): string[] {
   const edgeMap: Record<ResizeDirection, string[]> = {
-    north: ['north'],
-    east: ['east'],
-    south: ['south'],
-    west: ['west'],
-    northeast: ['north', 'east'],
-    northwest: ['north', 'west'],
-    southeast: ['south', 'east'],
-    southwest: ['south', 'west'],
+    north: ["north"],
+    east: ["east"],
+    south: ["south"],
+    west: ["west"],
+    northeast: ["north", "east"],
+    northwest: ["north", "west"],
+    southeast: ["south", "east"],
+    southwest: ["south", "west"],
   };
-  
+
   return edgeMap[direction] || [];
 }

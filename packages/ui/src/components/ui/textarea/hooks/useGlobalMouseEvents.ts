@@ -3,7 +3,7 @@
  * Handles mouse move and mouse up events across the entire document
  */
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 interface UseGlobalMouseEventsOptions {
   isActive: boolean;
@@ -18,7 +18,7 @@ export function useGlobalMouseEvents({
   onMouseMove,
   onMouseUp,
   onWheel,
-  enableWheel = false
+  enableWheel = false,
 }: UseGlobalMouseEventsOptions): void {
   useEffect(() => {
     if (!isActive) return;
@@ -38,20 +38,20 @@ export function useGlobalMouseEvents({
     };
 
     // Add event listeners
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
     if (enableWheel) {
-      document.addEventListener('wheel', handleWheel, { passive: false });
+      document.addEventListener("wheel", handleWheel, { passive: false });
     }
 
     // Cleanup function
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+
       if (enableWheel) {
-        document.removeEventListener('wheel', handleWheel);
+        document.removeEventListener("wheel", handleWheel);
       }
     };
   }, [isActive, onMouseMove, onMouseUp, onWheel, enableWheel]);
