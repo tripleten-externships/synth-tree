@@ -1,7 +1,7 @@
-import OrganicChemistry from "../assets/organic-chemistry.svg";
-import BasicsOfPhysics from "../assets/basics-of-physics.svg";
-import AdvancedGeometry from "../assets/advanced-geometry.svg";
-import NodeIcon from "../assets/node-icon.svg";
+import OrganicChemistry from "../../assets/organic-chemistry.svg";
+import BasicsOfPhysics from "../../assets/basics-of-physics.svg";
+import AdvancedGeometry from "../../assets/advanced-geometry.svg";
+import NodeIcon from "../../assets/node-icon.svg";
 
 export default function Home() {
   return (
