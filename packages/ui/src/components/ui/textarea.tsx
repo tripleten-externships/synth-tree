@@ -12,13 +12,12 @@ type ResizeDirection =
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  /** Label text displayed above the textarea */
   label?: string;
-  /** Title text displayed in the header section */
+
   title?: string;
-  /** Initial width in pixels */
+
   initialWidth?: number;
-  /** Initial height in pixels */
+
   initialHeight?: number;
   /** Minimum width constraint */
   minWidth?: number;
