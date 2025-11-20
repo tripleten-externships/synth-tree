@@ -9,7 +9,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { schema } from "./schema";
 import { admin } from "./firebase";
 
-interface Context extends BaseContext {
+export interface Context extends BaseContext {
   user?: {
     uid: string;
     email?: string;
