@@ -75,7 +75,7 @@ export const Default: Story = {
     placeholder:
       "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance\n\nKeyboard controls:\n• Ctrl+Arrows: Resize textarea\n• Shift+Arrows: Move textarea\n• Ctrl+Shift+Arrows: Move label\n• PageUp/PageDown: Adjust label distance",
     // Add aria-label for extra accessibility if label is hidden
-    "aria-label": "Text input area for notes and instructions"
+    "aria-label": "Text input area for notes and instructions",
   },
 };
 
@@ -134,5 +134,4 @@ export const WithPlaceholderOnly: Story = {
     placeholder: "Type your text here...",
     "aria-label": "Text input area",
   },
-};
 };
