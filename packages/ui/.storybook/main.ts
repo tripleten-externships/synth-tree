@@ -1,7 +1,10 @@
 import type { StorybookConfig } from "@storybook/react-vite";
 
 const config: StorybookConfig = {
-  stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: [
+    "../src/components/ui/default/**/*.stories.@(js|jsx|ts|tsx)",
+    "../src/components/ui/**/*.stories.@(js|jsx|ts|tsx)"
+  ],
   addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-a11y",
@@ -28,12 +31,11 @@ const config: StorybookConfig = {
       };
     }
 
-    // Add alias resolution for @/* paths and workspace packages
+    // Remove aliased paths for Storybook stories to enforce relative imports
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@": require("path").resolve(__dirname, "../src"),
-      "@skilltree/theme": require("path").resolve(__dirname, "../../theme/src"),
+      // Aliases removed for Storybook stories; use only relative imports in stories
     };
 
     return config;

@@ -28,7 +28,7 @@ const preview: Preview = {
   decorators: [
     (Story, context) => (
       <ThemeProvider>
-        <div className="min-h-screen bg-background text-foreground">
+        <div className="min-h-screen bg-transparent text-foreground">
           <ColorModeLoader colorMode={context.globals.theme} />
           <Story {...context} />
         </div>
