@@ -4,53 +4,29 @@ import { Check } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
 
-/**
- * Checkbox variants: sizing + base styling
- */
-const checkboxVariants = cva(
-  // Base styles, theme tokens, + accessibility features
-  "peer shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-  {
-    variants: {
-      // Size variants for different contexts
-      size: {
-        sm: "h-3 w-3",
-        default: "h-4 w-4",
-        lg: "h-5 w-5",
-      },
-    },
-    defaultVariants: {
-      size: "default",
-    },
-  }
-);
+const sizeMappings = {
+  sm: { width: 12, height: 12, iconSize: 10 },
+  default: { width: 16, height: 16, iconSize: 14 },
+  lg: { width: 20, height: 20, iconSize: 18 },
+};
 
 /**
- * Checkbox indicator icon variants
- * Check icon scales to checkbox size
- */
-const checkboxIconVariants = cva(
-  "flex items-center justify-center text-current",
-  {
-    variants: {
-      size: {
-        sm: "h-2.5 w-2.5",
-        default: "h-3.5 w-3.5",
-        lg: "h-4 w-4",
-      },
-    },
-    defaultVariants: {
-      size: "default",
-    },
-  }
-);
-
-/**
- * Checkbox Props: Radix + size variant
+ * Checkbox Props: Radix + dimensions + colors + size
  */
 export interface CheckboxProps
-  extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>,
-    VariantProps<typeof checkboxVariants> {}
+  extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
+  checkedColor: string;
+  uncheckedColor: string;
+  borderColor: string;
+  checkedCheckmarkColor: string;
+  width?: number;
+  height?: number;
+  iconSize?: number;
+  size?: "sm" | "default" | "lg";
+  widthOffset?: number;
+  heightOffset?: number;
+  iconSizeOffset?: number;
+}
 
 /**
  * Checkbox Component - ST-34
@@ -62,21 +38,68 @@ export interface CheckboxProps
  * - Theme tokens
  * - Scaling visual check indicator
  */
+/**
+ * Checkbox Component - ST-34
+ *
+ * Radix UI primitives checkbox
+ * - Keyboard navigation
+ * - forwardRef = react-hook-form
+ * - Dynamic dimensions and colors
+ * - Theme tokens
+ * - Animations + transitions
+ */
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   CheckboxProps
->(({ className, size, ...props }, ref) => (
-  <CheckboxPrimitive.Root
-    ref={ref}
-    className={cn(checkboxVariants({ size }), className)}
-    {...props}
-  >
-    <CheckboxPrimitive.Indicator className={cn(checkboxIconVariants({ size }))}>
-      <Check className="h-full w-full" />
-    </CheckboxPrimitive.Indicator>
-  </CheckboxPrimitive.Root>
-));
+>(({
+  className,
+  checkedColor,
+  uncheckedColor,
+  borderColor,
+  checkedCheckmarkColor,
+  width,
+  height,
+  iconSize,
+  size = "default",
+  widthOffset = 0,
+  heightOffset = 0,
+  iconSizeOffset = 0,
+  ...props
+}, ref) => {
+  const dimensions = sizeMappings[size];
+  const finalWidth = (width ?? dimensions.width) + widthOffset;
+  const finalHeight = (height ?? dimensions.height) + heightOffset;
+  const finalIconSize = (iconSize ?? dimensions.iconSize) + iconSizeOffset;
+
+  return (
+    <CheckboxPrimitive.Root
+      className={cn(
+        "peer shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "w-[var(--checkbox-width)] h-[var(--checkbox-height)] bg-[var(--checkbox-bg)] border",
+        className
+      )}
+      style={{
+        '--checkbox-width': `${finalWidth}px`,
+        '--checkbox-height': `${finalHeight}px`,
+        '--checkbox-bg': props.checked ? checkedColor : uncheckedColor,
+        borderColor: borderColor,
+      } as React.CSSProperties}
+      {...props}
+      ref={ref}
+    >
+      <CheckboxPrimitive.Indicator
+        className="flex items-center justify-center text-[var(--checkmark-color)]"
+        style={{
+          '--checkmark-color': checkedCheckmarkColor,
+          fontSize: `${finalIconSize}px`,
+        } as React.CSSProperties}
+      >
+        <Check className="h-full w-full" />
+      </CheckboxPrimitive.Indicator>
+    </CheckboxPrimitive.Root>
+  );
+});
 
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
-export { Checkbox, checkboxVariants };
+export { Checkbox };

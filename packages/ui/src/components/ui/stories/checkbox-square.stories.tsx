@@ -2,14 +2,14 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Checkbox } from "../checkbox/checkbox";
 
 const meta: Meta<typeof Checkbox> = {
-  title: "UI/Checkbox/Checkbox (circle)",
+  title: "UI/Checkbox/Checkbox (square)",
   component: Checkbox,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "A customizable checkbox component with accessibility, keyboard navigation, and size variants.",
+          "A customizable checkbox component with square borders, accessibility, keyboard navigation, and size variants.",
       },
     },
   },
@@ -72,7 +72,7 @@ export const Default: Story = {
     uncheckedColor: "#ffffff",
     borderColor: "#479AFF",
     checkedCheckmarkColor: "hsl(var(--primary-foreground))",
-    className: "rounded-full",
+    className: "rounded-none",
   },
 };
 
@@ -87,7 +87,7 @@ export const Checked: Story = {
     uncheckedColor: "#ffffff",
     borderColor: "#479AFF",
     checkedCheckmarkColor: "hsl(var(--primary-foreground))",
-    className: "rounded-full",
+    className: "rounded-none",
   },
 };
 
@@ -102,7 +102,7 @@ export const Disabled: Story = {
     uncheckedColor: "#ffffff",
     borderColor: "#479AFF",
     checkedCheckmarkColor: "hsl(var(--primary-foreground))",
-    className: "rounded-full",
+    className: "rounded-none",
   },
 };
 
@@ -118,7 +118,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-full"
+        className="rounded-none"
       />
       <Checkbox
         size="default"
@@ -129,7 +129,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-full"
+        className="rounded-none"
       />
       <Checkbox
         size="lg"
@@ -140,7 +140,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-full"
+        className="rounded-none"
       />
     </div>
   ),

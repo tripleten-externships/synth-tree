@@ -25,6 +25,7 @@ export interface TextareaProps
   maxWidth?: number;
   maxHeight?: number;
   placeholder?: string;
+  containerClassName?: string;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -44,6 +45,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       onBlur,
       value,
       textarea,
+      containerClassName,
       ...restProps
     } = props;
 
@@ -111,6 +113,34 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     React.useEffect(() => {
       initialResizeBoundsRef.current = initialResizeBounds;
     }, [initialResizeBounds]);
+
+    // Center the textarea in the viewport on mount
+    React.useEffect(() => {
+      const centerTextarea = () => {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const parentRect = textareaContainerRef.current?.parentElement?.getBoundingClientRect();
+
+        const centerX = Math.max(0, (viewportWidth - initialWidth) / 2 - (parentRect?.left || 0));
+        const centerY = Math.max(0, (viewportHeight - initialHeight) / 2 - (parentRect?.top || 0));
+
+        setTextareaPosition({ x: centerX, y: centerY });
+      };
+
+      // Delay to ensure parent is rendered
+      const timeoutId = setTimeout(centerTextarea, 0);
+
+      // Optional: Recenter on window resize
+      const handleResize = () => {
+        centerTextarea();
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener('resize', handleResize);
+      };
+    }, [initialWidth, initialHeight]);
 
     const handleResizeStart = React.useCallback(
       (e: React.MouseEvent, direction: ResizeDirection) => {
@@ -568,7 +598,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             isResizingActive &&
               "textarea-field__resizable-container--resizing select-none",
             isDraggingActive &&
-              "textarea-field__resizable-container--dragging select-none"
+              "textarea-field__resizable-container--dragging select-none",
+            containerClassName
           )}
           style={{
             width: textareaDimensions.width,
@@ -582,7 +613,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           {label !== "" && (
             <label
               className={cn(
-                "absolute px-2 py-1 font-sans font-medium text-3xl rounded select-none cursor-pointer z-50",
+                "absolute px-2 py-1 font-sans font-medium text-3xl rounded-xl select-none cursor-pointer z-50 border border-border",
                 isDraggingLabel && "cursor-grabbing transition-none"
               )}
               style={{
@@ -660,11 +691,14 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             id={id}
             value={typeof textarea === "string" ? textarea : value}
             className={cn(
-              "textarea-field__input w-full h-full bg-background text-foreground rounded-md px-3 py-2 pt-12",
+              "textarea-field__input bg-background text-foreground rounded-md px-3 py-2",
               "font-sans font-normal text-lg",
               "placeholder:text-muted-foreground resize-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               "disabled:cursor-not-allowed disabled:opacity-50",
+              title !== ""
+                ? "absolute top-12 inset-x-0 h-[calc(100%-3rem)]"
+                : "w-full h-full",
               className
             )}
             style={{
