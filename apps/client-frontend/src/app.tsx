@@ -1,11 +1,11 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// ✅ Your layout + your SkillTree Home
+
 import MainLayout from "../layouts/MainLayout";
 import SkillTreeHome from "./pages/SkillTreeHomePage";
 
-// ✅ Evan's page components
+
 import DashboardPage from "./pages/DashboardPage";
 import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
@@ -30,7 +30,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,            // "/" route
-        element: <SkillTreeHome />, // ✅ your SkillTree Home.tsx
+        element: <SkillTreeHome />, // SkillTree Home.tsx
       },
       {
         path: "dashboard",      // "/dashboard"
