@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import SkillTreeLogo from "../assets/skilltree.svg";
 import Frame from "../assets/frame.svg";
+import Navigation from "../src/components/Navigation";
 
 export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -20,7 +21,12 @@ export default function Navbar() {
           />
         </div>
 
-        {/* RIGHT (desktop)Logout btn */}
+        {/* CENTER: Navigation (Desktop only) */}
+        <div className="hidden md:flex">
+          <Navigation />
+        </div>
+
+        {/* RIGHT (desktop): Logout btn */}
         <div className="hidden md:flex items-center gap-4">
           <button
             aria-label="Logout"
@@ -29,18 +35,6 @@ export default function Navbar() {
             <img src={Frame} alt="Logout" className="h-5 w-5" />
           </button>
         </div>
-
-        {/* MOBILE HAMBURGER */}
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100 md:hidden"
-          aria-label="Toggle main menu"
-          aria-expanded={isMobileOpen}
-          onClick={() => setIsMobileOpen((open) => !open)}
-        >
-          <span className="sr-only">Toggle navigation</span>
-          ☰
-        </button>
       </nav>
 
       {/* MOBILE MENU */}
