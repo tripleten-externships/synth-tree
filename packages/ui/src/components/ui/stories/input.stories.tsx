@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Input } from "./input";
+import { Input } from "../input";
 
 const meta: Meta<typeof Input> = {
   title: "UI/Input",
@@ -32,12 +32,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     placeholder: "Enter text...",
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {},
   },
 };
 
 export const Email: Story = {
   args: {
     type: "email",
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {},
     placeholder: "Enter your email",
   },
 };
@@ -81,6 +83,7 @@ export const WithValue: Story = {
   args: {
     value: "Pre-filled value",
     placeholder: "This won't show",
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {},
   },
 };
 
