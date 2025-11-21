@@ -15,28 +15,61 @@ generator pothosCrud {
   generatorConfigPath = "./pothos.config.js"
   // You may also set the `generatorConfigPath` via the `POTHOS_CRUD_CONFIG_PATH` environment variable.
   // The environment variable will override the path hardcoded here.
-}
+} 
+
+// Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information  
+// The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models. 
+//Rewards and Gamification intentionally not implemented yet.  
+// Leaving comments in the schema file. Request removal if the team does not want this. 
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// ENUMS
-// ============================================================================
+enum Role {  
+  ADMIN 
+ USER 
+  }
 
-enum Role {
-  ADMIN
-  USER
+enum QuestionType {  
+  SINGLE_CHOICE  
+  MULTIPLE_CHOICE  
+  OPEN_QUESTION  
+  }
+
+enum ContentType {  
+IMAGE 
+ VIDEO  
+ EMBED  
+ HTML 
+     }
+
+enum LessonStatus {  
+  DRAFT  
+  PUBLISHED   
+
 }
 
-// ============================================================================
-// MODELS
-// ============================================================================
+enum CourseStatus {  
+  DRAFT  
+  PUBLISHED   
+ 
+  }
+
+
+
+
+enum ProgressStatus {  
+  NOT_STARTED  
+  IN_PROGRESS  
+  COMPLETED  
+  }
+
+
 
 model User {
-  id        String   @id // Firebase UID — this is your canonical user identifier
+  id        String   @id                    
   email     String   @unique
   name      String?
   photoUrl  String?
@@ -44,8 +77,261 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Example placeholders for future relationships
-  // lessons      Lesson[]    @relation("AuthorLessons")
-  // progress     Progress[]
-  // rewards      Reward[]
+  // Authoring:
+  coursesAuthored Course[]         @relation("CourseAuthor")
+
+  // Learning:
+  nodeProgress    UserNodeProgress[]  // 1 row per (user,node)
+  quizAttempts    QuizAttempt[]       // all attempts across quizzes
+
+  // NOTE: If we later separate "Author" and "Learner" personas,
+  // Role can gate UI while the schema stays the same.
+}
+
+// ================================================================
+// Course
+// - Author-owned content container for one or more SkillTrees.
+// - Soft delete included to allow recoverability.
+// ================================================================
+model Course {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  authorId    String
+  status      CourseStatus  @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  author  User       @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  trees   SkillTree[]
+
+  @@index([title]) // lightweight browse/search
+}
+
+// ================================================================
+// SkillTree
+// - A course may have >1 tree; most courses likely use just one.
+// - Deleting a tree cascades to nodes and their content/quiz data.
+// ================================================================
+model SkillTree {
+  id          String     @id @default(uuid()) @db.Uuid
+  courseId    String     @db.Uuid
+  title       String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  course Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  nodes  SkillNode[]
+
+  @@index([courseId])
+  @@index([title])
+}
+
+// ================================================================
+// SkillNode
+// - A single learning step in a tree.
+// - Two orderings:
+//   1) Logical order: (step, orderInStep) used for gating.
+//   2) Visual layout: (posX, posY) for the editor canvas.
+// - Exactly one (optional) Quiz per node (enforced on Quiz.nodeId).
+// ================================================================
+model SkillNode {
+  id           String   @id @default(uuid()) @db.Uuid
+  treeId       String   @db.Uuid
+  title        String
+  step         Int      @default(1)  // logical level/layer (e.g., column)
+  orderInStep  Int      @default(0)  // order within the step
+  posX         Int?     @default(0)  // optional: UI layout
+  posY         Int?     @default(0)  // optional: UI layout
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  tree   SkillTree @relation(fields: [treeId], references: [id], onDelete: Cascade)
+
+  // Content & assessment
+  lessons LessonBlocks[]     // ordered blocks of mixed media for this node
+  quiz    Quiz?              // 0..1 quiz per node (Quiz.nodeId is unique)
+
+  // Gating (self-relation). Example: "To start this node, complete Node A".
+  prerequisites SkillNodePrerequisite[] @relation("NodePrereq_node")
+  requiredFor   SkillNodePrerequisite[] @relation("NodePrereq_depends")
+
+  // Progress (per user, per node)
+  progresses UserNodeProgress[]
+
+  @@index([treeId])
+  @@unique([treeId, step, orderInStep]) // unique logical position
+  @@unique([treeId, posX, posY])        // unique canvas coordinates (optional)
+}
+
+// ================================================================
+// SkillNodePrerequisite
+// - Composite PK identifies edges in the prerequisite graph.
+// - Deleting the depended/parent or child node cascades to edges.
+// ================================================================
+model SkillNodePrerequisite {
+  nodeId          String @db.Uuid        // the node being gated (child)
+  dependsOnNodeId String @db.Uuid        // prerequisite (parent)
+
+  node      SkillNode @relation("NodePrereq_node",    fields: [nodeId],          references: [id], onDelete: Cascade)
+  dependsOn SkillNode @relation("NodePrereq_depends", fields: [dependsOnNodeId], references: [id], onDelete: Cascade)
+
+  @@id([nodeId, dependsOnNodeId])
+}
+
+// ================================================================
+// LessonBlocks
+// - Rich content is modeled as ordered blocks for flexibility.
+// - For non-HTML types, use `url`; for HTML, use `html`.
+// - `meta` JSON holds provider-specific data without schema churn.
+// ================================================================
+model LessonBlocks {
+  id        String       @id @default(uuid()) @db.Uuid
+  nodeId    String       @db.Uuid
+  type      ContentType
+  url       String?      // IMAGE/VIDEO/EMBED: remote asset link
+  html      String?      // HTML: inline HTML snippet (sanitized on write)
+  caption   String?
+  order     Int          @default(0) // render ordering within node
+  meta      Json?        // optional structured payload (e.g., provider, dims)
+  status    LessonStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId])
+  @@index([type])
+  @@index([status])
+}
+
+// ================================================================
+// Quiz
+// - At most one quiz per node (nodeId is unique).
+// - `required` means the quiz must be taken for completion logic,
+//   but grading uses only booleans in v1 (no numeric scores). 
+// Rewards can be used later on and completed lessons result in points or unit of choice. 
+// ================================================================
+model Quiz {
+  id        String   @id @default(uuid()) @db.Uuid
+  nodeId    String   @unique @db.Uuid     // 1:1 with SkillNode
+  title     String?
+  required  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  node      SkillNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+// ================================================================
+// QuizQuestion
+// - For open questions, `options` may be empty and we do not auto-grade.
+// - Keep ordering stable for rendering.
+// ================================================================
+model QuizQuestion {
+  id        String       @id @default(uuid()) @db.Uuid
+  quizId    String       @db.Uuid
+  type      QuestionType
+  prompt    String
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options  QuizOption[]       // SINGLE/MULTIPLE; optional for OPEN_QUESTION
+  answers  QuizAttemptAnswer[]// backrefs for per-attempt answers
+
+  @@index([quizId])
+}
+
+// ================================================================
+// QuizOption
+// - Correctness flags live at the option level.
+// - For MULTIPLE_CHOICE, multiple options may be correct.
+// ================================================================
+model QuizOption {
+  id          String   @id @default(uuid()) @db.Uuid
+  questionId  String   @db.Uuid
+  text        String
+  isCorrect   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+// ================================================================
+// QuizAttempt
+// - v1 grading is boolean: passed/failed, no numeric score.
+// - Application logic determines "passed" by checking that all
+//   auto-gradable answers are correct (or true if none exist).
+// ================================================================
+model QuizAttempt {
+  id       String   @id @default(uuid()) @db.Uuid
+  quizId   String   @db.Uuid
+  userId   String
+  passed   Boolean
+  takenAt  DateTime @default(now())
+
+  quiz     Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers  QuizAttemptAnswer[]
+
+  @@index([quizId])
+  @@index([userId])
+}
+
+// ================================================================
+// QuizAttemptAnswer
+// - Stores the raw user answer and computed correctness (if applicable).
+// - JSON `answer` shapes (v1):
+//   SINGLE_CHOICE   -> { selectedOptionIds: ["opt-uuid"] }
+//   MULTIPLE_CHOICE -> { selectedOptionIds: ["opt-uuid", ...] }
+//   OPEN_QUESTION   -> { text: "free response" }
+// - `isCorrect` is null for OPEN_QUESTION in v1.
+// ================================================================
+model QuizAttemptAnswer {
+  id         String   @id @default(uuid()) @db.Uuid
+  attemptId  String   @db.Uuid
+  questionId String   @db.Uuid
+  answer     Json?
+  isCorrect  Boolean? // computed for choice questions; null for OPEN_QUESTION
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId]) // exactly one answer per question per attempt
+  @@index([questionId])
+}
+
+// ================================================================
+// UserNodeProgress
+// - Single row per (user, node) drives dashboards & gating checks.
+// - Completion timestamp is optional and set when finished.
+// ================================================================
+model UserNodeProgress {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String
+  nodeId      String         @db.Uuid
+  status      ProgressStatus @default(NOT_STARTED)
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, nodeId])     // canonical progress row
+  @@index([userId, status])      // "what's in progress/completed for this user?"
+  @@index([nodeId, status])      // "how many users completed this node?"
 }
