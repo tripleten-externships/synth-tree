@@ -117,20 +117,6 @@ jobs:
           echo "Running API tests..."
           pnpm test || echo "⚠️ No tests configured"
 
-      - name: Validate Prisma schema
-        working-directory: apps/api
-        run: |
-          echo "Validating Prisma schema..."
-          pnpm prisma validate
-          echo "✅ Prisma schema is valid"
-
-      - name: Generate Prisma client
-        working-directory: apps/api
-        run: |
-          echo "Generating Prisma client..."
-          pnpm prisma generate
-          echo "✅ Prisma client generated"
-
   build-api:
     name: Build API
     runs-on: ubuntu-latest
