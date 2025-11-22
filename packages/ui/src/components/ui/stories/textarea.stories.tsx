@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Textarea } from "../textarea/textarea";
+import { Textarea } from "../textarea";
 
 const meta: Meta<typeof Textarea> = {
   title: "UI/Text Area/Label with Title and Textarea",
@@ -18,7 +18,7 @@ const meta: Meta<typeof Textarea> = {
     label: "Label",
     title: "Title",
     textarea:
-      "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance\n\nKeyboard controls:\n• Ctrl+Arrows: Resize textarea\n• Shift+Arrows: Move textarea\n• Ctrl+Shift+Arrows: Move label\n• PageUp/PageDown: Adjust label distance",
+      "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance\n\nKeyboard controls:\n• Ctrl+Arrows: Increase size (east/south)\n• Alt+Arrows: Decrease size (west/north)\n• Shift+Arrows: Move textarea\n• Ctrl+Shift+Arrows: Move label & adjust distance\n• Ctrl+Shift+↑/↓: Adjust label distance (15px increments)",
     initialWidth: 400,
     initialHeight: 200,
     minWidth: 200,

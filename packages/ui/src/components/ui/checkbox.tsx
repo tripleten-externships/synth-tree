@@ -3,6 +3,8 @@ import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
+import { useDimensions } from "@/hooks/useDimensions";
+import { useCheckboxStyles, useCheckmarkStyles } from "@/hooks/useComponentStyles";
 
 const sizeMappings = {
   sm: { width: 12, height: 12, iconSize: 10 },
@@ -64,35 +66,53 @@ const Checkbox = React.forwardRef<
   widthOffset = 0,
   heightOffset = 0,
   iconSizeOffset = 0,
+  checked,
   ...props
 }, ref) => {
-  const dimensions = sizeMappings[size];
-  const finalWidth = (width ?? dimensions.width) + widthOffset;
-  const finalHeight = (height ?? dimensions.height) + heightOffset;
-  const finalIconSize = (iconSize ?? dimensions.iconSize) + iconSizeOffset;
+  const { width: finalWidth, height: finalHeight, iconSize: finalIconSize } = useDimensions({
+    sizeMappings,
+    size,
+    width,
+    height,
+    iconSize,
+    widthOffset,
+    heightOffset,
+    iconSizeOffset,
+  });
+
+  const checkboxStyles = useCheckboxStyles({
+    width: finalWidth,
+    height: finalHeight,
+    checkedColor,
+    uncheckedColor,
+    borderColor,
+  });
+
+  const checkmarkStyles = useCheckmarkStyles({
+    checkmarkColor: checkedCheckmarkColor,
+    fontSize: finalIconSize!,
+  });
+
+  const rootProps = {
+    className: cn(
+      "peer shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      "w-[var(--checkbox-width)] h-[var(--checkbox-height)] bg-[var(--unchecked-bg)] data-[state=checked]:bg-[var(--checked-bg)] border",
+      className
+    ),
+    style: checkboxStyles,
+    ...props,
+    ref,
+  } as React.ComponentProps<typeof CheckboxPrimitive.Root>;
+
+  if (checked !== undefined) {
+    rootProps.checked = checked;
+  }
 
   return (
-    <CheckboxPrimitive.Root
-      className={cn(
-        "peer shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        "w-[var(--checkbox-width)] h-[var(--checkbox-height)] bg-[var(--checkbox-bg)] border",
-        className
-      )}
-      style={{
-        '--checkbox-width': `${finalWidth}px`,
-        '--checkbox-height': `${finalHeight}px`,
-        '--checkbox-bg': props.checked ? checkedColor : uncheckedColor,
-        borderColor: borderColor,
-      } as React.CSSProperties}
-      {...props}
-      ref={ref}
-    >
+    <CheckboxPrimitive.Root {...rootProps}>
       <CheckboxPrimitive.Indicator
         className="flex items-center justify-center text-[var(--checkmark-color)]"
-        style={{
-          '--checkmark-color': checkedCheckmarkColor,
-          fontSize: `${finalIconSize}px`,
-        } as React.CSSProperties}
+        style={checkmarkStyles}
       >
         <Check className="h-full w-full" />
       </CheckboxPrimitive.Indicator>

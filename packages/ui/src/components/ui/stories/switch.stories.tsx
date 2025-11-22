@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Switch } from "../switch/switch";
+import { Switch } from "../switch";
+import {
+  createSizeArgTypes,
+  createDimensionArgTypes,
+  createIconSizeArgTypes,
+  createStateArgTypes,
+  createColorArgTypes,
+  createThumbColorArgTypes,
+  createSwitchDefaults,
+} from "@/utils/storybook-helpers";
 
 const meta: Meta<typeof Switch> = {
   title: "UI/Switch",
@@ -15,51 +24,12 @@ const meta: Meta<typeof Switch> = {
   },
   tags: ["autodocs"],
   argTypes: {
-    size: {
-      control: { type: "select" },
-      options: ["sm", "default", "lg"],
-      description: "Switch size preset",
-    },
-    widthOffset: {
-      control: { type: "range", min: -20, max: 20, step: 1 },
-      description: "Width offset from size preset",
-    },
-    heightOffset: {
-      control: { type: "range", min: -10, max: 10, step: 1 },
-      description: "Height offset from size preset",
-    },
-    thumbSizeOffset: {
-      control: { type: "range", min: -10, max: 10, step: 1 },
-      description: "Thumb size offset from size preset",
-    },
-    checked: {
-      control: { type: "boolean" },
-      description: "Checked state",
-    },
-    disabled: {
-      control: { type: "boolean" },
-      description: "Disabled state",
-    },
-    checkedColor: {
-      control: { type: "color" },
-      description: "Background color when checked",
-    },
-    uncheckedColor: {
-      control: { type: "color" },
-      description: "Background color when unchecked",
-    },
-    borderColor: {
-      control: { type: "color" },
-      description: "Border color",
-    },
-    checkedThumbColor: {
-      control: { type: "color" },
-      description: "Thumb color when checked",
-    },
-    uncheckedThumbColor: {
-      control: { type: "color" },
-      description: "Thumb color when unchecked",
-    },
+    ...createSizeArgTypes(),
+    ...createDimensionArgTypes(),
+    ...createIconSizeArgTypes("thumb"),
+    ...createStateArgTypes(),
+    ...createColorArgTypes(),
+    ...createThumbColorArgTypes(),
   },
 };
 
@@ -67,47 +37,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: {
-    size: "default",
-    widthOffset: 0,
-    heightOffset: 0,
-    thumbSizeOffset: 0,
-    checkedColor: "hsl(var(--primary))",
-    uncheckedColor: "hsl(var(--muted))",
-    borderColor: "hsl(var(--border))",
-    checkedThumbColor: "hsl(var(--primary-foreground))",
-    uncheckedThumbColor: "hsl(var(--muted-foreground))",
-  },
+  args: createSwitchDefaults(),
 };
 
 export const Checked: Story = {
-  args: {
-    checked: true,
-    size: "default",
-    widthOffset: 0,
-    heightOffset: 0,
-    thumbSizeOffset: 0,
-    checkedColor: "hsl(var(--primary))",
-    uncheckedColor: "hsl(var(--muted))",
-    borderColor: "hsl(var(--border))",
-    checkedThumbColor: "hsl(var(--primary-foreground))",
-    uncheckedThumbColor: "hsl(var(--muted-foreground))",
-  },
+  args: createSwitchDefaults({ checked: true }),
 };
 
 export const Disabled: Story = {
-  args: {
-    disabled: true,
-    size: "default",
-    widthOffset: 0,
-    heightOffset: 0,
-    thumbSizeOffset: 0,
-    checkedColor: "hsl(var(--primary))",
-    uncheckedColor: "hsl(var(--muted))",
-    borderColor: "hsl(var(--border))",
-    checkedThumbColor: "hsl(var(--primary-foreground))",
-    uncheckedThumbColor: "hsl(var(--muted-foreground))",
-  },
+  args: createSwitchDefaults({ disabled: true }),
 };
 
 export const Sizes: Story = {

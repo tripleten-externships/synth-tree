@@ -38,12 +38,16 @@ export { Toaster, toast } from "./components/ui/sonner";
 
 // Form components - ST-34
 export { Label } from "./components/ui/label"; // Form labeling (Radix)
-export { Textarea } from "./components/ui/textarea/textarea"; // Resizable modal textarea
-export { Checkbox } from "./components/ui/checkbox/checkbox"; // Binary select (Radix)
-export { Switch, switchVariants } from "./components/ui/switch/switch"; // Toggle (Radix)
+export { Textarea } from "./components/ui/textarea"; // Resizable modal textarea
+export { Checkbox } from "./components/ui/checkbox"; // Binary select (Radix)
+export { Switch, switchVariants } from "./components/ui/switch"; // Toggle (Radix)
 
 // Export utilities
 export { cn, cnUI } from "./utils";
+
+// Export hooks
+export { useDimensions } from "./hooks";
+export type { SizeMappings, UseDimensionsOptions, DimensionResult } from "./hooks";
 
 // Re-export theme utilities for convenience
 export {

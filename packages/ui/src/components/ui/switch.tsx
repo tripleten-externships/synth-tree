@@ -2,6 +2,8 @@ import * as React from "react";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
+import { useDimensions } from "@/hooks/useDimensions";
+import { useSwitchStyles, useThumbStyles } from "@/hooks/useComponentStyles";
 
 const sizeMappings = {
   sm: { width: 28, height: 16, thumbSize: 12 },
@@ -100,34 +102,45 @@ const Switch = React.forwardRef<
   thumbSizeOffset = 0,
   ...props
 }, ref) => {
-  const dimensions = sizeMappings[size];
-  const finalWidth = (width ?? dimensions.width) + widthOffset;
-  const finalHeight = (height ?? dimensions.height) + heightOffset;
-  const finalThumbSize = (thumbSize ?? dimensions.thumbSize) + thumbSizeOffset;
+  const { width: finalWidth, height: finalHeight, thumbSize: finalThumbSize } = useDimensions({
+    sizeMappings,
+    size,
+    width,
+    height,
+    thumbSize,
+    widthOffset,
+    heightOffset,
+    thumbSizeOffset,
+  });
+
+  const switchStyles = useSwitchStyles({
+    width: finalWidth,
+    height: finalHeight,
+    checkedColor,
+    uncheckedColor,
+    borderColor,
+  });
+
+  const thumbStyles = useThumbStyles({
+    thumbSize: finalThumbSize,
+    checkedThumbColor,
+    uncheckedThumbColor,
+  });
 
   return (
     <SwitchPrimitive.Root
       className={cn(
         "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",
-        "w-[var(--switch-width)] h-[var(--switch-height)] bg-[var(--switch-bg)] border-[var(--switch-border)]",
+        "w-[var(--switch-width)] h-[var(--switch-height)] bg-[var(--unchecked-bg)] data-[state=checked]:bg-[var(--checked-bg)]",
         className
       )}
-      style={{
-        '--switch-width': `${finalWidth}px`,
-        '--switch-height': `${finalHeight}px`,
-        '--switch-bg': props.checked ? checkedColor : uncheckedColor,
-        '--switch-border': borderColor,
-      } as React.CSSProperties}
+      style={switchStyles}
       {...props}
       ref={ref}
     >
       <SwitchPrimitive.Thumb
-        className="pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0 w-[var(--thumb-size)] h-[var(--thumb-size)] bg-[var(--thumb-bg)]"
-        style={{
-          '--thumb-size': `${finalThumbSize}px`,
-          '--thumb-bg': props.checked ? checkedThumbColor : uncheckedThumbColor,
-          transform: props.checked ? `translateX(calc(var(--switch-width) - var(--thumb-size)))` : 'translateX(0)',
-        } as React.CSSProperties}
+        className="pointer-events-none block rounded-full shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0 w-[var(--thumb-size)] h-[var(--thumb-size)] bg-[var(--unchecked-thumb-bg)] data-[state=checked]:bg-[var(--checked-thumb-bg)]"
+        style={thumbStyles}
       />
     </SwitchPrimitive.Root>
   );
