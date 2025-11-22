@@ -3,19 +3,12 @@ import express, { Request, Response } from "express";
 import http from "http";
 import cors from "cors";
 import { expressMiddleware } from "@as-integrations/express5";
-import { ApolloServer, BaseContext } from "@apollo/server";
+import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { schema } from "./schema";
-import { admin } from "./firebase";
-
-export interface Context extends BaseContext {
-  user?: {
-    uid: string;
-    email?: string;
-    role: string;
-  };
-}
+import { createGraphQLContext, GraphQLContext } from "@graphql/context";
+import { prisma } from "@lib/prisma";
 
 async function start() {
   const app = express();
@@ -30,7 +23,7 @@ async function start() {
   app.use(cors());
   app.use(express.json());
 
-  const server = new ApolloServer<Context>({
+  const server = new ApolloServer<GraphQLContext>({
     schema,
     introspection: true,
     plugins: [
@@ -50,17 +43,7 @@ async function start() {
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        const token = req.headers.authorization?.replace("Bearer ", "");
-        let user = null;
-        if (token && admin) {
-          const decoded = await admin.auth().verifyIdToken(token);
-          user = {
-            uid: decoded.uid,
-            email: decoded.email,
-            role: decoded.role || "user",
-          };
-        }
-        return { user };
+        return createGraphQLContext({ req, prisma });
       },
     })
   );
