@@ -76,7 +76,6 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  lessons   Lesson[] @relation("UserLessons")
 
   // Authoring:
   coursesAuthored Course[]         @relation("CourseAuthor")
