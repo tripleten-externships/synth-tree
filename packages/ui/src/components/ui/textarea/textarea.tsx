@@ -1,15 +1,6 @@
 import * as React from "react";
 import { cn } from "@/utils";
-// NOTE: Custom hooks are imported but not yet used - component still uses inline implementation
-// TODO: Refactor to use hooks for better separation of concerns and testability
-import { useTextareaPositioning } from "@/hooks/useTextareaPositioning";
-import { useTextareaDragging } from "@/hooks/useTextareaDragging";
-import { useTextareaResizing } from "@/hooks/useTextareaResizing";
 
-/**
- * Supported resize directions for multi-directional textarea resizing
- * WHY: TypeScript ensures only valid directions are used, preventing runtime errors
- */
 type ResizeDirection =
   | "north"
   | "east"
@@ -20,54 +11,25 @@ type ResizeDirection =
   | "southeast"
   | "southwest";
 
-/**
- * Props for the interactive textarea component with advanced features
- *
- * WHAT: Defines interface for a fully interactive textarea with drag, resize, and label positioning
- * WHY: Extends standard HTML textarea props while adding custom interactive features.
- *      Uses Omit to exclude conflicting 'textarea' prop that would override the custom implementation.
- */
 export interface TextareaProps
   extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "textarea"> {
-  /** Text displayed in the draggable label above the textarea */
+  /**text blocks */
   label?: string;
-  /** Title text displayed in the header section */
   title?: string;
-  /** React node to render inside textarea (alternative to standard value/onChange) */
   textarea?: React.ReactNode;
-  /** Initial width in pixels */
   initialWidth?: number;
-  /** Initial height in pixels */
   initialHeight?: number;
-  /** Minimum allowed width constraint */
+  /**  constraints */
   minWidth?: number;
-  /** Minimum allowed height constraint */
   minHeight?: number;
-  /** Maximum allowed width constraint */
   maxWidth?: number;
-  /** Maximum allowed height constraint */
   maxHeight?: number;
-  /** Placeholder text (passed through to underlying textarea) */
   placeholder?: string;
-  /** Additional CSS classes for the container element */
   containerClassName?: string;
 }
 
-/**
- * Interactive textarea component with drag, resize, and label positioning capabilities
- *
- * WHAT: Renders a fully interactive textarea with modal-like behavior, draggable positioning,
- *       multi-directional resizing, and a repositionable label with distance control
- * HOW: Combines multiple custom hooks for positioning, dragging, and resizing logic.
- *      Uses complex state management for interaction states and mouse event handling.
- * WHY: Provides rich textarea UX similar to design tools. Separates concerns with hooks
- *      for maintainability. Complex event handling prevents conflicts between drag/resize/text selection.
- *      Extensive state management ensures smooth interactions and proper cleanup.
- */
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (props, ref) => {
-    // WHAT: Extract props with sensible defaults
-    // WHY: Provides fallback values for optional props while maintaining type safety
     const {
       className,
       label = "Label",
@@ -152,11 +114,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       initialResizeBoundsRef.current = initialResizeBounds;
     }, [initialResizeBounds]);
 
-    // WHAT: Center the textarea in the viewport on mount
-    // HOW: Calculates center position based on viewport size and initial dimensions, accounting for parent element offset
-    // WHY: Better UX - textarea appears centered rather than at (0,0). Uses setTimeout to ensure parent is rendered.
-    //      Math.max(0, ...) prevents negative positions. Inline implementation vs hook: allows direct state access
-    //      without additional abstraction layer. Hook version exists but not used for tighter coupling during development.
+    // Center the textarea in the viewport on mount
     React.useEffect(() => {
       const centerTextarea = () => {
         const viewportWidth = window.innerWidth;
@@ -176,11 +134,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         setTextareaPosition({ x: centerX, y: centerY });
       };
 
-      // WHY: Delay ensures parent element is fully rendered before calculating position
+      // Delay to ensure parent is rendered
       const timeoutId = setTimeout(centerTextarea, 0);
 
-      // WHAT: Recenter textarea when window resizes
-      // WHY: Maintains centered appearance during responsive layout changes
+      // Optional: Recenter on window resize
       const handleResize = () => {
         centerTextarea();
       };
@@ -192,11 +149,6 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       };
     }, [initialWidth, initialHeight]);
 
-    // WHAT: Initiates resize operation for specified direction
-    // HOW: Sets up resize state and attaches global mouse listeners for smooth resizing
-    // WHY: Global listeners allow resizing even when mouse moves outside textarea bounds.
-    //      Inline implementation vs hook: allows direct access to component state without prop drilling.
-    //      More performant for complex resize calculations that need immediate state access.
     const handleResizeStart = React.useCallback(
       (e: React.MouseEvent, direction: ResizeDirection) => {
         e.preventDefault();

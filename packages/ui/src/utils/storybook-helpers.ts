@@ -50,7 +50,9 @@ export function createDimensionArgTypes(): ArgTypes {
  *      Dynamic property naming enables reuse for both icons and thumbs.
  *      Smaller range than dimensions since icons/thumbs are secondary elements.
  */
-export function createIconSizeArgTypes(iconType: "icon" | "thumb" = "icon"): ArgTypes {
+export function createIconSizeArgTypes(
+  iconType: "icon" | "thumb" = "icon"
+): ArgTypes {
   const label = iconType === "icon" ? "Icon" : "Thumb";
   return {
     [`${iconType}SizeOffset`]: {
@@ -179,7 +181,9 @@ export interface SwitchDefaultArgs {
  *      colors (hsl(var(--primary))) for theme compatibility. Centralized defaults prevent
  *      duplication and ensure consistency. Alternative: Inline defaults would be inconsistent.
  */
-export function createCheckboxDefaults(overrides: Partial<CheckboxDefaultArgs> = {}): CheckboxDefaultArgs {
+export function createCheckboxDefaults(
+  overrides: Partial<CheckboxDefaultArgs> = {}
+): CheckboxDefaultArgs {
   return {
     size: "default",
     widthOffset: 0,
@@ -202,7 +206,9 @@ export function createCheckboxDefaults(overrides: Partial<CheckboxDefaultArgs> =
  *      Uses muted colors for unchecked state to match switch design patterns.
  *      Thumb colors are foreground colors for better contrast.
  */
-export function createSwitchDefaults(overrides: Partial<SwitchDefaultArgs> = {}): SwitchDefaultArgs {
+export function createSwitchDefaults(
+  overrides: Partial<SwitchDefaultArgs> = {}
+): SwitchDefaultArgs {
   return {
     size: "default",
     widthOffset: 0,

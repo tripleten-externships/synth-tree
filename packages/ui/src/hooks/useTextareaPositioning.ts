@@ -34,10 +34,11 @@ export function useTextareaPositioning({
 }: UseTextareaPositioningOptions) {
   // WHAT: Store current position state
   // WHY: Standard React state management for position coordinates
-  const [textareaPosition, setTextareaPosition] = React.useState<TextareaPosition>({
-    x: 0,
-    y: 0,
-  });
+  const [textareaPosition, setTextareaPosition] =
+    React.useState<TextareaPosition>({
+      x: 0,
+      y: 0,
+    });
 
   // WHAT: Ref for synchronous position access during mouse events
   // WHY: Mouse event handlers need immediate position values without waiting for React state updates.
@@ -58,11 +59,18 @@ export function useTextareaPositioning({
     const centerTextarea = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const parentRect = containerRef.current?.parentElement?.getBoundingClientRect();
+      const parentRect =
+        containerRef.current?.parentElement?.getBoundingClientRect();
 
       // Calculate center position, accounting for parent element offset
-      const centerX = Math.max(0, (viewportWidth - initialWidth) / 2 - (parentRect?.left || 0));
-      const centerY = Math.max(0, (viewportHeight - initialHeight) / 2 - (parentRect?.top || 0));
+      const centerX = Math.max(
+        0,
+        (viewportWidth - initialWidth) / 2 - (parentRect?.left || 0)
+      );
+      const centerY = Math.max(
+        0,
+        (viewportHeight - initialHeight) / 2 - (parentRect?.top || 0)
+      );
 
       setTextareaPosition({ x: centerX, y: centerY });
     };
@@ -76,12 +84,12 @@ export function useTextareaPositioning({
       centerTextarea();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     return () => {
       // WHAT: Cleanup timeout and event listener
       // WHY: Prevents memory leaks and ensures event listeners are removed when component unmounts
       clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, [initialWidth, initialHeight, containerRef]);
 

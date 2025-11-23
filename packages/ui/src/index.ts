@@ -47,7 +47,11 @@ export { cn, cnUI } from "./utils";
 
 // Export hooks
 export { useDimensions } from "./hooks";
-export type { SizeMappings, UseDimensionsOptions, DimensionResult } from "./hooks";
+export type {
+  SizeMappings,
+  UseDimensionsOptions,
+  DimensionResult,
+} from "./hooks";
 
 // Re-export theme utilities for convenience
 export {

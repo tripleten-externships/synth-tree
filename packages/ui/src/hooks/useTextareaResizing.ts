@@ -30,9 +30,13 @@ export interface UseTextareaResizingOptions {
   maxHeight: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
   textareaDimensions: { width: number; height: number };
-  setTextareaDimensions: React.Dispatch<React.SetStateAction<{ width: number; height: number }>>;
+  setTextareaDimensions: React.Dispatch<
+    React.SetStateAction<{ width: number; height: number }>
+  >;
   textareaPosition: { x: number; y: number };
-  setTextareaPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  setTextareaPosition: React.Dispatch<
+    React.SetStateAction<{ x: number; y: number }>
+  >;
 }
 
 /**
@@ -58,15 +62,19 @@ export function useTextareaResizing({
 
   // WHAT: Store current resize direction (north, east, etc.)
   // WHY: Determines how mouse movements affect dimensions and position
-  const [currentResizeDirection, setCurrentResizeDirection] = React.useState<ResizeDirection | null>(null);
+  const [currentResizeDirection, setCurrentResizeDirection] =
+    React.useState<ResizeDirection | null>(null);
 
   // WHAT: Track which resize edges are being hovered
   // WHY: Provides visual feedback for available resize directions
-  const [hoveredResizeEdge, setHoveredResizeEdge] = React.useState<string[]>([]);
+  const [hoveredResizeEdge, setHoveredResizeEdge] = React.useState<string[]>(
+    []
+  );
 
   // WHAT: Store initial textarea bounds at resize start
   // WHY: Used as reference point for calculating relative mouse movements
-  const [initialResizeBounds, setInitialResizeBounds] = React.useState<DOMRect | null>(null);
+  const [initialResizeBounds, setInitialResizeBounds] =
+    React.useState<DOMRect | null>(null);
 
   // WHAT: Refs for synchronous access during mouse events
   // WHY: Mouse event handlers need immediate values without waiting for React state updates
@@ -227,16 +235,24 @@ export function useTextareaResizing({
         setIsResizingActive(false);
         setCurrentResizeDirection(null);
         currentResizeDirectionRef.current = null;
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
 
       // WHAT: Attach global mouse listeners for resize operation
       // WHY: Allows smooth resizing even when mouse moves outside textarea bounds
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     },
-    [minWidth, minHeight, maxWidth, maxHeight, containerRef, setTextareaDimensions, setTextareaPosition]
+    [
+      minWidth,
+      minHeight,
+      maxWidth,
+      maxHeight,
+      containerRef,
+      setTextareaDimensions,
+      setTextareaPosition,
+    ]
   );
 
   // WHAT: Return resize state and handlers for use in textarea component

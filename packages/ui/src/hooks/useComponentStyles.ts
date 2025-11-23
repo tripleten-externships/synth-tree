@@ -25,20 +25,24 @@ export function useCheckboxStyles({
   // WHAT: Memoize style object to prevent unnecessary re-renders
   // HOW: Recalculates only when dependencies change
   // WHY: Performance optimization - prevents style recalculation on every render
-  return React.useMemo(() => ({
-    // WHAT: CSS custom properties for dynamic sizing
-    // WHY: Allows CSS to reference dynamic values without inline styles
-    '--checkbox-width': `${width}px`,
-    '--checkbox-height': `${height}px`,
-    // WHAT: CSS custom properties for color theming
-    // WHY: Enables theme switching and color customization through CSS variables
-    '--unchecked-bg': uncheckedColor,
-    '--checked-bg': checkedColor,
-    '--border-color': borderColor,
-    // WHAT: Fallback border color for browsers that don't support CSS custom properties
-    // WHY: Ensures styling works in older browsers as graceful degradation
-    borderColor: 'var(--border-color)',
-  } as React.CSSProperties), [width, height, checkedColor, uncheckedColor, borderColor]);
+  return React.useMemo(
+    () =>
+      ({
+        // WHAT: CSS custom properties for dynamic sizing
+        // WHY: Allows CSS to reference dynamic values without inline styles
+        "--checkbox-width": `${width}px`,
+        "--checkbox-height": `${height}px`,
+        // WHAT: CSS custom properties for color theming
+        // WHY: Enables theme switching and color customization through CSS variables
+        "--unchecked-bg": uncheckedColor,
+        "--checked-bg": checkedColor,
+        "--border-color": borderColor,
+        // WHAT: Fallback border color for browsers that don't support CSS custom properties
+        // WHY: Ensures styling works in older browsers as graceful degradation
+        borderColor: "var(--border-color)",
+      } as React.CSSProperties),
+    [width, height, checkedColor, uncheckedColor, borderColor]
+  );
 }
 
 /**
@@ -65,18 +69,22 @@ export function useSwitchStyles({
   // WHAT: Memoize style object to prevent unnecessary re-renders
   // HOW: Recalculates only when dependencies change
   // WHY: Performance optimization - prevents style recalculation on every render
-  return React.useMemo(() => ({
-    // WHAT: CSS custom properties for dynamic sizing
-    // WHY: Allows CSS to reference dynamic values without inline styles
-    '--switch-width': `${width}px`,
-    '--switch-height': `${height}px`,
-    // WHAT: CSS custom properties for color theming
-    // WHY: Enables theme switching and color customization through CSS variables
-    '--unchecked-bg': uncheckedColor,
-    '--checked-bg': checkedColor,
-    '--border-color': borderColor,
-    borderColor: 'var(--border-color)',
-  } as React.CSSProperties), [width, height, checkedColor, uncheckedColor, borderColor]);
+  return React.useMemo(
+    () =>
+      ({
+        // WHAT: CSS custom properties for dynamic sizing
+        // WHY: Allows CSS to reference dynamic values without inline styles
+        "--switch-width": `${width}px`,
+        "--switch-height": `${height}px`,
+        // WHAT: CSS custom properties for color theming
+        // WHY: Enables theme switching and color customization through CSS variables
+        "--unchecked-bg": uncheckedColor,
+        "--checked-bg": checkedColor,
+        "--border-color": borderColor,
+        borderColor: "var(--border-color)",
+      } as React.CSSProperties),
+    [width, height, checkedColor, uncheckedColor, borderColor]
+  );
 }
 
 /**
@@ -94,14 +102,18 @@ export function useCheckmarkStyles({
   checkmarkColor: string;
   fontSize: number;
 }) {
-  return React.useMemo(() => ({
-    // WHAT: CSS custom property for checkmark color theming
-    // WHY: Allows theme-based color changes without component re-renders
-    '--checkmark-color': checkmarkColor,
-    // WHAT: Direct fontSize for icon scaling
-    // WHY: Icons need explicit sizing, not CSS custom properties for better browser support
-    fontSize: `${fontSize}px`,
-  } as React.CSSProperties), [checkmarkColor, fontSize]);
+  return React.useMemo(
+    () =>
+      ({
+        // WHAT: CSS custom property for checkmark color theming
+        // WHY: Allows theme-based color changes without component re-renders
+        "--checkmark-color": checkmarkColor,
+        // WHAT: Direct fontSize for icon scaling
+        // WHY: Icons need explicit sizing, not CSS custom properties for better browser support
+        fontSize: `${fontSize}px`,
+      } as React.CSSProperties),
+    [checkmarkColor, fontSize]
+  );
 }
 
 /**
@@ -121,13 +133,17 @@ export function useThumbStyles({
   checkedThumbColor: string;
   uncheckedThumbColor: string;
 }) {
-  return React.useMemo(() => ({
-    // WHAT: CSS custom property for thumb size
-    // WHY: Allows dynamic sizing based on switch dimensions
-    '--thumb-size': `${thumbSize}px`,
-    // WHAT: CSS custom properties for thumb color theming
-    // WHY: Enables state-based color changes (checked vs unchecked) through CSS variables
-    '--unchecked-thumb-bg': uncheckedThumbColor,
-    '--checked-thumb-bg': checkedThumbColor,
-  } as React.CSSProperties), [thumbSize, checkedThumbColor, uncheckedThumbColor]);
+  return React.useMemo(
+    () =>
+      ({
+        // WHAT: CSS custom property for thumb size
+        // WHY: Allows dynamic sizing based on switch dimensions
+        "--thumb-size": `${thumbSize}px`,
+        // WHAT: CSS custom properties for thumb color theming
+        // WHY: Enables state-based color changes (checked vs unchecked) through CSS variables
+        "--unchecked-thumb-bg": uncheckedThumbColor,
+        "--checked-thumb-bg": checkedThumbColor,
+      } as React.CSSProperties),
+    [thumbSize, checkedThumbColor, uncheckedThumbColor]
+  );
 }
