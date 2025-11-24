@@ -18,7 +18,7 @@ const meta: Meta<typeof Textarea> = {
     label: "Label",
     title: "Title",
     textarea:
-      "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance\n\nKeyboard controls:\n• Ctrl+Arrows: Resize textarea\n• Shift+Arrows: Move textarea\n• Ctrl+Shift+Arrows: Move label\n• PageUp/PageDown: Adjust label distance",
+      "Type your text here...\n\nMouse controls:\n• Click & drag textarea: Move position\n• Click & drag label: Reposition label\n• Drag resize handles: Resize textarea\n• Scroll wheel on label: Adjust distance",
     initialWidth: 400,
     initialHeight: 200,
     minWidth: 200,

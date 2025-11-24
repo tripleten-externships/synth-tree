@@ -3,9 +3,9 @@ import type { ArgTypes } from "@storybook/react";
 /**
  * Creates standardized size argTypes for Storybook controls
  *
- * WHAT: Generates consistent size selection controls for component stories
- * HOW: Returns ArgTypes configuration with select control and size options
- * WHY: Ensures consistent sizing controls across all component stories. Select control
+ * Generates consistent size selection controls for component stories
+ * Returns ArgTypes configuration with select control and size options
+ * Ensures consistent sizing controls across all component stories. Select control
  *      prevents invalid size values. Centralized definition prevents duplication.
  *      Alternative: Inline argTypes would be inconsistent and harder to maintain.
  */
@@ -22,9 +22,9 @@ export function createSizeArgTypes(): ArgTypes {
 /**
  * Creates standardized dimension offset argTypes for Storybook controls
  *
- * WHAT: Generates range controls for width/height adjustments relative to size presets
- * HOW: Returns ArgTypes with range controls for offset values
- * WHY: Allows fine-tuning of component dimensions while maintaining base size consistency.
+ * Generates range controls for width/height adjustments relative to size presets
+ * Returns ArgTypes with range controls for offset values
+ * Allows fine-tuning of component dimensions while maintaining base size consistency.
  *      Range controls provide intuitive +/- adjustments. Prevents extreme values with min/max.
  *      Alternative: Separate width/height controls would be less intuitive and more cluttered.
  */
@@ -44,9 +44,9 @@ export function createDimensionArgTypes(): ArgTypes {
 /**
  * Creates standardized icon/thumb size offset argTypes for Storybook controls
  *
- * WHAT: Generates range controls for icon or thumb size adjustments
- * HOW: Returns ArgTypes with dynamic property names based on iconType parameter
- * WHY: Allows customization of internal element sizes while maintaining proportions.
+ * Generates range controls for icon or thumb size adjustments
+ * Returns ArgTypes with dynamic property names based on iconType parameter
+ * Allows customization of internal element sizes while maintaining proportions.
  *      Dynamic property naming enables reuse for both icons and thumbs.
  *      Smaller range than dimensions since icons/thumbs are secondary elements.
  */
@@ -65,9 +65,9 @@ export function createIconSizeArgTypes(
 /**
  * Creates standardized state argTypes for Storybook controls
  *
- * WHAT: Generates boolean controls for component state management
- * HOW: Returns ArgTypes with boolean control for checked state
- * WHY: Provides consistent state controls across interactive components.
+ * Generates boolean controls for component state management
+ * Returns ArgTypes with boolean control for checked state
+ * Provides consistent state controls across interactive components.
  *      Boolean control is most appropriate for binary states.
  */
 export function createStateArgTypes(): ArgTypes {
@@ -106,9 +106,9 @@ export function createColorArgTypes(): ArgTypes {
 /**
  * Creates standardized checkmark color argTypes for Storybook controls
  *
- * WHAT: Generates color picker controls for checkmark theming
- * HOW: Returns ArgTypes with color control for checkmark appearance
- * WHY: Allows customization of checkmark color independently from background.
+ * Generates color picker controls for checkmark theming
+ * Returns ArgTypes with color control for checkmark appearance
+ * Allows customization of checkmark color independently from background.
  *      Specific to checkbox components that have checkmark icons.
  */
 export function createCheckmarkColorArgTypes(): ArgTypes {
@@ -123,9 +123,9 @@ export function createCheckmarkColorArgTypes(): ArgTypes {
 /**
  * Creates standardized thumb color argTypes for switch components
  *
- * WHAT: Generates color picker controls for switch thumb theming
- * HOW: Returns ArgTypes with color controls for both checked and unchecked thumb states
- * WHY: Switch thumbs have distinct colors for different states, unlike checkboxes.
+ * Generates color picker controls for switch thumb theming
+ * Returns ArgTypes with color controls for both checked and unchecked thumb states
+ * Switch thumbs have distinct colors for different states, unlike checkboxes.
  *      Allows independent theming of the movable thumb element.
  */
 export function createThumbColorArgTypes(): ArgTypes {
@@ -141,8 +141,8 @@ export function createThumbColorArgTypes(): ArgTypes {
   };
 }
 
-// WHAT: Type definitions for default args factories
-// WHY: Provides type safety for default argument creation and prevents typos
+// Type definitions for default args factories
+// Provides type safety for default argument creation and prevents typos
 
 export interface CheckboxDefaultArgs {
   size: "sm" | "default" | "lg";
@@ -175,9 +175,9 @@ export interface SwitchDefaultArgs {
 /**
  * Creates standardized default args for checkbox components
  *
- * WHAT: Generates complete default argument objects for checkbox stories
- * HOW: Returns CheckboxDefaultArgs with sensible defaults, overridden by provided values
- * WHY: Ensures consistent baseline appearance across checkbox stories. Uses design system
+ * Generates complete default argument objects for checkbox stories
+ * Returns CheckboxDefaultArgs with sensible defaults, overridden by provided values
+ * Ensures consistent baseline appearance across checkbox stories. Uses design system
  *      colors (hsl(var(--primary))) for theme compatibility. Centralized defaults prevent
  *      duplication and ensure consistency. Alternative: Inline defaults would be inconsistent.
  */
@@ -200,9 +200,9 @@ export function createCheckboxDefaults(
 /**
  * Creates standardized default args for switch components
  *
- * WHAT: Generates complete default argument objects for switch stories
- * HOW: Returns SwitchDefaultArgs with sensible defaults, overridden by provided values
- * WHY: Same benefits as createCheckboxDefaults but with switch-specific defaults.
+ * Generates complete default argument objects for switch stories
+ * Returns SwitchDefaultArgs with sensible defaults, overridden by provided values
+ * Same benefits as createCheckboxDefaults but with switch-specific defaults.
  *      Uses muted colors for unchecked state to match switch design patterns.
  *      Thumb colors are foreground colors for better contrast.
  */

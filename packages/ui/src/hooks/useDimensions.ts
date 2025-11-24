@@ -2,8 +2,8 @@ import * as React from "react";
 
 /**
  * Size mapping interface for component dimensions
- * WHY: Provides type-safe size configurations for different component variants
- * HOW: Maps size keys (sm, md, lg) to dimension objects with width, height, and optional icon/thumb sizes
+ * Provides type-safe size configurations for different component variants
+ * Maps size keys (sm, md, lg) to dimension objects with width, height, and optional icon/thumb sizes
  */
 export interface SizeMappings {
   [key: string]: {
@@ -16,7 +16,7 @@ export interface SizeMappings {
 
 /**
  * Options for the useDimensions hook
- * WHY: Allows flexible dimension calculation with base mappings and runtime overrides
+ * Allows flexible dimension calculation with base mappings and runtime overrides
  */
 export interface UseDimensionsOptions {
   sizeMappings: SizeMappings;
@@ -33,7 +33,7 @@ export interface UseDimensionsOptions {
 
 /**
  * Result interface for calculated dimensions
- * WHY: Provides consistent return type for all dimension calculations
+ * Provides consistent return type for all dimension calculations
  */
 export interface DimensionResult {
   width: number;
@@ -45,9 +45,9 @@ export interface DimensionResult {
 /**
  * Custom hook for calculating component dimensions with size mappings and offsets
  *
- * WHAT: Calculates final dimensions by combining size mappings with runtime overrides and offsets
- * HOW: Looks up base dimensions from sizeMappings, applies prop overrides, then adds offsets
- * WHY: Enables consistent sizing across components while allowing customization. Size mappings
+ * Calculates final dimensions by combining size mappings with runtime overrides and offsets
+ * Looks up base dimensions from sizeMappings, applies prop overrides, then adds offsets
+ * Enables consistent sizing across components while allowing customization. Size mappings
  *      ensure design system consistency. Offsets allow for padding/margin adjustments.
  *      Hook vs inline: Reusable across Checkbox/Switch components, testable in isolation.
  *      Alternative: Inline calculations would duplicate logic and be harder to maintain.
@@ -64,13 +64,13 @@ export function useDimensions({
   iconSizeOffset = 0,
   thumbSizeOffset = 0,
 }: UseDimensionsOptions): DimensionResult {
-  // WHAT: Get base dimensions from size mapping
-  // WHY: Ensures consistent sizing based on design system size variants
+  // Get base dimensions from size mapping
+  // Ensures consistent sizing based on design system size variants
   const dimensions = sizeMappings[size];
 
-  // WHAT: Calculate final dimensions with overrides and offsets
-  // HOW: Prop overrides take precedence over mappings, then offsets are applied
-  // WHY: Allows runtime customization while maintaining base design consistency.
+  // Calculate final dimensions with overrides and offsets
+  // Prop overrides take precedence over mappings, then offsets are applied
+  // Allows runtime customization while maintaining base design consistency.
   //      Order: base mapping → prop override → offset addition. Fallbacks (?? 0) prevent NaN.
   return {
     width: (width ?? dimensions.width) + widthOffset,

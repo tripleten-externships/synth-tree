@@ -23,8 +23,8 @@ type ResizeDirection =
 /**
  * Props for the interactive textarea component with advanced features
  *
- * WHAT: Defines interface for a fully interactive textarea with drag, resize, and label positioning
- * WHY: Extends standard HTML textarea props while adding custom interactive features.
+ * Defines interface for a fully interactive textarea with drag, resize, and label positioning
+ * Extends standard HTML textarea props while adding custom interactive features.
  *      Uses Omit to exclude conflicting 'textarea' prop that would override the custom implementation.
  */
 export interface TextareaProps
@@ -56,18 +56,18 @@ export interface TextareaProps
 /**
  * Interactive textarea component with drag, resize, and label positioning capabilities
  *
- * WHAT: Renders a fully interactive textarea with modal-like behavior, draggable positioning,
+ * Renders a fully interactive textarea with modal-like behavior, draggable positioning,
  *       multi-directional resizing, and a repositionable label with distance control
- * HOW: Combines multiple custom hooks for positioning, dragging, and resizing logic.
+ * Combines multiple custom hooks for positioning, dragging, and resizing logic.
  *      Uses complex state management for interaction states and mouse event handling.
- * WHY: Provides rich textarea UX similar to design tools. Separates concerns with hooks
+ * Provides rich textarea UX similar to design tools. Separates concerns with hooks
  *      for maintainability. Complex event handling prevents conflicts between drag/resize/text selection.
  *      Extensive state management ensures smooth interactions and proper cleanup.
  */
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   (props, ref) => {
-    // WHAT: Extract props with sensible defaults
-    // WHY: Provides fallback values for optional props while maintaining type safety
+    // Extract props with sensible defaults
+    // Provides fallback values for optional props while maintaining type safety
     const {
       className,
       label = "Label",
