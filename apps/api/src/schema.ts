@@ -1,10 +1,12 @@
 import { builder } from "./graphql/builder";
-import "./graphql/lesson/lessonType";
-import "./graphql/lesson/lesson.queries";
+import "./graphql/skillNode/skillNodeType";
+import "./graphql/skillNode/skillNode.queries";
+import "./graphql/lessonBlocks/blockType";
+import "./graphql/lessonBlocks/block.queries";
+import "./graphql/lessonBlocks/block.mutations";
 import { generateAllCrud } from "./graphql/__generated__/autocrud";
-import './graphql/lesson/lesson.mutations'
 
-generateAllCrud({ exclude: ["Lesson"] });
+generateAllCrud({ exclude: ["SkillNode", "LessonBlocks"] });
 
 builder.queryType({});
 builder.mutationType({});
