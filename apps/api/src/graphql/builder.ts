@@ -5,7 +5,7 @@ import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import { Scalars } from "prisma-generator-pothos-codegen";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@lib/prisma";
-import type { Context } from "../index"
+import type { GraphQLContext } from "@graphql/context";
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
@@ -14,7 +14,7 @@ export const builder = new SchemaBuilder<{
     Prisma.InputJsonValue | null,
     Prisma.InputJsonValue
   >;
-  Context: Context;
+  Context: GraphQLContext;
 }>({
   plugins: [PrismaPlugin],
   prisma: {
