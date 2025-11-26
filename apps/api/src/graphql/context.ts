@@ -29,7 +29,7 @@ export async function createGraphQLContext({
   // Extract and verify token
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const token = authHeader.substring(7);
     if (admin) {
       try {
         const decoded = await admin.auth().verifyIdToken(token);

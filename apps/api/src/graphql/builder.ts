@@ -5,8 +5,11 @@ import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import { Scalars } from "prisma-generator-pothos-codegen";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@lib/prisma";
+import { GraphQLContext } from "@graphql/context";
 
 export const builder = new SchemaBuilder<{
+  Context: GraphQLContext;
+  // Type The context so it is recognized in the resolvers
   PrismaTypes: PrismaTypes;
   Scalars: Scalars<
     Prisma.Decimal,
