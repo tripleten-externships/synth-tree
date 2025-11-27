@@ -128,6 +128,8 @@ async function main() {
   ];
 
   // Lessons for Tree 1
+  // `flatMap` is used to turn each node into an array of two lesson objects,
+  // and then flatten the arrays into a single array for createMany.
   await prisma.lessonBlocks.createMany({
     data: nodesTree1.flatMap((node, i) => [
       {
@@ -166,6 +168,8 @@ async function main() {
   // --------------------------
   // Sample progress
   // --------------------------
+  // `userNodeProgress` tracks each user's progress on a specific node.
+  // Here, all nodes are initialized with status NOT_STARTED.
   for (const user of users) {
     for (const node of [...nodesTree1, ...nodesTree2]) {
       await prisma.userNodeProgress.create({
@@ -178,7 +182,7 @@ async function main() {
     }
   }
 
-  console.log("✅ Seed complete:");
+  console.log("Seed complete:");
   console.log({ users, course, tree1, tree2, nodesTree1, nodesTree2 });
 }
 
