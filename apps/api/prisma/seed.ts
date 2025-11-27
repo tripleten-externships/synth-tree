@@ -1,15 +1,26 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ContentType, ProgressStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data
-  await prisma.lesson.deleteMany();
-  await prisma.skilltree.deleteMany();
+  // --------------------------
+  // Cleanup / idempotency
+  // --------------------------
+  await prisma.quizAttemptAnswer.deleteMany();
+  await prisma.quizAttempt.deleteMany();
+  await prisma.quizOption.deleteMany();
+  await prisma.quizQuestion.deleteMany();
+  await prisma.quiz.deleteMany();
+  await prisma.lessonBlocks.deleteMany();
+  await prisma.skillNodePrerequisite.deleteMany();
+  await prisma.skillNode.deleteMany();
+  await prisma.skillTree.deleteMany();
+  await prisma.course.deleteMany();
   await prisma.user.deleteMany();
 
-  // Create users
-  // Admin
+  // --------------------------
+  // Users
+  // --------------------------
   const admin = await prisma.user.create({
     data: {
       id: "firebase-uid-admin",
@@ -18,44 +29,159 @@ async function main() {
       role: "ADMIN",
     },
   });
-  // Student 1
-  const testUser1 = await prisma.user.create({
+
+  const user1 = await prisma.user.create({
     data: {
-      id: "firebase-uid-user",
-      email: "testUser1@synth-tree.com",
-      name: "TestUser2",
-      role: "USER",
-    },
-  });
-  // Student 2
-  const testUser2 = await prisma.user.create({
-    data: {
-      id: "firebase-uid-user",
-      email: "testUser1@synth-tree.com",
-      name: "TestUser2",
-      role: "USER",
+      id: "firebase-uid-user-1",
+      email: "user1@synth-tree.com",
+      name: "Test User 1",
     },
   });
 
-  console.log(admin);
-  console.log(testUser1);
-  console.log(testUser2);
+  const user2 = await prisma.user.create({
+    data: {
+      id: "firebase-uid-user-2",
+      email: "user2@synth-tree.com",
+      name: "Test User 2",
+    },
+  });
 
-  // Create lessons (John O had named them "Courses", as ask him to clarify)
-  const introLesson = await prisma.lesson.create({});
-  const periodicTableLesson = await prisma.lesson.create({});
-  const statesOfMatterLesson = await prisma.lesson.create({});
-  const acidAndBasesLesson = await prisma.lesson.create({});
-  const atomicStructureLesson = await prisma.lesson.create({});
+  const users = [admin, user1, user2];
 
-  // Create SkillTrees
-  const skillTree1 = await prisma.skilltree.create({});
-  const skillTree2 = await prisma.skilltree.create({});
-  const skillTree3 = await prisma.skilltree.create({});
+  // --------------------------
+  // Courses
+  // --------------------------
+  const course = await prisma.course.create({
+    data: {
+      title: "Intro to Chemistry",
+      description: "Basics of chemistry",
+      authorId: admin.id,
+    },
+  });
+
+  // --------------------------
+  // SkillTrees
+  // --------------------------
+  const tree1 = await prisma.skillTree.create({
+    data: {
+      title: "Chemistry Tree 1",
+      description: "Foundational chemistry concepts",
+      courseId: course.id,
+    },
+  });
+
+  const tree2 = await prisma.skillTree.create({
+    data: {
+      title: "Chemistry Tree 2",
+      description: "Advanced chemistry concepts",
+      courseId: course.id,
+    },
+  });
+
+  // --------------------------
+  // SkillNodes + Lessons
+  // --------------------------
+  const nodesTree1 = [
+    await prisma.skillNode.create({
+      data: {
+        treeId: tree1.id,
+        title: "Atoms & Molecules",
+        step: 1,
+        orderInStep: 0,
+      },
+    }),
+    await prisma.skillNode.create({
+      data: {
+        treeId: tree1.id,
+        title: "States of Matter",
+        step: 2,
+        orderInStep: 0,
+      },
+    }),
+    await prisma.skillNode.create({
+      data: {
+        treeId: tree1.id,
+        title: "Acids & Bases",
+        step: 3,
+        orderInStep: 0,
+      },
+    }),
+  ];
+
+  const nodesTree2 = [
+    await prisma.skillNode.create({
+      data: {
+        treeId: tree2.id,
+        title: "Atomic Structure",
+        step: 1,
+        orderInStep: 0,
+      },
+    }),
+    await prisma.skillNode.create({
+      data: {
+        treeId: tree2.id,
+        title: "Periodic Table",
+        step: 2,
+        orderInStep: 0,
+      },
+    }),
+  ];
+
+  // Lessons for Tree 1
+  await prisma.lessonBlocks.createMany({
+    data: nodesTree1.flatMap((node, i) => [
+      {
+        nodeId: node.id,
+        type: ContentType.HTML,
+        html: `<h1>${node.title} Lesson 1</h1>`,
+        order: 0,
+      },
+      {
+        nodeId: node.id,
+        type: ContentType.VIDEO,
+        url: `https://example.com/video-${i + 1}`,
+        order: 1,
+      },
+    ]),
+  });
+
+  // Lessons for Tree 2
+  await prisma.lessonBlocks.createMany({
+    data: nodesTree2.flatMap((node, i) => [
+      {
+        nodeId: node.id,
+        type: ContentType.HTML,
+        html: `<h1>${node.title} Lesson 1</h1>`,
+        order: 0,
+      },
+      {
+        nodeId: node.id,
+        type: ContentType.IMAGE,
+        url: `https://example.com/image-${i + 1}`,
+        order: 1,
+      },
+    ]),
+  });
+
+  // --------------------------
+  // Sample progress
+  // --------------------------
+  for (const user of users) {
+    for (const node of [...nodesTree1, ...nodesTree2]) {
+      await prisma.userNodeProgress.create({
+        data: {
+          userId: user.id,
+          nodeId: node.id,
+          status: ProgressStatus.NOT_STARTED,
+        },
+      });
+    }
+  }
+
+  console.log("✅ Seed complete:");
+  console.log({ users, course, tree1, tree2, nodesTree1, nodesTree2 });
 }
 
 main()
   .catch(console.error)
-  .finally(() => {
-    prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());
