@@ -176,6 +176,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build theme library
+        working-directory: packages/theme
+        run: pnpm build
+
+      - name: Build component library
+        working-directory: packages/ui
+        run: pnpm build
+
+      - name: Reinstall dependencies (after building libs)
+        run: pnpm install --frozen-lockfile
+
       - name: Build frontend
         working-directory: apps/admin-dashboard
         env:

@@ -22,7 +22,7 @@ generator pothosCrud {
 //Rewards and Gamification intentionally not implemented yet.  
 // Leaving comments in the schema file. Request removal if the team does not want this. 
 
-datasource db {
+datasource db {  
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
