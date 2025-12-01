@@ -12,7 +12,8 @@
     "postinstall": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate:dev": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "create:dev-admin": "ts-node -r tsconfig-paths/register devScripts/createDevAdminUser.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
