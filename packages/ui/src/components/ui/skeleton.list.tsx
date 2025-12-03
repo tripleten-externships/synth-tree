@@ -13,7 +13,7 @@ export function SkeletonQuizList() {
         <div key={i} className="flex items-center gap-4">
           {/* For questions with images (e.g., first few) */}
           {i < 5 && <Skeleton shape="rectangle" className="h-16 w-24" />}
-          <Skeleton shape="rectangle" className="h-12 w-full" />
+            <Skeleton shape={i === 6 ? "hexagon" : "rectangle"} className="h-12 w-full" />
         </div>
       ))}
       {/* Bottom Button */}
