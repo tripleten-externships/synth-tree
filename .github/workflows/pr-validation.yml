@@ -249,6 +249,9 @@ jobs:
         working-directory: packages/theme
         run: pnpm build
 
+      - name: Reinstall dependencies (after building theme)
+        run: pnpm install --frozen-lockfile
+
       - name: Build Storybook
         working-directory: packages/ui
         run: |
