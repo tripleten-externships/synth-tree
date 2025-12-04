@@ -176,7 +176,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build packages
+      - name: Build theme library
+        run: pnpm --filter @skilltree/theme build
+
+      - name: Build component library
+        working-directory: packages/ui
         run: pnpm build
 
       - name: Build frontend

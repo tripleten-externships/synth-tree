@@ -70,7 +70,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme library
-      - name: Build packages
+      - name: Build theme library
+        run: pnpm --filter @skilltree/theme build
+
+      - name: Build UI package
+        working-directory: packages/ui
         run: pnpm build
 
       - name: Build Storybook
@@ -206,7 +210,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme library
-      - name: Build packages
+      - name: Build theme library
+        run: pnpm --filter @skilltree/theme build
+
+      - name: Build UI package
+        working-directory: packages/ui
         run: pnpm build
 
       - name: Build Storybook
