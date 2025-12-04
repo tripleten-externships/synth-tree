@@ -246,7 +246,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme library
-        run: pnpm --filter @skilltree/theme build
+        working-directory: packages/theme
+        run: pnpm build
 
       - name: Verify theme build
         run: |
@@ -257,7 +258,8 @@ jobs:
           echo "✅ Theme build successful - dist directory exists"
 
       - name: Build UI library
-        run: pnpm --filter @skilltree/ui build
+        working-directory: packages/ui
+        run: pnpm build
 
       - name: Reinstall dependencies (after building libs)
         run: pnpm install --frozen-lockfile
