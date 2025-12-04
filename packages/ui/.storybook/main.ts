@@ -28,12 +28,27 @@ const config: StorybookConfig = {
       };
     }
 
+    // Configure Vite to handle packages with "use client" directives
+    config.optimizeDeps = config.optimizeDeps || {};
+    config.optimizeDeps.include = [
+      ...(config.optimizeDeps.include || []),
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-select',
+    ];
+
+    config.ssr = config.ssr || {};
+    config.ssr.noExternal = [
+      ...(config.ssr.noExternal || []),
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-select',
+    ];
+
     // Add alias resolution for @/* paths and workspace packages
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": require("path").resolve(__dirname, "../src"),
-      "@skilltree/theme": require("path").resolve(__dirname, "../../theme/src"),
+      // Removed @skilltree/theme alias to allow proper package resolution
     };
 
     return config;
