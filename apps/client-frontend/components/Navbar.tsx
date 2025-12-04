@@ -1,6 +1,6 @@
-import React, { useState } from "react"; 
-import SkillTreeLogo from "../assets/skilltree.svg"; 
-import Frame from "../assets/frame.svg"; 
+import { useState } from "react";
+import SkillTreeLogo from "../assets/skilltree.svg";
+import Frame from "../assets/frame.svg";
 import Navigation from "../src/components/Navigation";
 
 export default function Navbar() {

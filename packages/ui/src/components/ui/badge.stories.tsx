@@ -1,4 +1,3 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Badge } from "./badge";
 
@@ -21,7 +20,7 @@ const meta: Meta<typeof Badge> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {
   args: {
@@ -159,42 +158,6 @@ export const InteractiveBadges: Story = {
       >
         Button-like
       </Badge>
-    </div>
-  ),
-};
-
-export const NotificationBadges: Story = {
-  render: () => (
-    <div className="space-y-4">
-      <div className="relative inline-block">
-        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-        <Badge
-          variant="destructive"
-          className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-        >
-          3
-        </Badge>
-      </div>
-
-      <div className="relative inline-block">
-        <div className="w-12 h-8 bg-gray-300 rounded"></div>
-        <Badge
-          variant="default"
-          className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 flex items-center justify-center text-xs"
-        >
-          !
-        </Badge>
-      </div>
-
-      <div className="relative inline-block">
-        <span className="text-lg">Messages</span>
-        <Badge
-          variant="destructive"
-          className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-        >
-          5
-        </Badge>
-      </div>
     </div>
   ),
 };

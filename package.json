@@ -9,12 +9,10 @@
   "scripts": {
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
-
     "db:validate": "pnpm --filter ./apps/api prisma validate",
     "db:migrate:dev": "pnpm --filter ./apps/api prisma migrate dev",
     "db:studio": "pnpm --filter ./apps/api prisma studio",
-  "dev": "pnpm db:start && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
-
+    "dev": "pnpm build && pnpm db:start && pnpm --parallel --filter admin-dashboard --filter api --filter @skilltree/client-frontend dev",
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"
   },
