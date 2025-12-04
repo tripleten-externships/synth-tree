@@ -79,7 +79,7 @@ export const ReadOnly: Story = {
 
 export const WithValue: Story = {
   args: {
-    value: "Pre-filled value",
+    defaultValue: "Pre-filled value",
     placeholder: "This won't show",
   },
 };

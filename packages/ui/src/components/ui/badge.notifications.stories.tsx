@@ -2,83 +2,49 @@ import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { Badge } from "./badge";
 
-const DoubleLayeredBadgesComponent = (args: any) => {
-  const [hover, setHover] = useState(false);
+const NotificationBadgesComponent = (args: any) => {
+  const count = args.messageCount;
+  const showBadge = count > 0;
+  const badgeContent = count > 9 ? "!" : count.toString();
+  const badgeVariant = count > 9 ? "default" : "destructive";
+  const badgeHoverClass = count > 9 ? "hover:bg-primary" : "hover:bg-destructive";
+  const badgeSize = count > 9 ? "h-4 w-4" : "h-5 w-5";
+  const spanText = count === 0 ? "No New Messages" : count === 1 ? "Message" : "Messages";
 
   return (
-    <div className="flex gap-4">
-      <div className="inline-block">
-        <div
-          className="relative w-8 h-8 bg-muted rounded-full flex items-center justify-center"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            backgroundColor:
-              hover && args.enableOuterHover ? args.outerHoverColor : undefined,
-          }}
-        >
-          <Badge
-            variant="destructive"
-            className="h-5 w-5 rounded-full p-0 border-0 flex items-center justify-center text-center text-xs z-10 hover:bg-destructive"
-            style={{
-              backgroundColor:
-                hover && args.enableInnerHover
-                  ? args.innerHoverColor
-                  : undefined,
-            }}
-          >
-            3
-          </Badge>
-        </div>
-      </div>
+    <div className="w-full">
+      <div
+        className="relative bg-muted rounded-lg flex items-center justify-end px-2 py-1"
+      >
+        <div className="flex items-center gap-2 cursor-pointer">
+          {showBadge && (
+            <div className="relative inline-block">
+              <Badge
+                variant={badgeVariant}
+                className={`${badgeSize} rounded-full p-0 border-0 flex items-center justify-center text-center text-xs z-10 ${badgeHoverClass}`}
+                style={{
+                  backgroundColor:
+                    args.enableTextHover
+                      ? args.textHoverColor
+                      : undefined,
+                }}
+              >
+                {badgeContent}
+              </Badge>
+            </div>
+          )}
 
-      <div className="inline-block">
-        <div
-          className="relative w-8 h-8 bg-muted rounded-full flex items-center justify-center"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            backgroundColor:
-              hover && args.enableOuterHover ? args.outerHoverColor : undefined,
-          }}
-        >
-          <Badge
-            variant="default"
-            className="h-4 w-4 rounded-full p-0 border-0 flex items-center justify-center text-center text-xs z-10 hover:bg-primary"
+          <span
+            className="text-lg"
             style={{
-              backgroundColor:
-                hover && args.enableInnerHover
-                  ? args.innerHoverColor
+              color:
+                args.enableTextHover
+                  ? args.textHoverColor
                   : undefined,
             }}
           >
-            !
-          </Badge>
-        </div>
-      </div>
-
-      <div className="inline-block">
-        <div
-          className="relative w-8 h-8 bg-muted rounded-full flex items-center justify-center"
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            backgroundColor:
-              hover && args.enableOuterHover ? args.outerHoverColor : undefined,
-          }}
-        >
-          <Badge
-            variant="destructive"
-            className="h-5 w-5 rounded-full p-0 border-0 flex items-center justify-center text-center text-xs z-10 hover:bg-destructive"
-            style={{
-              backgroundColor:
-                hover && args.enableInnerHover
-                  ? args.innerHoverColor
-                  : undefined,
-            }}
-          >
-            5
-          </Badge>
+            {spanText}
+          </span>
         </div>
       </div>
     </div>
@@ -112,7 +78,7 @@ const SingleLayeredBadgesComponent = (args: any) => {
 };
 
 const meta: Meta = {
-  title: "UI/Badge/Notifications",
+  title: "UI/Badge/Notification Badges",
   parameters: {
     layout: "centered",
     controls: {
@@ -125,32 +91,22 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-export const DoubleLayered: Story = {
+export const NotificationBadges: Story = {
   args: {
-    outerHoverColor: "#3b82f6",
-    enableOuterHover: false,
-    innerHoverColor: "#64748b",
+    messageCount: 3,
     enableInnerHover: false,
+    innerHoverColor: "#64748b",
+    enableTextHover: false,
+    textHoverColor: "#3b82f6",
   },
   argTypes: {
-    enableOuterHover: {
-      name: "1. Enable Outer Hover",
-      control: {
-        type: "boolean",
-        labels: {
-          true: "On",
-          false: "Off",
-        },
-      },
-      description: "Toggle hover effect for outer gray circles",
-    },
-    outerHoverColor: {
-      name: "2. Outer Hover Color",
-      control: { type: "color" },
-      description: "Hover color for the outer gray circles",
+    messageCount: {
+      name: "1. Message Count",
+      control: { type: "number" },
+      description: "Number displayed in the badge",
     },
     enableInnerHover: {
-      name: "3. Enable Inner Hover",
+      name: "2. Circle Icon",
       control: {
         type: "boolean",
         labels: {
@@ -161,40 +117,12 @@ export const DoubleLayered: Story = {
       description: "Toggle hover effect for inner badges",
     },
     innerHoverColor: {
-      name: "4. Inner Hover Color",
+      name: "3. Circle Hover Color",
       control: { type: "color" },
-      description: "Hover color for the inner badges",
-    },
-  },
-  render: (args) => <DoubleLayeredBadgesComponent {...args} />,
-};
-
-export const SingleLayered: Story = {
-  args: {
-    blockHoverColor: "#e5e7eb",
-    enableBlockHover: false,
-    textHoverColor: "#3b82f6",
-    enableTextHover: false,
-  },
-  argTypes: {
-    enableBlockHover: {
-      name: "1. Enable Block Hover",
-      control: {
-        type: "boolean",
-        labels: {
-          true: "On",
-          false: "Off",
-        },
-      },
-      description: "Toggle hover effect for the block background",
-    },
-    blockHoverColor: {
-      name: "2. Block Hover Color",
-      control: { type: "color" },
-      description: "Hover color for the block background",
+      description: "Hover color for the circle badges",
     },
     enableTextHover: {
-      name: "3. Enable Text Hover",
+      name: "4. Enable Text Hover",
       control: {
         type: "boolean",
         labels: {
@@ -205,10 +133,33 @@ export const SingleLayered: Story = {
       description: "Toggle hover effect for Messages text",
     },
     textHoverColor: {
-      name: "4. Text Hover Color",
+      name: "5. Text Hover Color",
       control: { type: "color" },
       description: "Hover color for the Messages text",
     },
   },
-  render: (args) => <SingleLayeredBadgesComponent {...args} />,
+  render: (args) => (
+    <div className="space-y-4">
+      <div>
+        <h4 className="text-sm font-semibold mb-2">Count = 0: Hides the badge and displays "No New Messages"</h4>
+        <NotificationBadgesComponent {...args} messageCount={0} />
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold mb-2">Count = 1: Shows red badge and "Message"</h4>
+        <NotificationBadgesComponent {...args} messageCount={1} />
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold mb-2">Count {'>'} 1: Shows red badge and "Messages"</h4>
+        <NotificationBadgesComponent {...args} messageCount={5} />
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold mb-2">Count {'>'} 9: Shows blue badge with ! and "Messages"</h4>
+        <NotificationBadgesComponent {...args} messageCount={10} />
+      </div>
+      <div className="mt-8">
+        <h4 className="text-sm font-semibold mb-2">Interactive Example (use controls below)</h4>
+        <NotificationBadgesComponent {...args} />
+      </div>
+    </div>
+  ),
 };
