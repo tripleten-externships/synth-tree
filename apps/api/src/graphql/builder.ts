@@ -7,24 +7,14 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@lib/prisma";
 import type { GraphQLContext } from "@graphql/context";
 
-interface Context {
-  user?: {
-    id: string;
-    email?: string;
-    role: string;
-  };
-  prisma: typeof prisma; // Auto-CRUD support
-}
-
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
-  Context: Context;
+  Context: GraphQLContext;
   Scalars: Scalars<
     Prisma.Decimal,
     Prisma.InputJsonValue | null,
     Prisma.InputJsonValue
   >;
-  Context: GraphQLContext;
 }>({
   plugins: [PrismaPlugin],
   prisma: {

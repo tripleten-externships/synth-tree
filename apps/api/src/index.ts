@@ -9,14 +9,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { schema } from "./schema";
 import { admin } from "./firebase";
 import { prisma } from "./lib/prisma";
-
-interface Context extends BaseContext {
-  user?: {
-    uid: string;
-    email?: string;
-    role: string;
-  };
-}
+import { GraphQLContext, createGraphQLContext } from "./graphql/context";
 
 async function start() {
   const app = express();
@@ -50,19 +43,7 @@ async function start() {
     cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }) => {
-        const token = req.headers.authorization?.replace("Bearer ", "");
-        let user = null;
-        if (token && admin) {
-          const decoded = await admin.auth().verifyIdToken(token);
-          user = {
-            uid: decoded.uid,
-            email: decoded.email,
-            role: decoded.role || "user",
-          };
-        }
-        return { user, prisma };
-      },
+      context: async ({ req }) => createGraphQLContext({ req, prisma }),
     })
   );
 
