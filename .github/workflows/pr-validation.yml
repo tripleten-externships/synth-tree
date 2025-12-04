@@ -248,6 +248,14 @@ jobs:
       - name: Build theme library
         run: pnpm build --filter @skilltree/theme
 
+      - name: Verify theme build
+        run: |
+          if [ ! -d "packages/theme/dist" ] || [ -z "$(ls -A packages/theme/dist)" ]; then
+            echo "❌ Theme build failed - dist directory not found or empty"
+            exit 1
+          fi
+          echo "✅ Theme build successful - dist directory exists"
+
       - name: Reinstall dependencies (after building theme)
         run: pnpm install --frozen-lockfile
 
