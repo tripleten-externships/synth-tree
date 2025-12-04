@@ -7,15 +7,15 @@ const NotificationBadgesComponent = (args: any) => {
   const showBadge = count > 0;
   const badgeContent = count > 9 ? "!" : count.toString();
   const badgeVariant = count > 9 ? "default" : "destructive";
-  const badgeHoverClass = count > 9 ? "hover:bg-primary" : "hover:bg-destructive";
+  const badgeHoverClass =
+    count > 9 ? "hover:bg-primary" : "hover:bg-destructive";
   const badgeSize = count > 9 ? "h-4 w-4" : "h-5 w-5";
-  const spanText = count === 0 ? "No New Messages" : count === 1 ? "Message" : "Messages";
+  const spanText =
+    count === 0 ? "No New Messages" : count === 1 ? "Message" : "Messages";
 
   return (
     <div className="w-full">
-      <div
-        className="relative bg-muted rounded-lg flex items-center justify-end px-2 py-1"
-      >
+      <div className="relative bg-muted rounded-lg flex items-center justify-end px-2 py-1">
         <div className="flex items-center gap-2 cursor-pointer">
           {showBadge && (
             <div className="relative inline-block">
@@ -23,10 +23,9 @@ const NotificationBadgesComponent = (args: any) => {
                 variant={badgeVariant}
                 className={`${badgeSize} rounded-full p-0 border-0 flex items-center justify-center text-center text-xs z-10 ${badgeHoverClass}`}
                 style={{
-                  backgroundColor:
-                    args.enableTextHover
-                      ? args.textHoverColor
-                      : undefined,
+                  backgroundColor: args.enableTextHover
+                    ? args.textHoverColor
+                    : undefined,
                 }}
               >
                 {badgeContent}
@@ -37,10 +36,7 @@ const NotificationBadgesComponent = (args: any) => {
           <span
             className="text-lg"
             style={{
-              color:
-                args.enableTextHover
-                  ? args.textHoverColor
-                  : undefined,
+              color: args.enableTextHover ? args.textHoverColor : undefined,
             }}
           >
             {spanText}
@@ -141,23 +137,33 @@ export const NotificationBadges: Story = {
   render: (args) => (
     <div className="space-y-4">
       <div>
-        <h4 className="text-sm font-semibold mb-2">Count = 0: Hides the badge and displays "No New Messages"</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          Count = 0: Hides the badge and displays "No New Messages"
+        </h4>
         <NotificationBadgesComponent {...args} messageCount={0} />
       </div>
       <div>
-        <h4 className="text-sm font-semibold mb-2">Count = 1: Shows red badge and "Message"</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          Count = 1: Shows red badge and "Message"
+        </h4>
         <NotificationBadgesComponent {...args} messageCount={1} />
       </div>
       <div>
-        <h4 className="text-sm font-semibold mb-2">Count {'>'} 1: Shows red badge and "Messages"</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          Count {">"} 1: Shows red badge and "Messages"
+        </h4>
         <NotificationBadgesComponent {...args} messageCount={5} />
       </div>
       <div>
-        <h4 className="text-sm font-semibold mb-2">Count {'>'} 9: Shows blue badge with ! and "Messages"</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          Count {">"} 9: Shows blue badge with ! and "Messages"
+        </h4>
         <NotificationBadgesComponent {...args} messageCount={10} />
       </div>
       <div className="mt-8">
-        <h4 className="text-sm font-semibold mb-2">Interactive Example (use controls below)</h4>
+        <h4 className="text-sm font-semibold mb-2">
+          Interactive Example (use controls below)
+        </h4>
         <NotificationBadgesComponent {...args} />
       </div>
     </div>

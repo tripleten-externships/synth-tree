@@ -82,7 +82,7 @@ jobs:
       - name: Build Storybook
         run: |
           echo "Building Storybook for dev environment..."
-          pnpm --filter ./packages/ui run build-storybook
+          cd packages/ui && pnpm build-storybook
 
           # Verify build output
           if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
@@ -223,7 +223,7 @@ jobs:
       - name: Build Storybook
         run: |
           echo "Building Storybook for prod environment..."
-          pnpm --filter ./packages/ui run build-storybook
+          cd packages/ui && pnpm build-storybook
 
           # Verify build output
           if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then

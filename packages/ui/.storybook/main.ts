@@ -32,29 +32,29 @@ const config: StorybookConfig = {
     config.optimizeDeps = config.optimizeDeps || {};
     config.optimizeDeps.include = [
       ...(config.optimizeDeps.include || []),
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-select',
-      '@radix-ui/react-dismissable-layer',
-      '@radix-ui/react-portal',
-      '@radix-ui/react-focus-scope',
-      '@radix-ui/react-presence',
-      '@radix-ui/react-focus-guards',
-      '@radix-ui/react-popper',
-      '@radix-ui/react-collection',
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-select",
+      "@radix-ui/react-dismissable-layer",
+      "@radix-ui/react-portal",
+      "@radix-ui/react-focus-scope",
+      "@radix-ui/react-presence",
+      "@radix-ui/react-focus-guards",
+      "@radix-ui/react-popper",
+      "@radix-ui/react-collection",
     ];
 
     config.ssr = config.ssr || {};
     config.ssr.noExternal = [
       ...(config.ssr.noExternal || []),
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-select',
-      '@radix-ui/react-dismissable-layer',
-      '@radix-ui/react-portal',
-      '@radix-ui/react-focus-scope',
-      '@radix-ui/react-presence',
-      '@radix-ui/react-focus-guards',
-      '@radix-ui/react-popper',
-      '@radix-ui/react-collection',
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-select",
+      "@radix-ui/react-dismissable-layer",
+      "@radix-ui/react-portal",
+      "@radix-ui/react-focus-scope",
+      "@radix-ui/react-presence",
+      "@radix-ui/react-focus-guards",
+      "@radix-ui/react-popper",
+      "@radix-ui/react-collection",
     ];
 
     // Add alias resolution for @/* paths and workspace packages
@@ -62,7 +62,10 @@ const config: StorybookConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": require("path").resolve(__dirname, "../src"),
-      "@skilltree/theme": require("path").resolve(__dirname, "../../theme/dist"),
+      "@skilltree/theme": require("path").resolve(
+        __dirname,
+        "../../theme/dist"
+      ),
     };
 
     return config;

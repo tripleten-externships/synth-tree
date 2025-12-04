@@ -247,9 +247,9 @@ jobs:
       - name: Build Storybook
         run: |
           echo "Building Storybook..."
-          pnpm --filter ./packages/ui run build-storybook
+          cd packages/ui && pnpm build-storybook
 
-          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
+          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
             echo "❌ Build failed"
             exit 1
           fi
