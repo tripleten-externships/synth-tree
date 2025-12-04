@@ -246,7 +246,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme library
-        run: cd packages/theme && pnpm build
+        run: cd packages/theme && npx vite build
 
       - name: Verify theme build
         run: |
