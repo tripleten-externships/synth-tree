@@ -3,7 +3,7 @@ import express, { Request, Response } from "express";
 import http from "http";
 import cors from "cors";
 import { expressMiddleware } from "@as-integrations/express5";
-import { ApolloServer, BaseContext } from "@apollo/server";
+import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { schema } from "./schema";
@@ -31,7 +31,7 @@ async function start() {
   app.use(cors());
   app.use(express.json());
 
-  const server = new ApolloServer<Context>({
+  const server = new ApolloServer<GraphQLContext>({
     schema,
     introspection: true,
     plugins: [
