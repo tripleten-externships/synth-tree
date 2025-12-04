@@ -77,6 +77,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Admin UI customizations
+  uiCustomizations UIComponentCustomization[] @relation("UserUICustomizations")
+
   // Authoring:
   coursesAuthored Course[]         @relation("CourseAuthor")
 
@@ -347,7 +350,7 @@ model UIComponentCustomization {
   updatedAt    DateTime @updatedAt
 
   // Relations
-  creator      User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  creator User @relation("UserUICustomizations", fields: [createdBy], references: [id], onDelete: Cascade)
 
   @@index([componentType])
   @@index([instanceId])
