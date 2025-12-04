@@ -246,37 +246,23 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build theme library
-        run: |
-          echo "Building theme package..."
-          cd packages/theme && npx vite build
-          echo "Theme build completed"
-
-      - name: Verify theme build
-        run: |
-          echo "Verifying theme build output..."
-          if [ ! -d "packages/theme/dist" ]; then
-            echo "❌ Theme dist directory not found"
-            exit 1
-          fi
-          if [ -z "$(ls -A packages/theme/dist)" ]; then
-            echo "❌ Theme dist directory is empty"
-            exit 1
-          fi
-          echo "✅ Theme build successful - dist directory exists with files:"
-          ls -la packages/theme/dist/
+        working-directory: packages/theme
+        run: pnpm build
 
       - name: Build UI library
-        run: cd packages/ui && pnpm build
+        working-directory: packages/ui
+        run: pnpm build
 
       - name: Reinstall dependencies (after building libs)
         run: pnpm install --frozen-lockfile
 
       - name: Build Storybook
+        working-directory: packages/ui
         run: |
           echo "Building Storybook..."
-          pnpm --filter @skilltree/ui build-storybook
+          pnpm build-storybook
 
-          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
+          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
             echo "❌ Build failed"
             exit 1
           fi
