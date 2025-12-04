@@ -15,61 +15,54 @@ generator pothosCrud {
   generatorConfigPath = "./pothos.config.js"
   // You may also set the `generatorConfigPath` via the `POTHOS_CRUD_CONFIG_PATH` environment variable.
   // The environment variable will override the path hardcoded here.
-} 
+}
 
 // Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information  
 // The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models. 
 //Rewards and Gamification intentionally not implemented yet.  
 // Leaving comments in the schema file. Request removal if the team does not want this. 
 
-datasource db {  
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-enum Role {  
-  ADMIN 
- USER 
-  }
-
-enum QuestionType {  
-  SINGLE_CHOICE  
-  MULTIPLE_CHOICE  
-  OPEN_QUESTION  
-  }
-
-enum ContentType {  
-IMAGE 
- VIDEO  
- EMBED  
- HTML 
-     }
-
-enum LessonStatus {  
-  DRAFT  
-  PUBLISHED   
-
+enum Role {
+  ADMIN
+  USER
 }
 
-enum CourseStatus {  
-  DRAFT  
-  PUBLISHED   
- 
-  }
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  OPEN_QUESTION
+}
 
+enum ContentType {
+  IMAGE
+  VIDEO
+  EMBED
+  HTML
+}
 
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+}
 
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
 
-enum ProgressStatus {  
-  NOT_STARTED  
-  IN_PROGRESS  
-  COMPLETED  
-  }
-
-
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
 
 model User {
-  id        String   @id                    
+  id        String   @id
   email     String   @unique
   name      String?
   photoUrl  String?
@@ -81,11 +74,11 @@ model User {
   uiCustomizations UIComponentCustomization[] @relation("UserUICustomizations")
 
   // Authoring:
-  coursesAuthored Course[]         @relation("CourseAuthor")
+  coursesAuthored Course[] @relation("CourseAuthor")
 
   // Learning:
-  nodeProgress    UserNodeProgress[]  // 1 row per (user,node)
-  quizAttempts    QuizAttempt[]       // all attempts across quizzes
+  nodeProgress UserNodeProgress[] // 1 row per (user,node)
+  quizAttempts QuizAttempt[] // all attempts across quizzes
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -97,17 +90,17 @@ model User {
 // - Soft delete included to allow recoverability.
 // ================================================================
 model Course {
-  id          String        @id @default(uuid()) @db.Uuid
+  id          String       @id @default(uuid()) @db.Uuid
   title       String
   description String?
   authorId    String
-  status      CourseStatus  @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  status      CourseStatus @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
 
-  author  User       @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Restrict)
-  trees   SkillTree[]
+  author User        @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  trees  SkillTree[]
 
   @@index([title]) // lightweight browse/search
 }
@@ -118,15 +111,15 @@ model Course {
 // - Deleting a tree cascades to nodes and their content/quiz data.
 // ================================================================
 model SkillTree {
-  id          String     @id @default(uuid()) @db.Uuid
-  courseId    String     @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  courseId    String    @db.Uuid
   title       String
   description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  course Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   nodes  SkillNode[]
 
   @@index([courseId])
@@ -142,22 +135,22 @@ model SkillTree {
 // - Exactly one (optional) Quiz per node (enforced on Quiz.nodeId).
 // ================================================================
 model SkillNode {
-  id           String   @id @default(uuid()) @db.Uuid
-  treeId       String   @db.Uuid
-  title        String
-  step         Int      @default(1)  // logical level/layer (e.g., column)
-  orderInStep  Int      @default(0)  // order within the step
-  posX         Int?     @default(0)  // optional: UI layout
-  posY         Int?     @default(0)  // optional: UI layout
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  deletedAt    DateTime?
+  id          String    @id @default(uuid()) @db.Uuid
+  treeId      String    @db.Uuid
+  title       String
+  step        Int       @default(1) // logical level/layer (e.g., column)
+  orderInStep Int       @default(0) // order within the step
+  posX        Int?      @default(0) // optional: UI layout
+  posY        Int?      @default(0) // optional: UI layout
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
-  tree   SkillTree @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  tree SkillTree @relation(fields: [treeId], references: [id], onDelete: Cascade)
 
   // Content & assessment
-  lessons LessonBlocks[]     // ordered blocks of mixed media for this node
-  quiz    Quiz?              // 0..1 quiz per node (Quiz.nodeId is unique)
+  lessons LessonBlocks[] // ordered blocks of mixed media for this node
+  quiz    Quiz? // 0..1 quiz per node (Quiz.nodeId is unique)
 
   // Gating (self-relation). Example: "To start this node, complete Node A".
   prerequisites SkillNodePrerequisite[] @relation("NodePrereq_node")
@@ -166,9 +159,9 @@ model SkillNode {
   // Progress (per user, per node)
   progresses UserNodeProgress[]
 
-  @@index([treeId])
   @@unique([treeId, step, orderInStep]) // unique logical position
-  @@unique([treeId, posX, posY])        // unique canvas coordinates (optional)
+  @@unique([treeId, posX, posY]) // unique canvas coordinates (optional)
+  @@index([treeId])
 }
 
 // ================================================================
@@ -177,10 +170,10 @@ model SkillNode {
 // - Deleting the depended/parent or child node cascades to edges.
 // ================================================================
 model SkillNodePrerequisite {
-  nodeId          String @db.Uuid        // the node being gated (child)
-  dependsOnNodeId String @db.Uuid        // prerequisite (parent)
+  nodeId          String @db.Uuid // the node being gated (child)
+  dependsOnNodeId String @db.Uuid // prerequisite (parent)
 
-  node      SkillNode @relation("NodePrereq_node",    fields: [nodeId],          references: [id], onDelete: Cascade)
+  node      SkillNode @relation("NodePrereq_node", fields: [nodeId], references: [id], onDelete: Cascade)
   dependsOn SkillNode @relation("NodePrereq_depends", fields: [dependsOnNodeId], references: [id], onDelete: Cascade)
 
   @@id([nodeId, dependsOnNodeId])
@@ -196,11 +189,11 @@ model LessonBlocks {
   id        String       @id @default(uuid()) @db.Uuid
   nodeId    String       @db.Uuid
   type      ContentType
-  url       String?      // IMAGE/VIDEO/EMBED: remote asset link
-  html      String?      // HTML: inline HTML snippet (sanitized on write)
+  url       String? // IMAGE/VIDEO/EMBED: remote asset link
+  html      String? // HTML: inline HTML snippet (sanitized on write)
   caption   String?
   order     Int          @default(0) // render ordering within node
-  meta      Json?        // optional structured payload (e.g., provider, dims)
+  meta      Json? // optional structured payload (e.g., provider, dims)
   status    LessonStatus @default(DRAFT)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
@@ -221,12 +214,12 @@ model LessonBlocks {
 // Rewards can be used later on and completed lessons result in points or unit of choice. 
 // ================================================================
 model Quiz {
-  id        String   @id @default(uuid()) @db.Uuid
-  nodeId    String   @unique @db.Uuid     // 1:1 with SkillNode
+  id        String    @id @default(uuid()) @db.Uuid
+  nodeId    String    @unique @db.Uuid // 1:1 with SkillNode
   title     String?
-  required  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  required  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   node      SkillNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
@@ -248,9 +241,9 @@ model QuizQuestion {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  quiz     Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options  QuizOption[]       // SINGLE/MULTIPLE; optional for OPEN_QUESTION
-  answers  QuizAttemptAnswer[]// backrefs for per-attempt answers
+  quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION
+  answers QuizAttemptAnswer[] // backrefs for per-attempt answers
 
   @@index([quizId])
 }
@@ -261,12 +254,12 @@ model QuizQuestion {
 // - For MULTIPLE_CHOICE, multiple options may be correct.
 // ================================================================
 model QuizOption {
-  id          String   @id @default(uuid()) @db.Uuid
-  questionId  String   @db.Uuid
-  text        String
-  isCorrect   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(uuid()) @db.Uuid
+  questionId String   @db.Uuid
+  text       String
+  isCorrect  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
@@ -280,15 +273,15 @@ model QuizOption {
 //   auto-gradable answers are correct (or true if none exist).
 // ================================================================
 model QuizAttempt {
-  id       String   @id @default(uuid()) @db.Uuid
-  quizId   String   @db.Uuid
-  userId   String
-  passed   Boolean
-  takenAt  DateTime @default(now())
+  id      String   @id @default(uuid()) @db.Uuid
+  quizId  String   @db.Uuid
+  userId  String
+  passed  Boolean
+  takenAt DateTime @default(now())
 
-  quiz     Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  answers  QuizAttemptAnswer[]
+  quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers QuizAttemptAnswer[]
 
   @@index([quizId])
   @@index([userId])
@@ -334,20 +327,20 @@ model UserNodeProgress {
   user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   node SkillNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, nodeId])     // canonical progress row
-  @@index([userId, status])      // "what's in progress/completed for this user?"
-  @@index([nodeId, status])      // "how many users completed this node?"
+  @@unique([userId, nodeId]) // canonical progress row
+  @@index([userId, status]) // "what's in progress/completed for this user?"
+  @@index([nodeId, status]) // "how many users completed this node?"
 }
 
 // UI component customization storage
 model UIComponentCustomization {
-  id           String   @id @default(uuid())
-  instanceId   String   @unique // Component instance ID
-  componentType String  // Component type
-  settings     Json     // Component settings (width, height, etc.)
-  createdBy    String   // Admin Firebase UID
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(uuid())
+  instanceId    String   @unique // Component instance ID
+  componentType String // Component type
+  settings      Json // Component settings (width, height, etc.)
+  createdBy     String // Admin Firebase UID
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relations
   creator User @relation("UserUICustomizations", fields: [createdBy], references: [id], onDelete: Cascade)
