@@ -73,6 +73,9 @@ jobs:
       - name: Build theme library
         run: pnpm --filter @skilltree/theme build
 
+      - name: Reinstall dependencies (after building theme)
+        run: pnpm install --frozen-lockfile
+
       - name: Build UI package
         working-directory: packages/ui
         run: pnpm build
@@ -212,6 +215,9 @@ jobs:
       - name: Build theme library
       - name: Build theme library
         run: pnpm --filter @skilltree/theme build
+
+      - name: Reinstall dependencies (after building theme)
+        run: pnpm install --frozen-lockfile
 
       - name: Build UI package
         working-directory: packages/ui
