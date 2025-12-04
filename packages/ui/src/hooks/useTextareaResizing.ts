@@ -60,7 +60,7 @@ export function useTextareaResizing({
   // Controls resize event listeners and visual feedback
   const [isResizingActive, setIsResizingActive] = React.useState(false);
 
-<<<<<<< HEAD
+
   // WHAT: Store current resize direction (north, east, etc.)
   // WHY: Determines how mouse movements affect dimensions and position
   const [currentResizeDirection, setCurrentResizeDirection] =
@@ -68,26 +68,15 @@ export function useTextareaResizing({
 
   // WHAT: Track which resize edges are being hovered
   // WHY: Provides visual feedback for available resize directions
-=======
-  // Store current resize direction (north, east, etc.)
-  // Determines how mouse movements affect dimensions and position
-  const [currentResizeDirection, setCurrentResizeDirection] =
-    React.useState<ResizeDirection | null>(null);
 
-  // Track which resize edges are being hovered
-  // Provides visual feedback for available resize directions
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
   const [hoveredResizeEdge, setHoveredResizeEdge] = React.useState<string[]>(
     []
   );
 
-<<<<<<< HEAD
+
   // WHAT: Store initial textarea bounds at resize start
   // WHY: Used as reference point for calculating relative mouse movements
-=======
-  // Store initial textarea bounds at resize start
-  // Used as reference point for calculating relative mouse movements
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
   const [initialResizeBounds, setInitialResizeBounds] =
     React.useState<DOMRect | null>(null);
 
@@ -254,13 +243,10 @@ export function useTextareaResizing({
         document.removeEventListener("mouseup", handleMouseUp);
       };
 
-<<<<<<< HEAD
+
       // WHAT: Attach global mouse listeners for resize operation
       // WHY: Allows smooth resizing even when mouse moves outside textarea bounds
-=======
-      // Attach global mouse listeners for resize operation
-      // Allows smooth resizing even when mouse moves outside textarea bounds
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     },
@@ -285,3 +271,4 @@ export function useTextareaResizing({
     handleResizeStart,
   };
 }
+

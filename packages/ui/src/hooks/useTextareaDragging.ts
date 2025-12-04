@@ -44,13 +44,8 @@ export function useTextareaDragging({
   // Used with timer to determine if click is "sustained" (drag vs click)
   const [dragStartTime, setDragStartTime] = React.useState<number | null>(null);
 
-<<<<<<< HEAD
   // WHAT: Store initial mouse position when drag monitoring starts
   // WHY: Used to detect if mouse moved enough to trigger actual drag (vs micro-movements)
-=======
-  // Store initial mouse position when drag monitoring starts
-  // Used to detect if mouse moved enough to trigger actual drag (vs micro-movements)
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
   const [dragStartPosition, setDragStartPosition] = React.useState<{
     x: number;
     y: number;
@@ -70,26 +65,16 @@ export function useTextareaDragging({
    */
   const handleTextareaMouseDown = React.useCallback(
     (e: React.MouseEvent) => {
-<<<<<<< HEAD
       // WHAT: Clean up any existing drag timer from previous interactions
       // WHY: Prevents multiple timers from running simultaneously
-=======
-      // Clean up any existing drag timer from previous interactions
-      // Prevents multiple timers from running simultaneously
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
       const existingTimer = (e.currentTarget as any).__dragTimer;
       if (existingTimer) {
         clearTimeout(existingTimer);
         (e.currentTarget as any).__dragTimer = null;
       }
 
-<<<<<<< HEAD
       // WHAT: Prevent drag if user has selected text
       // WHY: Text selection should take precedence over dragging to preserve expected behavior
-=======
-      // Prevent drag if user has selected text
-      // Text selection should take precedence over dragging to preserve expected behavior
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
       const textarea = e.currentTarget as HTMLTextAreaElement;
       const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
 
@@ -97,15 +82,11 @@ export function useTextareaDragging({
         return;
       }
 
-<<<<<<< HEAD
+
       // WHAT: Prevent drag if mouse is near textarea edges (resize zones)
       // HOW: Check if mouse is within 4px of any edge
       // WHY: Allows resize handles to work without triggering drag. EdgeThreshold prevents accidental overlap.
-=======
-      // Prevent drag if mouse is near textarea edges (resize zones)
-      // Check if mouse is within 4px of any edge
-      // Allows resize handles to work without triggering drag. EdgeThreshold prevents accidental overlap.
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
       const rect = e.currentTarget.getBoundingClientRect();
       const edgeThreshold = 4;
       const isNearEdge =
@@ -118,7 +99,7 @@ export function useTextareaDragging({
         return;
       }
 
-<<<<<<< HEAD
+
       // WHAT: Record drag initiation data
       // WHY: Establishes baseline for drag detection and position calculations
       const startTime = Date.now();
@@ -126,15 +107,7 @@ export function useTextareaDragging({
 
       // WHAT: Calculate drag offset relative to container
       // WHY: Ensures textarea moves relative to mouse position within container bounds
-=======
-      // Record drag initiation data
-      // Establishes baseline for drag detection and position calculations
-      const startTime = Date.now();
-      const startPosition = { x: e.clientX, y: e.clientY };
 
-      // Calculate drag offset relative to container
-      // Ensures textarea moves relative to mouse position within container bounds
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
       const containerRect = containerRef.current?.getBoundingClientRect();
 
       if (containerRect) {
@@ -144,18 +117,15 @@ export function useTextareaDragging({
         setDragOffset({ x: offsetX, y: offsetY });
       }
 
-<<<<<<< HEAD
+
       // WHAT: Initialize drag tracking state
       // WHY: Sets up the monitoring phase before actual drag begins
-=======
-      // Initialize drag tracking state
-      // Sets up the monitoring phase before actual drag begins
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
       setDragStartTime(startTime);
       setDragStartPosition(startPosition);
       setIsTrackingForDrag(true);
 
-<<<<<<< HEAD
+
       // WHAT: Set timer for sustained click detection
       // HOW: 150ms delay before drag is considered intentional
       // WHY: Prevents accidental drags from quick clicks or micro-movements. Longer than typical click duration.
@@ -164,28 +134,16 @@ export function useTextareaDragging({
         setIsDraggingActive(true);
         // WHAT: Disable text selection during drag
         // WHY: Prevents visual glitches and maintains drag focus
-=======
-      // Set timer for sustained click detection
-      // 150ms delay before drag is considered intentional
-      // Prevents accidental drags from quick clicks or micro-movements. Longer than typical click duration.
-      const dragTimer = setTimeout(() => {
-        setIsSustainedClick(true);
-        setIsDraggingActive(true);
-        // Disable text selection during drag
-        // Prevents visual glitches and maintains drag focus
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
         document.body.style.userSelect = "none";
         document.body.style.webkitUserSelect = "none";
         setIsTrackingForDrag(false);
       }, 150);
 
-<<<<<<< HEAD
+
       // WHAT: Store timer reference on DOM element for cleanup
       // WHY: Allows canceling timer if user releases mouse before timeout
-=======
-      // Store timer reference on DOM element for cleanup
-      // Allows canceling timer if user releases mouse before timeout
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
       (e.currentTarget as any).__dragTimer = dragTimer;
     },
     [containerRef]
@@ -265,24 +223,18 @@ export function useTextareaDragging({
       });
     };
 
-<<<<<<< HEAD
+
     // WHAT: Attach global mouse event listeners
     // WHY: Capture mouse events anywhere on document for smooth drag experience
-=======
-    // Attach global mouse event listeners
-    // Capture mouse events anywhere on document for smooth drag experience
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-<<<<<<< HEAD
+
       // WHAT: Clean up event listeners
       // WHY: Prevents memory leaks and ensures listeners are removed when component unmounts or dependencies change
-=======
-      // Clean up event listeners
-      // Prevents memory leaks and ensures listeners are removed when component unmounts or dependencies change
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -305,3 +257,4 @@ export function useTextareaDragging({
     handleTextareaMouseDown,
   };
 }
+

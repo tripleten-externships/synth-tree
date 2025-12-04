@@ -32,12 +32,10 @@ export function useTextareaPositioning({
   initialHeight,
   containerRef,
 }: UseTextareaPositioningOptions) {
-<<<<<<< HEAD
+
   // WHAT: Store current position state
   // WHY: Standard React state management for position coordinates
-=======
-  // Store current position state
->>>>>>> b630920 (refactor (ST-34): Adjusted comment and improve formatting)
+
   const [textareaPosition, setTextareaPosition] =
     React.useState<TextareaPosition>({
       x: 0,
@@ -105,3 +103,4 @@ export function useTextareaPositioning({
     textareaPositionRef,
   };
 }
+
