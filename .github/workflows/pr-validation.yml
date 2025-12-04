@@ -244,6 +244,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build theme library
+        run: |
+          echo "Building theme library..."
+          pnpm --filter @skilltree/theme build
+          echo "✅ Theme build completed"
+
+      - name: Verify theme build output
+        run: |
+          echo "Verifying theme build output..."
+          if [ ! -d "packages/theme/dist" ]; then
+            echo "❌ Theme dist directory not found"
+            exit 1
+          fi
+          if [ ! -f "packages/theme/dist/tailwind/index.cjs" ]; then
+            echo "❌ Theme tailwind preset not found"
+            exit 1
+          fi
+          echo "✅ Theme build output verified"
+
+      - name: Reinstall dependencies (after building theme)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build component library
+        working-directory: packages/ui
+        run: pnpm build
+
       - name: Build Storybook
         run: |
           echo "Building Storybook..."
