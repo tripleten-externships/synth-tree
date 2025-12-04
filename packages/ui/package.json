@@ -23,7 +23,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "pnpm --filter @skilltree/theme build && storybook build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
