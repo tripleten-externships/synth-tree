@@ -73,19 +73,18 @@ jobs:
         run: pnpm build
 
       - name: Build Storybook
-        working-directory: packages/ui
         run: |
           echo "Building Storybook for dev environment..."
-          pnpm run build-storybook
+          pnpm --filter @skilltree/ui run build-storybook
 
           # Verify build output
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
             echo "❌ Build failed - storybook-static directory is empty"
             exit 1
           fi
 
           echo "✅ Storybook build completed successfully"
-          ls -lah storybook-static/
+          ls -lah packages/ui/storybook-static/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -114,14 +113,13 @@ jobs:
           echo "CloudFront Distribution: $DIST_ID"
 
       - name: Sync to S3
-        working-directory: packages/ui
         env:
           BUCKET: ${{ steps.infra.outputs.bucket }}
         run: |
           echo "Syncing Storybook to S3..."
 
           # Sync all files with long cache (Storybook handles cache-busting via filenames)
-          aws s3 sync storybook-static/ s3://$BUCKET/ \
+          aws s3 sync packages/ui/storybook-static/ s3://$BUCKET/ \
             --delete \
             --cache-control "public,max-age=31536000,immutable"
 
@@ -207,20 +205,19 @@ jobs:
       - name: Build all packages
         run: pnpm build
 
-      - name: Build Storybook
-        working-directory: packages/ui
+      - name: Build Storybook (Prod)
         run: |
           echo "Building Storybook for prod environment..."
-          pnpm run build-storybook
+          pnpm --filter @skilltree/ui run build-storybook
 
           # Verify build output
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
             echo "❌ Build failed - storybook-static directory is empty"
             exit 1
           fi
 
           echo "✅ Storybook build completed successfully"
-          ls -lah storybook-static/
+          ls -lah packages/ui/storybook-static/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -249,14 +246,13 @@ jobs:
           echo "CloudFront Distribution: $DIST_ID"
 
       - name: Sync to S3
-        working-directory: packages/ui
         env:
           BUCKET: ${{ steps.infra.outputs.bucket }}
         run: |
           echo "Syncing Storybook to S3..."
 
           # Sync all files with long cache (Storybook handles cache-busting via filenames)
-          aws s3 sync storybook-static/ s3://$BUCKET/ \
+          aws s3 sync packages/ui/storybook-static/ s3://$BUCKET/ \
             --delete \
             --cache-control "public,max-age=31536000,immutable"
 
