@@ -80,19 +80,18 @@ jobs:
         run: pnpm build
 
       - name: Build Storybook
-        working-directory: packages/ui
         run: |
           echo "Building Storybook for dev environment..."
-          pnpm build-storybook
+          pnpm --filter ./packages/ui run build-storybook
 
           # Verify build output
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
             echo "❌ Build failed - storybook-static directory is empty"
             exit 1
           fi
 
           echo "✅ Storybook build completed successfully"
-          ls -lah storybook-static/
+          ls -lah packages/ui/storybook-static/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -222,19 +221,18 @@ jobs:
         run: pnpm build
 
       - name: Build Storybook
-        working-directory: packages/ui
         run: |
           echo "Building Storybook for prod environment..."
-          pnpm build-storybook
+          pnpm --filter ./packages/ui run build-storybook
 
           # Verify build output
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
             echo "❌ Build failed - storybook-static directory is empty"
             exit 1
           fi
 
           echo "✅ Storybook build completed successfully"
-          ls -lah storybook-static/
+          ls -lah packages/ui/storybook-static/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

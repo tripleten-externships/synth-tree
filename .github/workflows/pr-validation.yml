@@ -245,12 +245,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Storybook
-        working-directory: packages/ui
         run: |
           echo "Building Storybook..."
-          pnpm build-storybook
+          pnpm --filter ./packages/ui run build-storybook
 
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
+          if [ ! -d "packages/ui/storybook-static" ] || [ -z "$(ls -A packages/ui/storybook-static)" ]; then
             echo "❌ Build failed"
             exit 1
           fi
