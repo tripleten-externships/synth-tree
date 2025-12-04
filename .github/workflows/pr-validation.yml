@@ -245,6 +245,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build theme library
+        working-directory: packages/theme
+        run: pnpm build
+
       - name: Build Storybook
         working-directory: packages/ui
         run: |
