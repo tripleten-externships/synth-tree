@@ -70,9 +70,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Admin UI customizations
-  uiCustomizations UIComponentCustomization[] @relation("UserUICustomizations")
-
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
 
@@ -330,21 +327,4 @@ model UserNodeProgress {
   @@unique([userId, nodeId]) // canonical progress row
   @@index([userId, status]) // "what's in progress/completed for this user?"
   @@index([nodeId, status]) // "how many users completed this node?"
-}
-
-// UI component customization storage
-model UIComponentCustomization {
-  id            String   @id @default(uuid())
-  instanceId    String   @unique // Component instance ID
-  componentType String // Component type
-  settings      Json // Component settings (width, height, etc.)
-  createdBy     String // Admin Firebase UID
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  creator User @relation("UserUICustomizations", fields: [createdBy], references: [id], onDelete: Cascade)
-
-  @@index([componentType])
-  @@index([instanceId])
 }
