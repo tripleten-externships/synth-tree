@@ -80,7 +80,7 @@ Instead of disabling authentication or bypassing the middleware, we simulate the
 To automate this, we use the script:
 
 ```
-devScripts/createDevAdminUser.ts
+scripts/createDevAdminUser.ts
 ```
 
 This script performs the full flow the frontend would normally trigger using the Firebase client SDK — but headlessly, via the Firebase Admin SDK and the Identity Toolkit REST API.
@@ -111,7 +111,7 @@ pnpm create:dev-admin -- --email dev@example.com --name "Dev Admin"
   - This uses the same process the frontend SDK uses under the hood.
 - **Saves a credential file to:**
   ```
-  devScripts/credentials/<email>.credentials.json
+  scripts/credentials/<email>.credentials.json
   ```
 
 This file includes:
@@ -132,7 +132,7 @@ This file includes:
 The directory:
 
 ```
-devScripts/credentials/
+scripts/credentials/
 ```
 
 is fully `.gitignored`, including:

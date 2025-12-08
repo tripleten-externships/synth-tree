@@ -20,7 +20,7 @@ async function main() {
 
   if (!email || !name) {
     console.error(
-      'Usage: ts-node devScripts/createDevAdminUser.ts --email <email> --name "<name>" [--role ADMIN|USER]'
+      'Usage: ts-node scripts/createDevAdminUser.ts --email <email> --name "<name>" [--role ADMIN|USER]'
     );
     process.exit(1);
   }
@@ -126,7 +126,7 @@ async function main() {
     }
 
     // 5. Save credentials to a .gitignored folder
-    const outDir = path.resolve(process.cwd(), "devScripts/credentials");
+    const outDir = path.resolve(process.cwd(), "scripts/credentials");
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true });
     }

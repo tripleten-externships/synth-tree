@@ -6,5 +6,5 @@ node_modules
 /src/graphql/__generated__ 
 
 
-devScripts/credentials  
-devScripts/*.credentials.json 
+scripts/credentials  
+scripts/*.credentials.json 
