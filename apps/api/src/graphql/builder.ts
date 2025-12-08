@@ -8,13 +8,14 @@ import { prisma } from "@lib/prisma";
 import type { GraphQLContext } from "@graphql/context";
 
 export const builder = new SchemaBuilder<{
+  Context: GraphQLContext;
+  // Type The context so it is recognized in the resolvers
   PrismaTypes: PrismaTypes;
   Scalars: Scalars<
     Prisma.Decimal,
     Prisma.InputJsonValue | null,
     Prisma.InputJsonValue
   >;
-  Context: GraphQLContext;
 }>({
   plugins: [PrismaPlugin],
   prisma: {

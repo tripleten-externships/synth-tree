@@ -1,12 +1,8 @@
-import { builder } from "./graphql/builder";
-import "./graphql/skillNode/skillNodeType";
-import "./graphql/skillNode/skillNode.queries";
-import "./graphql/lessonBlocks/blockType";
-import "./graphql/lessonBlocks/block.queries";
-import "./graphql/lessonBlocks/block.mutations";
-import { generateAllCrud } from "./graphql/__generated__/autocrud";
-
-generateAllCrud({ exclude: ["SkillNode", "LessonBlocks"] });
+import { builder } from "@graphql/builder";
+import "@graphql/models/models.all";
+// AutoCrud Deleted. Used the fundamental GraphQL Models created by Pothos
+import "@graphql/queries";
+import "@graphql/mutations";
 
 builder.queryType({});
 builder.mutationType({});
