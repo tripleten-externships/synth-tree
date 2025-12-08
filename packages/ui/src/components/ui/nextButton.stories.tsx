@@ -5,6 +5,9 @@ import { NextButton } from "./nextButton";
 const meta: Meta<typeof NextButton> = {
   title: "UI/NextButton",
   component: NextButton,
+  parameters: {
+    layout: "centered",
+  },
   tags: ["autodocs"],
   argTypes: {
     disabled: { control: "boolean" },
