@@ -23,9 +23,7 @@ argTypes: {
     },
    animate: {
     control: { type: "boolean" },
-    description: "Toggle animation on/off",
-    options: { On: true, Off: false },
-    mapping: { On: true, Off: false }
+    description: "Toggle animation on/off"
    },
    className: {
     control: { type: "text"},
