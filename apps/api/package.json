@@ -11,8 +11,11 @@
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
     "postinstall": "prisma generate",
     "db:backup": "bash scripts/db-backup.sh",
-    "db:restore":"bash scripts/db-restore.sh",
-    "db:reset": "bash scripts/db-reset.sh"
+    "db:restore": "bash scripts/db-restore.sh",
+    "db:reset": "bash scripts/db-reset.sh",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -26,6 +29,7 @@
     "@prisma/client": "^6.17.1",
     "@skilltree/api-types": "workspace:*",
     "apollo-server": "^3.13.0",
+    "apollo-server-errors": "^3.3.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

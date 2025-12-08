@@ -152,7 +152,7 @@ Follow these steps to set up the project locally:
 
 ```bash
 git clone <repository-url>
-cd skilltree-monorepo
+cd synth-tree
 ```
 
 ### 2. Install Dependencies
@@ -520,6 +520,13 @@ Build all apps and packages for production:
 ```bash
 # Build everything
 pnpm build
+
+# May be necessary to run this first to build dependencies
+cd packages/theme
+pnpm build
+cd ../ui
+pnpm build
+cd ../..
 
 # Build specific app
 cd apps/admin-dashboard
