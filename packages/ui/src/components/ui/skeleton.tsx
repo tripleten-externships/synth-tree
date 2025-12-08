@@ -3,18 +3,22 @@ import {cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils";
 
 const skeletonVariants = cva(
-    "bg-muted animate-pulse",
+    "bg-muted",
 {
     variants: {
     shape: {
 rectangle:"",
 circle: "rounded-full",
 rounded: "rounded-lg"
+    },
+    animate: {
+      true: "animate-pulse",
+      false: ""
     }
     },
 defaultVariants:{
-    shape: "rectangle"
-
+    shape: "rectangle",
+    animate: true
     }
 }
 );
@@ -28,10 +32,10 @@ animate?: boolean;
 
 
 const Skeleton = React.forwardRef<HTMLDivElement,SkeletonProps>(
-    ({ className, shape, animate, ...props }, ref) => {
+    ({ className, shape, animate = true, ...props }, ref) => {
 return (
  <div ref={ref}
-      className={cn(skeletonVariants({ shape }), className)}
+      className={cn(skeletonVariants({ shape, animate }), className)}
        {...props}
    />
      );

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { EmptyState } from './empty.state';
+import { Button } from './button';
 
 
 const meta: Meta<typeof EmptyState> = {
@@ -29,11 +30,17 @@ export const Default: Story = {
 };
 
 export const WithAction: Story = {
-  args: {
-    title: 'No Projects',
-    description: 'Start by creating a new project.',
-    action: <button className="btn btn-primary">Create Project</button>,
-  },
+  render: () => (
+    <EmptyState
+      title="No Projects"
+      description="Start by creating a new project."
+      action={
+        <Button onClick={() => alert('Create Project clicked!')}>
+          Create Project
+        </Button>
+      }
+    />
+  ),
 };
 export const CustomClass: Story = {
 args: {

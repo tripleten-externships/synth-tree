@@ -18,13 +18,18 @@ argTypes: {
         "rectangle",
         "circle",
         "rounded"
-        ]
+        ],
+        description: "Shape of the skeleton"
     },
    animate: {
     control: { type: "boolean" },
+    description: "Toggle animation on/off",
+    options: { On: true, Off: false },
+    mapping: { On: true, Off: false }
    },
    className: {
     control: { type: "text"},
+    description: "Custom Tailwind classes for dimensions (e.g., 'w-32 h-6')"
    },
 },
 };
@@ -32,8 +37,24 @@ argTypes: {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Rectangle: Story = { args:{ shape: "rectangle", className: "w-32 h-6"} };
-export const Circle: Story = { args: { shape: "circle", className: "w-12 h-12" } };
-export const Rounded: Story = { args: { shape: "rounded", className: "w-32 h-6" } };
-export const Animated: Story = { args: { shape: "rectangle", animate: true, className: "w-32 h-6" } };
-export const Static: Story = { args: { shape: "rectangle", animate: false, className: "w-32 h-6" } };
+export const Rectangle: Story = { 
+  args:{ shape: "rectangle", animate: true, className: "w-32 h-6"} 
+};
+
+export const Circle: Story = { 
+  args: { shape: "circle", animate: true, className: "w-12 h-12" } 
+};
+
+export const Rounded: Story = { 
+  args: { shape: "rounded", animate: true, className: "w-32 h-6" } 
+};
+
+export const AnimatedOn: Story = { 
+  args: { shape: "rectangle", animate: true, className: "w-32 h-6" },
+  name: "Animation On"
+};
+
+export const AnimatedOff: Story = { 
+  args: { shape: "rectangle", animate: false, className: "w-32 h-6" },
+  name: "Animation Off"
+};
