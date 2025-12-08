@@ -1,6 +1,6 @@
 import { Request } from "express";
 import { PrismaClient, Role } from "@prisma/client";
-import { AuthenticationError } from "apollo-server-errors";
+import { GraphQLError } from "graphql";
 import { admin } from "../firebase";
 
 export interface GraphQLContext {
@@ -37,7 +37,7 @@ export async function createGraphQLContext({
           where: { id: decoded.uid },
         });
         if (!userRecord) {
-          throw new AuthenticationError(`No user found for UID ${decoded.uid}`);
+          throw new GraphQLError(`No user found for UID ${decoded.uid}`);
         }
         user = {
           uid: decoded.uid,
@@ -56,7 +56,7 @@ export async function createGraphQLContext({
     requireAuth: (): string => {
       const userId = auth.getUserId();
       if (!userId) {
-        throw new AuthenticationError("Authentication required");
+        throw new GraphQLError("Authentication required");
       }
       return userId;
     },
