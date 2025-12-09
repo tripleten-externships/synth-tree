@@ -6,10 +6,6 @@ import "./graphql/lessonBlocks/block.queries";
 import "./graphql/lessonBlocks/block.mutations";
 import { generateAllCrud } from "./graphql/__generated__/autocrud";
 
-// Custom resolvers
-import "./graphql/user";
-import "./graphql/ui-customization";
-
 // Auto-generate CRUD
 generateAllCrud();
 
