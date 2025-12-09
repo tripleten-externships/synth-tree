@@ -25,7 +25,7 @@
   },
   "include": [
     "src/**/*",
-    "stories/**/*"
+    "src/components/ui/**/*.stories.*"
   ],
   "exclude": [
     "dist",

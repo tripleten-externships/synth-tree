@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { Checkbox } from "../checkbox";
+import { Checkbox } from "./checkbox";
 import {
   createSizeArgTypes,
   createDimensionArgTypes,
@@ -12,14 +12,14 @@ import {
 } from "@/utils/storybook-helpers";
 
 const meta: Meta<typeof Checkbox> = {
-  title: "UI/Checkbox/Checkbox (square)",
+  title: "UI/Checkbox/Checkbox (circle)",
   component: Checkbox,
   parameters: {
     layout: "centered",
     docs: {
       description: {
         component:
-          "A customizable checkbox component with square borders, accessibility, keyboard navigation, and size variants.",
+          "A customizable checkbox component with accessibility, keyboard navigation, and size variants.",
       },
     },
   },
@@ -38,7 +38,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  args: createCheckboxDefaults({ className: "rounded-none" }),
+  args: createCheckboxDefaults({ className: "rounded-full" }),
 };
 
 export const Checked: Story = {
@@ -46,7 +46,7 @@ export const Checked: Story = {
     const [checked, setChecked] = useState(true);
     return (
       <Checkbox
-        {...createCheckboxDefaults({ className: "rounded-none" })}
+        {...createCheckboxDefaults({ className: "rounded-full" })}
         checked={checked}
         onCheckedChange={(checked) => setChecked(checked === true)}
       />
@@ -57,7 +57,7 @@ export const Checked: Story = {
 export const Disabled: Story = {
   args: createCheckboxDefaults({
     disabled: true,
-    className: "rounded-none",
+    className: "rounded-full",
   }),
 };
 
@@ -73,7 +73,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-none"
+        className="rounded-full"
       />
       <Checkbox
         size="default"
@@ -84,7 +84,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-none"
+        className="rounded-full"
       />
       <Checkbox
         size="lg"
@@ -95,7 +95,7 @@ export const Sizes: Story = {
         uncheckedColor="#ffffff"
         borderColor="#479AFF"
         checkedCheckmarkColor="hsl(var(--primary-foreground))"
-        className="rounded-none"
+        className="rounded-full"
       />
     </div>
   ),

@@ -9,7 +9,7 @@ import {
   SelectGroup,
   SelectLabel,
   SelectSeparator,
-} from "../select";
+} from "./select";
 
 const meta: Meta<typeof Select> = {
   title: "UI/Select",

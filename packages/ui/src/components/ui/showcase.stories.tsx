@@ -1,7 +1,7 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { Button } from "../button";
-import { Input } from "../input";
+import { Button } from "./button";
+import { Input } from "./input";
 import {
   Card,
   CardHeader,
@@ -9,8 +9,8 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-} from "../card";
-import { Badge } from "../badge";
+} from "./card";
+import { Badge } from "./badge";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../dialog";
+} from "./dialog";
 import {
   Select,
   SelectContent,
@@ -28,7 +28,7 @@ import {
   SelectValue,
   SelectGroup,
   SelectLabel,
-} from "../select";
+} from "./select";
 
 const meta: Meta = {
   title: "UI/Component Showcase",
