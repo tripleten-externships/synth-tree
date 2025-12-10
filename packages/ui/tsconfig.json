@@ -19,16 +19,10 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@theme/*": ["../../theme/src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "stories/**/*"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules",
-    "storybook-static"
-  ]
+  "include": ["src/**/*", "src/components/ui/**/*.stories.*"],
+  "exclude": ["dist", "node_modules", "storybook-static"]
 }

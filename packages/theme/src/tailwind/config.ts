@@ -37,7 +37,7 @@ export const tailwindConfig: Partial<Config> = {
   content: [
     // Include all source files that might use Tailwind classes
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./stories/**/*.{js,ts,jsx,tsx}",
+    "./src/components/ui/**/*.stories.{js,ts,jsx,tsx}",
     // Include other packages that might use this theme
     "../../packages/ui/src/**/*.{js,ts,jsx,tsx}",
     "../../apps/*/src/**/*.{js,ts,jsx,tsx}",

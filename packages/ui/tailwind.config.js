@@ -2,7 +2,7 @@ import { createTailwindConfig } from "@skilltree/theme/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default createTailwindConfig({
-  content: ["./src/**/*.{js,ts,jsx,tsx}", "./stories/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "./src/components/ui/**/*.stories.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       // Additional UI-specific customizations can go here

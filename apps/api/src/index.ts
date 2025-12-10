@@ -7,8 +7,9 @@ import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { schema } from "./schema";
-import { createGraphQLContext, GraphQLContext } from "@graphql/context";
-import { prisma } from "@lib/prisma";
+import { admin } from "./firebase";
+import { prisma } from "./lib/prisma";
+import { GraphQLContext, createGraphQLContext } from "./graphql/context";
 
 async function start() {
   const app = express();
@@ -42,9 +43,7 @@ async function start() {
     cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }) => {
-        return createGraphQLContext({ req, prisma });
-      },
+      context: async ({ req }) => createGraphQLContext({ req, prisma }),
     })
   );
 

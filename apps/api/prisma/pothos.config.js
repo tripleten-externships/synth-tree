@@ -10,6 +10,7 @@ module.exports = {
     resolverImports: `import { prisma } from '@lib/prisma';`,
     prismaCaller: "prisma",
     prismaImporter: "import type { Prisma } from '@prisma/client';",
+    deleteOutputDirBeforeGenerate: true, // Clean stale files
   },
   global: {
     builderLocation: `./src/graphql/builder`,
