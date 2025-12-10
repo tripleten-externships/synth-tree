@@ -1,9 +1,7 @@
 import { builder } from "./graphql/builder";
-import "./graphql/skillNode/skillNodeType";
-import "./graphql/skillNode/skillNode.queries";
-import "./graphql/lessonBlocks/blockType";
-import "./graphql/lessonBlocks/block.queries";
-import "./graphql/lessonBlocks/block.mutations";
+import "./graphql/models/models.all";
+import "./graphql/mutations";
+import "./graphql/queries";
 import { generateAllCrud } from "./graphql/__generated__/autocrud";
 
 // Auto-generate CRUD
