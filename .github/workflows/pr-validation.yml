@@ -249,7 +249,11 @@ jobs:
         working-directory: packages/theme
         run: pnpm build
 
-      - name: Reinstall dependencies (after building theme)
+      - name: Build UI library
+        working-directory: packages/ui
+        run: pnpm build
+
+      - name: Reinstall dependencies (after building libs)
         run: pnpm install --frozen-lockfile
 
       - name: Build Storybook
