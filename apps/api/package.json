@@ -13,7 +13,8 @@
     "prisma:validate": "prisma validate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "create:dev-admin": "ts-node -r tsconfig-paths/register scripts/createDevAdminUser.ts"
+    "create:dev-admin": "ts-node -r tsconfig-paths/register scripts/createDevAdminUser.ts",
+    "refresh:dev-token": "ts-node -r tsconfig-paths/register scripts/refreshDevToken.ts"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
