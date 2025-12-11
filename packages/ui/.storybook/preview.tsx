@@ -1,9 +1,15 @@
 import type { Preview } from "@storybook/react";
 import React, { useEffect } from "react";
 import { ThemeProvider, useTheme } from "@skilltree/theme";
+import type { ColorMode } from "@skilltree/theme";
 import "@skilltree/theme/styles/globals.css";
+import { configure } from "@testing-library/react";
 
-const ColorModeLoader = ({ colorMode }) => {
+configure({
+  asyncUtilTimeout: 5000,
+});
+
+const ColorModeLoader = ({ colorMode }: { colorMode: ColorMode }) => {
   const { setColorMode } = useTheme();
   useEffect(() => {
     console.log("Setting color mode to:", colorMode);

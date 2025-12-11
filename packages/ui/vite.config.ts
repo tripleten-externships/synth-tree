@@ -9,6 +9,7 @@ export default defineConfig({
       insertTypesEntry: true,
       rollupTypes: true,
       exclude: ["**/*.stories.*", "**/*.test.*"],
+      tsConfigFilePath: resolve(__dirname, "tsconfig.json"),
     }) as Plugin,
   ],
   resolve: {
