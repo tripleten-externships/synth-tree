@@ -3,9 +3,6 @@ import { PrismaClient, ContentType, ProgressStatus } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // --------------------------
-  // Cleanup / idempotency
-  // --------------------------
   await prisma.quizAttemptAnswer.deleteMany();
   await prisma.quizAttempt.deleteMany();
   await prisma.quizOption.deleteMany();
@@ -18,9 +15,6 @@ async function main() {
   await prisma.course.deleteMany();
   await prisma.user.deleteMany();
 
-  // --------------------------
-  // Users
-  // --------------------------
   const admin = await prisma.user.create({
     data: {
       id: "firebase-uid-admin",
@@ -48,9 +42,6 @@ async function main() {
 
   const users = [admin, user1, user2];
 
-  // --------------------------
-  // Courses
-  // --------------------------
   const course = await prisma.course.create({
     data: {
       title: "Intro to Chemistry",
@@ -59,9 +50,6 @@ async function main() {
     },
   });
 
-  // --------------------------
-  // SkillTrees
-  // --------------------------
   const tree1 = await prisma.skillTree.create({
     data: {
       title: "Chemistry Tree 1",
@@ -78,9 +66,6 @@ async function main() {
     },
   });
 
-  // --------------------------
-  // SkillNodes + Lessons
-  // --------------------------
   const nodesTree1 = [
     await prisma.skillNode.create({
       data: {
@@ -147,7 +132,6 @@ async function main() {
     ]),
   });
 
-  // Lessons for Tree 2
   await prisma.lessonBlocks.createMany({
     data: nodesTree2.flatMap((node, i) => [
       {
@@ -165,9 +149,6 @@ async function main() {
     ]),
   });
 
-  // --------------------------
-  // Sample progress
-  // --------------------------
   // `userNodeProgress` tracks each user's progress on a specific node.
   // Here, all nodes are initialized with status NOT_STARTED.
   for (const user of users) {
