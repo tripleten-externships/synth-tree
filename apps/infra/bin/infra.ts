@@ -51,11 +51,21 @@ const env = {
 };
 
 /**
+ * Parent Stack
+ * Groups all infrastructure stacks together in CloudFormation
+ */
+const parentStack = new cdk.Stack(app, `${config.name}-Stack`, {
+  env,
+  description: `Stack for Synth Tree ${config.name} environment`,
+  tags: config.tags,
+});
+
+/**
  * Network Stack
  * VPC, subnets, NAT gateways, security groups
  * No dependencies
  */
-const networkStack = new NetworkStack(app, `${config.name}-Network`, {
+const networkStack = new NetworkStack(parentStack, `${config.name}-Network`, {
   env,
   description: `Network infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
@@ -67,17 +77,21 @@ const networkStack = new NetworkStack(app, `${config.name}-Network`, {
  * Aurora Serverless v2 PostgreSQL cluster
  * Depends on: Network Stack
  */
-const databaseStack = new DatabaseStack(app, `${config.name}-Database`, {
-  env,
-  description: `Database infrastructure for Synth Tree ${config.name} environment`,
-  tags: config.tags,
-  config,
-  vpc: networkStack.vpc,
-  databaseSecurityGroup: networkStack.databaseSecurityGroup,
-  bastionSecurityGroup: networkStack.bastionSecurityGroup,
-  publicSubnets: networkStack.publicSubnets,
-  privateSubnets: networkStack.privateSubnets,
-});
+const databaseStack = new DatabaseStack(
+  parentStack,
+  `${config.name}-Database`,
+  {
+    env,
+    description: `Database infrastructure for Synth Tree ${config.name} environment`,
+    tags: config.tags,
+    config,
+    vpc: networkStack.vpc,
+    databaseSecurityGroup: networkStack.databaseSecurityGroup,
+    bastionSecurityGroup: networkStack.bastionSecurityGroup,
+    publicSubnets: networkStack.publicSubnets,
+    privateSubnets: networkStack.privateSubnets,
+  },
+);
 
 // Database stack depends on network stack
 databaseStack.addDependency(networkStack);
@@ -87,7 +101,7 @@ databaseStack.addDependency(networkStack);
  * ECS Fargate service, Application Load Balancer
  * Depends on: Network Stack, Database Stack
  */
-const apiStack = new ApiStack(app, `${config.name}-Api`, {
+const apiStack = new ApiStack(parentStack, `${config.name}-Api`, {
   env,
   description: `API infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
@@ -108,24 +122,32 @@ apiStack.addDependency(databaseStack);
  * S3 bucket, CloudFront distribution for React app
  * Independent - no dependencies
  */
-const frontendStack = new FrontendStack(app, `${config.name}-Frontend`, {
-  env,
-  description: `Frontend infrastructure for Synth Tree ${config.name} environment`,
-  tags: config.tags,
-  config,
-});
+const frontendStack = new FrontendStack(
+  parentStack,
+  `${config.name}-Frontend`,
+  {
+    env,
+    description: `Frontend infrastructure for Synth Tree ${config.name} environment`,
+    tags: config.tags,
+    config,
+  },
+);
 
 /**
  * Storybook Stack
  * S3 bucket, CloudFront distribution for Storybook
  * Independent - no dependencies
  */
-const storybookStack = new StorybookStack(app, `${config.name}-Storybook`, {
-  env,
-  description: `Storybook infrastructure for Synth Tree ${config.name} environment`,
-  tags: config.tags,
-  config,
-});
+const storybookStack = new StorybookStack(
+  parentStack,
+  `${config.name}-Storybook`,
+  {
+    env,
+    description: `Storybook infrastructure for Synth Tree ${config.name} environment`,
+    tags: config.tags,
+    config,
+  },
+);
 
 // Add stack-level tags
 cdk.Tags.of(app).add("Project", "synth-tree");
