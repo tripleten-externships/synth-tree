@@ -12,6 +12,7 @@
   "dependencies": {
     "@skilltree/theme": "workspace:*",
     "@skilltree/ui": "workspace:*",
+    "firebase": "^11.10.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.2"

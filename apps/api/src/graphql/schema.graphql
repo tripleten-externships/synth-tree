@@ -4,6 +4,392 @@ type BatchPayload {
   count: Int!
 }
 
+input BoolFieldUpdateOperationsInput {
+  set: Boolean
+}
+
+input BoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input BoolNullableFilter {
+  equals: Boolean
+  not: NestedBoolNullableFilter
+}
+
+input BoolNullableWithAggregatesFilter {
+  _count: NestedIntNullableFilter
+  _max: NestedBoolNullableFilter
+  _min: NestedBoolNullableFilter
+  equals: Boolean
+  not: NestedBoolNullableWithAggregatesFilter
+}
+
+input BoolWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedBoolFilter
+  _min: NestedBoolFilter
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
+}
+
+enum ContentType {
+  EMBED
+  HTML
+  IMAGE
+  VIDEO
+}
+
+type Course {
+  author: User!
+  authorId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String
+  id: ID!
+  status: CourseStatus!
+  title: String!
+  trees(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): [SkillTree!]!
+  updatedAt: DateTime!
+}
+
+input CourseCountOrderByAggregateInput {
+  authorId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  status: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input CourseCreateInput {
+  author: UserCreateNestedOneWithoutCoursesAuthoredInput!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  status: CourseStatus
+  title: String!
+  trees: SkillTreeCreateNestedManyWithoutCourseInput
+  updatedAt: DateTime
+}
+
+input CourseCreateManyAuthorInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  status: CourseStatus
+  title: String!
+  updatedAt: DateTime
+}
+
+input CourseCreateManyAuthorInputEnvelope {
+  data: [CourseCreateManyAuthorInput!]!
+  skipDuplicates: Boolean
+}
+
+input CourseCreateManyInput {
+  authorId: String!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  status: CourseStatus
+  title: String!
+  updatedAt: DateTime
+}
+
+input CourseCreateNestedManyWithoutAuthorInput {
+  connect: [CourseWhereUniqueInput!]
+  connectOrCreate: [CourseCreateOrConnectWithoutAuthorInput!]
+  create: [CourseCreateWithoutAuthorInput!]
+  createMany: CourseCreateManyAuthorInputEnvelope
+}
+
+input CourseCreateNestedOneWithoutTreesInput {
+  connect: CourseWhereUniqueInput
+  connectOrCreate: CourseCreateOrConnectWithoutTreesInput
+  create: CourseCreateWithoutTreesInput
+}
+
+input CourseCreateOrConnectWithoutAuthorInput {
+  create: CourseCreateWithoutAuthorInput!
+  where: CourseWhereUniqueInput!
+}
+
+input CourseCreateOrConnectWithoutTreesInput {
+  create: CourseCreateWithoutTreesInput!
+  where: CourseWhereUniqueInput!
+}
+
+input CourseCreateWithoutAuthorInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  status: CourseStatus
+  title: String!
+  trees: SkillTreeCreateNestedManyWithoutCourseInput
+  updatedAt: DateTime
+}
+
+input CourseCreateWithoutTreesInput {
+  author: UserCreateNestedOneWithoutCoursesAuthoredInput!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  status: CourseStatus
+  title: String!
+  updatedAt: DateTime
+}
+
+input CourseListRelationFilter {
+  every: CourseWhereInput
+  none: CourseWhereInput
+  some: CourseWhereInput
+}
+
+input CourseMaxOrderByAggregateInput {
+  authorId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  status: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input CourseMinOrderByAggregateInput {
+  authorId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  status: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input CourseOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input CourseOrderByWithAggregationInput {
+  _count: CourseCountOrderByAggregateInput
+  _max: CourseMaxOrderByAggregateInput
+  _min: CourseMinOrderByAggregateInput
+  authorId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  status: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input CourseOrderByWithRelationInput {
+  author: UserOrderByWithRelationInput
+  authorId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  status: SortOrder
+  title: SortOrder
+  trees: SkillTreeOrderByRelationAggregateInput
+  updatedAt: SortOrder
+}
+
+enum CourseScalarFieldEnum {
+  authorId
+  createdAt
+  deletedAt
+  description
+  id
+  status
+  title
+  updatedAt
+}
+
+input CourseScalarRelationFilter {
+  is: CourseWhereInput
+  isNot: CourseWhereInput
+}
+
+input CourseScalarWhereInput {
+  AND: [CourseScalarWhereInput!]
+  NOT: [CourseScalarWhereInput!]
+  OR: [CourseScalarWhereInput!]
+  authorId: StringFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: UuidFilter
+  status: EnumCourseStatusFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input CourseScalarWhereWithAggregatesInput {
+  AND: [CourseScalarWhereWithAggregatesInput!]
+  NOT: [CourseScalarWhereWithAggregatesInput!]
+  OR: [CourseScalarWhereWithAggregatesInput!]
+  authorId: StringWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  deletedAt: DateTimeNullableWithAggregatesFilter
+  description: StringNullableWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  status: EnumCourseStatusWithAggregatesFilter
+  title: StringWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+input CourseUpdateInput {
+  author: UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumCourseStatusFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  trees: SkillTreeUpdateManyWithoutCourseNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input CourseUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumCourseStatusFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input CourseUpdateManyWithWhereWithoutAuthorInput {
+  data: CourseUpdateManyMutationInput!
+  where: CourseScalarWhereInput!
+}
+
+input CourseUpdateManyWithoutAuthorNestedInput {
+  connect: [CourseWhereUniqueInput!]
+  connectOrCreate: [CourseCreateOrConnectWithoutAuthorInput!]
+  create: [CourseCreateWithoutAuthorInput!]
+  createMany: CourseCreateManyAuthorInputEnvelope
+  delete: [CourseWhereUniqueInput!]
+  deleteMany: [CourseScalarWhereInput!]
+  disconnect: [CourseWhereUniqueInput!]
+  set: [CourseWhereUniqueInput!]
+  update: [CourseUpdateWithWhereUniqueWithoutAuthorInput!]
+  updateMany: [CourseUpdateManyWithWhereWithoutAuthorInput!]
+  upsert: [CourseUpsertWithWhereUniqueWithoutAuthorInput!]
+}
+
+input CourseUpdateOneRequiredWithoutTreesNestedInput {
+  connect: CourseWhereUniqueInput
+  connectOrCreate: CourseCreateOrConnectWithoutTreesInput
+  create: CourseCreateWithoutTreesInput
+  update: CourseUpdateToOneWithWhereWithoutTreesInput
+  upsert: CourseUpsertWithoutTreesInput
+}
+
+input CourseUpdateToOneWithWhereWithoutTreesInput {
+  data: CourseUpdateWithoutTreesInput!
+  where: CourseWhereInput
+}
+
+input CourseUpdateWithWhereUniqueWithoutAuthorInput {
+  data: CourseUpdateWithoutAuthorInput!
+  where: CourseWhereUniqueInput!
+}
+
+input CourseUpdateWithoutAuthorInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumCourseStatusFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  trees: SkillTreeUpdateManyWithoutCourseNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input CourseUpdateWithoutTreesInput {
+  author: UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumCourseStatusFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input CourseUpsertWithWhereUniqueWithoutAuthorInput {
+  create: CourseCreateWithoutAuthorInput!
+  update: CourseUpdateWithoutAuthorInput!
+  where: CourseWhereUniqueInput!
+}
+
+input CourseUpsertWithoutTreesInput {
+  create: CourseCreateWithoutTreesInput!
+  update: CourseUpdateWithoutTreesInput!
+  where: CourseWhereInput
+}
+
+input CourseWhereInput {
+  AND: [CourseWhereInput!]
+  NOT: [CourseWhereInput!]
+  OR: [CourseWhereInput!]
+  author: UserWhereInput
+  authorId: StringFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: UuidFilter
+  status: EnumCourseStatusFilter
+  title: StringFilter
+  trees: SkillTreeListRelationFilter
+  updatedAt: DateTimeFilter
+}
+
+input CourseWhereUniqueInput {
+  AND: [CourseWhereInput!]
+  NOT: [CourseWhereInput!]
+  OR: [CourseWhereInput!]
+  author: UserWhereInput
+  authorId: StringFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: String
+  status: EnumCourseStatusFilter
+  title: StringFilter
+  trees: SkillTreeListRelationFilter
+  updatedAt: DateTimeFilter
+}
+
+input CreateLessonBlockInput {
+  caption: String
+  html: String
+  nodeId: ID!
+  order: Int!
+  type: String!
+  url: String
+}
+
 scalar DateTime
 
 input DateTimeFieldUpdateOperationsInput {
@@ -21,6 +407,31 @@ input DateTimeFilter {
   notIn: [DateTime!]
 }
 
+input DateTimeNullableFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableFilter
+  notIn: [DateTime!]
+}
+
+input DateTimeNullableWithAggregatesFilter {
+  _count: NestedIntNullableFilter
+  _max: NestedDateTimeNullableFilter
+  _min: NestedDateTimeNullableFilter
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableWithAggregatesFilter
+  notIn: [DateTime!]
+}
+
 input DateTimeWithAggregatesFilter {
   _count: NestedIntFilter
   _max: NestedDateTimeFilter
@@ -33,6 +444,111 @@ input DateTimeWithAggregatesFilter {
   lte: DateTime
   not: NestedDateTimeWithAggregatesFilter
   notIn: [DateTime!]
+}
+
+input EnumContentTypeFieldUpdateOperationsInput {
+  set: ContentType
+}
+
+input EnumContentTypeFilter {
+  equals: ContentType
+  in: [ContentType!]
+  not: ContentType
+  notIn: [ContentType!]
+}
+
+input EnumContentTypeWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumContentTypeFilter
+  _min: NestedEnumContentTypeFilter
+  equals: ContentType
+  in: [ContentType!]
+  not: ContentType
+  notIn: [ContentType!]
+}
+
+input EnumCourseStatusFieldUpdateOperationsInput {
+  set: CourseStatus
+}
+
+input EnumCourseStatusFilter {
+  equals: CourseStatus
+  in: [CourseStatus!]
+  not: CourseStatus
+  notIn: [CourseStatus!]
+}
+
+input EnumCourseStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumCourseStatusFilter
+  _min: NestedEnumCourseStatusFilter
+  equals: CourseStatus
+  in: [CourseStatus!]
+  not: CourseStatus
+  notIn: [CourseStatus!]
+}
+
+input EnumLessonStatusFieldUpdateOperationsInput {
+  set: LessonStatus
+}
+
+input EnumLessonStatusFilter {
+  equals: LessonStatus
+  in: [LessonStatus!]
+  not: LessonStatus
+  notIn: [LessonStatus!]
+}
+
+input EnumLessonStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumLessonStatusFilter
+  _min: NestedEnumLessonStatusFilter
+  equals: LessonStatus
+  in: [LessonStatus!]
+  not: LessonStatus
+  notIn: [LessonStatus!]
+}
+
+input EnumProgressStatusFieldUpdateOperationsInput {
+  set: ProgressStatus
+}
+
+input EnumProgressStatusFilter {
+  equals: ProgressStatus
+  in: [ProgressStatus!]
+  not: ProgressStatus
+  notIn: [ProgressStatus!]
+}
+
+input EnumProgressStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumProgressStatusFilter
+  _min: NestedEnumProgressStatusFilter
+  equals: ProgressStatus
+  in: [ProgressStatus!]
+  not: ProgressStatus
+  notIn: [ProgressStatus!]
+}
+
+input EnumQuestionTypeFieldUpdateOperationsInput {
+  set: QuestionType
+}
+
+input EnumQuestionTypeFilter {
+  equals: QuestionType
+  in: [QuestionType!]
+  not: QuestionType
+  notIn: [QuestionType!]
+}
+
+input EnumQuestionTypeWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumQuestionTypeFilter
+  _min: NestedEnumQuestionTypeFilter
+  equals: QuestionType
+  in: [QuestionType!]
+  not: QuestionType
+  notIn: [QuestionType!]
 }
 
 input EnumRoleFieldUpdateOperationsInput {
@@ -56,14 +572,568 @@ input EnumRoleWithAggregatesFilter {
   notIn: [Role!]
 }
 
+input IntFieldUpdateOperationsInput {
+  decrement: Int
+  divide: Int
+  increment: Int
+  multiply: Int
+  set: Int
+}
+
+input IntFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntFilter
+  notIn: [Int!]
+}
+
+input IntNullableFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntNullableFilter
+  notIn: [Int!]
+}
+
+input IntNullableWithAggregatesFilter {
+  _avg: NestedFloatNullableFilter
+  _count: NestedIntNullableFilter
+  _max: NestedIntNullableFilter
+  _min: NestedIntNullableFilter
+  _sum: NestedIntNullableFilter
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntNullableWithAggregatesFilter
+  notIn: [Int!]
+}
+
+input IntWithAggregatesFilter {
+  _avg: NestedFloatFilter
+  _count: NestedIntFilter
+  _max: NestedIntFilter
+  _min: NestedIntFilter
+  _sum: NestedIntFilter
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntWithAggregatesFilter
+  notIn: [Int!]
+}
+
+scalar Json
+
+enum JsonNullValueFilter {
+  AnyNull
+  DbNull
+  JsonNull
+}
+
+input JsonNullableFilter {
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
+}
+
+input JsonNullableWithAggregatesFilter {
+  _count: NestedIntNullableFilter
+  _max: NestedJsonNullableFilter
+  _min: NestedJsonNullableFilter
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
+}
+
+type LessonBlocks {
+  caption: String
+  createdAt: DateTime
+  html: String
+  id: ID
+  node: SkillNode
+  order: Int
+  type: String
+  updatedAt: DateTime
+  url: String
+}
+
+input LessonBlocksAvgOrderByAggregateInput {
+  order: SortOrder
+}
+
+input LessonBlocksCountOrderByAggregateInput {
+  caption: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  html: SortOrder
+  id: SortOrder
+  meta: SortOrder
+  nodeId: SortOrder
+  order: SortOrder
+  status: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+  url: SortOrder
+}
+
+input LessonBlocksCreateInput {
+  caption: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  html: String
+  id: String
+  meta: Json
+  node: SkillNodeCreateNestedOneWithoutLessonsInput!
+  order: Int
+  status: LessonStatus
+  type: ContentType!
+  updatedAt: DateTime
+  url: String
+}
+
+input LessonBlocksCreateManyInput {
+  caption: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  html: String
+  id: String
+  meta: Json
+  nodeId: String!
+  order: Int
+  status: LessonStatus
+  type: ContentType!
+  updatedAt: DateTime
+  url: String
+}
+
+input LessonBlocksCreateManyNodeInput {
+  caption: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  html: String
+  id: String
+  meta: Json
+  order: Int
+  status: LessonStatus
+  type: ContentType!
+  updatedAt: DateTime
+  url: String
+}
+
+input LessonBlocksCreateManyNodeInputEnvelope {
+  data: [LessonBlocksCreateManyNodeInput!]!
+  skipDuplicates: Boolean
+}
+
+input LessonBlocksCreateNestedManyWithoutNodeInput {
+  connect: [LessonBlocksWhereUniqueInput!]
+  connectOrCreate: [LessonBlocksCreateOrConnectWithoutNodeInput!]
+  create: [LessonBlocksCreateWithoutNodeInput!]
+  createMany: LessonBlocksCreateManyNodeInputEnvelope
+}
+
+input LessonBlocksCreateOrConnectWithoutNodeInput {
+  create: LessonBlocksCreateWithoutNodeInput!
+  where: LessonBlocksWhereUniqueInput!
+}
+
+input LessonBlocksCreateWithoutNodeInput {
+  caption: String
+  createdAt: DateTime
+  deletedAt: DateTime
+  html: String
+  id: String
+  meta: Json
+  order: Int
+  status: LessonStatus
+  type: ContentType!
+  updatedAt: DateTime
+  url: String
+}
+
+input LessonBlocksListRelationFilter {
+  every: LessonBlocksWhereInput
+  none: LessonBlocksWhereInput
+  some: LessonBlocksWhereInput
+}
+
+input LessonBlocksMaxOrderByAggregateInput {
+  caption: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  html: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  order: SortOrder
+  status: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+  url: SortOrder
+}
+
+input LessonBlocksMinOrderByAggregateInput {
+  caption: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  html: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  order: SortOrder
+  status: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+  url: SortOrder
+}
+
+input LessonBlocksOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input LessonBlocksOrderByWithAggregationInput {
+  _avg: LessonBlocksAvgOrderByAggregateInput
+  _count: LessonBlocksCountOrderByAggregateInput
+  _max: LessonBlocksMaxOrderByAggregateInput
+  _min: LessonBlocksMinOrderByAggregateInput
+  _sum: LessonBlocksSumOrderByAggregateInput
+  caption: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  html: SortOrder
+  id: SortOrder
+  meta: SortOrder
+  nodeId: SortOrder
+  order: SortOrder
+  status: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+  url: SortOrder
+}
+
+input LessonBlocksOrderByWithRelationInput {
+  caption: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  html: SortOrder
+  id: SortOrder
+  meta: SortOrder
+  node: SkillNodeOrderByWithRelationInput
+  nodeId: SortOrder
+  order: SortOrder
+  status: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+  url: SortOrder
+}
+
+enum LessonBlocksScalarFieldEnum {
+  caption
+  createdAt
+  deletedAt
+  html
+  id
+  meta
+  nodeId
+  order
+  status
+  type
+  updatedAt
+  url
+}
+
+input LessonBlocksScalarWhereInput {
+  AND: [LessonBlocksScalarWhereInput!]
+  NOT: [LessonBlocksScalarWhereInput!]
+  OR: [LessonBlocksScalarWhereInput!]
+  caption: StringNullableFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  html: StringNullableFilter
+  id: UuidFilter
+  meta: JsonNullableFilter
+  nodeId: UuidFilter
+  order: IntFilter
+  status: EnumLessonStatusFilter
+  type: EnumContentTypeFilter
+  updatedAt: DateTimeFilter
+  url: StringNullableFilter
+}
+
+input LessonBlocksScalarWhereWithAggregatesInput {
+  AND: [LessonBlocksScalarWhereWithAggregatesInput!]
+  NOT: [LessonBlocksScalarWhereWithAggregatesInput!]
+  OR: [LessonBlocksScalarWhereWithAggregatesInput!]
+  caption: StringNullableWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  deletedAt: DateTimeNullableWithAggregatesFilter
+  html: StringNullableWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  meta: JsonNullableWithAggregatesFilter
+  nodeId: UuidWithAggregatesFilter
+  order: IntWithAggregatesFilter
+  status: EnumLessonStatusWithAggregatesFilter
+  type: EnumContentTypeWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+  url: StringNullableWithAggregatesFilter
+}
+
+input LessonBlocksSumOrderByAggregateInput {
+  order: SortOrder
+}
+
+input LessonBlocksUpdateInput {
+  caption: NullableStringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  html: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  meta: Json
+  node: SkillNodeUpdateOneRequiredWithoutLessonsNestedInput
+  order: IntFieldUpdateOperationsInput
+  status: EnumLessonStatusFieldUpdateOperationsInput
+  type: EnumContentTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  url: NullableStringFieldUpdateOperationsInput
+}
+
+input LessonBlocksUpdateManyMutationInput {
+  caption: NullableStringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  html: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  meta: Json
+  order: IntFieldUpdateOperationsInput
+  status: EnumLessonStatusFieldUpdateOperationsInput
+  type: EnumContentTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  url: NullableStringFieldUpdateOperationsInput
+}
+
+input LessonBlocksUpdateManyWithWhereWithoutNodeInput {
+  data: LessonBlocksUpdateManyMutationInput!
+  where: LessonBlocksScalarWhereInput!
+}
+
+input LessonBlocksUpdateManyWithoutNodeNestedInput {
+  connect: [LessonBlocksWhereUniqueInput!]
+  connectOrCreate: [LessonBlocksCreateOrConnectWithoutNodeInput!]
+  create: [LessonBlocksCreateWithoutNodeInput!]
+  createMany: LessonBlocksCreateManyNodeInputEnvelope
+  delete: [LessonBlocksWhereUniqueInput!]
+  deleteMany: [LessonBlocksScalarWhereInput!]
+  disconnect: [LessonBlocksWhereUniqueInput!]
+  set: [LessonBlocksWhereUniqueInput!]
+  update: [LessonBlocksUpdateWithWhereUniqueWithoutNodeInput!]
+  updateMany: [LessonBlocksUpdateManyWithWhereWithoutNodeInput!]
+  upsert: [LessonBlocksUpsertWithWhereUniqueWithoutNodeInput!]
+}
+
+input LessonBlocksUpdateWithWhereUniqueWithoutNodeInput {
+  data: LessonBlocksUpdateWithoutNodeInput!
+  where: LessonBlocksWhereUniqueInput!
+}
+
+input LessonBlocksUpdateWithoutNodeInput {
+  caption: NullableStringFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  html: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  meta: Json
+  order: IntFieldUpdateOperationsInput
+  status: EnumLessonStatusFieldUpdateOperationsInput
+  type: EnumContentTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  url: NullableStringFieldUpdateOperationsInput
+}
+
+input LessonBlocksUpsertWithWhereUniqueWithoutNodeInput {
+  create: LessonBlocksCreateWithoutNodeInput!
+  update: LessonBlocksUpdateWithoutNodeInput!
+  where: LessonBlocksWhereUniqueInput!
+}
+
+input LessonBlocksWhereInput {
+  AND: [LessonBlocksWhereInput!]
+  NOT: [LessonBlocksWhereInput!]
+  OR: [LessonBlocksWhereInput!]
+  caption: StringNullableFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  html: StringNullableFilter
+  id: UuidFilter
+  meta: JsonNullableFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  order: IntFilter
+  status: EnumLessonStatusFilter
+  type: EnumContentTypeFilter
+  updatedAt: DateTimeFilter
+  url: StringNullableFilter
+}
+
+input LessonBlocksWhereUniqueInput {
+  AND: [LessonBlocksWhereInput!]
+  NOT: [LessonBlocksWhereInput!]
+  OR: [LessonBlocksWhereInput!]
+  caption: StringNullableFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  html: StringNullableFilter
+  id: String
+  meta: JsonNullableFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  order: IntFilter
+  status: EnumLessonStatusFilter
+  type: EnumContentTypeFilter
+  updatedAt: DateTimeFilter
+  url: StringNullableFilter
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+}
+
 type Mutation {
+  createLessonBlock(input: CreateLessonBlockInput!): LessonBlocks
+  createManyCourse(data: [CourseCreateInput!]!): [Course!]!
+  createManyQuiz(data: [QuizCreateInput!]!): [Quiz!]!
+  createManyQuizAttempt(data: [QuizAttemptCreateInput!]!): [QuizAttempt!]!
+  createManyQuizAttemptAnswer(data: [QuizAttemptAnswerCreateInput!]!): [QuizAttemptAnswer!]!
+  createManyQuizOption(data: [QuizOptionCreateInput!]!): [QuizOption!]!
+  createManyQuizQuestion(data: [QuizQuestionCreateInput!]!): [QuizQuestion!]!
+  createManySkillNodePrerequisite(data: [SkillNodePrerequisiteCreateInput!]!): [SkillNodePrerequisite!]!
+  createManySkillTree(data: [SkillTreeCreateInput!]!): [SkillTree!]!
   createManyUser(data: [UserCreateInput!]!): [User!]!
+  createManyUserNodeProgress(data: [UserNodeProgressCreateInput!]!): [UserNodeProgress!]!
+  createOneCourse(data: CourseCreateInput!): Course!
+  createOneQuiz(data: QuizCreateInput!): Quiz!
+  createOneQuizAttempt(data: QuizAttemptCreateInput!): QuizAttempt!
+  createOneQuizAttemptAnswer(data: QuizAttemptAnswerCreateInput!): QuizAttemptAnswer!
+  createOneQuizOption(data: QuizOptionCreateInput!): QuizOption!
+  createOneQuizQuestion(data: QuizQuestionCreateInput!): QuizQuestion!
+  createOneSkillNodePrerequisite(data: SkillNodePrerequisiteCreateInput!): SkillNodePrerequisite!
+  createOneSkillTree(data: SkillTreeCreateInput!): SkillTree!
   createOneUser(data: UserCreateInput!): User!
+  createOneUserNodeProgress(data: UserNodeProgressCreateInput!): UserNodeProgress!
+  deleteLessonBlock(id: ID!): LessonBlocks
+  deleteManyCourse(where: CourseWhereInput!): BatchPayload
+  deleteManyQuiz(where: QuizWhereInput!): BatchPayload
+  deleteManyQuizAttempt(where: QuizAttemptWhereInput!): BatchPayload
+  deleteManyQuizAttemptAnswer(where: QuizAttemptAnswerWhereInput!): BatchPayload
+  deleteManyQuizOption(where: QuizOptionWhereInput!): BatchPayload
+  deleteManyQuizQuestion(where: QuizQuestionWhereInput!): BatchPayload
+  deleteManySkillNodePrerequisite(where: SkillNodePrerequisiteWhereInput!): BatchPayload
+  deleteManySkillTree(where: SkillTreeWhereInput!): BatchPayload
   deleteManyUser(where: UserWhereInput!): BatchPayload
+  deleteManyUserNodeProgress(where: UserNodeProgressWhereInput!): BatchPayload
+  deleteOneCourse(where: CourseWhereUniqueInput!): Course
+  deleteOneQuiz(where: QuizWhereUniqueInput!): Quiz
+  deleteOneQuizAttempt(where: QuizAttemptWhereUniqueInput!): QuizAttempt
+  deleteOneQuizAttemptAnswer(where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
+  deleteOneQuizOption(where: QuizOptionWhereUniqueInput!): QuizOption
+  deleteOneQuizQuestion(where: QuizQuestionWhereUniqueInput!): QuizQuestion
+  deleteOneSkillNodePrerequisite(where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
+  deleteOneSkillTree(where: SkillTreeWhereUniqueInput!): SkillTree
   deleteOneUser(where: UserWhereUniqueInput!): User
+  deleteOneUserNodeProgress(where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
+  publishLessonBlock(id: ID!): LessonBlocks
+  updateLessonBlock(id: ID!, input: UpdateLessonBlockInput!): LessonBlocks
+  updateManyCourse(data: CourseUpdateManyMutationInput!, where: CourseWhereInput): BatchPayload!
+  updateManyQuiz(data: QuizUpdateManyMutationInput!, where: QuizWhereInput): BatchPayload!
+  updateManyQuizAttempt(data: QuizAttemptUpdateManyMutationInput!, where: QuizAttemptWhereInput): BatchPayload!
+  updateManyQuizAttemptAnswer(data: QuizAttemptAnswerUpdateManyMutationInput!, where: QuizAttemptAnswerWhereInput): BatchPayload!
+  updateManyQuizOption(data: QuizOptionUpdateManyMutationInput!, where: QuizOptionWhereInput): BatchPayload!
+  updateManyQuizQuestion(data: QuizQuestionUpdateManyMutationInput!, where: QuizQuestionWhereInput): BatchPayload!
+  updateManySkillNodePrerequisite(data: SkillNodePrerequisiteUpdateManyMutationInput!, where: SkillNodePrerequisiteWhereInput): BatchPayload!
+  updateManySkillTree(data: SkillTreeUpdateManyMutationInput!, where: SkillTreeWhereInput): BatchPayload!
   updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
+  updateManyUserNodeProgress(data: UserNodeProgressUpdateManyMutationInput!, where: UserNodeProgressWhereInput): BatchPayload!
+  updateOneCourse(data: CourseUpdateInput!, where: CourseWhereUniqueInput!): Course
+  updateOneQuiz(data: QuizUpdateInput!, where: QuizWhereUniqueInput!): Quiz
+  updateOneQuizAttempt(data: QuizAttemptUpdateInput!, where: QuizAttemptWhereUniqueInput!): QuizAttempt
+  updateOneQuizAttemptAnswer(data: QuizAttemptAnswerUpdateInput!, where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
+  updateOneQuizOption(data: QuizOptionUpdateInput!, where: QuizOptionWhereUniqueInput!): QuizOption
+  updateOneQuizQuestion(data: QuizQuestionUpdateInput!, where: QuizQuestionWhereUniqueInput!): QuizQuestion
+  updateOneSkillNodePrerequisite(data: SkillNodePrerequisiteUpdateInput!, where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
+  updateOneSkillTree(data: SkillTreeUpdateInput!, where: SkillTreeWhereUniqueInput!): SkillTree
   updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateOneUserNodeProgress(data: UserNodeProgressUpdateInput!, where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
+  upsertOneCourse(create: CourseCreateInput!, update: CourseUpdateInput!, where: CourseWhereUniqueInput!): Course!
+  upsertOneQuiz(create: QuizCreateInput!, update: QuizUpdateInput!, where: QuizWhereUniqueInput!): Quiz!
+  upsertOneQuizAttempt(create: QuizAttemptCreateInput!, update: QuizAttemptUpdateInput!, where: QuizAttemptWhereUniqueInput!): QuizAttempt!
+  upsertOneQuizAttemptAnswer(create: QuizAttemptAnswerCreateInput!, update: QuizAttemptAnswerUpdateInput!, where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer!
+  upsertOneQuizOption(create: QuizOptionCreateInput!, update: QuizOptionUpdateInput!, where: QuizOptionWhereUniqueInput!): QuizOption!
+  upsertOneQuizQuestion(create: QuizQuestionCreateInput!, update: QuizQuestionUpdateInput!, where: QuizQuestionWhereUniqueInput!): QuizQuestion!
+  upsertOneSkillNodePrerequisite(create: SkillNodePrerequisiteCreateInput!, update: SkillNodePrerequisiteUpdateInput!, where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite!
+  upsertOneSkillTree(create: SkillTreeCreateInput!, update: SkillTreeUpdateInput!, where: SkillTreeWhereUniqueInput!): SkillTree!
   upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
+  upsertOneUserNodeProgress(create: UserNodeProgressCreateInput!, update: UserNodeProgressUpdateInput!, where: UserNodeProgressWhereUniqueInput!): UserNodeProgress!
+}
+
+"""Never fill this, its created for inputs that dont have fields"""
+scalar NEVER
+
+input NestedBoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input NestedBoolNullableFilter {
+  equals: Boolean
+  not: NestedBoolNullableFilter
+}
+
+input NestedBoolNullableWithAggregatesFilter {
+  _count: NestedIntNullableFilter
+  _max: NestedBoolNullableFilter
+  _min: NestedBoolNullableFilter
+  equals: Boolean
+  not: NestedBoolNullableWithAggregatesFilter
+}
+
+input NestedBoolWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedBoolFilter
+  _min: NestedBoolFilter
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
 }
 
 input NestedDateTimeFilter {
@@ -74,6 +1144,31 @@ input NestedDateTimeFilter {
   lt: DateTime
   lte: DateTime
   not: NestedDateTimeFilter
+  notIn: [DateTime!]
+}
+
+input NestedDateTimeNullableFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableFilter
+  notIn: [DateTime!]
+}
+
+input NestedDateTimeNullableWithAggregatesFilter {
+  _count: NestedIntNullableFilter
+  _max: NestedDateTimeNullableFilter
+  _min: NestedDateTimeNullableFilter
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableWithAggregatesFilter
   notIn: [DateTime!]
 }
 
@@ -91,6 +1186,91 @@ input NestedDateTimeWithAggregatesFilter {
   notIn: [DateTime!]
 }
 
+input NestedEnumContentTypeFilter {
+  equals: ContentType
+  in: [ContentType!]
+  not: ContentType
+  notIn: [ContentType!]
+}
+
+input NestedEnumContentTypeWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumContentTypeFilter
+  _min: NestedEnumContentTypeFilter
+  equals: ContentType
+  in: [ContentType!]
+  not: ContentType
+  notIn: [ContentType!]
+}
+
+input NestedEnumCourseStatusFilter {
+  equals: CourseStatus
+  in: [CourseStatus!]
+  not: CourseStatus
+  notIn: [CourseStatus!]
+}
+
+input NestedEnumCourseStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumCourseStatusFilter
+  _min: NestedEnumCourseStatusFilter
+  equals: CourseStatus
+  in: [CourseStatus!]
+  not: CourseStatus
+  notIn: [CourseStatus!]
+}
+
+input NestedEnumLessonStatusFilter {
+  equals: LessonStatus
+  in: [LessonStatus!]
+  not: LessonStatus
+  notIn: [LessonStatus!]
+}
+
+input NestedEnumLessonStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumLessonStatusFilter
+  _min: NestedEnumLessonStatusFilter
+  equals: LessonStatus
+  in: [LessonStatus!]
+  not: LessonStatus
+  notIn: [LessonStatus!]
+}
+
+input NestedEnumProgressStatusFilter {
+  equals: ProgressStatus
+  in: [ProgressStatus!]
+  not: ProgressStatus
+  notIn: [ProgressStatus!]
+}
+
+input NestedEnumProgressStatusWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumProgressStatusFilter
+  _min: NestedEnumProgressStatusFilter
+  equals: ProgressStatus
+  in: [ProgressStatus!]
+  not: ProgressStatus
+  notIn: [ProgressStatus!]
+}
+
+input NestedEnumQuestionTypeFilter {
+  equals: QuestionType
+  in: [QuestionType!]
+  not: QuestionType
+  notIn: [QuestionType!]
+}
+
+input NestedEnumQuestionTypeWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedEnumQuestionTypeFilter
+  _min: NestedEnumQuestionTypeFilter
+  equals: QuestionType
+  in: [QuestionType!]
+  not: QuestionType
+  notIn: [QuestionType!]
+}
+
 input NestedEnumRoleFilter {
   equals: Role
   in: [Role!]
@@ -106,6 +1286,28 @@ input NestedEnumRoleWithAggregatesFilter {
   in: [Role!]
   not: Role
   notIn: [Role!]
+}
+
+input NestedFloatFilter {
+  equals: Float
+  gt: Float
+  gte: Float
+  in: [Float!]
+  lt: Float
+  lte: Float
+  not: NestedFloatFilter
+  notIn: [Float!]
+}
+
+input NestedFloatNullableFilter {
+  equals: Float
+  gt: Float
+  gte: Float
+  in: [Float!]
+  lt: Float
+  lte: Float
+  not: NestedFloatNullableFilter
+  notIn: [Float!]
 }
 
 input NestedIntFilter {
@@ -128,6 +1330,55 @@ input NestedIntNullableFilter {
   lte: Int
   not: NestedIntNullableFilter
   notIn: [Int!]
+}
+
+input NestedIntNullableWithAggregatesFilter {
+  _avg: NestedFloatNullableFilter
+  _count: NestedIntNullableFilter
+  _max: NestedIntNullableFilter
+  _min: NestedIntNullableFilter
+  _sum: NestedIntNullableFilter
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntNullableWithAggregatesFilter
+  notIn: [Int!]
+}
+
+input NestedIntWithAggregatesFilter {
+  _avg: NestedFloatFilter
+  _count: NestedIntFilter
+  _max: NestedIntFilter
+  _min: NestedIntFilter
+  _sum: NestedIntFilter
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntWithAggregatesFilter
+  notIn: [Int!]
+}
+
+input NestedJsonNullableFilter {
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
 }
 
 input NestedStringFilter {
@@ -192,6 +1443,52 @@ input NestedStringWithAggregatesFilter {
   startsWith: String
 }
 
+input NestedUuidFilter {
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  not: NestedUuidFilter
+  notIn: [String!]
+}
+
+input NestedUuidWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedStringFilter
+  _min: NestedStringFilter
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  not: NestedUuidWithAggregatesFilter
+  notIn: [String!]
+}
+
+input NullableBoolFieldUpdateOperationsInput {
+  set: Boolean
+}
+
+input NullableDateTimeFieldUpdateOperationsInput {
+  set: DateTime
+}
+
+input NullableIntFieldUpdateOperationsInput {
+  decrement: Int
+  divide: Int
+  increment: Int
+  multiply: Int
+  set: Int
+}
+
+enum NullableJsonNullValueInput {
+  DbNull
+  JsonNull
+}
+
 input NullableStringFieldUpdateOperationsInput {
   set: String
 }
@@ -201,11 +1498,59 @@ enum NullsOrder {
   last
 }
 
+enum ProgressStatus {
+  COMPLETED
+  IN_PROGRESS
+  NOT_STARTED
+}
+
 type Query {
+  countCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): Int!
+  countQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): Int!
+  countQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): Int!
+  countQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): Int!
+  countQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): Int!
+  countQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): Int!
+  countSkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): Int!
+  countSkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): Int!
   countUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): Int!
+  countUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): Int!
+  findFirstCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): Course
+  findFirstQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): Quiz
+  findFirstQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): QuizAttempt
+  findFirstQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): QuizAttemptAnswer
+  findFirstQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): QuizOption
+  findFirstQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): QuizQuestion
+  findFirstSkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): SkillNodePrerequisite
+  findFirstSkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): SkillTree
   findFirstUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): User
+  findFirstUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): UserNodeProgress
+  findManyCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
+  findManyQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): [Quiz!]!
+  findManyQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
+  findManyQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  findManyQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
+  findManyQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
+  findManySkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  findManySkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): [SkillTree!]!
   findManyUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
+  findManyUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
+  findUniqueCourse(where: CourseWhereUniqueInput!): Course
+  findUniqueQuiz(where: QuizWhereUniqueInput!): Quiz
+  findUniqueQuizAttempt(where: QuizAttemptWhereUniqueInput!): QuizAttempt
+  findUniqueQuizAttemptAnswer(where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
+  findUniqueQuizOption(where: QuizOptionWhereUniqueInput!): QuizOption
+  findUniqueQuizQuestion(where: QuizQuestionWhereUniqueInput!): QuizQuestion
+  findUniqueSkillNodePrerequisite(where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
+  findUniqueSkillTree(where: SkillTreeWhereUniqueInput!): SkillTree
   findUniqueUser(where: UserWhereUniqueInput!): User
+  findUniqueUserNodeProgress(where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
+  lessonBlock(id: ID!): LessonBlocks
+  lessonBlocks(limit: Int, offset: Int): [LessonBlocks!]
+  lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
+  skillNode(id: ID!): SkillNode
+  skillNodes(limit: Int, offset: Int): [SkillNode!]
+  skillNodesByTree(treeId: ID!): [SkillNode!]
 }
 
 enum QueryMode {
@@ -213,9 +1558,2851 @@ enum QueryMode {
   insensitive
 }
 
+enum QuestionType {
+  MULTIPLE_CHOICE
+  OPEN_QUESTION
+  SINGLE_CHOICE
+}
+
+type Quiz {
+  attempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: ID!
+  node: SkillNode!
+  nodeId: String!
+  questions(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
+  required: Boolean!
+  title: String
+  updatedAt: DateTime!
+}
+
+type QuizAttempt {
+  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  id: ID!
+  passed: Boolean!
+  quiz: Quiz!
+  quizId: String!
+  takenAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+type QuizAttemptAnswer {
+  answer: Json
+  attempt: QuizAttempt!
+  attemptId: String!
+  id: ID!
+  isCorrect: Boolean
+  question: QuizQuestion!
+  questionId: String!
+}
+
+input QuizAttemptAnswerAttemptIdQuestionIdCompoundUniqueInput {
+  attemptId: String!
+  questionId: String!
+}
+
+input QuizAttemptAnswerCountOrderByAggregateInput {
+  answer: SortOrder
+  attemptId: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+}
+
+input QuizAttemptAnswerCreateInput {
+  answer: Json
+  attempt: QuizAttemptCreateNestedOneWithoutAnswersInput!
+  id: String
+  isCorrect: Boolean
+  question: QuizQuestionCreateNestedOneWithoutAnswersInput!
+}
+
+input QuizAttemptAnswerCreateManyAttemptInput {
+  answer: Json
+  id: String
+  isCorrect: Boolean
+  questionId: String!
+}
+
+input QuizAttemptAnswerCreateManyAttemptInputEnvelope {
+  data: [QuizAttemptAnswerCreateManyAttemptInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizAttemptAnswerCreateManyInput {
+  answer: Json
+  attemptId: String!
+  id: String
+  isCorrect: Boolean
+  questionId: String!
+}
+
+input QuizAttemptAnswerCreateManyQuestionInput {
+  answer: Json
+  attemptId: String!
+  id: String
+  isCorrect: Boolean
+}
+
+input QuizAttemptAnswerCreateManyQuestionInputEnvelope {
+  data: [QuizAttemptAnswerCreateManyQuestionInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizAttemptAnswerCreateNestedManyWithoutAttemptInput {
+  connect: [QuizAttemptAnswerWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptAnswerCreateOrConnectWithoutAttemptInput!]
+  create: [QuizAttemptAnswerCreateWithoutAttemptInput!]
+  createMany: QuizAttemptAnswerCreateManyAttemptInputEnvelope
+}
+
+input QuizAttemptAnswerCreateNestedManyWithoutQuestionInput {
+  connect: [QuizAttemptAnswerWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptAnswerCreateOrConnectWithoutQuestionInput!]
+  create: [QuizAttemptAnswerCreateWithoutQuestionInput!]
+  createMany: QuizAttemptAnswerCreateManyQuestionInputEnvelope
+}
+
+input QuizAttemptAnswerCreateOrConnectWithoutAttemptInput {
+  create: QuizAttemptAnswerCreateWithoutAttemptInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerCreateOrConnectWithoutQuestionInput {
+  create: QuizAttemptAnswerCreateWithoutQuestionInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerCreateWithoutAttemptInput {
+  answer: Json
+  id: String
+  isCorrect: Boolean
+  question: QuizQuestionCreateNestedOneWithoutAnswersInput!
+}
+
+input QuizAttemptAnswerCreateWithoutQuestionInput {
+  answer: Json
+  attempt: QuizAttemptCreateNestedOneWithoutAnswersInput!
+  id: String
+  isCorrect: Boolean
+}
+
+input QuizAttemptAnswerListRelationFilter {
+  every: QuizAttemptAnswerWhereInput
+  none: QuizAttemptAnswerWhereInput
+  some: QuizAttemptAnswerWhereInput
+}
+
+input QuizAttemptAnswerMaxOrderByAggregateInput {
+  attemptId: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+}
+
+input QuizAttemptAnswerMinOrderByAggregateInput {
+  attemptId: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+}
+
+input QuizAttemptAnswerOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input QuizAttemptAnswerOrderByWithAggregationInput {
+  _count: QuizAttemptAnswerCountOrderByAggregateInput
+  _max: QuizAttemptAnswerMaxOrderByAggregateInput
+  _min: QuizAttemptAnswerMinOrderByAggregateInput
+  answer: SortOrder
+  attemptId: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+}
+
+input QuizAttemptAnswerOrderByWithRelationInput {
+  answer: SortOrder
+  attempt: QuizAttemptOrderByWithRelationInput
+  attemptId: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  question: QuizQuestionOrderByWithRelationInput
+  questionId: SortOrder
+}
+
+enum QuizAttemptAnswerScalarFieldEnum {
+  answer
+  attemptId
+  id
+  isCorrect
+  questionId
+}
+
+input QuizAttemptAnswerScalarWhereInput {
+  AND: [QuizAttemptAnswerScalarWhereInput!]
+  NOT: [QuizAttemptAnswerScalarWhereInput!]
+  OR: [QuizAttemptAnswerScalarWhereInput!]
+  answer: JsonNullableFilter
+  attemptId: UuidFilter
+  id: UuidFilter
+  isCorrect: BoolNullableFilter
+  questionId: UuidFilter
+}
+
+input QuizAttemptAnswerScalarWhereWithAggregatesInput {
+  AND: [QuizAttemptAnswerScalarWhereWithAggregatesInput!]
+  NOT: [QuizAttemptAnswerScalarWhereWithAggregatesInput!]
+  OR: [QuizAttemptAnswerScalarWhereWithAggregatesInput!]
+  answer: JsonNullableWithAggregatesFilter
+  attemptId: UuidWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  isCorrect: BoolNullableWithAggregatesFilter
+  questionId: UuidWithAggregatesFilter
+}
+
+input QuizAttemptAnswerUpdateInput {
+  answer: Json
+  attempt: QuizAttemptUpdateOneRequiredWithoutAnswersNestedInput
+  id: StringFieldUpdateOperationsInput
+  isCorrect: NullableBoolFieldUpdateOperationsInput
+  question: QuizQuestionUpdateOneRequiredWithoutAnswersNestedInput
+}
+
+input QuizAttemptAnswerUpdateManyMutationInput {
+  answer: Json
+  id: StringFieldUpdateOperationsInput
+  isCorrect: NullableBoolFieldUpdateOperationsInput
+}
+
+input QuizAttemptAnswerUpdateManyWithWhereWithoutAttemptInput {
+  data: QuizAttemptAnswerUpdateManyMutationInput!
+  where: QuizAttemptAnswerScalarWhereInput!
+}
+
+input QuizAttemptAnswerUpdateManyWithWhereWithoutQuestionInput {
+  data: QuizAttemptAnswerUpdateManyMutationInput!
+  where: QuizAttemptAnswerScalarWhereInput!
+}
+
+input QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput {
+  connect: [QuizAttemptAnswerWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptAnswerCreateOrConnectWithoutAttemptInput!]
+  create: [QuizAttemptAnswerCreateWithoutAttemptInput!]
+  createMany: QuizAttemptAnswerCreateManyAttemptInputEnvelope
+  delete: [QuizAttemptAnswerWhereUniqueInput!]
+  deleteMany: [QuizAttemptAnswerScalarWhereInput!]
+  disconnect: [QuizAttemptAnswerWhereUniqueInput!]
+  set: [QuizAttemptAnswerWhereUniqueInput!]
+  update: [QuizAttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput!]
+  updateMany: [QuizAttemptAnswerUpdateManyWithWhereWithoutAttemptInput!]
+  upsert: [QuizAttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput!]
+}
+
+input QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput {
+  connect: [QuizAttemptAnswerWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptAnswerCreateOrConnectWithoutQuestionInput!]
+  create: [QuizAttemptAnswerCreateWithoutQuestionInput!]
+  createMany: QuizAttemptAnswerCreateManyQuestionInputEnvelope
+  delete: [QuizAttemptAnswerWhereUniqueInput!]
+  deleteMany: [QuizAttemptAnswerScalarWhereInput!]
+  disconnect: [QuizAttemptAnswerWhereUniqueInput!]
+  set: [QuizAttemptAnswerWhereUniqueInput!]
+  update: [QuizAttemptAnswerUpdateWithWhereUniqueWithoutQuestionInput!]
+  updateMany: [QuizAttemptAnswerUpdateManyWithWhereWithoutQuestionInput!]
+  upsert: [QuizAttemptAnswerUpsertWithWhereUniqueWithoutQuestionInput!]
+}
+
+input QuizAttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput {
+  data: QuizAttemptAnswerUpdateWithoutAttemptInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerUpdateWithWhereUniqueWithoutQuestionInput {
+  data: QuizAttemptAnswerUpdateWithoutQuestionInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerUpdateWithoutAttemptInput {
+  answer: Json
+  id: StringFieldUpdateOperationsInput
+  isCorrect: NullableBoolFieldUpdateOperationsInput
+  question: QuizQuestionUpdateOneRequiredWithoutAnswersNestedInput
+}
+
+input QuizAttemptAnswerUpdateWithoutQuestionInput {
+  answer: Json
+  attempt: QuizAttemptUpdateOneRequiredWithoutAnswersNestedInput
+  id: StringFieldUpdateOperationsInput
+  isCorrect: NullableBoolFieldUpdateOperationsInput
+}
+
+input QuizAttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput {
+  create: QuizAttemptAnswerCreateWithoutAttemptInput!
+  update: QuizAttemptAnswerUpdateWithoutAttemptInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerUpsertWithWhereUniqueWithoutQuestionInput {
+  create: QuizAttemptAnswerCreateWithoutQuestionInput!
+  update: QuizAttemptAnswerUpdateWithoutQuestionInput!
+  where: QuizAttemptAnswerWhereUniqueInput!
+}
+
+input QuizAttemptAnswerWhereInput {
+  AND: [QuizAttemptAnswerWhereInput!]
+  NOT: [QuizAttemptAnswerWhereInput!]
+  OR: [QuizAttemptAnswerWhereInput!]
+  answer: JsonNullableFilter
+  attempt: QuizAttemptWhereInput
+  attemptId: UuidFilter
+  id: UuidFilter
+  isCorrect: BoolNullableFilter
+  question: QuizQuestionWhereInput
+  questionId: UuidFilter
+}
+
+input QuizAttemptAnswerWhereUniqueInput {
+  AND: [QuizAttemptAnswerWhereInput!]
+  NOT: [QuizAttemptAnswerWhereInput!]
+  OR: [QuizAttemptAnswerWhereInput!]
+  answer: JsonNullableFilter
+  attempt: QuizAttemptWhereInput
+  attemptId: UuidFilter
+  attemptId_questionId: QuizAttemptAnswerAttemptIdQuestionIdCompoundUniqueInput
+  id: String
+  isCorrect: BoolNullableFilter
+  question: QuizQuestionWhereInput
+  questionId: UuidFilter
+}
+
+input QuizAttemptCountOrderByAggregateInput {
+  id: SortOrder
+  passed: SortOrder
+  quizId: SortOrder
+  takenAt: SortOrder
+  userId: SortOrder
+}
+
+input QuizAttemptCreateInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
+  id: String
+  passed: Boolean!
+  quiz: QuizCreateNestedOneWithoutAttemptsInput!
+  takenAt: DateTime
+  user: UserCreateNestedOneWithoutQuizAttemptsInput!
+}
+
+input QuizAttemptCreateManyInput {
+  id: String
+  passed: Boolean!
+  quizId: String!
+  takenAt: DateTime
+  userId: String!
+}
+
+input QuizAttemptCreateManyQuizInput {
+  id: String
+  passed: Boolean!
+  takenAt: DateTime
+  userId: String!
+}
+
+input QuizAttemptCreateManyQuizInputEnvelope {
+  data: [QuizAttemptCreateManyQuizInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizAttemptCreateManyUserInput {
+  id: String
+  passed: Boolean!
+  quizId: String!
+  takenAt: DateTime
+}
+
+input QuizAttemptCreateManyUserInputEnvelope {
+  data: [QuizAttemptCreateManyUserInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizAttemptCreateNestedManyWithoutQuizInput {
+  connect: [QuizAttemptWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptCreateOrConnectWithoutQuizInput!]
+  create: [QuizAttemptCreateWithoutQuizInput!]
+  createMany: QuizAttemptCreateManyQuizInputEnvelope
+}
+
+input QuizAttemptCreateNestedManyWithoutUserInput {
+  connect: [QuizAttemptWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptCreateOrConnectWithoutUserInput!]
+  create: [QuizAttemptCreateWithoutUserInput!]
+  createMany: QuizAttemptCreateManyUserInputEnvelope
+}
+
+input QuizAttemptCreateNestedOneWithoutAnswersInput {
+  connect: QuizAttemptWhereUniqueInput
+  connectOrCreate: QuizAttemptCreateOrConnectWithoutAnswersInput
+  create: QuizAttemptCreateWithoutAnswersInput
+}
+
+input QuizAttemptCreateOrConnectWithoutAnswersInput {
+  create: QuizAttemptCreateWithoutAnswersInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptCreateOrConnectWithoutQuizInput {
+  create: QuizAttemptCreateWithoutQuizInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptCreateOrConnectWithoutUserInput {
+  create: QuizAttemptCreateWithoutUserInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptCreateWithoutAnswersInput {
+  id: String
+  passed: Boolean!
+  quiz: QuizCreateNestedOneWithoutAttemptsInput!
+  takenAt: DateTime
+  user: UserCreateNestedOneWithoutQuizAttemptsInput!
+}
+
+input QuizAttemptCreateWithoutQuizInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
+  id: String
+  passed: Boolean!
+  takenAt: DateTime
+  user: UserCreateNestedOneWithoutQuizAttemptsInput!
+}
+
+input QuizAttemptCreateWithoutUserInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
+  id: String
+  passed: Boolean!
+  quiz: QuizCreateNestedOneWithoutAttemptsInput!
+  takenAt: DateTime
+}
+
+input QuizAttemptListRelationFilter {
+  every: QuizAttemptWhereInput
+  none: QuizAttemptWhereInput
+  some: QuizAttemptWhereInput
+}
+
+input QuizAttemptMaxOrderByAggregateInput {
+  id: SortOrder
+  passed: SortOrder
+  quizId: SortOrder
+  takenAt: SortOrder
+  userId: SortOrder
+}
+
+input QuizAttemptMinOrderByAggregateInput {
+  id: SortOrder
+  passed: SortOrder
+  quizId: SortOrder
+  takenAt: SortOrder
+  userId: SortOrder
+}
+
+input QuizAttemptOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input QuizAttemptOrderByWithAggregationInput {
+  _count: QuizAttemptCountOrderByAggregateInput
+  _max: QuizAttemptMaxOrderByAggregateInput
+  _min: QuizAttemptMinOrderByAggregateInput
+  id: SortOrder
+  passed: SortOrder
+  quizId: SortOrder
+  takenAt: SortOrder
+  userId: SortOrder
+}
+
+input QuizAttemptOrderByWithRelationInput {
+  answers: QuizAttemptAnswerOrderByRelationAggregateInput
+  id: SortOrder
+  passed: SortOrder
+  quiz: QuizOrderByWithRelationInput
+  quizId: SortOrder
+  takenAt: SortOrder
+  user: UserOrderByWithRelationInput
+  userId: SortOrder
+}
+
+enum QuizAttemptScalarFieldEnum {
+  id
+  passed
+  quizId
+  takenAt
+  userId
+}
+
+input QuizAttemptScalarRelationFilter {
+  is: QuizAttemptWhereInput
+  isNot: QuizAttemptWhereInput
+}
+
+input QuizAttemptScalarWhereInput {
+  AND: [QuizAttemptScalarWhereInput!]
+  NOT: [QuizAttemptScalarWhereInput!]
+  OR: [QuizAttemptScalarWhereInput!]
+  id: UuidFilter
+  passed: BoolFilter
+  quizId: UuidFilter
+  takenAt: DateTimeFilter
+  userId: StringFilter
+}
+
+input QuizAttemptScalarWhereWithAggregatesInput {
+  AND: [QuizAttemptScalarWhereWithAggregatesInput!]
+  NOT: [QuizAttemptScalarWhereWithAggregatesInput!]
+  OR: [QuizAttemptScalarWhereWithAggregatesInput!]
+  id: UuidWithAggregatesFilter
+  passed: BoolWithAggregatesFilter
+  quizId: UuidWithAggregatesFilter
+  takenAt: DateTimeWithAggregatesFilter
+  userId: StringWithAggregatesFilter
+}
+
+input QuizAttemptUpdateInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
+  id: StringFieldUpdateOperationsInput
+  passed: BoolFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
+  takenAt: DateTimeFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
+}
+
+input QuizAttemptUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  passed: BoolFieldUpdateOperationsInput
+  takenAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizAttemptUpdateManyWithWhereWithoutQuizInput {
+  data: QuizAttemptUpdateManyMutationInput!
+  where: QuizAttemptScalarWhereInput!
+}
+
+input QuizAttemptUpdateManyWithWhereWithoutUserInput {
+  data: QuizAttemptUpdateManyMutationInput!
+  where: QuizAttemptScalarWhereInput!
+}
+
+input QuizAttemptUpdateManyWithoutQuizNestedInput {
+  connect: [QuizAttemptWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptCreateOrConnectWithoutQuizInput!]
+  create: [QuizAttemptCreateWithoutQuizInput!]
+  createMany: QuizAttemptCreateManyQuizInputEnvelope
+  delete: [QuizAttemptWhereUniqueInput!]
+  deleteMany: [QuizAttemptScalarWhereInput!]
+  disconnect: [QuizAttemptWhereUniqueInput!]
+  set: [QuizAttemptWhereUniqueInput!]
+  update: [QuizAttemptUpdateWithWhereUniqueWithoutQuizInput!]
+  updateMany: [QuizAttemptUpdateManyWithWhereWithoutQuizInput!]
+  upsert: [QuizAttemptUpsertWithWhereUniqueWithoutQuizInput!]
+}
+
+input QuizAttemptUpdateManyWithoutUserNestedInput {
+  connect: [QuizAttemptWhereUniqueInput!]
+  connectOrCreate: [QuizAttemptCreateOrConnectWithoutUserInput!]
+  create: [QuizAttemptCreateWithoutUserInput!]
+  createMany: QuizAttemptCreateManyUserInputEnvelope
+  delete: [QuizAttemptWhereUniqueInput!]
+  deleteMany: [QuizAttemptScalarWhereInput!]
+  disconnect: [QuizAttemptWhereUniqueInput!]
+  set: [QuizAttemptWhereUniqueInput!]
+  update: [QuizAttemptUpdateWithWhereUniqueWithoutUserInput!]
+  updateMany: [QuizAttemptUpdateManyWithWhereWithoutUserInput!]
+  upsert: [QuizAttemptUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input QuizAttemptUpdateOneRequiredWithoutAnswersNestedInput {
+  connect: QuizAttemptWhereUniqueInput
+  connectOrCreate: QuizAttemptCreateOrConnectWithoutAnswersInput
+  create: QuizAttemptCreateWithoutAnswersInput
+  update: QuizAttemptUpdateToOneWithWhereWithoutAnswersInput
+  upsert: QuizAttemptUpsertWithoutAnswersInput
+}
+
+input QuizAttemptUpdateToOneWithWhereWithoutAnswersInput {
+  data: QuizAttemptUpdateWithoutAnswersInput!
+  where: QuizAttemptWhereInput
+}
+
+input QuizAttemptUpdateWithWhereUniqueWithoutQuizInput {
+  data: QuizAttemptUpdateWithoutQuizInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptUpdateWithWhereUniqueWithoutUserInput {
+  data: QuizAttemptUpdateWithoutUserInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptUpdateWithoutAnswersInput {
+  id: StringFieldUpdateOperationsInput
+  passed: BoolFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
+  takenAt: DateTimeFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
+}
+
+input QuizAttemptUpdateWithoutQuizInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
+  id: StringFieldUpdateOperationsInput
+  passed: BoolFieldUpdateOperationsInput
+  takenAt: DateTimeFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
+}
+
+input QuizAttemptUpdateWithoutUserInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
+  id: StringFieldUpdateOperationsInput
+  passed: BoolFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
+  takenAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizAttemptUpsertWithWhereUniqueWithoutQuizInput {
+  create: QuizAttemptCreateWithoutQuizInput!
+  update: QuizAttemptUpdateWithoutQuizInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptUpsertWithWhereUniqueWithoutUserInput {
+  create: QuizAttemptCreateWithoutUserInput!
+  update: QuizAttemptUpdateWithoutUserInput!
+  where: QuizAttemptWhereUniqueInput!
+}
+
+input QuizAttemptUpsertWithoutAnswersInput {
+  create: QuizAttemptCreateWithoutAnswersInput!
+  update: QuizAttemptUpdateWithoutAnswersInput!
+  where: QuizAttemptWhereInput
+}
+
+input QuizAttemptWhereInput {
+  AND: [QuizAttemptWhereInput!]
+  NOT: [QuizAttemptWhereInput!]
+  OR: [QuizAttemptWhereInput!]
+  answers: QuizAttemptAnswerListRelationFilter
+  id: UuidFilter
+  passed: BoolFilter
+  quiz: QuizWhereInput
+  quizId: UuidFilter
+  takenAt: DateTimeFilter
+  user: UserWhereInput
+  userId: StringFilter
+}
+
+input QuizAttemptWhereUniqueInput {
+  AND: [QuizAttemptWhereInput!]
+  NOT: [QuizAttemptWhereInput!]
+  OR: [QuizAttemptWhereInput!]
+  answers: QuizAttemptAnswerListRelationFilter
+  id: String
+  passed: BoolFilter
+  quiz: QuizWhereInput
+  quizId: UuidFilter
+  takenAt: DateTimeFilter
+  user: UserWhereInput
+  userId: StringFilter
+}
+
+input QuizCountOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  required: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizCreateInput {
+  attempts: QuizAttemptCreateNestedManyWithoutQuizInput
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  node: SkillNodeCreateNestedOneWithoutQuizInput!
+  questions: QuizQuestionCreateNestedManyWithoutQuizInput
+  required: Boolean
+  title: String
+  updatedAt: DateTime
+}
+
+input QuizCreateManyInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  nodeId: String!
+  required: Boolean
+  title: String
+  updatedAt: DateTime
+}
+
+input QuizCreateNestedOneWithoutAttemptsInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutAttemptsInput
+  create: QuizCreateWithoutAttemptsInput
+}
+
+input QuizCreateNestedOneWithoutNodeInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutNodeInput
+  create: QuizCreateWithoutNodeInput
+}
+
+input QuizCreateNestedOneWithoutQuestionsInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutQuestionsInput
+  create: QuizCreateWithoutQuestionsInput
+}
+
+input QuizCreateOrConnectWithoutAttemptsInput {
+  create: QuizCreateWithoutAttemptsInput!
+  where: QuizWhereUniqueInput!
+}
+
+input QuizCreateOrConnectWithoutNodeInput {
+  create: QuizCreateWithoutNodeInput!
+  where: QuizWhereUniqueInput!
+}
+
+input QuizCreateOrConnectWithoutQuestionsInput {
+  create: QuizCreateWithoutQuestionsInput!
+  where: QuizWhereUniqueInput!
+}
+
+input QuizCreateWithoutAttemptsInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  node: SkillNodeCreateNestedOneWithoutQuizInput!
+  questions: QuizQuestionCreateNestedManyWithoutQuizInput
+  required: Boolean
+  title: String
+  updatedAt: DateTime
+}
+
+input QuizCreateWithoutNodeInput {
+  attempts: QuizAttemptCreateNestedManyWithoutQuizInput
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  questions: QuizQuestionCreateNestedManyWithoutQuizInput
+  required: Boolean
+  title: String
+  updatedAt: DateTime
+}
+
+input QuizCreateWithoutQuestionsInput {
+  attempts: QuizAttemptCreateNestedManyWithoutQuizInput
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  node: SkillNodeCreateNestedOneWithoutQuizInput!
+  required: Boolean
+  title: String
+  updatedAt: DateTime
+}
+
+input QuizMaxOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  required: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizMinOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  required: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizNullableScalarRelationFilter {
+  is: QuizWhereInput
+  isNot: QuizWhereInput
+}
+
+type QuizOption {
+  createdAt: DateTime!
+  id: ID!
+  isCorrect: Boolean!
+  question: QuizQuestion!
+  questionId: String!
+  text: String!
+  updatedAt: DateTime!
+}
+
+input QuizOptionCountOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizOptionCreateInput {
+  createdAt: DateTime
+  id: String
+  isCorrect: Boolean
+  question: QuizQuestionCreateNestedOneWithoutOptionsInput!
+  text: String!
+  updatedAt: DateTime
+}
+
+input QuizOptionCreateManyInput {
+  createdAt: DateTime
+  id: String
+  isCorrect: Boolean
+  questionId: String!
+  text: String!
+  updatedAt: DateTime
+}
+
+input QuizOptionCreateManyQuestionInput {
+  createdAt: DateTime
+  id: String
+  isCorrect: Boolean
+  text: String!
+  updatedAt: DateTime
+}
+
+input QuizOptionCreateManyQuestionInputEnvelope {
+  data: [QuizOptionCreateManyQuestionInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizOptionCreateNestedManyWithoutQuestionInput {
+  connect: [QuizOptionWhereUniqueInput!]
+  connectOrCreate: [QuizOptionCreateOrConnectWithoutQuestionInput!]
+  create: [QuizOptionCreateWithoutQuestionInput!]
+  createMany: QuizOptionCreateManyQuestionInputEnvelope
+}
+
+input QuizOptionCreateOrConnectWithoutQuestionInput {
+  create: QuizOptionCreateWithoutQuestionInput!
+  where: QuizOptionWhereUniqueInput!
+}
+
+input QuizOptionCreateWithoutQuestionInput {
+  createdAt: DateTime
+  id: String
+  isCorrect: Boolean
+  text: String!
+  updatedAt: DateTime
+}
+
+input QuizOptionListRelationFilter {
+  every: QuizOptionWhereInput
+  none: QuizOptionWhereInput
+  some: QuizOptionWhereInput
+}
+
+input QuizOptionMaxOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizOptionMinOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizOptionOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input QuizOptionOrderByWithAggregationInput {
+  _count: QuizOptionCountOrderByAggregateInput
+  _max: QuizOptionMaxOrderByAggregateInput
+  _min: QuizOptionMinOrderByAggregateInput
+  createdAt: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  questionId: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizOptionOrderByWithRelationInput {
+  createdAt: SortOrder
+  id: SortOrder
+  isCorrect: SortOrder
+  question: QuizQuestionOrderByWithRelationInput
+  questionId: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+enum QuizOptionScalarFieldEnum {
+  createdAt
+  id
+  isCorrect
+  questionId
+  text
+  updatedAt
+}
+
+input QuizOptionScalarWhereInput {
+  AND: [QuizOptionScalarWhereInput!]
+  NOT: [QuizOptionScalarWhereInput!]
+  OR: [QuizOptionScalarWhereInput!]
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  isCorrect: BoolFilter
+  questionId: UuidFilter
+  text: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizOptionScalarWhereWithAggregatesInput {
+  AND: [QuizOptionScalarWhereWithAggregatesInput!]
+  NOT: [QuizOptionScalarWhereWithAggregatesInput!]
+  OR: [QuizOptionScalarWhereWithAggregatesInput!]
+  createdAt: DateTimeWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  isCorrect: BoolWithAggregatesFilter
+  questionId: UuidWithAggregatesFilter
+  text: StringWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input QuizOptionUpdateInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  isCorrect: BoolFieldUpdateOperationsInput
+  question: QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput
+  text: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizOptionUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  isCorrect: BoolFieldUpdateOperationsInput
+  text: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizOptionUpdateManyWithWhereWithoutQuestionInput {
+  data: QuizOptionUpdateManyMutationInput!
+  where: QuizOptionScalarWhereInput!
+}
+
+input QuizOptionUpdateManyWithoutQuestionNestedInput {
+  connect: [QuizOptionWhereUniqueInput!]
+  connectOrCreate: [QuizOptionCreateOrConnectWithoutQuestionInput!]
+  create: [QuizOptionCreateWithoutQuestionInput!]
+  createMany: QuizOptionCreateManyQuestionInputEnvelope
+  delete: [QuizOptionWhereUniqueInput!]
+  deleteMany: [QuizOptionScalarWhereInput!]
+  disconnect: [QuizOptionWhereUniqueInput!]
+  set: [QuizOptionWhereUniqueInput!]
+  update: [QuizOptionUpdateWithWhereUniqueWithoutQuestionInput!]
+  updateMany: [QuizOptionUpdateManyWithWhereWithoutQuestionInput!]
+  upsert: [QuizOptionUpsertWithWhereUniqueWithoutQuestionInput!]
+}
+
+input QuizOptionUpdateWithWhereUniqueWithoutQuestionInput {
+  data: QuizOptionUpdateWithoutQuestionInput!
+  where: QuizOptionWhereUniqueInput!
+}
+
+input QuizOptionUpdateWithoutQuestionInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  isCorrect: BoolFieldUpdateOperationsInput
+  text: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizOptionUpsertWithWhereUniqueWithoutQuestionInput {
+  create: QuizOptionCreateWithoutQuestionInput!
+  update: QuizOptionUpdateWithoutQuestionInput!
+  where: QuizOptionWhereUniqueInput!
+}
+
+input QuizOptionWhereInput {
+  AND: [QuizOptionWhereInput!]
+  NOT: [QuizOptionWhereInput!]
+  OR: [QuizOptionWhereInput!]
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  isCorrect: BoolFilter
+  question: QuizQuestionWhereInput
+  questionId: UuidFilter
+  text: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizOptionWhereUniqueInput {
+  AND: [QuizOptionWhereInput!]
+  NOT: [QuizOptionWhereInput!]
+  OR: [QuizOptionWhereInput!]
+  createdAt: DateTimeFilter
+  id: String
+  isCorrect: BoolFilter
+  question: QuizQuestionWhereInput
+  questionId: UuidFilter
+  text: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizOrderByWithAggregationInput {
+  _count: QuizCountOrderByAggregateInput
+  _max: QuizMaxOrderByAggregateInput
+  _min: QuizMinOrderByAggregateInput
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  required: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizOrderByWithRelationInput {
+  attempts: QuizAttemptOrderByRelationAggregateInput
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  node: SkillNodeOrderByWithRelationInput
+  nodeId: SortOrder
+  questions: QuizQuestionOrderByRelationAggregateInput
+  required: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+type QuizQuestion {
+  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  createdAt: DateTime!
+  id: ID!
+  options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
+  order: Int!
+  prompt: String!
+  quiz: Quiz!
+  quizId: String!
+  type: QuestionType!
+  updatedAt: DateTime!
+}
+
+input QuizQuestionAvgOrderByAggregateInput {
+  order: SortOrder
+}
+
+input QuizQuestionCountOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  order: SortOrder
+  prompt: SortOrder
+  quizId: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizQuestionCreateInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  createdAt: DateTime
+  id: String
+  options: QuizOptionCreateNestedManyWithoutQuestionInput
+  order: Int
+  prompt: String!
+  quiz: QuizCreateNestedOneWithoutQuestionsInput!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionCreateManyInput {
+  createdAt: DateTime
+  id: String
+  order: Int
+  prompt: String!
+  quizId: String!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionCreateManyQuizInput {
+  createdAt: DateTime
+  id: String
+  order: Int
+  prompt: String!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionCreateManyQuizInputEnvelope {
+  data: [QuizQuestionCreateManyQuizInput!]!
+  skipDuplicates: Boolean
+}
+
+input QuizQuestionCreateNestedManyWithoutQuizInput {
+  connect: [QuizQuestionWhereUniqueInput!]
+  connectOrCreate: [QuizQuestionCreateOrConnectWithoutQuizInput!]
+  create: [QuizQuestionCreateWithoutQuizInput!]
+  createMany: QuizQuestionCreateManyQuizInputEnvelope
+}
+
+input QuizQuestionCreateNestedOneWithoutAnswersInput {
+  connect: QuizQuestionWhereUniqueInput
+  connectOrCreate: QuizQuestionCreateOrConnectWithoutAnswersInput
+  create: QuizQuestionCreateWithoutAnswersInput
+}
+
+input QuizQuestionCreateNestedOneWithoutOptionsInput {
+  connect: QuizQuestionWhereUniqueInput
+  connectOrCreate: QuizQuestionCreateOrConnectWithoutOptionsInput
+  create: QuizQuestionCreateWithoutOptionsInput
+}
+
+input QuizQuestionCreateOrConnectWithoutAnswersInput {
+  create: QuizQuestionCreateWithoutAnswersInput!
+  where: QuizQuestionWhereUniqueInput!
+}
+
+input QuizQuestionCreateOrConnectWithoutOptionsInput {
+  create: QuizQuestionCreateWithoutOptionsInput!
+  where: QuizQuestionWhereUniqueInput!
+}
+
+input QuizQuestionCreateOrConnectWithoutQuizInput {
+  create: QuizQuestionCreateWithoutQuizInput!
+  where: QuizQuestionWhereUniqueInput!
+}
+
+input QuizQuestionCreateWithoutAnswersInput {
+  createdAt: DateTime
+  id: String
+  options: QuizOptionCreateNestedManyWithoutQuestionInput
+  order: Int
+  prompt: String!
+  quiz: QuizCreateNestedOneWithoutQuestionsInput!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionCreateWithoutOptionsInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  createdAt: DateTime
+  id: String
+  order: Int
+  prompt: String!
+  quiz: QuizCreateNestedOneWithoutQuestionsInput!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionCreateWithoutQuizInput {
+  answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  createdAt: DateTime
+  id: String
+  options: QuizOptionCreateNestedManyWithoutQuestionInput
+  order: Int
+  prompt: String!
+  type: QuestionType!
+  updatedAt: DateTime
+}
+
+input QuizQuestionListRelationFilter {
+  every: QuizQuestionWhereInput
+  none: QuizQuestionWhereInput
+  some: QuizQuestionWhereInput
+}
+
+input QuizQuestionMaxOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  order: SortOrder
+  prompt: SortOrder
+  quizId: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizQuestionMinOrderByAggregateInput {
+  createdAt: SortOrder
+  id: SortOrder
+  order: SortOrder
+  prompt: SortOrder
+  quizId: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizQuestionOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input QuizQuestionOrderByWithAggregationInput {
+  _avg: QuizQuestionAvgOrderByAggregateInput
+  _count: QuizQuestionCountOrderByAggregateInput
+  _max: QuizQuestionMaxOrderByAggregateInput
+  _min: QuizQuestionMinOrderByAggregateInput
+  _sum: QuizQuestionSumOrderByAggregateInput
+  createdAt: SortOrder
+  id: SortOrder
+  order: SortOrder
+  prompt: SortOrder
+  quizId: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+input QuizQuestionOrderByWithRelationInput {
+  answers: QuizAttemptAnswerOrderByRelationAggregateInput
+  createdAt: SortOrder
+  id: SortOrder
+  options: QuizOptionOrderByRelationAggregateInput
+  order: SortOrder
+  prompt: SortOrder
+  quiz: QuizOrderByWithRelationInput
+  quizId: SortOrder
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+enum QuizQuestionScalarFieldEnum {
+  createdAt
+  id
+  order
+  prompt
+  quizId
+  type
+  updatedAt
+}
+
+input QuizQuestionScalarRelationFilter {
+  is: QuizQuestionWhereInput
+  isNot: QuizQuestionWhereInput
+}
+
+input QuizQuestionScalarWhereInput {
+  AND: [QuizQuestionScalarWhereInput!]
+  NOT: [QuizQuestionScalarWhereInput!]
+  OR: [QuizQuestionScalarWhereInput!]
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  order: IntFilter
+  prompt: StringFilter
+  quizId: UuidFilter
+  type: EnumQuestionTypeFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizQuestionScalarWhereWithAggregatesInput {
+  AND: [QuizQuestionScalarWhereWithAggregatesInput!]
+  NOT: [QuizQuestionScalarWhereWithAggregatesInput!]
+  OR: [QuizQuestionScalarWhereWithAggregatesInput!]
+  createdAt: DateTimeWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  order: IntWithAggregatesFilter
+  prompt: StringWithAggregatesFilter
+  quizId: UuidWithAggregatesFilter
+  type: EnumQuestionTypeWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input QuizQuestionSumOrderByAggregateInput {
+  order: SortOrder
+}
+
+input QuizQuestionUpdateInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  options: QuizOptionUpdateManyWithoutQuestionNestedInput
+  order: IntFieldUpdateOperationsInput
+  prompt: StringFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutQuestionsNestedInput
+  type: EnumQuestionTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizQuestionUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
+  prompt: StringFieldUpdateOperationsInput
+  type: EnumQuestionTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizQuestionUpdateManyWithWhereWithoutQuizInput {
+  data: QuizQuestionUpdateManyMutationInput!
+  where: QuizQuestionScalarWhereInput!
+}
+
+input QuizQuestionUpdateManyWithoutQuizNestedInput {
+  connect: [QuizQuestionWhereUniqueInput!]
+  connectOrCreate: [QuizQuestionCreateOrConnectWithoutQuizInput!]
+  create: [QuizQuestionCreateWithoutQuizInput!]
+  createMany: QuizQuestionCreateManyQuizInputEnvelope
+  delete: [QuizQuestionWhereUniqueInput!]
+  deleteMany: [QuizQuestionScalarWhereInput!]
+  disconnect: [QuizQuestionWhereUniqueInput!]
+  set: [QuizQuestionWhereUniqueInput!]
+  update: [QuizQuestionUpdateWithWhereUniqueWithoutQuizInput!]
+  updateMany: [QuizQuestionUpdateManyWithWhereWithoutQuizInput!]
+  upsert: [QuizQuestionUpsertWithWhereUniqueWithoutQuizInput!]
+}
+
+input QuizQuestionUpdateOneRequiredWithoutAnswersNestedInput {
+  connect: QuizQuestionWhereUniqueInput
+  connectOrCreate: QuizQuestionCreateOrConnectWithoutAnswersInput
+  create: QuizQuestionCreateWithoutAnswersInput
+  update: QuizQuestionUpdateToOneWithWhereWithoutAnswersInput
+  upsert: QuizQuestionUpsertWithoutAnswersInput
+}
+
+input QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput {
+  connect: QuizQuestionWhereUniqueInput
+  connectOrCreate: QuizQuestionCreateOrConnectWithoutOptionsInput
+  create: QuizQuestionCreateWithoutOptionsInput
+  update: QuizQuestionUpdateToOneWithWhereWithoutOptionsInput
+  upsert: QuizQuestionUpsertWithoutOptionsInput
+}
+
+input QuizQuestionUpdateToOneWithWhereWithoutAnswersInput {
+  data: QuizQuestionUpdateWithoutAnswersInput!
+  where: QuizQuestionWhereInput
+}
+
+input QuizQuestionUpdateToOneWithWhereWithoutOptionsInput {
+  data: QuizQuestionUpdateWithoutOptionsInput!
+  where: QuizQuestionWhereInput
+}
+
+input QuizQuestionUpdateWithWhereUniqueWithoutQuizInput {
+  data: QuizQuestionUpdateWithoutQuizInput!
+  where: QuizQuestionWhereUniqueInput!
+}
+
+input QuizQuestionUpdateWithoutAnswersInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  options: QuizOptionUpdateManyWithoutQuestionNestedInput
+  order: IntFieldUpdateOperationsInput
+  prompt: StringFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutQuestionsNestedInput
+  type: EnumQuestionTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizQuestionUpdateWithoutOptionsInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
+  prompt: StringFieldUpdateOperationsInput
+  quiz: QuizUpdateOneRequiredWithoutQuestionsNestedInput
+  type: EnumQuestionTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizQuestionUpdateWithoutQuizInput {
+  answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  options: QuizOptionUpdateManyWithoutQuestionNestedInput
+  order: IntFieldUpdateOperationsInput
+  prompt: StringFieldUpdateOperationsInput
+  type: EnumQuestionTypeFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizQuestionUpsertWithWhereUniqueWithoutQuizInput {
+  create: QuizQuestionCreateWithoutQuizInput!
+  update: QuizQuestionUpdateWithoutQuizInput!
+  where: QuizQuestionWhereUniqueInput!
+}
+
+input QuizQuestionUpsertWithoutAnswersInput {
+  create: QuizQuestionCreateWithoutAnswersInput!
+  update: QuizQuestionUpdateWithoutAnswersInput!
+  where: QuizQuestionWhereInput
+}
+
+input QuizQuestionUpsertWithoutOptionsInput {
+  create: QuizQuestionCreateWithoutOptionsInput!
+  update: QuizQuestionUpdateWithoutOptionsInput!
+  where: QuizQuestionWhereInput
+}
+
+input QuizQuestionWhereInput {
+  AND: [QuizQuestionWhereInput!]
+  NOT: [QuizQuestionWhereInput!]
+  OR: [QuizQuestionWhereInput!]
+  answers: QuizAttemptAnswerListRelationFilter
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  options: QuizOptionListRelationFilter
+  order: IntFilter
+  prompt: StringFilter
+  quiz: QuizWhereInput
+  quizId: UuidFilter
+  type: EnumQuestionTypeFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizQuestionWhereUniqueInput {
+  AND: [QuizQuestionWhereInput!]
+  NOT: [QuizQuestionWhereInput!]
+  OR: [QuizQuestionWhereInput!]
+  answers: QuizAttemptAnswerListRelationFilter
+  createdAt: DateTimeFilter
+  id: String
+  options: QuizOptionListRelationFilter
+  order: IntFilter
+  prompt: StringFilter
+  quiz: QuizWhereInput
+  quizId: UuidFilter
+  type: EnumQuestionTypeFilter
+  updatedAt: DateTimeFilter
+}
+
+enum QuizScalarFieldEnum {
+  createdAt
+  deletedAt
+  id
+  nodeId
+  required
+  title
+  updatedAt
+}
+
+input QuizScalarRelationFilter {
+  is: QuizWhereInput
+  isNot: QuizWhereInput
+}
+
+input QuizScalarWhereWithAggregatesInput {
+  AND: [QuizScalarWhereWithAggregatesInput!]
+  NOT: [QuizScalarWhereWithAggregatesInput!]
+  OR: [QuizScalarWhereWithAggregatesInput!]
+  createdAt: DateTimeWithAggregatesFilter
+  deletedAt: DateTimeNullableWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  nodeId: UuidWithAggregatesFilter
+  required: BoolWithAggregatesFilter
+  title: StringNullableWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input QuizUpdateInput {
+  attempts: QuizAttemptUpdateManyWithoutQuizNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  node: SkillNodeUpdateOneRequiredWithoutQuizNestedInput
+  questions: QuizQuestionUpdateManyWithoutQuizNestedInput
+  required: BoolFieldUpdateOperationsInput
+  title: NullableStringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  required: BoolFieldUpdateOperationsInput
+  title: NullableStringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizUpdateOneRequiredWithoutAttemptsNestedInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutAttemptsInput
+  create: QuizCreateWithoutAttemptsInput
+  update: QuizUpdateToOneWithWhereWithoutAttemptsInput
+  upsert: QuizUpsertWithoutAttemptsInput
+}
+
+input QuizUpdateOneRequiredWithoutQuestionsNestedInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutQuestionsInput
+  create: QuizCreateWithoutQuestionsInput
+  update: QuizUpdateToOneWithWhereWithoutQuestionsInput
+  upsert: QuizUpsertWithoutQuestionsInput
+}
+
+input QuizUpdateOneWithoutNodeNestedInput {
+  connect: QuizWhereUniqueInput
+  connectOrCreate: QuizCreateOrConnectWithoutNodeInput
+  create: QuizCreateWithoutNodeInput
+  delete: QuizWhereInput
+  disconnect: QuizWhereInput
+  update: QuizUpdateToOneWithWhereWithoutNodeInput
+  upsert: QuizUpsertWithoutNodeInput
+}
+
+input QuizUpdateToOneWithWhereWithoutAttemptsInput {
+  data: QuizUpdateWithoutAttemptsInput!
+  where: QuizWhereInput
+}
+
+input QuizUpdateToOneWithWhereWithoutNodeInput {
+  data: QuizUpdateWithoutNodeInput!
+  where: QuizWhereInput
+}
+
+input QuizUpdateToOneWithWhereWithoutQuestionsInput {
+  data: QuizUpdateWithoutQuestionsInput!
+  where: QuizWhereInput
+}
+
+input QuizUpdateWithoutAttemptsInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  node: SkillNodeUpdateOneRequiredWithoutQuizNestedInput
+  questions: QuizQuestionUpdateManyWithoutQuizNestedInput
+  required: BoolFieldUpdateOperationsInput
+  title: NullableStringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizUpdateWithoutNodeInput {
+  attempts: QuizAttemptUpdateManyWithoutQuizNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  questions: QuizQuestionUpdateManyWithoutQuizNestedInput
+  required: BoolFieldUpdateOperationsInput
+  title: NullableStringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizUpdateWithoutQuestionsInput {
+  attempts: QuizAttemptUpdateManyWithoutQuizNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  node: SkillNodeUpdateOneRequiredWithoutQuizNestedInput
+  required: BoolFieldUpdateOperationsInput
+  title: NullableStringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input QuizUpsertWithoutAttemptsInput {
+  create: QuizCreateWithoutAttemptsInput!
+  update: QuizUpdateWithoutAttemptsInput!
+  where: QuizWhereInput
+}
+
+input QuizUpsertWithoutNodeInput {
+  create: QuizCreateWithoutNodeInput!
+  update: QuizUpdateWithoutNodeInput!
+  where: QuizWhereInput
+}
+
+input QuizUpsertWithoutQuestionsInput {
+  create: QuizCreateWithoutQuestionsInput!
+  update: QuizUpdateWithoutQuestionsInput!
+  where: QuizWhereInput
+}
+
+input QuizWhereInput {
+  AND: [QuizWhereInput!]
+  NOT: [QuizWhereInput!]
+  OR: [QuizWhereInput!]
+  attempts: QuizAttemptListRelationFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  id: UuidFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  questions: QuizQuestionListRelationFilter
+  required: BoolFilter
+  title: StringNullableFilter
+  updatedAt: DateTimeFilter
+}
+
+input QuizWhereUniqueInput {
+  AND: [QuizWhereInput!]
+  NOT: [QuizWhereInput!]
+  OR: [QuizWhereInput!]
+  attempts: QuizAttemptListRelationFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  id: String
+  node: SkillNodeWhereInput
+  nodeId: String
+  questions: QuizQuestionListRelationFilter
+  required: BoolFilter
+  title: StringNullableFilter
+  updatedAt: DateTimeFilter
+}
+
 enum Role {
   ADMIN
   USER
+}
+
+type SkillNode {
+  createdAt: DateTime
+  id: ID
+  lessons: [LessonBlocks!]
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  step: Int
+  title: String
+  tree: SkillTree
+  updatedAt: DateTime
+}
+
+input SkillNodeAvgOrderByAggregateInput {
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+}
+
+input SkillNodeCountOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+  title: SortOrder
+  treeId: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillNodeCreateInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateManyInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  step: Int
+  title: String!
+  treeId: String!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateManyTreeInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  step: Int
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateManyTreeInputEnvelope {
+  data: [SkillNodeCreateManyTreeInput!]!
+  skipDuplicates: Boolean
+}
+
+input SkillNodeCreateNestedManyWithoutTreeInput {
+  connect: [SkillNodeWhereUniqueInput!]
+  connectOrCreate: [SkillNodeCreateOrConnectWithoutTreeInput!]
+  create: [SkillNodeCreateWithoutTreeInput!]
+  createMany: SkillNodeCreateManyTreeInputEnvelope
+}
+
+input SkillNodeCreateNestedOneWithoutLessonsInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutLessonsInput
+  create: SkillNodeCreateWithoutLessonsInput
+}
+
+input SkillNodeCreateNestedOneWithoutPrerequisitesInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutPrerequisitesInput
+  create: SkillNodeCreateWithoutPrerequisitesInput
+}
+
+input SkillNodeCreateNestedOneWithoutProgressesInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutProgressesInput
+  create: SkillNodeCreateWithoutProgressesInput
+}
+
+input SkillNodeCreateNestedOneWithoutQuizInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutQuizInput
+  create: SkillNodeCreateWithoutQuizInput
+}
+
+input SkillNodeCreateNestedOneWithoutRequiredForInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutRequiredForInput
+  create: SkillNodeCreateWithoutRequiredForInput
+}
+
+input SkillNodeCreateOrConnectWithoutLessonsInput {
+  create: SkillNodeCreateWithoutLessonsInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateOrConnectWithoutPrerequisitesInput {
+  create: SkillNodeCreateWithoutPrerequisitesInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateOrConnectWithoutProgressesInput {
+  create: SkillNodeCreateWithoutProgressesInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateOrConnectWithoutQuizInput {
+  create: SkillNodeCreateWithoutQuizInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateOrConnectWithoutRequiredForInput {
+  create: SkillNodeCreateWithoutRequiredForInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateOrConnectWithoutTreeInput {
+  create: SkillNodeCreateWithoutTreeInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeCreateWithoutLessonsInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateWithoutPrerequisitesInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateWithoutProgressesInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateWithoutQuizInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateWithoutRequiredForInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  step: Int
+  title: String!
+  tree: SkillTreeCreateNestedOneWithoutNodesInput!
+  updatedAt: DateTime
+}
+
+input SkillNodeCreateWithoutTreeInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  id: String
+  lessons: LessonBlocksCreateNestedManyWithoutNodeInput
+  orderInStep: Int
+  posX: Int
+  posY: Int
+  prerequisites: SkillNodePrerequisiteCreateNestedManyWithoutNodeInput
+  progresses: UserNodeProgressCreateNestedManyWithoutNodeInput
+  quiz: QuizCreateNestedOneWithoutNodeInput
+  requiredFor: SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput
+  step: Int
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillNodeListRelationFilter {
+  every: SkillNodeWhereInput
+  none: SkillNodeWhereInput
+  some: SkillNodeWhereInput
+}
+
+input SkillNodeMaxOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+  title: SortOrder
+  treeId: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillNodeMinOrderByAggregateInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+  title: SortOrder
+  treeId: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillNodeOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input SkillNodeOrderByWithAggregationInput {
+  _avg: SkillNodeAvgOrderByAggregateInput
+  _count: SkillNodeCountOrderByAggregateInput
+  _max: SkillNodeMaxOrderByAggregateInput
+  _min: SkillNodeMinOrderByAggregateInput
+  _sum: SkillNodeSumOrderByAggregateInput
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+  title: SortOrder
+  treeId: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillNodeOrderByWithRelationInput {
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  id: SortOrder
+  lessons: LessonBlocksOrderByRelationAggregateInput
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  prerequisites: SkillNodePrerequisiteOrderByRelationAggregateInput
+  progresses: UserNodeProgressOrderByRelationAggregateInput
+  quiz: QuizOrderByWithRelationInput
+  requiredFor: SkillNodePrerequisiteOrderByRelationAggregateInput
+  step: SortOrder
+  title: SortOrder
+  tree: SkillTreeOrderByWithRelationInput
+  treeId: SortOrder
+  updatedAt: SortOrder
+}
+
+type SkillNodePrerequisite {
+  dependsOn: SkillNode!
+  dependsOnNodeId: String!
+  node: SkillNode!
+  nodeId: String!
+}
+
+input SkillNodePrerequisiteCountOrderByAggregateInput {
+  dependsOnNodeId: SortOrder
+  nodeId: SortOrder
+}
+
+input SkillNodePrerequisiteCreateInput {
+  dependsOn: SkillNodeCreateNestedOneWithoutRequiredForInput!
+  node: SkillNodeCreateNestedOneWithoutPrerequisitesInput!
+}
+
+input SkillNodePrerequisiteCreateManyDependsOnInput {
+  nodeId: String!
+}
+
+input SkillNodePrerequisiteCreateManyDependsOnInputEnvelope {
+  data: [SkillNodePrerequisiteCreateManyDependsOnInput!]!
+  skipDuplicates: Boolean
+}
+
+input SkillNodePrerequisiteCreateManyInput {
+  dependsOnNodeId: String!
+  nodeId: String!
+}
+
+input SkillNodePrerequisiteCreateManyNodeInput {
+  dependsOnNodeId: String!
+}
+
+input SkillNodePrerequisiteCreateManyNodeInputEnvelope {
+  data: [SkillNodePrerequisiteCreateManyNodeInput!]!
+  skipDuplicates: Boolean
+}
+
+input SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput {
+  connect: [SkillNodePrerequisiteWhereUniqueInput!]
+  connectOrCreate: [SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput!]
+  create: [SkillNodePrerequisiteCreateWithoutDependsOnInput!]
+  createMany: SkillNodePrerequisiteCreateManyDependsOnInputEnvelope
+}
+
+input SkillNodePrerequisiteCreateNestedManyWithoutNodeInput {
+  connect: [SkillNodePrerequisiteWhereUniqueInput!]
+  connectOrCreate: [SkillNodePrerequisiteCreateOrConnectWithoutNodeInput!]
+  create: [SkillNodePrerequisiteCreateWithoutNodeInput!]
+  createMany: SkillNodePrerequisiteCreateManyNodeInputEnvelope
+}
+
+input SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput {
+  create: SkillNodePrerequisiteCreateWithoutDependsOnInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteCreateOrConnectWithoutNodeInput {
+  create: SkillNodePrerequisiteCreateWithoutNodeInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteCreateWithoutDependsOnInput {
+  node: SkillNodeCreateNestedOneWithoutPrerequisitesInput!
+}
+
+input SkillNodePrerequisiteCreateWithoutNodeInput {
+  dependsOn: SkillNodeCreateNestedOneWithoutRequiredForInput!
+}
+
+input SkillNodePrerequisiteListRelationFilter {
+  every: SkillNodePrerequisiteWhereInput
+  none: SkillNodePrerequisiteWhereInput
+  some: SkillNodePrerequisiteWhereInput
+}
+
+input SkillNodePrerequisiteMaxOrderByAggregateInput {
+  dependsOnNodeId: SortOrder
+  nodeId: SortOrder
+}
+
+input SkillNodePrerequisiteMinOrderByAggregateInput {
+  dependsOnNodeId: SortOrder
+  nodeId: SortOrder
+}
+
+input SkillNodePrerequisiteNodeIdDependsOnNodeIdCompoundUniqueInput {
+  dependsOnNodeId: String!
+  nodeId: String!
+}
+
+input SkillNodePrerequisiteOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input SkillNodePrerequisiteOrderByWithAggregationInput {
+  _count: SkillNodePrerequisiteCountOrderByAggregateInput
+  _max: SkillNodePrerequisiteMaxOrderByAggregateInput
+  _min: SkillNodePrerequisiteMinOrderByAggregateInput
+  dependsOnNodeId: SortOrder
+  nodeId: SortOrder
+}
+
+input SkillNodePrerequisiteOrderByWithRelationInput {
+  dependsOn: SkillNodeOrderByWithRelationInput
+  dependsOnNodeId: SortOrder
+  node: SkillNodeOrderByWithRelationInput
+  nodeId: SortOrder
+}
+
+enum SkillNodePrerequisiteScalarFieldEnum {
+  dependsOnNodeId
+  nodeId
+}
+
+input SkillNodePrerequisiteScalarWhereInput {
+  AND: [SkillNodePrerequisiteScalarWhereInput!]
+  NOT: [SkillNodePrerequisiteScalarWhereInput!]
+  OR: [SkillNodePrerequisiteScalarWhereInput!]
+  dependsOnNodeId: UuidFilter
+  nodeId: UuidFilter
+}
+
+input SkillNodePrerequisiteScalarWhereWithAggregatesInput {
+  AND: [SkillNodePrerequisiteScalarWhereWithAggregatesInput!]
+  NOT: [SkillNodePrerequisiteScalarWhereWithAggregatesInput!]
+  OR: [SkillNodePrerequisiteScalarWhereWithAggregatesInput!]
+  dependsOnNodeId: UuidWithAggregatesFilter
+  nodeId: UuidWithAggregatesFilter
+}
+
+input SkillNodePrerequisiteUpdateInput {
+  dependsOn: SkillNodeUpdateOneRequiredWithoutRequiredForNestedInput
+  node: SkillNodeUpdateOneRequiredWithoutPrerequisitesNestedInput
+}
+
+input SkillNodePrerequisiteUpdateManyMutationInput {
+  _: NEVER
+}
+
+input SkillNodePrerequisiteUpdateManyWithWhereWithoutDependsOnInput {
+  data: SkillNodePrerequisiteUpdateManyMutationInput!
+  where: SkillNodePrerequisiteScalarWhereInput!
+}
+
+input SkillNodePrerequisiteUpdateManyWithWhereWithoutNodeInput {
+  data: SkillNodePrerequisiteUpdateManyMutationInput!
+  where: SkillNodePrerequisiteScalarWhereInput!
+}
+
+input SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput {
+  connect: [SkillNodePrerequisiteWhereUniqueInput!]
+  connectOrCreate: [SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput!]
+  create: [SkillNodePrerequisiteCreateWithoutDependsOnInput!]
+  createMany: SkillNodePrerequisiteCreateManyDependsOnInputEnvelope
+  delete: [SkillNodePrerequisiteWhereUniqueInput!]
+  deleteMany: [SkillNodePrerequisiteScalarWhereInput!]
+  disconnect: [SkillNodePrerequisiteWhereUniqueInput!]
+  set: [SkillNodePrerequisiteWhereUniqueInput!]
+  update: [SkillNodePrerequisiteUpdateWithWhereUniqueWithoutDependsOnInput!]
+  updateMany: [SkillNodePrerequisiteUpdateManyWithWhereWithoutDependsOnInput!]
+  upsert: [SkillNodePrerequisiteUpsertWithWhereUniqueWithoutDependsOnInput!]
+}
+
+input SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput {
+  connect: [SkillNodePrerequisiteWhereUniqueInput!]
+  connectOrCreate: [SkillNodePrerequisiteCreateOrConnectWithoutNodeInput!]
+  create: [SkillNodePrerequisiteCreateWithoutNodeInput!]
+  createMany: SkillNodePrerequisiteCreateManyNodeInputEnvelope
+  delete: [SkillNodePrerequisiteWhereUniqueInput!]
+  deleteMany: [SkillNodePrerequisiteScalarWhereInput!]
+  disconnect: [SkillNodePrerequisiteWhereUniqueInput!]
+  set: [SkillNodePrerequisiteWhereUniqueInput!]
+  update: [SkillNodePrerequisiteUpdateWithWhereUniqueWithoutNodeInput!]
+  updateMany: [SkillNodePrerequisiteUpdateManyWithWhereWithoutNodeInput!]
+  upsert: [SkillNodePrerequisiteUpsertWithWhereUniqueWithoutNodeInput!]
+}
+
+input SkillNodePrerequisiteUpdateWithWhereUniqueWithoutDependsOnInput {
+  data: SkillNodePrerequisiteUpdateWithoutDependsOnInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteUpdateWithWhereUniqueWithoutNodeInput {
+  data: SkillNodePrerequisiteUpdateWithoutNodeInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteUpdateWithoutDependsOnInput {
+  node: SkillNodeUpdateOneRequiredWithoutPrerequisitesNestedInput
+}
+
+input SkillNodePrerequisiteUpdateWithoutNodeInput {
+  dependsOn: SkillNodeUpdateOneRequiredWithoutRequiredForNestedInput
+}
+
+input SkillNodePrerequisiteUpsertWithWhereUniqueWithoutDependsOnInput {
+  create: SkillNodePrerequisiteCreateWithoutDependsOnInput!
+  update: SkillNodePrerequisiteUpdateWithoutDependsOnInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteUpsertWithWhereUniqueWithoutNodeInput {
+  create: SkillNodePrerequisiteCreateWithoutNodeInput!
+  update: SkillNodePrerequisiteUpdateWithoutNodeInput!
+  where: SkillNodePrerequisiteWhereUniqueInput!
+}
+
+input SkillNodePrerequisiteWhereInput {
+  AND: [SkillNodePrerequisiteWhereInput!]
+  NOT: [SkillNodePrerequisiteWhereInput!]
+  OR: [SkillNodePrerequisiteWhereInput!]
+  dependsOn: SkillNodeWhereInput
+  dependsOnNodeId: UuidFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+}
+
+input SkillNodePrerequisiteWhereUniqueInput {
+  AND: [SkillNodePrerequisiteWhereInput!]
+  NOT: [SkillNodePrerequisiteWhereInput!]
+  OR: [SkillNodePrerequisiteWhereInput!]
+  dependsOn: SkillNodeWhereInput
+  dependsOnNodeId: UuidFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  nodeId_dependsOnNodeId: SkillNodePrerequisiteNodeIdDependsOnNodeIdCompoundUniqueInput
+}
+
+enum SkillNodeScalarFieldEnum {
+  createdAt
+  deletedAt
+  id
+  orderInStep
+  posX
+  posY
+  step
+  title
+  treeId
+  updatedAt
+}
+
+input SkillNodeScalarRelationFilter {
+  is: SkillNodeWhereInput
+  isNot: SkillNodeWhereInput
+}
+
+input SkillNodeScalarWhereInput {
+  AND: [SkillNodeScalarWhereInput!]
+  NOT: [SkillNodeScalarWhereInput!]
+  OR: [SkillNodeScalarWhereInput!]
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  id: UuidFilter
+  orderInStep: IntFilter
+  posX: IntNullableFilter
+  posY: IntNullableFilter
+  step: IntFilter
+  title: StringFilter
+  treeId: UuidFilter
+  updatedAt: DateTimeFilter
+}
+
+input SkillNodeScalarWhereWithAggregatesInput {
+  AND: [SkillNodeScalarWhereWithAggregatesInput!]
+  NOT: [SkillNodeScalarWhereWithAggregatesInput!]
+  OR: [SkillNodeScalarWhereWithAggregatesInput!]
+  createdAt: DateTimeWithAggregatesFilter
+  deletedAt: DateTimeNullableWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  orderInStep: IntWithAggregatesFilter
+  posX: IntNullableWithAggregatesFilter
+  posY: IntNullableWithAggregatesFilter
+  step: IntWithAggregatesFilter
+  title: StringWithAggregatesFilter
+  treeId: UuidWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input SkillNodeSumOrderByAggregateInput {
+  orderInStep: SortOrder
+  posX: SortOrder
+  posY: SortOrder
+  step: SortOrder
+}
+
+input SkillNodeTreeIdPosXPosYCompoundUniqueInput {
+  posX: Int!
+  posY: Int!
+  treeId: String!
+}
+
+input SkillNodeTreeIdStepOrderInStepCompoundUniqueInput {
+  orderInStep: Int!
+  step: Int!
+  treeId: String!
+}
+
+input SkillNodeUpdateInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateManyWithWhereWithoutTreeInput {
+  data: SkillNodeUpdateManyMutationInput!
+  where: SkillNodeScalarWhereInput!
+}
+
+input SkillNodeUpdateManyWithoutTreeNestedInput {
+  connect: [SkillNodeWhereUniqueInput!]
+  connectOrCreate: [SkillNodeCreateOrConnectWithoutTreeInput!]
+  create: [SkillNodeCreateWithoutTreeInput!]
+  createMany: SkillNodeCreateManyTreeInputEnvelope
+  delete: [SkillNodeWhereUniqueInput!]
+  deleteMany: [SkillNodeScalarWhereInput!]
+  disconnect: [SkillNodeWhereUniqueInput!]
+  set: [SkillNodeWhereUniqueInput!]
+  update: [SkillNodeUpdateWithWhereUniqueWithoutTreeInput!]
+  updateMany: [SkillNodeUpdateManyWithWhereWithoutTreeInput!]
+  upsert: [SkillNodeUpsertWithWhereUniqueWithoutTreeInput!]
+}
+
+input SkillNodeUpdateOneRequiredWithoutLessonsNestedInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutLessonsInput
+  create: SkillNodeCreateWithoutLessonsInput
+  update: SkillNodeUpdateToOneWithWhereWithoutLessonsInput
+  upsert: SkillNodeUpsertWithoutLessonsInput
+}
+
+input SkillNodeUpdateOneRequiredWithoutPrerequisitesNestedInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutPrerequisitesInput
+  create: SkillNodeCreateWithoutPrerequisitesInput
+  update: SkillNodeUpdateToOneWithWhereWithoutPrerequisitesInput
+  upsert: SkillNodeUpsertWithoutPrerequisitesInput
+}
+
+input SkillNodeUpdateOneRequiredWithoutProgressesNestedInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutProgressesInput
+  create: SkillNodeCreateWithoutProgressesInput
+  update: SkillNodeUpdateToOneWithWhereWithoutProgressesInput
+  upsert: SkillNodeUpsertWithoutProgressesInput
+}
+
+input SkillNodeUpdateOneRequiredWithoutQuizNestedInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutQuizInput
+  create: SkillNodeCreateWithoutQuizInput
+  update: SkillNodeUpdateToOneWithWhereWithoutQuizInput
+  upsert: SkillNodeUpsertWithoutQuizInput
+}
+
+input SkillNodeUpdateOneRequiredWithoutRequiredForNestedInput {
+  connect: SkillNodeWhereUniqueInput
+  connectOrCreate: SkillNodeCreateOrConnectWithoutRequiredForInput
+  create: SkillNodeCreateWithoutRequiredForInput
+  update: SkillNodeUpdateToOneWithWhereWithoutRequiredForInput
+  upsert: SkillNodeUpsertWithoutRequiredForInput
+}
+
+input SkillNodeUpdateToOneWithWhereWithoutLessonsInput {
+  data: SkillNodeUpdateWithoutLessonsInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpdateToOneWithWhereWithoutPrerequisitesInput {
+  data: SkillNodeUpdateWithoutPrerequisitesInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpdateToOneWithWhereWithoutProgressesInput {
+  data: SkillNodeUpdateWithoutProgressesInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpdateToOneWithWhereWithoutQuizInput {
+  data: SkillNodeUpdateWithoutQuizInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpdateToOneWithWhereWithoutRequiredForInput {
+  data: SkillNodeUpdateWithoutRequiredForInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpdateWithWhereUniqueWithoutTreeInput {
+  data: SkillNodeUpdateWithoutTreeInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeUpdateWithoutLessonsInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateWithoutPrerequisitesInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateWithoutProgressesInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateWithoutQuizInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateWithoutRequiredForInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpdateWithoutTreeInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  lessons: LessonBlocksUpdateManyWithoutNodeNestedInput
+  orderInStep: IntFieldUpdateOperationsInput
+  posX: NullableIntFieldUpdateOperationsInput
+  posY: NullableIntFieldUpdateOperationsInput
+  prerequisites: SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput
+  progresses: UserNodeProgressUpdateManyWithoutNodeNestedInput
+  quiz: QuizUpdateOneWithoutNodeNestedInput
+  requiredFor: SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput
+  step: IntFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillNodeUpsertWithWhereUniqueWithoutTreeInput {
+  create: SkillNodeCreateWithoutTreeInput!
+  update: SkillNodeUpdateWithoutTreeInput!
+  where: SkillNodeWhereUniqueInput!
+}
+
+input SkillNodeUpsertWithoutLessonsInput {
+  create: SkillNodeCreateWithoutLessonsInput!
+  update: SkillNodeUpdateWithoutLessonsInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpsertWithoutPrerequisitesInput {
+  create: SkillNodeCreateWithoutPrerequisitesInput!
+  update: SkillNodeUpdateWithoutPrerequisitesInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpsertWithoutProgressesInput {
+  create: SkillNodeCreateWithoutProgressesInput!
+  update: SkillNodeUpdateWithoutProgressesInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpsertWithoutQuizInput {
+  create: SkillNodeCreateWithoutQuizInput!
+  update: SkillNodeUpdateWithoutQuizInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeUpsertWithoutRequiredForInput {
+  create: SkillNodeCreateWithoutRequiredForInput!
+  update: SkillNodeUpdateWithoutRequiredForInput!
+  where: SkillNodeWhereInput
+}
+
+input SkillNodeWhereInput {
+  AND: [SkillNodeWhereInput!]
+  NOT: [SkillNodeWhereInput!]
+  OR: [SkillNodeWhereInput!]
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  id: UuidFilter
+  lessons: LessonBlocksListRelationFilter
+  orderInStep: IntFilter
+  posX: IntNullableFilter
+  posY: IntNullableFilter
+  prerequisites: SkillNodePrerequisiteListRelationFilter
+  progresses: UserNodeProgressListRelationFilter
+  quiz: QuizWhereInput
+  requiredFor: SkillNodePrerequisiteListRelationFilter
+  step: IntFilter
+  title: StringFilter
+  tree: SkillTreeWhereInput
+  treeId: UuidFilter
+  updatedAt: DateTimeFilter
+}
+
+input SkillNodeWhereUniqueInput {
+  AND: [SkillNodeWhereInput!]
+  NOT: [SkillNodeWhereInput!]
+  OR: [SkillNodeWhereInput!]
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  id: String
+  lessons: LessonBlocksListRelationFilter
+  orderInStep: IntFilter
+  posX: IntNullableFilter
+  posY: IntNullableFilter
+  prerequisites: SkillNodePrerequisiteListRelationFilter
+  progresses: UserNodeProgressListRelationFilter
+  quiz: QuizWhereInput
+  requiredFor: SkillNodePrerequisiteListRelationFilter
+  step: IntFilter
+  title: StringFilter
+  tree: SkillTreeWhereInput
+  treeId: UuidFilter
+  treeId_posX_posY: SkillNodeTreeIdPosXPosYCompoundUniqueInput
+  treeId_step_orderInStep: SkillNodeTreeIdStepOrderInStepCompoundUniqueInput
+  updatedAt: DateTimeFilter
+}
+
+type SkillTree {
+  course: Course!
+  courseId: String!
+  createdAt: DateTime!
+  deletedAt: DateTime
+  description: String
+  id: ID!
+  nodes(cursor: SkillNodeWhereUniqueInput, distinct: [SkillNodeScalarFieldEnum!], orderBy: [SkillNodeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodeWhereInput): [SkillNode!]!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input SkillTreeCountOrderByAggregateInput {
+  courseId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillTreeCreateInput {
+  course: CourseCreateNestedOneWithoutTreesInput!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  nodes: SkillNodeCreateNestedManyWithoutTreeInput
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillTreeCreateManyCourseInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillTreeCreateManyCourseInputEnvelope {
+  data: [SkillTreeCreateManyCourseInput!]!
+  skipDuplicates: Boolean
+}
+
+input SkillTreeCreateManyInput {
+  courseId: String!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillTreeCreateNestedManyWithoutCourseInput {
+  connect: [SkillTreeWhereUniqueInput!]
+  connectOrCreate: [SkillTreeCreateOrConnectWithoutCourseInput!]
+  create: [SkillTreeCreateWithoutCourseInput!]
+  createMany: SkillTreeCreateManyCourseInputEnvelope
+}
+
+input SkillTreeCreateNestedOneWithoutNodesInput {
+  connect: SkillTreeWhereUniqueInput
+  connectOrCreate: SkillTreeCreateOrConnectWithoutNodesInput
+  create: SkillTreeCreateWithoutNodesInput
+}
+
+input SkillTreeCreateOrConnectWithoutCourseInput {
+  create: SkillTreeCreateWithoutCourseInput!
+  where: SkillTreeWhereUniqueInput!
+}
+
+input SkillTreeCreateOrConnectWithoutNodesInput {
+  create: SkillTreeCreateWithoutNodesInput!
+  where: SkillTreeWhereUniqueInput!
+}
+
+input SkillTreeCreateWithoutCourseInput {
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  nodes: SkillNodeCreateNestedManyWithoutTreeInput
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillTreeCreateWithoutNodesInput {
+  course: CourseCreateNestedOneWithoutTreesInput!
+  createdAt: DateTime
+  deletedAt: DateTime
+  description: String
+  id: String
+  title: String!
+  updatedAt: DateTime
+}
+
+input SkillTreeListRelationFilter {
+  every: SkillTreeWhereInput
+  none: SkillTreeWhereInput
+  some: SkillTreeWhereInput
+}
+
+input SkillTreeMaxOrderByAggregateInput {
+  courseId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillTreeMinOrderByAggregateInput {
+  courseId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillTreeOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input SkillTreeOrderByWithAggregationInput {
+  _count: SkillTreeCountOrderByAggregateInput
+  _max: SkillTreeMaxOrderByAggregateInput
+  _min: SkillTreeMinOrderByAggregateInput
+  courseId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input SkillTreeOrderByWithRelationInput {
+  course: CourseOrderByWithRelationInput
+  courseId: SortOrder
+  createdAt: SortOrder
+  deletedAt: SortOrder
+  description: SortOrder
+  id: SortOrder
+  nodes: SkillNodeOrderByRelationAggregateInput
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+enum SkillTreeScalarFieldEnum {
+  courseId
+  createdAt
+  deletedAt
+  description
+  id
+  title
+  updatedAt
+}
+
+input SkillTreeScalarRelationFilter {
+  is: SkillTreeWhereInput
+  isNot: SkillTreeWhereInput
+}
+
+input SkillTreeScalarWhereInput {
+  AND: [SkillTreeScalarWhereInput!]
+  NOT: [SkillTreeScalarWhereInput!]
+  OR: [SkillTreeScalarWhereInput!]
+  courseId: UuidFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: UuidFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input SkillTreeScalarWhereWithAggregatesInput {
+  AND: [SkillTreeScalarWhereWithAggregatesInput!]
+  NOT: [SkillTreeScalarWhereWithAggregatesInput!]
+  OR: [SkillTreeScalarWhereWithAggregatesInput!]
+  courseId: UuidWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  deletedAt: DateTimeNullableWithAggregatesFilter
+  description: StringNullableWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  title: StringWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+}
+
+input SkillTreeUpdateInput {
+  course: CourseUpdateOneRequiredWithoutTreesNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  nodes: SkillNodeUpdateManyWithoutTreeNestedInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillTreeUpdateManyMutationInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillTreeUpdateManyWithWhereWithoutCourseInput {
+  data: SkillTreeUpdateManyMutationInput!
+  where: SkillTreeScalarWhereInput!
+}
+
+input SkillTreeUpdateManyWithoutCourseNestedInput {
+  connect: [SkillTreeWhereUniqueInput!]
+  connectOrCreate: [SkillTreeCreateOrConnectWithoutCourseInput!]
+  create: [SkillTreeCreateWithoutCourseInput!]
+  createMany: SkillTreeCreateManyCourseInputEnvelope
+  delete: [SkillTreeWhereUniqueInput!]
+  deleteMany: [SkillTreeScalarWhereInput!]
+  disconnect: [SkillTreeWhereUniqueInput!]
+  set: [SkillTreeWhereUniqueInput!]
+  update: [SkillTreeUpdateWithWhereUniqueWithoutCourseInput!]
+  updateMany: [SkillTreeUpdateManyWithWhereWithoutCourseInput!]
+  upsert: [SkillTreeUpsertWithWhereUniqueWithoutCourseInput!]
+}
+
+input SkillTreeUpdateOneRequiredWithoutNodesNestedInput {
+  connect: SkillTreeWhereUniqueInput
+  connectOrCreate: SkillTreeCreateOrConnectWithoutNodesInput
+  create: SkillTreeCreateWithoutNodesInput
+  update: SkillTreeUpdateToOneWithWhereWithoutNodesInput
+  upsert: SkillTreeUpsertWithoutNodesInput
+}
+
+input SkillTreeUpdateToOneWithWhereWithoutNodesInput {
+  data: SkillTreeUpdateWithoutNodesInput!
+  where: SkillTreeWhereInput
+}
+
+input SkillTreeUpdateWithWhereUniqueWithoutCourseInput {
+  data: SkillTreeUpdateWithoutCourseInput!
+  where: SkillTreeWhereUniqueInput!
+}
+
+input SkillTreeUpdateWithoutCourseInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  nodes: SkillNodeUpdateManyWithoutTreeNestedInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillTreeUpdateWithoutNodesInput {
+  course: CourseUpdateOneRequiredWithoutTreesNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  deletedAt: NullableDateTimeFieldUpdateOperationsInput
+  description: NullableStringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  title: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input SkillTreeUpsertWithWhereUniqueWithoutCourseInput {
+  create: SkillTreeCreateWithoutCourseInput!
+  update: SkillTreeUpdateWithoutCourseInput!
+  where: SkillTreeWhereUniqueInput!
+}
+
+input SkillTreeUpsertWithoutNodesInput {
+  create: SkillTreeCreateWithoutNodesInput!
+  update: SkillTreeUpdateWithoutNodesInput!
+  where: SkillTreeWhereInput
+}
+
+input SkillTreeWhereInput {
+  AND: [SkillTreeWhereInput!]
+  NOT: [SkillTreeWhereInput!]
+  OR: [SkillTreeWhereInput!]
+  course: CourseWhereInput
+  courseId: UuidFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: UuidFilter
+  nodes: SkillNodeListRelationFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input SkillTreeWhereUniqueInput {
+  AND: [SkillTreeWhereInput!]
+  NOT: [SkillTreeWhereInput!]
+  OR: [SkillTreeWhereInput!]
+  course: CourseWhereInput
+  courseId: UuidFilter
+  createdAt: DateTimeFilter
+  deletedAt: DateTimeNullableFilter
+  description: StringNullableFilter
+  id: String
+  nodes: SkillNodeListRelationFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
 }
 
 enum SortOrder {
@@ -300,12 +4487,23 @@ enum TransactionIsolationLevel {
   Serializable
 }
 
+input UpdateLessonBlockInput {
+  caption: String
+  html: String
+  order: Int
+  type: String
+  url: String
+}
+
 type User {
+  coursesAuthored(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
   createdAt: DateTime!
   email: String!
   id: ID!
   name: String
+  nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   photoUrl: String
+  quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   role: Role!
   updatedAt: DateTime!
 }
@@ -321,11 +4519,14 @@ input UserCountOrderByAggregateInput {
 }
 
 input UserCreateInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
   email: String!
   id: String!
   name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   updatedAt: DateTime
 }
@@ -335,6 +4536,75 @@ input UserCreateManyInput {
   email: String!
   id: String!
   name: String
+  photoUrl: String
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserCreateNestedOneWithoutCoursesAuthoredInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutCoursesAuthoredInput
+  create: UserCreateWithoutCoursesAuthoredInput
+}
+
+input UserCreateNestedOneWithoutNodeProgressInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutNodeProgressInput
+  create: UserCreateWithoutNodeProgressInput
+}
+
+input UserCreateNestedOneWithoutQuizAttemptsInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutQuizAttemptsInput
+  create: UserCreateWithoutQuizAttemptsInput
+}
+
+input UserCreateOrConnectWithoutCoursesAuthoredInput {
+  create: UserCreateWithoutCoursesAuthoredInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateOrConnectWithoutNodeProgressInput {
+  create: UserCreateWithoutNodeProgressInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateOrConnectWithoutQuizAttemptsInput {
+  create: UserCreateWithoutQuizAttemptsInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateWithoutCoursesAuthoredInput {
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserCreateWithoutNodeProgressInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  updatedAt: DateTime
+}
+
+input UserCreateWithoutQuizAttemptsInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
   role: Role
   updatedAt: DateTime
@@ -360,6 +4630,341 @@ input UserMinOrderByAggregateInput {
   updatedAt: SortOrder
 }
 
+type UserNodeProgress {
+  completedAt: DateTime
+  createdAt: DateTime!
+  id: ID!
+  node: SkillNode!
+  nodeId: String!
+  status: ProgressStatus!
+  updatedAt: DateTime!
+  user: User!
+  userId: String!
+}
+
+input UserNodeProgressCountOrderByAggregateInput {
+  completedAt: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  status: SortOrder
+  updatedAt: SortOrder
+  userId: SortOrder
+}
+
+input UserNodeProgressCreateInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  node: SkillNodeCreateNestedOneWithoutProgressesInput!
+  status: ProgressStatus
+  updatedAt: DateTime
+  user: UserCreateNestedOneWithoutNodeProgressInput!
+}
+
+input UserNodeProgressCreateManyInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  nodeId: String!
+  status: ProgressStatus
+  updatedAt: DateTime
+  userId: String!
+}
+
+input UserNodeProgressCreateManyNodeInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  status: ProgressStatus
+  updatedAt: DateTime
+  userId: String!
+}
+
+input UserNodeProgressCreateManyNodeInputEnvelope {
+  data: [UserNodeProgressCreateManyNodeInput!]!
+  skipDuplicates: Boolean
+}
+
+input UserNodeProgressCreateManyUserInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  nodeId: String!
+  status: ProgressStatus
+  updatedAt: DateTime
+}
+
+input UserNodeProgressCreateManyUserInputEnvelope {
+  data: [UserNodeProgressCreateManyUserInput!]!
+  skipDuplicates: Boolean
+}
+
+input UserNodeProgressCreateNestedManyWithoutNodeInput {
+  connect: [UserNodeProgressWhereUniqueInput!]
+  connectOrCreate: [UserNodeProgressCreateOrConnectWithoutNodeInput!]
+  create: [UserNodeProgressCreateWithoutNodeInput!]
+  createMany: UserNodeProgressCreateManyNodeInputEnvelope
+}
+
+input UserNodeProgressCreateNestedManyWithoutUserInput {
+  connect: [UserNodeProgressWhereUniqueInput!]
+  connectOrCreate: [UserNodeProgressCreateOrConnectWithoutUserInput!]
+  create: [UserNodeProgressCreateWithoutUserInput!]
+  createMany: UserNodeProgressCreateManyUserInputEnvelope
+}
+
+input UserNodeProgressCreateOrConnectWithoutNodeInput {
+  create: UserNodeProgressCreateWithoutNodeInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressCreateOrConnectWithoutUserInput {
+  create: UserNodeProgressCreateWithoutUserInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressCreateWithoutNodeInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  status: ProgressStatus
+  updatedAt: DateTime
+  user: UserCreateNestedOneWithoutNodeProgressInput!
+}
+
+input UserNodeProgressCreateWithoutUserInput {
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  node: SkillNodeCreateNestedOneWithoutProgressesInput!
+  status: ProgressStatus
+  updatedAt: DateTime
+}
+
+input UserNodeProgressListRelationFilter {
+  every: UserNodeProgressWhereInput
+  none: UserNodeProgressWhereInput
+  some: UserNodeProgressWhereInput
+}
+
+input UserNodeProgressMaxOrderByAggregateInput {
+  completedAt: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  status: SortOrder
+  updatedAt: SortOrder
+  userId: SortOrder
+}
+
+input UserNodeProgressMinOrderByAggregateInput {
+  completedAt: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  status: SortOrder
+  updatedAt: SortOrder
+  userId: SortOrder
+}
+
+input UserNodeProgressOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input UserNodeProgressOrderByWithAggregationInput {
+  _count: UserNodeProgressCountOrderByAggregateInput
+  _max: UserNodeProgressMaxOrderByAggregateInput
+  _min: UserNodeProgressMinOrderByAggregateInput
+  completedAt: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  nodeId: SortOrder
+  status: SortOrder
+  updatedAt: SortOrder
+  userId: SortOrder
+}
+
+input UserNodeProgressOrderByWithRelationInput {
+  completedAt: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  node: SkillNodeOrderByWithRelationInput
+  nodeId: SortOrder
+  status: SortOrder
+  updatedAt: SortOrder
+  user: UserOrderByWithRelationInput
+  userId: SortOrder
+}
+
+enum UserNodeProgressScalarFieldEnum {
+  completedAt
+  createdAt
+  id
+  nodeId
+  status
+  updatedAt
+  userId
+}
+
+input UserNodeProgressScalarWhereInput {
+  AND: [UserNodeProgressScalarWhereInput!]
+  NOT: [UserNodeProgressScalarWhereInput!]
+  OR: [UserNodeProgressScalarWhereInput!]
+  completedAt: DateTimeNullableFilter
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  nodeId: UuidFilter
+  status: EnumProgressStatusFilter
+  updatedAt: DateTimeFilter
+  userId: StringFilter
+}
+
+input UserNodeProgressScalarWhereWithAggregatesInput {
+  AND: [UserNodeProgressScalarWhereWithAggregatesInput!]
+  NOT: [UserNodeProgressScalarWhereWithAggregatesInput!]
+  OR: [UserNodeProgressScalarWhereWithAggregatesInput!]
+  completedAt: DateTimeNullableWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  nodeId: UuidWithAggregatesFilter
+  status: EnumProgressStatusWithAggregatesFilter
+  updatedAt: DateTimeWithAggregatesFilter
+  userId: StringWithAggregatesFilter
+}
+
+input UserNodeProgressUpdateInput {
+  completedAt: NullableDateTimeFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  node: SkillNodeUpdateOneRequiredWithoutProgressesNestedInput
+  status: EnumProgressStatusFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutNodeProgressNestedInput
+}
+
+input UserNodeProgressUpdateManyMutationInput {
+  completedAt: NullableDateTimeFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumProgressStatusFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserNodeProgressUpdateManyWithWhereWithoutNodeInput {
+  data: UserNodeProgressUpdateManyMutationInput!
+  where: UserNodeProgressScalarWhereInput!
+}
+
+input UserNodeProgressUpdateManyWithWhereWithoutUserInput {
+  data: UserNodeProgressUpdateManyMutationInput!
+  where: UserNodeProgressScalarWhereInput!
+}
+
+input UserNodeProgressUpdateManyWithoutNodeNestedInput {
+  connect: [UserNodeProgressWhereUniqueInput!]
+  connectOrCreate: [UserNodeProgressCreateOrConnectWithoutNodeInput!]
+  create: [UserNodeProgressCreateWithoutNodeInput!]
+  createMany: UserNodeProgressCreateManyNodeInputEnvelope
+  delete: [UserNodeProgressWhereUniqueInput!]
+  deleteMany: [UserNodeProgressScalarWhereInput!]
+  disconnect: [UserNodeProgressWhereUniqueInput!]
+  set: [UserNodeProgressWhereUniqueInput!]
+  update: [UserNodeProgressUpdateWithWhereUniqueWithoutNodeInput!]
+  updateMany: [UserNodeProgressUpdateManyWithWhereWithoutNodeInput!]
+  upsert: [UserNodeProgressUpsertWithWhereUniqueWithoutNodeInput!]
+}
+
+input UserNodeProgressUpdateManyWithoutUserNestedInput {
+  connect: [UserNodeProgressWhereUniqueInput!]
+  connectOrCreate: [UserNodeProgressCreateOrConnectWithoutUserInput!]
+  create: [UserNodeProgressCreateWithoutUserInput!]
+  createMany: UserNodeProgressCreateManyUserInputEnvelope
+  delete: [UserNodeProgressWhereUniqueInput!]
+  deleteMany: [UserNodeProgressScalarWhereInput!]
+  disconnect: [UserNodeProgressWhereUniqueInput!]
+  set: [UserNodeProgressWhereUniqueInput!]
+  update: [UserNodeProgressUpdateWithWhereUniqueWithoutUserInput!]
+  updateMany: [UserNodeProgressUpdateManyWithWhereWithoutUserInput!]
+  upsert: [UserNodeProgressUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input UserNodeProgressUpdateWithWhereUniqueWithoutNodeInput {
+  data: UserNodeProgressUpdateWithoutNodeInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressUpdateWithWhereUniqueWithoutUserInput {
+  data: UserNodeProgressUpdateWithoutUserInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressUpdateWithoutNodeInput {
+  completedAt: NullableDateTimeFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  status: EnumProgressStatusFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutNodeProgressNestedInput
+}
+
+input UserNodeProgressUpdateWithoutUserInput {
+  completedAt: NullableDateTimeFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  node: SkillNodeUpdateOneRequiredWithoutProgressesNestedInput
+  status: EnumProgressStatusFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserNodeProgressUpsertWithWhereUniqueWithoutNodeInput {
+  create: UserNodeProgressCreateWithoutNodeInput!
+  update: UserNodeProgressUpdateWithoutNodeInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressUpsertWithWhereUniqueWithoutUserInput {
+  create: UserNodeProgressCreateWithoutUserInput!
+  update: UserNodeProgressUpdateWithoutUserInput!
+  where: UserNodeProgressWhereUniqueInput!
+}
+
+input UserNodeProgressUserIdNodeIdCompoundUniqueInput {
+  nodeId: String!
+  userId: String!
+}
+
+input UserNodeProgressWhereInput {
+  AND: [UserNodeProgressWhereInput!]
+  NOT: [UserNodeProgressWhereInput!]
+  OR: [UserNodeProgressWhereInput!]
+  completedAt: DateTimeNullableFilter
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  status: EnumProgressStatusFilter
+  updatedAt: DateTimeFilter
+  user: UserWhereInput
+  userId: StringFilter
+}
+
+input UserNodeProgressWhereUniqueInput {
+  AND: [UserNodeProgressWhereInput!]
+  NOT: [UserNodeProgressWhereInput!]
+  OR: [UserNodeProgressWhereInput!]
+  completedAt: DateTimeNullableFilter
+  createdAt: DateTimeFilter
+  id: String
+  node: SkillNodeWhereInput
+  nodeId: UuidFilter
+  status: EnumProgressStatusFilter
+  updatedAt: DateTimeFilter
+  user: UserWhereInput
+  userId: StringFilter
+  userId_nodeId: UserNodeProgressUserIdNodeIdCompoundUniqueInput
+}
+
 input UserOrderByWithAggregationInput {
   _count: UserCountOrderByAggregateInput
   _max: UserMaxOrderByAggregateInput
@@ -374,11 +4979,14 @@ input UserOrderByWithAggregationInput {
 }
 
 input UserOrderByWithRelationInput {
+  coursesAuthored: CourseOrderByRelationAggregateInput
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
   name: SortOrder
+  nodeProgress: UserNodeProgressOrderByRelationAggregateInput
   photoUrl: SortOrder
+  quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
   updatedAt: SortOrder
 }
@@ -391,6 +4999,11 @@ enum UserScalarFieldEnum {
   photoUrl
   role
   updatedAt
+}
+
+input UserScalarRelationFilter {
+  is: UserWhereInput
+  isNot: UserWhereInput
 }
 
 input UserScalarWhereWithAggregatesInput {
@@ -407,11 +5020,14 @@ input UserScalarWhereWithAggregatesInput {
 }
 
 input UserUpdateInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
@@ -426,15 +5042,111 @@ input UserUpdateManyMutationInput {
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
 
+input UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutCoursesAuthoredInput
+  create: UserCreateWithoutCoursesAuthoredInput
+  update: UserUpdateToOneWithWhereWithoutCoursesAuthoredInput
+  upsert: UserUpsertWithoutCoursesAuthoredInput
+}
+
+input UserUpdateOneRequiredWithoutNodeProgressNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutNodeProgressInput
+  create: UserCreateWithoutNodeProgressInput
+  update: UserUpdateToOneWithWhereWithoutNodeProgressInput
+  upsert: UserUpsertWithoutNodeProgressInput
+}
+
+input UserUpdateOneRequiredWithoutQuizAttemptsNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutQuizAttemptsInput
+  create: UserCreateWithoutQuizAttemptsInput
+  update: UserUpdateToOneWithWhereWithoutQuizAttemptsInput
+  upsert: UserUpsertWithoutQuizAttemptsInput
+}
+
+input UserUpdateToOneWithWhereWithoutCoursesAuthoredInput {
+  data: UserUpdateWithoutCoursesAuthoredInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutNodeProgressInput {
+  data: UserUpdateWithoutNodeProgressInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutQuizAttemptsInput {
+  data: UserUpdateWithoutQuizAttemptsInput!
+  where: UserWhereInput
+}
+
+input UserUpdateWithoutCoursesAuthoredInput {
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserUpdateWithoutNodeProgressInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserUpdateWithoutQuizAttemptsInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  role: EnumRoleFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+}
+
+input UserUpsertWithoutCoursesAuthoredInput {
+  create: UserCreateWithoutCoursesAuthoredInput!
+  update: UserUpdateWithoutCoursesAuthoredInput!
+  where: UserWhereInput
+}
+
+input UserUpsertWithoutNodeProgressInput {
+  create: UserCreateWithoutNodeProgressInput!
+  update: UserUpdateWithoutNodeProgressInput!
+  where: UserWhereInput
+}
+
+input UserUpsertWithoutQuizAttemptsInput {
+  create: UserCreateWithoutQuizAttemptsInput!
+  update: UserUpdateWithoutQuizAttemptsInput!
+  where: UserWhereInput
+}
+
 input UserWhereInput {
   AND: [UserWhereInput!]
   NOT: [UserWhereInput!]
   OR: [UserWhereInput!]
+  coursesAuthored: CourseListRelationFilter
   createdAt: DateTimeFilter
   email: StringFilter
   id: StringFilter
   name: StringNullableFilter
+  nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter
+  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   updatedAt: DateTimeFilter
 }
@@ -443,11 +5155,41 @@ input UserWhereUniqueInput {
   AND: [UserWhereInput!]
   NOT: [UserWhereInput!]
   OR: [UserWhereInput!]
+  coursesAuthored: CourseListRelationFilter
   createdAt: DateTimeFilter
   email: String
   id: String
   name: StringNullableFilter
+  nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter
+  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   updatedAt: DateTimeFilter
+}
+
+input UuidFilter {
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  mode: QueryMode
+  not: NestedUuidFilter
+  notIn: [String!]
+}
+
+input UuidWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedStringFilter
+  _min: NestedStringFilter
+  equals: String
+  gt: String
+  gte: String
+  in: [String!]
+  lt: String
+  lte: String
+  mode: QueryMode
+  not: NestedUuidWithAggregatesFilter
+  notIn: [String!]
 }
