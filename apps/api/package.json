@@ -10,6 +10,7 @@
     "emit:schema": "ts-node -r tsconfig-paths/register scripts/emit-schema.ts",
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
     "postinstall": "prisma generate",
+    "prisma:reset": "prisma migrate reset",
     "prisma:validate": "prisma validate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
