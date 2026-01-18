@@ -9,9 +9,9 @@ import { FrontendStack } from "../lib/frontend-stack";
 import { StorybookStack } from "../lib/storybook-stack";
 
 /**
- * SkillTree Infrastructure CDK App
+ * Synth Tree Infrastructure CDK App
  *
- * This app creates infrastructure for the SkillTree application across multiple environments.
+ * This app creates infrastructure for the Synth Tree application across multiple environments.
  * Usage:
  *   - Deploy to dev:  cdk deploy --context environment=dev --all
  *   - Deploy to prod: cdk deploy --context environment=prod --all
@@ -32,8 +32,8 @@ const environmentParam = (app.node.tryGetContext("environment") ||
 if (!ENVIRONMENTS.includes(environmentParam as Environment)) {
   throw new Error(
     `Invalid environment: ${environmentParam}. Must be one of: ${ENVIRONMENTS.join(
-      ", "
-    )}`
+      ", ",
+    )}`,
   );
 }
 
@@ -57,7 +57,7 @@ const env = {
  */
 const networkStack = new NetworkStack(app, `${config.name}-Network`, {
   env,
-  description: `Network infrastructure for SkillTree ${config.name} environment`,
+  description: `Network infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
   config,
 });
@@ -69,7 +69,7 @@ const networkStack = new NetworkStack(app, `${config.name}-Network`, {
  */
 const databaseStack = new DatabaseStack(app, `${config.name}-Database`, {
   env,
-  description: `Database infrastructure for SkillTree ${config.name} environment`,
+  description: `Database infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
   config,
   vpc: networkStack.vpc,
@@ -89,7 +89,7 @@ databaseStack.addDependency(networkStack);
  */
 const apiStack = new ApiStack(app, `${config.name}-Api`, {
   env,
-  description: `API infrastructure for SkillTree ${config.name} environment`,
+  description: `API infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
   config,
   vpc: networkStack.vpc,
@@ -110,7 +110,7 @@ apiStack.addDependency(databaseStack);
  */
 const frontendStack = new FrontendStack(app, `${config.name}-Frontend`, {
   env,
-  description: `Frontend infrastructure for SkillTree ${config.name} environment`,
+  description: `Frontend infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
   config,
 });
@@ -122,13 +122,13 @@ const frontendStack = new FrontendStack(app, `${config.name}-Frontend`, {
  */
 const storybookStack = new StorybookStack(app, `${config.name}-Storybook`, {
   env,
-  description: `Storybook infrastructure for SkillTree ${config.name} environment`,
+  description: `Storybook infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
   config,
 });
 
 // Add stack-level tags
-cdk.Tags.of(app).add("Project", "skilltree");
+cdk.Tags.of(app).add("Project", "synth-tree");
 cdk.Tags.of(app).add("Environment", config.name);
 cdk.Tags.of(app).add("ManagedBy", "cdk");
 

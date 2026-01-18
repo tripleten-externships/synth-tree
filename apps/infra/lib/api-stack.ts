@@ -94,10 +94,10 @@ export class ApiStack extends cdk.Stack {
     const apiRepository = new ecr.Repository(this, "ApiRepository", {
       repositoryName: `${config.name}-api`,
       removalPolicy:
-        config.name === "prod"
+        config.name === "synth-tree-prod"
           ? cdk.RemovalPolicy.RETAIN
           : cdk.RemovalPolicy.DESTROY,
-      emptyOnDelete: config.name !== "prod", // Clean up images when stack is deleted
+      emptyOnDelete: config.name !== "synth-tree-prod", // Clean up images when stack is deleted
       imageScanOnPush: true, // Enable vulnerability scanning
     });
 
@@ -124,7 +124,7 @@ export class ApiStack extends cdk.Stack {
         domainName: config.apiDomain,
         validation:
           certificatemanager.CertificateValidation.fromDns(hostedZone),
-      }
+      },
     );
 
     // ========================================
@@ -143,7 +143,7 @@ export class ApiStack extends cdk.Stack {
         subnetType: ec2.SubnetType.PUBLIC,
       },
       loadBalancerName: `${config.name}-api-alb`,
-      deletionProtection: config.name === "prod",
+      deletionProtection: config.name === "synth-tree-prod",
     });
 
     cdk.Tags.of(this.loadBalancer).add("Name", `${config.name}-api-alb`);
@@ -170,7 +170,7 @@ export class ApiStack extends cdk.Stack {
           healthyHttpCodes: "200",
         },
         deregistrationDelay: cdk.Duration.seconds(30),
-      }
+      },
     );
 
     /**
@@ -207,7 +207,7 @@ export class ApiStack extends cdk.Stack {
       zone: hostedZone,
       recordName: config.apiDomain,
       target: route53.RecordTarget.fromAlias(
-        new route53Targets.LoadBalancerTarget(this.loadBalancer)
+        new route53Targets.LoadBalancerTarget(this.loadBalancer),
       ),
       comment: `API endpoint for ${config.name} environment`,
     });
@@ -243,7 +243,7 @@ export class ApiStack extends cdk.Stack {
     const logGroup = new logs.LogGroup(this, "ApiLogGroup", {
       logGroupName: `/ecs/${config.name}/api`,
       retention:
-        config.name === "prod"
+        config.name === "synth-tree-prod"
           ? logs.RetentionDays.ONE_MONTH
           : logs.RetentionDays.ONE_WEEK,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -262,7 +262,7 @@ export class ApiStack extends cdk.Stack {
       description: "ECS task execution role for API service",
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonECSTaskExecutionRolePolicy"
+          "service-role/AmazonECSTaskExecutionRolePolicy",
         ),
       ],
     });
@@ -274,7 +274,7 @@ export class ApiStack extends cdk.Stack {
     const firebaseSecret = secretsmanager.Secret.fromSecretNameV2(
       this,
       "FirebaseSecret",
-      `/skilltree/${config.name}/firebase`
+      `/skilltree/${config.name}/firebase`,
     );
 
     // Grant permissions to read Firebase secret
@@ -288,7 +288,7 @@ export class ApiStack extends cdk.Stack {
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter/skilltree/${config.name}/*`,
         ],
-      })
+      }),
     );
 
     // ========================================
@@ -315,7 +315,7 @@ export class ApiStack extends cdk.Stack {
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter/skilltree/${config.name}/*`,
         ],
-      })
+      }),
     );
 
     // ========================================
@@ -339,7 +339,7 @@ export class ApiStack extends cdk.Stack {
           cpuArchitecture: ecs.CpuArchitecture.X86_64,
           operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
         },
-      }
+      },
     );
 
     /**
@@ -354,7 +354,8 @@ export class ApiStack extends cdk.Stack {
         logGroup: logGroup,
       }),
       environment: {
-        NODE_ENV: config.name === "prod" ? "production" : "development",
+        NODE_ENV:
+          config.name === "synth-tree-prod" ? "production" : "development",
         PORT: config.ecs.containerPort.toString(),
         DATABASE_HOST: databaseCluster.clusterEndpoint.hostname,
         DATABASE_PORT: databaseCluster.clusterEndpoint.port.toString(),
@@ -364,24 +365,24 @@ export class ApiStack extends cdk.Stack {
         // Database credentials from Secrets Manager
         DATABASE_USERNAME: ecs.Secret.fromSecretsManager(
           databaseSecret,
-          "username"
+          "username",
         ),
         DATABASE_PASSWORD: ecs.Secret.fromSecretsManager(
           databaseSecret,
-          "password"
+          "password",
         ),
         // Firebase credentials from Secrets Manager
         FIREBASE_PROJECT_ID: ecs.Secret.fromSecretsManager(
           firebaseSecret,
-          "project_id"
+          "project_id",
         ),
         FIREBASE_CLIENT_EMAIL: ecs.Secret.fromSecretsManager(
           firebaseSecret,
-          "client_email"
+          "client_email",
         ),
         FIREBASE_PRIVATE_KEY: ecs.Secret.fromSecretsManager(
           firebaseSecret,
-          "private_key"
+          "private_key",
         ),
       },
       containerName: "api",

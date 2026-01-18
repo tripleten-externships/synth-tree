@@ -145,7 +145,7 @@ export class StaticSite extends Construct {
      * - Lifecycle rules to delete old versions
      */
     this.bucket = new s3.Bucket(this, "Bucket", {
-      bucketName: `${environmentName}-${siteName}-skilltree-io`,
+      bucketName: `${environmentName}-${siteName}-synth-tree-io`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
@@ -175,7 +175,7 @@ export class StaticSite extends Construct {
       "OAI",
       {
         comment: `OAI for ${domainName}`,
-      }
+      },
     );
 
     // Grant CloudFront OAI read access to the bucket
@@ -219,7 +219,7 @@ export class StaticSite extends Construct {
             override: true,
           },
         },
-      }
+      },
     );
 
     // ========================================
@@ -244,7 +244,7 @@ export class StaticSite extends Construct {
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.none(),
         headerBehavior: cloudfront.CacheHeaderBehavior.none(),
         cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-      }
+      },
     );
 
     /**
@@ -265,7 +265,7 @@ export class StaticSite extends Construct {
         queryStringBehavior: cloudfront.CacheQueryStringBehavior.none(),
         headerBehavior: cloudfront.CacheHeaderBehavior.none(),
         cookieBehavior: cloudfront.CacheCookieBehavior.none(),
-      }
+      },
     );
 
     // ========================================
@@ -422,12 +422,12 @@ export class StaticSite extends Construct {
     this.distribution = new cloudfront.Distribution(
       this,
       "Distribution",
-      distributionConfig
+      distributionConfig,
     );
 
     cdk.Tags.of(this.distribution).add(
       "Name",
-      `${environmentName}-${siteName}-distribution`
+      `${environmentName}-${siteName}-distribution`,
     );
 
     // ========================================
@@ -441,7 +441,7 @@ export class StaticSite extends Construct {
       zone: hostedZone,
       recordName: domainName,
       target: route53.RecordTarget.fromAlias(
-        new route53Targets.CloudFrontTarget(this.distribution)
+        new route53Targets.CloudFrontTarget(this.distribution),
       ),
       comment: `${siteName} for ${environmentName} environment`,
     });

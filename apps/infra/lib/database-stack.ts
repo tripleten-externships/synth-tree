@@ -176,10 +176,10 @@ export class DatabaseStack extends cdk.Stack {
       },
       preferredMaintenanceWindow: "sun:04:00-sun:05:00", // Sunday 4-5 AM UTC
       removalPolicy:
-        config.name === "prod"
+        config.name === "synth-tree-prod"
           ? cdk.RemovalPolicy.SNAPSHOT
           : cdk.RemovalPolicy.DESTROY,
-      deletionProtection: config.name === "prod",
+      deletionProtection: config.name === "synth-tree-prod",
       cloudwatchLogsExports: ["postgresql"],
       cloudwatchLogsRetention: logs.RetentionDays.ONE_MONTH,
       storageEncrypted: true,
@@ -204,7 +204,7 @@ export class DatabaseStack extends cdk.Stack {
       description: "IAM role for bastion host with SSM access",
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "AmazonSSMManagedInstanceCore"
+          "AmazonSSMManagedInstanceCore",
         ),
       ],
     });
@@ -229,7 +229,7 @@ export class DatabaseStack extends cdk.Stack {
       "dnf install -y postgresql15",
       "",
       "# Install session manager plugin (already included in AL2023)",
-      "echo 'PostgreSQL client installed successfully'"
+      "echo 'PostgreSQL client installed successfully'",
     );
 
     /**
@@ -243,7 +243,7 @@ export class DatabaseStack extends cdk.Stack {
       },
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T3,
-        ec2.InstanceSize.MICRO
+        ec2.InstanceSize.MICRO,
       ),
       machineImage: bastionAmi,
       securityGroup: bastionSecurityGroup,

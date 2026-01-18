@@ -93,7 +93,7 @@ export class NetworkStack extends cdk.Stack {
       // Define NAT Gateway strategy based on environment
       // Dev: 1 NAT Gateway total for cost savings
       // Prod: 1 NAT Gateway per AZ for high availability
-      natGateways: config.name === "prod" ? config.maxAzs : 1,
+      natGateways: config.name === "synth-tree-prod" ? config.maxAzs : 1,
 
       // Configure subnet groups
       subnetConfiguration: [
@@ -138,14 +138,14 @@ export class NetworkStack extends cdk.Stack {
     this.albSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(443),
-      "Allow HTTPS from internet"
+      "Allow HTTPS from internet",
     );
 
     // Allow HTTP from internet (for redirect to HTTPS)
     this.albSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(80),
-      "Allow HTTP from internet (redirect to HTTPS)"
+      "Allow HTTP from internet (redirect to HTTPS)",
     );
 
     cdk.Tags.of(this.albSecurityGroup).add("Name", `${config.name}-alb-sg`);
@@ -166,14 +166,14 @@ export class NetworkStack extends cdk.Stack {
     this.ecsSecurityGroup.addIngressRule(
       this.albSecurityGroup,
       ec2.Port.tcp(config.ecs.containerPort),
-      "Allow traffic from ALB on container port"
+      "Allow traffic from ALB on container port",
     );
 
     // Allow outbound HTTPS for pulling Docker images and making API calls
     this.ecsSecurityGroup.addEgressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(443),
-      "Allow HTTPS for pulling images and API calls"
+      "Allow HTTPS for pulling images and API calls",
     );
 
     cdk.Tags.of(this.ecsSecurityGroup).add("Name", `${config.name}-ecs-sg`);
@@ -189,12 +189,12 @@ export class NetworkStack extends cdk.Stack {
         vpc: this.vpc,
         description: "Security group for RDS database",
         allowAllOutbound: false, // Database doesn't need outbound
-      }
+      },
     );
 
     cdk.Tags.of(this.databaseSecurityGroup).add(
       "Name",
-      `${config.name}-rds-sg`
+      `${config.name}-rds-sg`,
     );
 
     /**
@@ -209,7 +209,7 @@ export class NetworkStack extends cdk.Stack {
         vpc: this.vpc,
         description: "Security group for Bastion host",
         allowAllOutbound: true, // Allow updates and RDS access
-      }
+      },
     );
 
     // Allow SSH from internet
@@ -217,12 +217,12 @@ export class NetworkStack extends cdk.Stack {
     this.bastionSecurityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.tcp(22),
-      "Allow SSH from internet (restrict to specific IPs in production)"
+      "Allow SSH from internet (restrict to specific IPs in production)",
     );
 
     cdk.Tags.of(this.bastionSecurityGroup).add(
       "Name",
-      `${config.name}-bastion-sg`
+      `${config.name}-bastion-sg`,
     );
 
     // ========================================
@@ -238,28 +238,28 @@ export class NetworkStack extends cdk.Stack {
     this.albSecurityGroup.addEgressRule(
       this.ecsSecurityGroup,
       ec2.Port.tcp(config.ecs.containerPort),
-      "Allow traffic to ECS tasks on container port"
+      "Allow traffic to ECS tasks on container port",
     );
 
     // ECS can connect to RDS on PostgreSQL port
     this.ecsSecurityGroup.addEgressRule(
       this.databaseSecurityGroup,
       ec2.Port.tcp(5432),
-      "Allow PostgreSQL connection to RDS"
+      "Allow PostgreSQL connection to RDS",
     );
 
     // RDS allows connections from ECS
     this.databaseSecurityGroup.addIngressRule(
       this.ecsSecurityGroup,
       ec2.Port.tcp(5432),
-      "Allow PostgreSQL from ECS tasks"
+      "Allow PostgreSQL from ECS tasks",
     );
 
     // RDS allows connections from Bastion
     this.databaseSecurityGroup.addIngressRule(
       this.bastionSecurityGroup,
       ec2.Port.tcp(5432),
-      "Allow PostgreSQL from Bastion host"
+      "Allow PostgreSQL from Bastion host",
     );
 
     // ========================================
