@@ -106,13 +106,13 @@ jobs:
         id: infra
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name dev-Storybook \
-            --query 'Stacks[0].Outputs[?ExportName==`dev-storybook-BucketName`].OutputValue' \
+            --stack-name synth-tree-dev-Storybook \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-storybook-BucketName`].OutputValue' \
             --output text)
 
           DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name dev-Storybook \
-            --query 'Stacks[0].Outputs[?ExportName==`dev-storybook-DistributionId`].OutputValue' \
+            --stack-name synth-tree-dev-Storybook \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-storybook-DistributionId`].OutputValue' \
             --output text)
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
@@ -249,13 +249,13 @@ jobs:
         id: infra
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name prod-Storybook \
-            --query 'Stacks[0].Outputs[?ExportName==`prod-storybook-BucketName`].OutputValue' \
+            --stack-name synth-tree-prod-Storybook \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-storybook-BucketName`].OutputValue' \
             --output text)
 
           DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name prod-Storybook \
-            --query 'Stacks[0].Outputs[?ExportName==`prod-storybook-DistributionId`].OutputValue' \
+            --stack-name synth-tree-prod-Storybook \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-storybook-DistributionId`].OutputValue' \
             --output text)
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT

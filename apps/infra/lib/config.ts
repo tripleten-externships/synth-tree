@@ -67,7 +67,7 @@ export interface EnvironmentConfig {
  * Development Environment Configuration
  */
 export const devConfig: EnvironmentConfig = {
-  name: "dev",
+  name: "synth-tree-dev",
   account: process.env.CDK_DEFAULT_ACCOUNT || "",
   region: "us-east-1",
 
@@ -122,7 +122,7 @@ export const devConfig: EnvironmentConfig = {
   // Tags
   tags: {
     Environment: "dev",
-    Project: "skilltree",
+    Project: "synth-tree",
     ManagedBy: "cdk",
     CostCenter: "development",
   },
@@ -132,7 +132,7 @@ export const devConfig: EnvironmentConfig = {
  * Production Environment Configuration
  */
 export const prodConfig: EnvironmentConfig = {
-  name: "prod",
+  name: "synth-tree-prod",
   account: process.env.CDK_DEFAULT_ACCOUNT || "",
   region: "us-east-1",
 
@@ -186,7 +186,7 @@ export const prodConfig: EnvironmentConfig = {
   // Tags
   tags: {
     Environment: "prod",
-    Project: "skilltree",
+    Project: "synth-tree",
     ManagedBy: "cdk",
     CostCenter: "production",
   },

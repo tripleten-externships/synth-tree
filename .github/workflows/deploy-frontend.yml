@@ -112,13 +112,13 @@ jobs:
         id: infra
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name dev-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`dev-frontend-BucketName`].OutputValue' \
+            --stack-name synth-tree-dev-Frontend \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-frontend-BucketName`].OutputValue' \
             --output text)
 
           DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name dev-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`dev-frontend-DistributionId`].OutputValue' \
+            --stack-name synth-tree-dev-Frontend \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-frontend-DistributionId`].OutputValue' \
             --output text)
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
@@ -268,13 +268,13 @@ jobs:
         id: infra
         run: |
           BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name prod-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`prod-frontend-BucketName`].OutputValue' \
+            --stack-name synth-tree-prod-Frontend \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-frontend-BucketName`].OutputValue' \
             --output text)
 
           DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name prod-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`prod-frontend-DistributionId`].OutputValue' \
+            --stack-name synth-tree-prod-Frontend \
+            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-frontend-DistributionId`].OutputValue' \
             --output text)
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
