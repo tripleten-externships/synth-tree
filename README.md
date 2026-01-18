@@ -22,10 +22,11 @@ A modern, tree-based learning management system designed for bootcamp students t
 This project is organized as a **monorepo** using [pnpm workspaces](https://pnpm.io/workspaces), allowing multiple applications and shared packages to coexist in a single repository.
 
 ```
-skilltree-monorepo/
+synth-tree/
 ├── apps/                    # Applications
 │   ├── admin-dashboard/     # React admin interface
 │   ├── api/                 # GraphQL API server
+│   ├── client-frontend/     # React client interface
 │   └── infra/               # AWS CDK infrastructure
 └── packages/                # Shared packages
     ├── ui/                  # Component library + Storybook
@@ -325,7 +326,6 @@ Whenever you need to modify the database schema, follow this workflow:
    ```
 
    This command will:
-
    - Generate a SQL migration file
    - Apply the migration to your local database
    - Regenerate the Prisma Client
