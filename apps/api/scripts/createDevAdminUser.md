@@ -29,32 +29,29 @@ FIREBASE_API_KEY=xxxxxxxxxxxxxxxxxxxxxx
 ```
 
 > 🔥 **This is mandatory.**
-
-The Firebase API key is required to mint a real Firebase ID token, which is the token the Apollo Server context authentication middleware verifies.
+> The Firebase API key is required to mint a real Firebase ID token, which is the token the Apollo Server context authentication middleware verifies.
 
 > ❗ **If you skip this step:**
 >
 > - The CLI script cannot exchange the custom token for an ID token
 > - Authentication will always fail in Apollo Sandbox
 > - You will see "Token verification failed" in your backend logs
-
-> 👉 **Do this first before running any dev authentication commands.**
+>   👉 **Do this first before running any dev authentication commands.**
 
 ---
 
-During development, our Apollo Server enforces real Firebase authentication through its context middleware. Since our dev environment does not automatically create users or tokens, requests issued from Apollo Sandbox will fail unless a valid Firebase ID token is provided in the headers.
+During development, our API Server enforces real Firebase authentication through its middleware. Since our dev environment does not automatically create users or tokens, requests issued to our API will fail unless valid Firebase ID token is provided in the headers.
 
 This guide explains:
 
-- Why the context middleware requires an authenticated user
+- Why the middleware requires an authenticated user
 - How to create a Firebase + Prisma user locally
 - How to generate a valid ID token with a CLI script
-- How to attach that token to Apollo Sandbox
 - Where generated files live (and why they are gitignored)
 
 ## 🚧 Why Apollo Server Requires an Auth Token
 
-Our GraphQL context middleware validates every request:
+Our auth middleware validates every request:
 
 - It checks for an `authorization: Bearer <idToken>` header
 - It verifies the token using Firebase Admin
@@ -92,18 +89,40 @@ You must pass at least:
 - `--email` → User email
 - `--name` → Display name
 - `--role` → Optional (defaults to ADMIN)
+- `--password` → Optional password for the user
 
-### Example
+### Examples
+
+#### Basic usage without password
 
 ```bash
 pnpm create:dev-admin -- --email dev@example.com --name "Dev Admin"
 ```
+
+#### With a custom password
+
+```bash
+pnpm create:dev-admin -- --email dev@example.com --name "Dev Admin" --password "SecurePassword123"
+```
+
+#### With role and password
+
+```bash
+pnpm create:dev-admin -- --email user@example.com --name "Test User" --role USER --password "TestPass456"
+```
+
+### Password Behavior
+
+- **For new users**: If `--password` is provided, the Firebase user will be created with that password
+- **For existing users**: If `--password` is provided, the existing user's password will be updated to the new value
+- **When omitted**: The script works as before—Firebase will create users without passwords (they can later sign in via email link or other providers)
 
 ### What the script does:
 
 - **Ensures a Firebase Auth user exists**
   - Fetches by email
   - Creates it if not found
+  - Sets or updates password if `--password` is provided
 - **Upserts the Prisma user**
   - Uses the Firebase UID as the Prisma id so both stay in sync.
 - **Generates a Firebase custom token**
@@ -142,40 +161,10 @@ is fully `.gitignored`, including:
 
 This ensures no tokens or local identity files are ever committed.
 
-## 🚀 Using the ID Token in Apollo Sandbox
-
-Once the script finishes, open the generated JSON file and copy the value of `idToken`.
-
-Then in Apollo Sandbox:
-
-1. Open the Headers tab on individual requests OR go the connection settings and add the token to the Authorization header. Pictures will be sent.
-2. Add:
-   ```json
-   {
-     "authorization": "Bearer <paste_idToken_here>"
-   }
-   ```
-3. Save or persist the headers (optional)
-4. Run queries normally — the context middleware will now authenticate you successfully
-
-This is identical to how a real frontend client sends ID tokens in production.
-
-## 📸 Screenshots & Usage Examples
-
-Screenshots showing:
-
-- Where to find the generated credentials file
-- Where to paste the token into Apollo Sandbox headers
-- Example of a successful authenticated GraphQL call
-
-…are being sent separately in the Hub chat and attached to the pull request.
-
 ## 🧩 Summary
 
-- Apollo Server requires a valid Firebase ID token for all authenticated operations
+- API Server requires a valid Firebase ID token for all authenticated operations
 - The dev script creates a real Firebase user + Prisma record
 - It also generates a real ID token identical to what the frontend would supply
 - The token is stored in a `.gitignored` location
-- Paste that token into Apollo Sandbox as a Bearer header to authenticate
-
-This keeps development aligned with real authentication behavior while avoiding unsafe shortcuts or disabling auth logic.
+- Paste that token into postman as a Bearer header to authenticate
