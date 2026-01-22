@@ -8,7 +8,14 @@ const httpLink = new HttpLink({
 });
 
 const authLink = new SetContextLink(async (prevContext: Record<string, unknown>) => {
-  const token = await auth.currentUser?.getIdToken();
+  let token: string | undefined;
+  
+  try {
+    token = await auth.currentUser?.getIdToken();
+  } catch (error) {
+    console.error("Failed to get Firebase auth token:", error);
+    // Continue without token - API will handle unauthorized requests
+  }
 
   return {
     headers: {

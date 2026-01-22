@@ -24,6 +24,10 @@ export function useTestConnection() {
     fetchPolicy: "cache-and-network",
   });
 
+  if (error) {
+    console.error("GraphQL connection test failed:", error);
+  }
+
   return {
     connected: !error && !loading,
     loading,
