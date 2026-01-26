@@ -60,3 +60,5 @@ temp/
 
 **/scripts/credentials  
 **/scripts/*.credentials.json 
+
+postgres_db
