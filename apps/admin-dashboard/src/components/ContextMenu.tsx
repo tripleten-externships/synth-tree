@@ -5,7 +5,7 @@ import { FiMoreHorizontal } from "react-icons/fi";
 
 
 // Defines object structure for menu items
-interface MenuItem {
+export interface MenuItem {
     label: string;
     icon?: React.ComponentType<any>;
     onClick: () => void;
@@ -18,7 +18,7 @@ interface ContextMenuProps {
 }
 
 // Renders a dropdown menu when clicking a kebab button
-const ContextMenu = ({ items }: ContextMenuProps) => {
+export const ContextMenu = ({ items }: ContextMenuProps) => {
     return (
         <DropdownMenu modal={false}>
             {/* Trigger button to open the dropdown menu */}
@@ -57,5 +57,3 @@ const ContextMenu = ({ items }: ContextMenuProps) => {
         </DropdownMenu>
     );
 }
-
-export default ContextMenu;
