@@ -752,6 +752,10 @@ If you encounter an issue not listed here:
 
 ## 📚 Additional Resources
 
+### Designs
+
+- [Figma Designs](https://www.figma.com/design/SqPytLeQQ0D80HvbyzRFf1/Skill-Tree-Platform?node-id=0-1&p=f&t=xwzH0yyxnVXoNYwf-0)
+
 ### Learning Materials
 
 #### React & TypeScript
