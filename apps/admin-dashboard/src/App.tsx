@@ -21,10 +21,10 @@ function App() {
                       <DashboardLayout>
                         <div className="flex flex-col ml-16 items-start mt-16">
                           <h1 className="text-3xl font-bold mb-2">Courses</h1>
-                          <p className="text=lg text-muted-foreground mb-8">
+                          <p className="text-lg text-muted-foreground mb-8">
                             No courses yet
                           </p>
-                          <div className="flex flex-col items-center justify-center border border-gray-20 rounded-lg w-72 h-40">
+                          <div className="flex flex-col items-center justify-center border border-gray-200 rounded-lg w-72 h-40">
                             <span className="text-3xl mb-2">+</span>
                             <span className="text-base font-bold">
                               New Course

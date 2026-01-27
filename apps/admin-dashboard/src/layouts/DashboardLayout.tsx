@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@skilltree/ui";
-import { useTheme } from "@skilltree/theme";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -18,7 +17,6 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user } = useAuth();
-  const them = useTheme();
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       <nav
@@ -43,21 +41,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {/* avatar + admin badge container */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {user?.photoURL ? (
+                <button
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  aria-label="User menu"
+                >
                   <img
-                    src={user.photoURL}
+                    src={user?.photoURL || GenericAvatar}
                     alt={user?.displayName || "User"}
                     className="h-8 w-8 rounded-full"
                   />
-                ) : (
-                  <img
-                    src={GenericAvatar}
-                    alt="Generic avatar"
-                    className="h-8 w-8 bg-transparent "
-                  />
-                )}
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="p-4 mr-8">
                 {/* TODO: Add navigation links/actions for Profile and Logout */}
                 <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Logout</DropdownMenuItem>
