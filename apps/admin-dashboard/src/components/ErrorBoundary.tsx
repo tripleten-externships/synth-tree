@@ -15,10 +15,12 @@ class ErrorBoundary extends Component<Props, State> {
     hasError: false,
   };
 
+  // This updates the hasError state whenever an error appears. This is necessary because it's how we know when we have to return the error page.
   public static getDerivedStateFromError(_: Error): State {
     return { hasError: true };
   }
 
+  // componentDidCatch gets called after an error appears from a child component
   public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
   }
