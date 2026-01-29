@@ -90,6 +90,7 @@ model Course {
   id          String       @id @default(uuid()) @db.Uuid
   title       String
   description String?
+  brandColor  String?      @default("#3b82f6") // Hex color for branding
   authorId    String
   status      CourseStatus @default(DRAFT)
   createdAt   DateTime     @default(now())
@@ -135,6 +136,7 @@ model SkillNode {
   id          String    @id @default(uuid()) @db.Uuid
   treeId      String    @db.Uuid
   title       String
+  color       String?   @default("#10b981") // Hex color for node visualization
   step        Int       @default(1) // logical level/layer (e.g., column)
   orderInStep Int       @default(0) // order within the step
   posX        Int?      @default(0) // optional: UI layout

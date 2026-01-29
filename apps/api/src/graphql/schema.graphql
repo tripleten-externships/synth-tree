@@ -44,6 +44,7 @@ enum ContentType {
 type Course {
   author: User!
   authorId: String!
+  brandColor: String
   createdAt: DateTime!
   deletedAt: DateTime
   description: String
@@ -56,6 +57,7 @@ type Course {
 
 input CourseCountOrderByAggregateInput {
   authorId: SortOrder
+  brandColor: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   description: SortOrder
@@ -67,6 +69,7 @@ input CourseCountOrderByAggregateInput {
 
 input CourseCreateInput {
   author: UserCreateNestedOneWithoutCoursesAuthoredInput!
+  brandColor: String
   createdAt: DateTime
   deletedAt: DateTime
   description: String
@@ -78,6 +81,7 @@ input CourseCreateInput {
 }
 
 input CourseCreateManyAuthorInput {
+  brandColor: String
   createdAt: DateTime
   deletedAt: DateTime
   description: String
@@ -94,6 +98,7 @@ input CourseCreateManyAuthorInputEnvelope {
 
 input CourseCreateManyInput {
   authorId: String!
+  brandColor: String
   createdAt: DateTime
   deletedAt: DateTime
   description: String
@@ -127,6 +132,7 @@ input CourseCreateOrConnectWithoutTreesInput {
 }
 
 input CourseCreateWithoutAuthorInput {
+  brandColor: String
   createdAt: DateTime
   deletedAt: DateTime
   description: String
@@ -139,6 +145,7 @@ input CourseCreateWithoutAuthorInput {
 
 input CourseCreateWithoutTreesInput {
   author: UserCreateNestedOneWithoutCoursesAuthoredInput!
+  brandColor: String
   createdAt: DateTime
   deletedAt: DateTime
   description: String
@@ -156,6 +163,7 @@ input CourseListRelationFilter {
 
 input CourseMaxOrderByAggregateInput {
   authorId: SortOrder
+  brandColor: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   description: SortOrder
@@ -167,6 +175,7 @@ input CourseMaxOrderByAggregateInput {
 
 input CourseMinOrderByAggregateInput {
   authorId: SortOrder
+  brandColor: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   description: SortOrder
@@ -185,6 +194,7 @@ input CourseOrderByWithAggregationInput {
   _max: CourseMaxOrderByAggregateInput
   _min: CourseMinOrderByAggregateInput
   authorId: SortOrder
+  brandColor: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   description: SortOrder
@@ -197,6 +207,7 @@ input CourseOrderByWithAggregationInput {
 input CourseOrderByWithRelationInput {
   author: UserOrderByWithRelationInput
   authorId: SortOrder
+  brandColor: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   description: SortOrder
@@ -209,6 +220,7 @@ input CourseOrderByWithRelationInput {
 
 enum CourseScalarFieldEnum {
   authorId
+  brandColor
   createdAt
   deletedAt
   description
@@ -228,6 +240,7 @@ input CourseScalarWhereInput {
   NOT: [CourseScalarWhereInput!]
   OR: [CourseScalarWhereInput!]
   authorId: StringFilter
+  brandColor: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   description: StringNullableFilter
@@ -242,6 +255,7 @@ input CourseScalarWhereWithAggregatesInput {
   NOT: [CourseScalarWhereWithAggregatesInput!]
   OR: [CourseScalarWhereWithAggregatesInput!]
   authorId: StringWithAggregatesFilter
+  brandColor: StringNullableWithAggregatesFilter
   createdAt: DateTimeWithAggregatesFilter
   deletedAt: DateTimeNullableWithAggregatesFilter
   description: StringNullableWithAggregatesFilter
@@ -258,6 +272,7 @@ enum CourseStatus {
 
 input CourseUpdateInput {
   author: UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput
+  brandColor: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   description: NullableStringFieldUpdateOperationsInput
@@ -269,6 +284,7 @@ input CourseUpdateInput {
 }
 
 input CourseUpdateManyMutationInput {
+  brandColor: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   description: NullableStringFieldUpdateOperationsInput
@@ -316,6 +332,7 @@ input CourseUpdateWithWhereUniqueWithoutAuthorInput {
 }
 
 input CourseUpdateWithoutAuthorInput {
+  brandColor: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   description: NullableStringFieldUpdateOperationsInput
@@ -328,6 +345,7 @@ input CourseUpdateWithoutAuthorInput {
 
 input CourseUpdateWithoutTreesInput {
   author: UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput
+  brandColor: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   description: NullableStringFieldUpdateOperationsInput
@@ -355,6 +373,7 @@ input CourseWhereInput {
   OR: [CourseWhereInput!]
   author: UserWhereInput
   authorId: StringFilter
+  brandColor: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   description: StringNullableFilter
@@ -371,6 +390,7 @@ input CourseWhereUniqueInput {
   OR: [CourseWhereInput!]
   author: UserWhereInput
   authorId: StringFilter
+  brandColor: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   description: StringNullableFilter
@@ -381,13 +401,35 @@ input CourseWhereUniqueInput {
   updatedAt: DateTimeFilter
 }
 
-input CreateLessonBlockInput {
-  caption: String
-  html: String
-  nodeId: ID!
-  order: Int!
-  type: String!
-  url: String
+input CreateCourseInput {
+  brandColor: String
+  defaultTreeTitle: String
+  description: String
+  title: String!
+}
+
+input CreateFirstSkillNodeInput {
+  color: String
+  title: String!
+  treeId: ID!
+}
+
+input CreateSkillNodeBelowInput {
+  color: String
+  referenceNodeId: ID!
+  title: String!
+}
+
+input CreateSkillNodeToRightInput {
+  color: String
+  referenceNodeId: ID!
+  title: String!
+}
+
+input CreateSkillTreeInput {
+  courseId: ID!
+  description: String
+  title: String!
 }
 
 scalar DateTime
@@ -681,13 +723,17 @@ input JsonNullableWithAggregatesFilter {
 
 type LessonBlocks {
   caption: String
-  createdAt: DateTime
+  createdAt: DateTime!
+  deletedAt: DateTime
   html: String
-  id: ID
-  node: SkillNode
-  order: Int
-  type: String
-  updatedAt: DateTime
+  id: ID!
+  meta: Json
+  node: SkillNode!
+  nodeId: String!
+  order: Int!
+  status: LessonStatus!
+  type: ContentType!
+  updatedAt: DateTime!
   url: String
 }
 
@@ -1031,80 +1077,25 @@ enum LessonStatus {
 }
 
 type Mutation {
-  createLessonBlock(input: CreateLessonBlockInput!): LessonBlocks
-  createManyCourse(data: [CourseCreateInput!]!): [Course!]!
-  createManyQuiz(data: [QuizCreateInput!]!): [Quiz!]!
-  createManyQuizAttempt(data: [QuizAttemptCreateInput!]!): [QuizAttempt!]!
-  createManyQuizAttemptAnswer(data: [QuizAttemptAnswerCreateInput!]!): [QuizAttemptAnswer!]!
-  createManyQuizOption(data: [QuizOptionCreateInput!]!): [QuizOption!]!
-  createManyQuizQuestion(data: [QuizQuestionCreateInput!]!): [QuizQuestion!]!
-  createManySkillNodePrerequisite(data: [SkillNodePrerequisiteCreateInput!]!): [SkillNodePrerequisite!]!
-  createManySkillTree(data: [SkillTreeCreateInput!]!): [SkillTree!]!
-  createManyUser(data: [UserCreateInput!]!): [User!]!
-  createManyUserNodeProgress(data: [UserNodeProgressCreateInput!]!): [UserNodeProgress!]!
-  createOneCourse(data: CourseCreateInput!): Course!
-  createOneQuiz(data: QuizCreateInput!): Quiz!
-  createOneQuizAttempt(data: QuizAttemptCreateInput!): QuizAttempt!
-  createOneQuizAttemptAnswer(data: QuizAttemptAnswerCreateInput!): QuizAttemptAnswer!
-  createOneQuizOption(data: QuizOptionCreateInput!): QuizOption!
-  createOneQuizQuestion(data: QuizQuestionCreateInput!): QuizQuestion!
-  createOneSkillNodePrerequisite(data: SkillNodePrerequisiteCreateInput!): SkillNodePrerequisite!
-  createOneSkillTree(data: SkillTreeCreateInput!): SkillTree!
-  createOneUser(data: UserCreateInput!): User!
-  createOneUserNodeProgress(data: UserNodeProgressCreateInput!): UserNodeProgress!
+  createCourse(input: CreateCourseInput!): Course
+  createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode
+  createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
+  createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
+  createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
+  createSkillTree(input: CreateSkillTreeInput!): SkillTree
+  deleteCourse(id: ID!): Course
   deleteLessonBlock(id: ID!): LessonBlocks
-  deleteManyCourse(where: CourseWhereInput!): BatchPayload
-  deleteManyQuiz(where: QuizWhereInput!): BatchPayload
-  deleteManyQuizAttempt(where: QuizAttemptWhereInput!): BatchPayload
-  deleteManyQuizAttemptAnswer(where: QuizAttemptAnswerWhereInput!): BatchPayload
-  deleteManyQuizOption(where: QuizOptionWhereInput!): BatchPayload
-  deleteManyQuizQuestion(where: QuizQuestionWhereInput!): BatchPayload
-  deleteManySkillNodePrerequisite(where: SkillNodePrerequisiteWhereInput!): BatchPayload
-  deleteManySkillTree(where: SkillTreeWhereInput!): BatchPayload
-  deleteManyUser(where: UserWhereInput!): BatchPayload
-  deleteManyUserNodeProgress(where: UserNodeProgressWhereInput!): BatchPayload
-  deleteOneCourse(where: CourseWhereUniqueInput!): Course
-  deleteOneQuiz(where: QuizWhereUniqueInput!): Quiz
-  deleteOneQuizAttempt(where: QuizAttemptWhereUniqueInput!): QuizAttempt
-  deleteOneQuizAttemptAnswer(where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
-  deleteOneQuizOption(where: QuizOptionWhereUniqueInput!): QuizOption
-  deleteOneQuizQuestion(where: QuizQuestionWhereUniqueInput!): QuizQuestion
-  deleteOneSkillNodePrerequisite(where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
-  deleteOneSkillTree(where: SkillTreeWhereUniqueInput!): SkillTree
-  deleteOneUser(where: UserWhereUniqueInput!): User
-  deleteOneUserNodeProgress(where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
+  deleteSkillNodeAdvanced(id: ID!): Boolean
+  deleteSkillNodeSimple(id: ID!): Boolean
+  deleteSkillTree(id: ID!): SkillTree
+  deleteUser(id: ID!): User
   publishLessonBlock(id: ID!): LessonBlocks
-  updateLessonBlock(id: ID!, input: UpdateLessonBlockInput!): LessonBlocks
-  updateManyCourse(data: CourseUpdateManyMutationInput!, where: CourseWhereInput): BatchPayload!
-  updateManyQuiz(data: QuizUpdateManyMutationInput!, where: QuizWhereInput): BatchPayload!
-  updateManyQuizAttempt(data: QuizAttemptUpdateManyMutationInput!, where: QuizAttemptWhereInput): BatchPayload!
-  updateManyQuizAttemptAnswer(data: QuizAttemptAnswerUpdateManyMutationInput!, where: QuizAttemptAnswerWhereInput): BatchPayload!
-  updateManyQuizOption(data: QuizOptionUpdateManyMutationInput!, where: QuizOptionWhereInput): BatchPayload!
-  updateManyQuizQuestion(data: QuizQuestionUpdateManyMutationInput!, where: QuizQuestionWhereInput): BatchPayload!
-  updateManySkillNodePrerequisite(data: SkillNodePrerequisiteUpdateManyMutationInput!, where: SkillNodePrerequisiteWhereInput): BatchPayload!
-  updateManySkillTree(data: SkillTreeUpdateManyMutationInput!, where: SkillTreeWhereInput): BatchPayload!
-  updateManyUser(data: UserUpdateManyMutationInput!, where: UserWhereInput): BatchPayload!
-  updateManyUserNodeProgress(data: UserNodeProgressUpdateManyMutationInput!, where: UserNodeProgressWhereInput): BatchPayload!
-  updateOneCourse(data: CourseUpdateInput!, where: CourseWhereUniqueInput!): Course
-  updateOneQuiz(data: QuizUpdateInput!, where: QuizWhereUniqueInput!): Quiz
-  updateOneQuizAttempt(data: QuizAttemptUpdateInput!, where: QuizAttemptWhereUniqueInput!): QuizAttempt
-  updateOneQuizAttemptAnswer(data: QuizAttemptAnswerUpdateInput!, where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
-  updateOneQuizOption(data: QuizOptionUpdateInput!, where: QuizOptionWhereUniqueInput!): QuizOption
-  updateOneQuizQuestion(data: QuizQuestionUpdateInput!, where: QuizQuestionWhereUniqueInput!): QuizQuestion
-  updateOneSkillNodePrerequisite(data: SkillNodePrerequisiteUpdateInput!, where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
-  updateOneSkillTree(data: SkillTreeUpdateInput!, where: SkillTreeWhereUniqueInput!): SkillTree
-  updateOneUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
-  updateOneUserNodeProgress(data: UserNodeProgressUpdateInput!, where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
-  upsertOneCourse(create: CourseCreateInput!, update: CourseUpdateInput!, where: CourseWhereUniqueInput!): Course!
-  upsertOneQuiz(create: QuizCreateInput!, update: QuizUpdateInput!, where: QuizWhereUniqueInput!): Quiz!
-  upsertOneQuizAttempt(create: QuizAttemptCreateInput!, update: QuizAttemptUpdateInput!, where: QuizAttemptWhereUniqueInput!): QuizAttempt!
-  upsertOneQuizAttemptAnswer(create: QuizAttemptAnswerCreateInput!, update: QuizAttemptAnswerUpdateInput!, where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer!
-  upsertOneQuizOption(create: QuizOptionCreateInput!, update: QuizOptionUpdateInput!, where: QuizOptionWhereUniqueInput!): QuizOption!
-  upsertOneQuizQuestion(create: QuizQuestionCreateInput!, update: QuizQuestionUpdateInput!, where: QuizQuestionWhereUniqueInput!): QuizQuestion!
-  upsertOneSkillNodePrerequisite(create: SkillNodePrerequisiteCreateInput!, update: SkillNodePrerequisiteUpdateInput!, where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite!
-  upsertOneSkillTree(create: SkillTreeCreateInput!, update: SkillTreeUpdateInput!, where: SkillTreeWhereUniqueInput!): SkillTree!
-  upsertOneUser(create: UserCreateInput!, update: UserUpdateInput!, where: UserWhereUniqueInput!): User!
-  upsertOneUserNodeProgress(create: UserNodeProgressCreateInput!, update: UserNodeProgressUpdateInput!, where: UserNodeProgressWhereUniqueInput!): UserNodeProgress!
+  setUserRole(role: Role!, userId: ID!): User
+  syncCurrentUser(name: String, photoUrl: String): User
+  updateCourse(id: ID!, input: UpdateCourseInput!): Course
+  updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
+  updateSkillNode(id: ID!, input: UpdateSkillNodeInput!): SkillNode
+  updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
 
 """Never fill this, its created for inputs that dont have fields"""
@@ -1505,51 +1496,24 @@ enum ProgressStatus {
 }
 
 type Query {
-  countCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): Int!
-  countQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): Int!
-  countQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): Int!
-  countQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): Int!
-  countQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): Int!
-  countQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): Int!
-  countSkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): Int!
-  countSkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): Int!
-  countUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): Int!
-  countUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): Int!
-  findFirstCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): Course
-  findFirstQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): Quiz
-  findFirstQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): QuizAttempt
-  findFirstQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): QuizAttemptAnswer
-  findFirstQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): QuizOption
-  findFirstQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): QuizQuestion
-  findFirstSkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): SkillNodePrerequisite
-  findFirstSkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): SkillTree
-  findFirstUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): User
-  findFirstUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): UserNodeProgress
-  findManyCourse(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
-  findManyQuiz(cursor: QuizWhereUniqueInput, distinct: [QuizScalarFieldEnum!], orderBy: [QuizOrderByWithRelationInput!], skip: Int, take: Int, where: QuizWhereInput): [Quiz!]!
-  findManyQuizAttempt(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
-  findManyQuizAttemptAnswer(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
-  findManyQuizOption(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
-  findManyQuizQuestion(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
-  findManySkillNodePrerequisite(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
-  findManySkillTree(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): [SkillTree!]!
-  findManyUser(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
-  findManyUserNodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
-  findUniqueCourse(where: CourseWhereUniqueInput!): Course
-  findUniqueQuiz(where: QuizWhereUniqueInput!): Quiz
-  findUniqueQuizAttempt(where: QuizAttemptWhereUniqueInput!): QuizAttempt
-  findUniqueQuizAttemptAnswer(where: QuizAttemptAnswerWhereUniqueInput!): QuizAttemptAnswer
-  findUniqueQuizOption(where: QuizOptionWhereUniqueInput!): QuizOption
-  findUniqueQuizQuestion(where: QuizQuestionWhereUniqueInput!): QuizQuestion
-  findUniqueSkillNodePrerequisite(where: SkillNodePrerequisiteWhereUniqueInput!): SkillNodePrerequisite
-  findUniqueSkillTree(where: SkillTreeWhereUniqueInput!): SkillTree
-  findUniqueUser(where: UserWhereUniqueInput!): User
-  findUniqueUserNodeProgress(where: UserNodeProgressWhereUniqueInput!): UserNodeProgress
+  adminCourse(id: ID!): Course
+  adminGetAllCourses(limit: Int, page: Int, search: String, status: CourseStatus): [Course!]
+  adminMyCourse(id: ID!): Course
+  adminMyCoursesWithContent(limit: Int, page: Int, search: String, status: CourseStatus): [Course!]
+  adminMySkillNode(id: ID!): SkillNode
+  adminMySkillNodes(courseId: ID, limit: Int, page: Int, treeId: ID): [SkillNode!]
+  adminMySkillTree(id: ID!): SkillTree
+  adminMySkillTrees(courseId: ID, limit: Int, page: Int, search: String): [SkillTree!]
+  adminSkillNode(id: ID!): SkillNode
+  adminSkillNodes(courseId: ID, limit: Int, page: Int, treeId: ID): [SkillNode!]
+  adminSkillTree(id: ID!): SkillTree
+  adminSkillTrees(courseId: ID, limit: Int, page: Int, search: String): [SkillTree!]
+  allUsers(limit: Int = 25, offset: Int = 0): [User!]
   lessonBlock(id: ID!): LessonBlocks
-  lessonBlocks(limit: Int, offset: Int): [LessonBlocks!]
+  lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
   skillNode(id: ID!): SkillNode
-  skillNodes(limit: Int, offset: Int): [SkillNode!]
+  skillNodes(limit: Int = 25, offset: Int = 0): [SkillNode!]
   skillNodesByTree(treeId: ID!): [SkillNode!]
 }
 
@@ -3165,16 +3129,23 @@ enum Role {
 }
 
 type SkillNode {
-  createdAt: DateTime
-  id: ID
-  lessons: [LessonBlocks!]
-  orderInStep: Int
+  color: String
+  createdAt: DateTime!
+  deletedAt: DateTime
+  id: ID!
+  lessons(cursor: LessonBlocksWhereUniqueInput, distinct: [LessonBlocksScalarFieldEnum!], orderBy: [LessonBlocksOrderByWithRelationInput!], skip: Int, take: Int, where: LessonBlocksWhereInput): [LessonBlocks!]!
+  orderInStep: Int!
   posX: Int
   posY: Int
-  step: Int
-  title: String
-  tree: SkillTree
-  updatedAt: DateTime
+  prerequisites(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  progresses(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
+  quiz: Quiz
+  requiredFor(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  step: Int!
+  title: String!
+  tree: SkillTree!
+  treeId: String!
+  updatedAt: DateTime!
 }
 
 input SkillNodeAvgOrderByAggregateInput {
@@ -3185,6 +3156,7 @@ input SkillNodeAvgOrderByAggregateInput {
 }
 
 input SkillNodeCountOrderByAggregateInput {
+  color: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -3198,6 +3170,7 @@ input SkillNodeCountOrderByAggregateInput {
 }
 
 input SkillNodeCreateInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3216,6 +3189,7 @@ input SkillNodeCreateInput {
 }
 
 input SkillNodeCreateManyInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3229,6 +3203,7 @@ input SkillNodeCreateManyInput {
 }
 
 input SkillNodeCreateManyTreeInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3313,6 +3288,7 @@ input SkillNodeCreateOrConnectWithoutTreeInput {
 }
 
 input SkillNodeCreateWithoutLessonsInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3330,6 +3306,7 @@ input SkillNodeCreateWithoutLessonsInput {
 }
 
 input SkillNodeCreateWithoutPrerequisitesInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3347,6 +3324,7 @@ input SkillNodeCreateWithoutPrerequisitesInput {
 }
 
 input SkillNodeCreateWithoutProgressesInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3364,6 +3342,7 @@ input SkillNodeCreateWithoutProgressesInput {
 }
 
 input SkillNodeCreateWithoutQuizInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3381,6 +3360,7 @@ input SkillNodeCreateWithoutQuizInput {
 }
 
 input SkillNodeCreateWithoutRequiredForInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3398,6 +3378,7 @@ input SkillNodeCreateWithoutRequiredForInput {
 }
 
 input SkillNodeCreateWithoutTreeInput {
+  color: String
   createdAt: DateTime
   deletedAt: DateTime
   id: String
@@ -3421,6 +3402,7 @@ input SkillNodeListRelationFilter {
 }
 
 input SkillNodeMaxOrderByAggregateInput {
+  color: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -3434,6 +3416,7 @@ input SkillNodeMaxOrderByAggregateInput {
 }
 
 input SkillNodeMinOrderByAggregateInput {
+  color: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -3456,6 +3439,7 @@ input SkillNodeOrderByWithAggregationInput {
   _max: SkillNodeMaxOrderByAggregateInput
   _min: SkillNodeMinOrderByAggregateInput
   _sum: SkillNodeSumOrderByAggregateInput
+  color: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -3469,6 +3453,7 @@ input SkillNodeOrderByWithAggregationInput {
 }
 
 input SkillNodeOrderByWithRelationInput {
+  color: SortOrder
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -3719,6 +3704,7 @@ input SkillNodePrerequisiteWhereUniqueInput {
 }
 
 enum SkillNodeScalarFieldEnum {
+  color
   createdAt
   deletedAt
   id
@@ -3740,6 +3726,7 @@ input SkillNodeScalarWhereInput {
   AND: [SkillNodeScalarWhereInput!]
   NOT: [SkillNodeScalarWhereInput!]
   OR: [SkillNodeScalarWhereInput!]
+  color: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: UuidFilter
@@ -3756,6 +3743,7 @@ input SkillNodeScalarWhereWithAggregatesInput {
   AND: [SkillNodeScalarWhereWithAggregatesInput!]
   NOT: [SkillNodeScalarWhereWithAggregatesInput!]
   OR: [SkillNodeScalarWhereWithAggregatesInput!]
+  color: StringNullableWithAggregatesFilter
   createdAt: DateTimeWithAggregatesFilter
   deletedAt: DateTimeNullableWithAggregatesFilter
   id: UuidWithAggregatesFilter
@@ -3788,6 +3776,7 @@ input SkillNodeTreeIdStepOrderInStepCompoundUniqueInput {
 }
 
 input SkillNodeUpdateInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3806,6 +3795,7 @@ input SkillNodeUpdateInput {
 }
 
 input SkillNodeUpdateManyMutationInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3907,6 +3897,7 @@ input SkillNodeUpdateWithWhereUniqueWithoutTreeInput {
 }
 
 input SkillNodeUpdateWithoutLessonsInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3924,6 +3915,7 @@ input SkillNodeUpdateWithoutLessonsInput {
 }
 
 input SkillNodeUpdateWithoutPrerequisitesInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3941,6 +3933,7 @@ input SkillNodeUpdateWithoutPrerequisitesInput {
 }
 
 input SkillNodeUpdateWithoutProgressesInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3958,6 +3951,7 @@ input SkillNodeUpdateWithoutProgressesInput {
 }
 
 input SkillNodeUpdateWithoutQuizInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3975,6 +3969,7 @@ input SkillNodeUpdateWithoutQuizInput {
 }
 
 input SkillNodeUpdateWithoutRequiredForInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -3992,6 +3987,7 @@ input SkillNodeUpdateWithoutRequiredForInput {
 }
 
 input SkillNodeUpdateWithoutTreeInput {
+  color: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   deletedAt: NullableDateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
@@ -4048,6 +4044,7 @@ input SkillNodeWhereInput {
   AND: [SkillNodeWhereInput!]
   NOT: [SkillNodeWhereInput!]
   OR: [SkillNodeWhereInput!]
+  color: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: UuidFilter
@@ -4070,6 +4067,7 @@ input SkillNodeWhereUniqueInput {
   AND: [SkillNodeWhereInput!]
   NOT: [SkillNodeWhereInput!]
   OR: [SkillNodeWhereInput!]
+  color: StringNullableFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: String
@@ -4487,12 +4485,23 @@ enum TransactionIsolationLevel {
   Serializable
 }
 
-input UpdateLessonBlockInput {
-  caption: String
-  html: String
-  order: Int
-  type: String
-  url: String
+input UpdateCourseInput {
+  brandColor: String
+  description: String
+  status: CourseStatus
+  title: String
+}
+
+input UpdateSkillNodeInput {
+  color: String
+  posX: Int
+  posY: Int
+  title: String
+}
+
+input UpdateSkillTreeInput {
+  description: String
+  title: String
 }
 
 type User {

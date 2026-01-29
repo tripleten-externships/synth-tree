@@ -249,7 +249,7 @@ VITE_API_URL=http://localhost:4000/graphql
 ### API Server (`apps/api/.env`)
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/skilltree
+DATABASE_URL=postgresql://postgres:postgres@localhost:1234/skilltree
 FIREBASE_PROJECT_ID=your_project_id
 FIREBASE_CLIENT_EMAIL=your_client_email
 FIREBASE_PRIVATE_KEY=your_private_key

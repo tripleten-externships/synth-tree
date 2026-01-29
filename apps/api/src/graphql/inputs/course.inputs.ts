@@ -5,6 +5,7 @@ export const CreateCourseInput = builder.inputType("CreateCourseInput", {
   fields: (t) => ({
     title: t.string({ required: true }),
     description: t.string(), // optional
+    brandColor: t.string(), // optional hex color for branding
     // Optional override for the auto-created default SkillTree
     defaultTreeTitle: t.string(),
   }),
@@ -14,6 +15,7 @@ export const UpdateCourseInput = builder.inputType("UpdateCourseInput", {
   fields: (t) => ({
     title: t.string(),
     description: t.string(),
+    brandColor: t.string(), // optional hex color for branding
     status: t.field({ type: CourseStatus }), // optional
   }),
 });
