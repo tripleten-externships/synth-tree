@@ -28,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center flex-col min-h-screen gap-11 text-center bg-gray-500">
+        <div className="flex items-center justify-center flex-col min-h-screen gap-11 text-center bg-gray-400">
           <div className="bg-white flex flex-col items-center p-5 rounded-3xl w-4/5 md:w-1/2">
             <img className="w-14 sm:max-w-xs mb-5" src={logo} alt="Logo" />
             <h1 className="text-4xl">An application error has occured...</h1>
@@ -42,13 +42,13 @@ class ErrorBoundary extends Component<Props, State> {
               the issue persists, please contact the development team.
             </h3>
             <button
-              className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-all"
+              className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-3xl hover:bg-blue-600 transition-all"
               onClick={() => window.location.reload()}
             >
               Refresh Page
             </button>
             <button
-              className="mt-4 px-6 py-2 text-gray hover:text-white rounded-md hover:bg-gray-500 border-2 transition-all"
+              className="mt-4 px-6 py-2 text-gray hover:text-white rounded-3xl hover:bg-gray-500 border-2 transition-all"
               onClick={() => (window.location.href = "/dashboard")}
             >
               Dashboard
