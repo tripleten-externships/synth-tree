@@ -1,9 +1,7 @@
 import { builder } from "@graphql/builder";
 import { requireAdmin } from "@graphql/auth/requireAuth";
-import { Prisma } from "@prisma/client";
 import { assertNodeOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
-import { updateOneSkillNodeMutationArgs } from "@graphql/__generated__/SkillNode/mutations/updateOne.base";
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -25,9 +23,6 @@ builder.mutationFields((t) => ({
           nodeId: nodeId,
           title: title,
           required: required,
-        },
-        include: {
-          questions: { include: { options: true } },
         },
       });
 
@@ -65,9 +60,7 @@ builder.mutationFields((t) => ({
         data: {
           ...(title !== undefined && title !== null && { title }),
           ...(required !== undefined && required !== null && { required }),
-          updatedAt: new Date(),
         },
-        include: { questions: { include: { options: true } } },
       });
 
       return quiz;
@@ -98,6 +91,18 @@ builder.mutationFields((t) => ({
         ...query,
         where: { id },
       });
+
+      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting. 
+      
+      const deleted = await ctx.prisma.quiz.update({
+        ...query,
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      */
 
       return deleted;
     },
