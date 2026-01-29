@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthFeature } from "./features/auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoutes } from "./components/ProtectedRoutes";
+import { MediaUrlInputDemo } from "./pages/MediaUrlInputDemo";
 
 function App() {
   return (
@@ -9,6 +10,8 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/auth/*" element={<AuthFeature />} />
+          {/* Public demo route - no auth required */}
+          <Route path="/demo/media-input" element={<MediaUrlInputDemo />} />
           <Route
             path="/*"
             element={
