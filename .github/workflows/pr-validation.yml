@@ -11,7 +11,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  NODE_VERSION: "24"
+  NODE_VERSION: "18"
   PNPM_VERSION: "10"
 
 jobs:
@@ -55,39 +55,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run ESLint
-        run: |
-          echo "Running ESLint..."
-          pnpm run lint || true
-          echo "✅ Linting complete"
+        run: npm run lint
 
       - name: Run TypeScript type check
-        run: |
-          echo "Running TypeScript type check..."
-          pnpm run type-check || pnpm exec tsc --noEmit || true
-          echo "✅ Type check complete"
+        run: npm run type-check
 
   test-api:
     name: Test API
@@ -102,20 +79,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run API tests
         working-directory: apps/api
-        run: |
-          echo "Running API tests..."
-          pnpm test || echo "⚠️ No tests configured"
+        run: npm test
 
   build-api:
     name: Build API
