@@ -25,6 +25,7 @@ builder.mutationFields((t) => ({
           data: {
             title: input.title,
             description: input.description ?? null,
+            brandColor: input.brandColor ?? null,
             status: "DRAFT",
             authorId: userId,
             // deletedAt default null
@@ -59,7 +60,7 @@ builder.mutationFields((t) => ({
 
       await assertCourseOwnership(ctx, id);
 
-      const { title, description, status } = input;
+      const { title, description, brandColor, status } = input;
 
       const data: Prisma.CourseUpdateInput = {};
 
@@ -70,6 +71,10 @@ builder.mutationFields((t) => ({
 
       if (description !== undefined) {
         data.description = description;
+      }
+
+      if (brandColor !== undefined) {
+        data.brandColor = brandColor;
       }
 
       if (status !== undefined && status !== null) {

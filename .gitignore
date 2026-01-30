@@ -59,4 +59,4 @@ temp/
 
 
 **/scripts/credentials  
-**/scripts/*.credentials.json 
+**/scripts/*.credentials.json apps/api/nul

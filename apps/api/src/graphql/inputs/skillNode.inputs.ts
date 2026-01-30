@@ -6,6 +6,7 @@ export const CreateFirstSkillNodeInput = builder.inputType(
     fields: (t) => ({
       treeId: t.id({ required: true }),
       title: t.string({ required: true }),
+      color: t.string(), // optional hex color for node visualization
     }),
   }
 );
@@ -16,6 +17,7 @@ export const CreateSkillNodeToRightInput = builder.inputType(
     fields: (t) => ({
       referenceNodeId: t.id({ required: true }),
       title: t.string({ required: true }),
+      color: t.string(), // optional hex color for node visualization
     }),
   }
 );
@@ -26,6 +28,7 @@ export const CreateSkillNodeBelowInput = builder.inputType(
     fields: (t) => ({
       referenceNodeId: t.id({ required: true }),
       title: t.string({ required: true }),
+      color: t.string(), // optional hex color for node visualization
     }),
   }
 );
@@ -33,6 +36,7 @@ export const CreateSkillNodeBelowInput = builder.inputType(
 export const UpdateSkillNodeInput = builder.inputType("UpdateSkillNodeInput", {
   fields: (t) => ({
     title: t.string(),
+    color: t.string(), // optional hex color for node visualization
     // No support for step or orderInStep updates right now. Should probably remove prerequisites from prisma and enforce gating with frontend logic.
     posX: t.int(),
     posY: t.int(),

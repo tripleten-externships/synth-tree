@@ -24,7 +24,7 @@ builder.mutationFields((t) => ({
       ctx.auth.requireAuth();
       requireAdmin(ctx);
 
-      const { treeId, title } = input;
+      const { treeId, title, color } = input;
 
       return ctx.prisma.$transaction(async (tx) => {
         // Load the tree and its course for ownership check
@@ -55,6 +55,7 @@ builder.mutationFields((t) => ({
           data: {
             treeId,
             title,
+            color: color ?? null,
             step: 1,
             orderInStep: 1,
             posX: 1,
@@ -80,7 +81,7 @@ builder.mutationFields((t) => ({
       ctx.auth.requireAuth();
       requireAdmin(ctx);
 
-      const { referenceNodeId, title } = input;
+      const { referenceNodeId, title, color } = input;
 
       return ctx.prisma.$transaction(async (tx) => {
         const ref = await tx.skillNode.findUnique({
@@ -114,6 +115,7 @@ builder.mutationFields((t) => ({
           data: {
             treeId,
             title,
+            color: color ?? null,
             step,
             orderInStep: newOrderInStep,
             posX: newOrderInStep,
@@ -147,7 +149,7 @@ builder.mutationFields((t) => ({
       ctx.auth.requireAuth();
       requireAdmin(ctx);
 
-      const { referenceNodeId, title } = input;
+      const { referenceNodeId, title, color } = input;
 
       return ctx.prisma.$transaction(async (tx) => {
         const ref = await tx.skillNode.findUnique({
@@ -201,6 +203,7 @@ builder.mutationFields((t) => ({
           data: {
             treeId,
             title,
+            color: color ?? null,
             step: newStep,
             orderInStep: 1, // first node in the new row
             posX: 1,
@@ -250,11 +253,12 @@ builder.mutationFields((t) => ({
 
         await assertCourseOwnership(ctx, node.tree.courseId);
 
-        const { title, posX, posY } = input;
+        const { title, color, posX, posY } = input;
 
         const updates: Prisma.SkillNodeUpdateInput = {};
 
         if (title != null) updates.title = title;
+        if (color !== undefined) updates.color = color;
         if (posX != null) updates.posX = posX;
         if (posY != null) updates.posY = posY;
 
