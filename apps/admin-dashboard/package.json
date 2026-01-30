@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@skilltree/config": "workspace:*",
     "@skilltree/theme": "workspace:*",
     "@skilltree/ui": "workspace:*",
