@@ -10,6 +10,10 @@ importers:
   apps/admin-dashboard:
     dependencies:
       "@hookform/resolvers":
+      '@apollo/client':
+        specifier: ^4.0.9
+        version: 4.0.9(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(rxjs@7.8.2)
+      '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.63.0(react@19.1.1))
       "@radix-ui/react-dropdown-menu":
@@ -27,6 +31,9 @@ importers:
       firebase:
         specifier: ^11.1.0
         version: 11.10.0
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -209,7 +216,10 @@ importers:
 
   apps/client-frontend:
     dependencies:
-      "@skilltree/theme":
+      '@apollo/client':
+        specifier: ^4.0.9
+        version: 4.0.9(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(rxjs@7.8.2)
+      '@skilltree/theme':
         specifier: workspace:*
         version: link:../../packages/theme
       "@skilltree/ui":
@@ -218,6 +228,9 @@ importers:
       firebase:
         specifier: ^11.10.0
         version: 11.10.0
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -11160,7 +11173,6 @@ packages:
         integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==,
       }
     engines: { node: ">=10" }
-    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
 
   teeny-request@9.0.0:
     resolution:
