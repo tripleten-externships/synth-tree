@@ -251,7 +251,7 @@ export function Login() {
               <Input
                 type="password"
                 placeholder="Enter two-factor verification code"
-                onChange={(e) => setVerificationCode(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVerificationCode(e.target.value)}
               />
             </div>
           )}
