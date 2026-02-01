@@ -249,7 +249,7 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
-      if (existing.type === PrismaQuestionType.SINGLE_CHOICE) {
+      if (existing.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
         for (let i = 0; i < existing.options.length; i++) {
           if (existing.options[i].isCorrect) {
             throw new GraphQLError(
@@ -302,7 +302,10 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.question.quiz.nodeId);
 
-      if (existing.question.type === PrismaQuestionType.SINGLE_CHOICE) {
+      if (
+        existing.question.type === PrismaQuestionType.SINGLE_CHOICE &&
+        isCorrect
+      ) {
         for (let i = 0; i < existing.question.options.length; i++) {
           if (
             existing.question.options[i].isCorrect &&
