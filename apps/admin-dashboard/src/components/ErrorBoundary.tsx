@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import logo from "../../public/favicon.ico"; // Change to logo when it's added to assets
+//import logo from "../../public/favicon.ico"; // Change to logo when it's added to assets
 
 interface Props {
   children?: React.ReactNode;
@@ -30,7 +30,12 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex items-center justify-center flex-col min-h-screen gap-11 text-center bg-gray-400">
           <div className="bg-white flex flex-col items-center p-5 rounded-3xl w-4/5 md:w-1/2">
-            <img className="w-14 sm:max-w-xs mb-5" src={logo} alt="Logo" />
+            {/*change to logo when added to assets*/}
+            <img
+              className="w-14 sm:max-w-xs mb-5"
+              src={"/favicon.ico"}
+              alt="Logo"
+            />
             <h1 className="text-4xl">An application error has occured...</h1>
 
             <h2 className="text-xl mb-10 mt-10 2xl:mt-0 text-red-500">
