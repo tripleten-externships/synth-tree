@@ -10,6 +10,9 @@ importers:
 
   apps/admin-dashboard:
     dependencies:
+      '@apollo/client':
+        specifier: ^4.0.9
+        version: 4.0.9(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(rxjs@7.8.2)
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.63.0(react@19.1.1))
@@ -25,6 +28,9 @@ importers:
       firebase:
         specifier: ^11.1.0
         version: 11.10.0
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -207,6 +213,9 @@ importers:
 
   apps/client-frontend:
     dependencies:
+      '@apollo/client':
+        specifier: ^4.0.9
+        version: 4.0.9(graphql-ws@6.0.6(graphql@16.11.0)(ws@8.18.3))(graphql@16.11.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(rxjs@7.8.2)
       '@skilltree/theme':
         specifier: workspace:*
         version: link:../../packages/theme
@@ -216,6 +225,9 @@ importers:
       firebase:
         specifier: ^11.10.0
         version: 11.10.0
+      graphql:
+        specifier: ^16.11.0
+        version: 16.11.0
       react:
         specifier: ^19.1.1
         version: 19.1.1
