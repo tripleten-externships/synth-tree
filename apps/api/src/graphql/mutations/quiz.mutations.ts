@@ -249,6 +249,12 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
+      if (existing.type === PrismaQuestionType.OPEN_QUESTION) {
+        throw new GraphQLError(
+          "You cannot have Quiz Options for an open ended question",
+        );
+      }
+
       if (existing.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
         for (let i = 0; i < existing.options.length; i++) {
           if (existing.options[i].isCorrect) {
