@@ -38,7 +38,6 @@
     "graphql-scalars": "^1.25.0",
     "graphql-tag": "^2.12.6",
     "mongodb": "^6.20.0",
-    "prisma": "^6.17.1",
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
@@ -52,6 +51,7 @@
     "@types/mongodb": "^4.0.7",
     "@types/node": "^24.5.2",
     "nodemon": "^3.1.10",
+    "prisma": "^6.17.1",
     "prisma-generator-pothos-codegen": "^0.7.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
