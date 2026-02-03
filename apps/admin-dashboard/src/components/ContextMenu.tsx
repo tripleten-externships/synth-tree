@@ -32,7 +32,7 @@ export const ContextMenu = ({ items }: ContextMenuProps) => {
                 alignOffset={-8}
                 side="bottom" 
                 align="start" 
-                className="w-129 bg-white border-[1px] border-[rgba(0,0,0,0.1)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.1)] rounded-[8px] overflow-hidden data-[state=open]:animate-[fade-in_120ms_ease-out] data-[state=closed]:animate-[fade-out_120ms_ease-in]"
+                className="w-[131px] bg-white border-[1px] border-[rgba(0,0,0,0.1)] shadow-[0px_2px_8px_0px_rgba(0,0,0,0.1)] rounded-[8px] overflow-hidden data-[state=open]:animate-[fade-in_120ms_ease-out] data-[state=closed]:animate-[fade-out_120ms_ease-in]"
             >
                 {/* Render each menu item */}
                 {items.map((item, index) => (
