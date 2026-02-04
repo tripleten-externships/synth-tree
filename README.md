@@ -10,6 +10,7 @@ A modern, tree-based learning management system designed for bootcamp students t
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Running Locally](#-running-locally)
+- [Running API Tests](#running-api-tests)
 - [Database Management](#-database-management)
 - [How to Contribute](#-how-to-contribute)
 - [Building & Deployment](#-building--deployment)
@@ -272,6 +273,18 @@ pnpm dev
 
 # The GraphQL server will start at http://localhost:4000
 # GraphQL Playground available at http://localhost:4000/graphql
+```
+
+### Running API Tests
+
+To run unit tests for the API package (`apps/api`):
+
+```sh
+cd apps/api
+pnpm install
+pnpm jest
+# or
+pnpx jest
 ```
 
 ### Start the Admin Dashboard
