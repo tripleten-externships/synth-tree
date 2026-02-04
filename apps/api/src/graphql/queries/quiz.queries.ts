@@ -1,14 +1,11 @@
 import { builder } from "@graphql/builder";
-import { requireAdmin } from "@graphql/auth/requireAuth";
-import {
-  assertCourseOwnership,
-  assertTreeOwnership,
-  assertNodeOwnership,
-} from "@graphql/auth/permissions";
+import { assertNodeOwnership } from "@graphql/auth/permissions";
 
 // Define all Quiz queries here
 builder.queryFields((t) => ({
-  // Fetch a single quiz by ID
+  /**
+   * Fetch a single quiz by ID
+   */
   quiz: t.prismaField({
     type: "Quiz",
     nullable: true,
@@ -17,47 +14,78 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
+      const isAdmin = ctx.auth.isAdmin();
 
-      // Fetch quiz from DB
-      const quiz = await ctx.prisma.quiz.findFirst({
+      return ctx.prisma.quiz.findFirst({
         ...query,
-        where: { id, deletedAt: null },
+        where: {
+          id,
+          deletedAt: null,
+          ...(isAdmin ? {} : { published: true, node: { published: true } }),
+        },
       });
-
-      return quiz; // Return whatever is found
     },
   }),
 
-  // Fetch quizzes by nodeId
+  /**
+   * Fetch quiz by nodeId (1:1)
+   */
   quizzesByNode: t.prismaField({
-    type: ["Quiz"],
+    type: "Quiz",
+    nullable: true,
     args: {
       nodeId: t.arg.id({ required: true }),
     },
     resolve: async (query, _root, { nodeId }, ctx) => {
       ctx.auth.requireAuth();
-      assertNodeOwnership(ctx, nodeId);
+      const isAdmin = ctx.auth.isAdmin();
 
-      return ctx.prisma.quiz.findMany({
+      if (isAdmin) {
+        await assertNodeOwnership(ctx, nodeId);
+      }
+
+      return ctx.prisma.quiz.findFirst({
         ...query,
-        where: { nodeId, deletedAt: null },
+        where: {
+          nodeId,
+          deletedAt: null,
+          ...(isAdmin ? {} : { published: true, node: { published: true } }),
+        },
       });
     },
   }),
 
-  // Fetch all quizzes (for now by node only, since treeId may not exist)
+  /**
+   * Fetch quizzes by treeId
+   */
   quizzesByTree: t.prismaField({
     type: ["Quiz"],
     args: {
-      nodeIds: t.arg.idList({ required: true }), // Replace treeId with nodeIds
+      treeId: t.arg.id({ required: true }),
     },
-    resolve: async (query, _root, { nodeIds }, ctx) => {
+    resolve: async (query, _root, { treeId }, ctx) => {
       ctx.auth.requireAuth();
+      const isAdmin = ctx.auth.isAdmin();
+
+      if (isAdmin) {
+        await ctx.auth.assertTreeOwnership(treeId);
+      }
 
       return ctx.prisma.quiz.findMany({
         ...query,
-        where: { nodeId: { in: nodeIds }, deletedAt: null },
-        orderBy: { createdAt: "desc" },
+        where: {
+          deletedAt: null,
+          node: {
+            treeId,
+            ...(isAdmin
+              ? {}
+              : {
+                  published: true,
+                  tree: { published: true },
+                }),
+          },
+          ...(isAdmin ? {} : { published: true }),
+        },
       });
     },
   }),

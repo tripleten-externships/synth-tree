@@ -8,4 +8,4 @@ import "./skillTree.owner.queries";
 import "./skillNode.admin.queries";
 import "./skillNode.owner.queries";
 import "./quiz.queries";
-// import queries/*.ts files here
+import "./types/quiz.type";
