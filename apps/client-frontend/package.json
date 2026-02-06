@@ -10,9 +10,11 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@apollo/client": "^4.1.4",
     "@skilltree/theme": "workspace:*",
     "@skilltree/ui": "workspace:*",
     "firebase": "^11.10.0",
+    "graphql": "^16.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.2"
