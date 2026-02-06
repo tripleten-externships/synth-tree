@@ -16,7 +16,10 @@
   "dev": "pnpm db:start && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
 
     "storybook": "pnpm --filter ./packages/ui storybook",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check",
+    "test": "pnpm -r test"
   },
   "packageManager": "pnpm@10.17.1"
 }

@@ -15,7 +15,11 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "create:dev-admin": "ts-node -r tsconfig-paths/register scripts/createDevAdminUser.ts",
-    "refresh:dev-token": "ts-node -r tsconfig-paths/register scripts/refreshDevToken.ts"
+    "refresh:dev-token": "ts-node -r tsconfig-paths/register scripts/refreshDevToken.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
