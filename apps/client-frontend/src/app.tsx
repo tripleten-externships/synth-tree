@@ -11,7 +11,7 @@ import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
-// import CourseCatalog from "./pages/CourseCatalog"; // Temporarily disabled - Apollo Client issue
+import CourseCatalog from "./pages/CourseCatalog";
 import CourseCatalogDemo from "./pages/CourseCatalogDemo";
 
 // A wrapper that combines protection + your layout + an Outlet
@@ -28,7 +28,7 @@ function ProtectedMainLayout() {
 const router = createBrowserRouter([
   {
     path: "/courses-demo",
-    element: <CourseCatalogDemo />,  // Standalone demo outside protected layout
+    element: <CourseCatalogDemo />,  // Demo version with mock data
   },
   {
     path: "/",
@@ -38,10 +38,10 @@ const router = createBrowserRouter([
         index: true,            // "/" route
         element: <SkillTreeHome />, // SkillTree Home.tsx
       },
-      // {
-      //   path: "courses",        // "/courses" - Temporarily disabled
-      //   element: <CourseCatalog />,
-      // },
+      {
+        path: "courses",        // "/courses"
+        element: <CourseCatalog />,
+      },
       {
         path: "dashboard",      // "/dashboard"
         element: <DashboardPage />,

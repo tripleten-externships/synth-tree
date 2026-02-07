@@ -1,6 +1,5 @@
 import { useState } from "react";
-// @ts-ignore - Apollo Client types will resolve after TS server restart
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import { BROWSE_COURSES_QUERY } from "../graphql/queries/courseCatalog";
 import {
@@ -28,12 +27,16 @@ interface Course {
   };
 }
 
+interface BrowseCoursesData {
+  browseCourses: Course[];
+}
+
 export default function CourseCatalog() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   // const [category, setCategory] = useState(""); // TODO: Enable when category field is added to Course model
 
-  const { data, loading, error } = useQuery(BROWSE_COURSES_QUERY, {
+  const { data, loading, error } = useQuery<BrowseCoursesData>(BROWSE_COURSES_QUERY, {
     variables: {
       search: search || undefined,
       // category: category || undefined, // TODO: Enable when category field is added
