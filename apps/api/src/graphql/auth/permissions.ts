@@ -1,7 +1,6 @@
 import { ForbiddenError } from "apollo-server-errors";
 import { GraphQLError } from "graphql";
 import { requireAdmin } from "@graphql/auth/requireAuth";
-import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 
 export async function assertCourseOwnership(

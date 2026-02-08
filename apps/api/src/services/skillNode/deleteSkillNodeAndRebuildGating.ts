@@ -87,9 +87,9 @@ export async function deleteSkillNodeAndRebuildGating(
 
         // Update local copy so we use correct values below if needed
         n.orderInStep = newOrderInStep;
-        // @ts-ignore
+        // @ts-expect-error - Prisma type doesn't include these fields but they exist
         n.posX = newOrderInStep;
-        // @ts-ignore
+        // @ts-expect-error - Prisma type doesn't include these fields but they exist
         n.posY = step;
       }
     }
