@@ -1,8 +1,8 @@
 import "@skilltree/theme/styles/globals.css";
 
+import { ThemeProvider } from "@skilltree/theme";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ThemeProvider } from "@skilltree/theme";
 
 import App from "./App.tsx";
 

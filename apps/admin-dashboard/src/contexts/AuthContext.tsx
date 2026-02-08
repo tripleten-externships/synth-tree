@@ -1,12 +1,13 @@
+import type { UserCredential } from "firebase/auth";
 import React, { createContext, useContext, useEffect, useState } from "react";
+
 import {
   auth,
+  type FirebaseUser,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-  type FirebaseUser,
 } from "../lib/firebase";
-import type { UserCredential } from "firebase/auth";
 
 /**
  * Authentication context type definition

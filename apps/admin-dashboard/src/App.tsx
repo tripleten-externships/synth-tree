@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthFeature } from "./features/auth";
-import { AuthProvider } from "./contexts/AuthContext";
+import { BrowserRouter, Navigate,Route, Routes } from "react-router-dom";
+
 import { ProtectedRoutes } from "./components/ProtectedRoutes";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AuthFeature } from "./features/auth";
 
 function App() {
   return (

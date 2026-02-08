@@ -1,4 +1,6 @@
-export default function ProtectedRoute({ children }: { children: any }) {
+import React from 'react';
+
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = true; // Change to false to test the protection
   
   if (!isLoggedIn) {
