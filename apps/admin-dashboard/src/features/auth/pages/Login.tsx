@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Button,
   Card,
@@ -8,25 +9,25 @@ import {
   toast,
   Toaster,
 } from "@skilltree/ui";
-import { z } from "zod";
-import { GoogleLogo } from "../components/GoogleLogo";
-import useAuth from "../../../hooks/useAuth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState, type SyntheticEvent } from "react";
 import {
   getMultiFactorResolver,
   GoogleAuthProvider,
+  type MultiFactorResolver,
   PhoneAuthProvider,
   PhoneMultiFactorGenerator,
   RecaptchaVerifier,
   sendEmailVerification,
   signInWithPopup,
-  type MultiFactorResolver,
   type UserCredential,
 } from "firebase/auth";
+import { type SyntheticEvent,useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+
+import useAuth from "../../../hooks/useAuth";
 import { auth } from "../../../lib/firebase";
+import { GoogleLogo } from "../components/GoogleLogo";
 
 const provider = new GoogleAuthProvider();
 
