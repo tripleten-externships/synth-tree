@@ -29,3 +29,27 @@ builder.prismaObject("QuizOption", QuizOptionObject);
 builder.prismaObject("QuizAttempt", QuizAttemptObject);
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
 builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
+
+
+export type CourseProgressShape = {
+ courseId: string;
+ totalNodes: number;
+ inProgressNodes: number;
+ completedNodes: number;
+ notStartedNodes: number;
+ completionPercentage: number;
+};
+
+
+export const CourseProgress = builder
+ .objectRef<CourseProgressShape>("CourseProgress")
+ .implement({
+   fields: (t) => ({
+     courseId: t.exposeID("courseId"),
+     totalNodes: t.exposeInt("totalNodes"),
+     inProgressNodes: t.exposeInt("inProgressNodes"),
+     completedNodes: t.exposeInt("completedNodes"),
+     notStartedNodes: t.exposeInt("notStartedNodes"),
+     completionPercentage: t.exposeInt("completionPercentage"),
+   }),
+ });
