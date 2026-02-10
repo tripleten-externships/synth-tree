@@ -2,25 +2,26 @@
 
 This document explains how we manage database schema changes using **Prisma**, including creating migrations, testing them locally, deploying them to production, rolling them back safely, and seeding data for development.
 
-**Location**: `apps/api/prisma/`
+Location: `apps/api/prisma/`
 
 ## Overview
 
-**Prisma Migrate** is used to track and apply database schema changes. All schema changes live in `schema.prisma` and are translated into SQL migrations stored in: `apps/api/prisma/migrations/`
+**Prisma Migrate** is used to track and apply database schema changes.
+All schema changes live in `schema.prisma` and are translated into SQL migrations stored in: `apps/api/prisma/migrations/`
 
-The migrations folder represents your migration history.
+The migrations folder represents the project's migration history.
 Each migration represents a change to the database.
 
 ## Migration Workflow
 
-### Develop:
+### Develop
 
 Before you begin:
 
 - Ensure your database is running.
-- Confirm `DATABASE_URL` points to your local database. (This is in .env)
-- Create a prisma schema (`schema.prisma`), this is already set up.
-- cd into apps/api
+- Confirm `DATABASE_URL` points to your local database. (This is in `.env`)
+- Ensure the prisma schema file (`schema.prisma`) exists, this is already set up in the project.
+- cd into `apps/api`
 
 1. **Update the Prisma Schema**
 
@@ -34,7 +35,7 @@ Run:
 pnpm prisma migrate dev
 ```
 
-or, to set the name in the same commmand:
+or, to set the name in the same command:
 
 ```bash
 pnpm prisma migrate dev --name <name_of_your_choice>
@@ -61,14 +62,14 @@ To keep GraphQL in sync, run:
 pnpm codegen
 ```
 
-### Test:
+### Test
 
 - Inspect the generated SQL in the migration folder
 - Run the API and confirm everything works as expected
 - Run any automated tests
 - Validate data integrity
 
-Prisma Studio is a useful GUI tool for viewing/editing data. To use it, cd into apps/api, and run:
+Prisma Studio is a useful GUI tool for viewing/editing data. To use it, cd into `apps/api`, and run:
 
 ```bash
 pnpm prisma studio
@@ -80,9 +81,9 @@ Tip: You can reset your local DB during development with:
 pnpm prisma migrate reset
 ```
 
-### Deploy:
+### Deploy
 
-In production, **never** use `prisma migrate dev`! There are risks that come with running that command.
+**WARNING!** In production, **never** use `prisma migrate dev`! There are risks that come with running that command.
 
 Instead, apply already created migrations using:
 
@@ -94,9 +95,9 @@ This will apply pending migrations only and is safe for CI/CD and production env
 
 ## Development vs Production Migrations
 
-Data in development environments can be messed with, but production data is real valuable data and should be kept safe.
+Data in development environments can be modified freely, but production data is real and valuable and must be protected.
 
-**Never run `prisma migrate dev` against a production database.**
+**REMEMBER** **Never run `prisma migrate dev` against a production database.**
 
 This command can:
 
@@ -107,15 +108,24 @@ This command can:
 
 So, running this for production could delete data and break the database.
 
-**So instead, remember, use `prisma migrate deploy` for production**
+**Instead, remember, use `prisma migrate deploy` for production**
 
-- This command applies existing migrations only.
+- This command applies only existing migrations to the production database.
+
+However, it is not generally recommended to run `prisma migrate deploy` locally to deploy changes to a production database.
+Connecting the `DATABASE_URL` local environment variable to the production database is unsafe.
+
+Ideally, `migrate deploy` should be part of an automated CI/CD pipeline.
+
+GitHub actions and secrets are used to accomplish this.
 
 ## Rollback & Recovery Procedures
 
-When rolling back changes, you will need to use a **roll forward** approach using new migrations. Prisma does not have built-in rollback functionality. This reversion of changes is called a down migration, while normal new migrations are called up migrations.
+When rolling back changes, you will need to use a **roll forward** approach using new migrations.
+Prisma does not have built-in rollback functionality.
+This reversion of changes is called a down migration, while normal new migrations are called up migrations.
 
-### Rolling back changes:
+### Rolling back changes
 
 1. Update `schema.prisma` to the previous correct state
 2. Run:
@@ -124,20 +134,20 @@ When rolling back changes, you will need to use a **roll forward** approach usin
 pnpm prisma migrate dev --name revert_<issue>
 ```
 
-### Migration failure:
+### Migration failure
 
-When a migration fails, and you need to resolve it to run subsequent migrations, run:
+When a migration fails and you need to resolve it to run subsequent migrations, run:
 
 ```bash
 pnpm prisma migrate resolve --rolled-back <migration_name>
 ```
 
-- This will not undo any changes, but will tell Prisma to ignore the failed migration.
+- This will not undo any changes, but will tell Prisma to ignore that failed migration.
 - Migration name here is the folder the holds the migration.sql file, for example: "20251102184320_initial_schema_dump"
 
 ## Manual Migration and Data Backfills
 
-When you change the schema, new data will work as it will follow the new rules automatically, but the old data can cause problems.
+When you change the schema, new data will follow the new rules automatically, but the old data can cause problems.
 
 Example problems that require backfilling:
 
@@ -148,13 +158,13 @@ Example problems that require backfilling:
 
 Backfilling is the step where you update the existing data so it is compatible with a new schema change.
 
-You don't backfill in the same migration, best practice is: schema change first, data fix second, and constraint enforcement last.
+Don't backfill in the same migration. Best practice is: schema change first, data fix second, and constraint enforcement last.
 
-### Example:
+### Example
 
-Let's say you want to add Course.status and eventually require it.
+Say you want to add `Course.status` and eventually require it.
 
-1. In schema.prisma, you would want to temporaily add the new column as nullable:
+1. In `schema.prisma`, you would temporarily add the new column as nullable:
 
 ```prisma
 model Course {
@@ -170,9 +180,9 @@ status CourseStatus? // nullable for now
 pnpm prisma migrate dev --name add_course_status_nullable
 ```
 
-This way no data breaks, the old data is still valid.
+This way, no data breaks and the old data is still valid.
 
-2. Deploy and run a backfill with either sql or a prisma script
+2. Deploy and run a backfill with either SQL or a prisma script
 
 ```sql
 UPDATE "Course"
@@ -210,9 +220,10 @@ status CourseStatus // non-nullable
 pnpm prisma migrate dev --name enforce_course_status_not_null
 ```
 
-**Idempotency**
+**IMPORTANT IDEA** **Idempotency**
 
-Backfills need to be "idempotent." Meaning they are safe to be re-run without causing issues. This is important as scripts may need to be re-run, deploys may fail, and you might need to retry in production.
+Backfills need to be "idempotent." Meaning they are safe to be re-run without causing issues.
+This is important as scripts may need to be re-run, deploys may fail, and you might need to retry in production.
 
 Bad backfill:
 
@@ -230,7 +241,7 @@ WHERE role IS NULL;
 
 ## Seeding Data
 
-Seeding is for _local and development environments only_ and should not be run automatically in production unless designed for it.
+Seeding is for **local and development environments only** and should not be run automatically in production unless designed for it.
 
 Seeding is used to populate local databases with baseline data.
 
@@ -246,61 +257,34 @@ Seeds must also be idempotent.
 
 ## Existing Dev Scripts
 
-We also maintain scripts for development:
+Scripts mainted for development are located here:
 
 - `apps/api/scripts/createDevAdminUser.md`
 
 This documents how to create a local admin user for testing.
 
-## Troubleshooting
+### Other Prisma Commands
 
-### Prisma CLI and Client version mismatch
-
-If you see unexpected runtime errors after upgrading Prisma:
-
-```bash
-pnpm install
-pnpm prisma generate
-```
-
-Ensure `@prisma/client` and `prisma` versions match in `package.json`
-
-### Migration fails with schema drift
-
-```bash
-pnpm prisma migrate reset
-```
-
-_Keep in mind: This will wipe local data!_
-
-### Prisma Client out of sync
-
-```bash
-pnpm prisma generate
-```
-
-### Production migration not applying
-
-- Ensure `prisma migrate deploy` is being used
-- Verify the database connection string
-- Check applied migrations:
+1. status
 
 ```bash
 pnpm prisma migrate status
 ```
 
-### Migration was edited after being applied
+This command checks the health of the database schema by comparing the `prisma/migrations` folder against the `_prisma_migrations` table in the database.
+It reports if your database is up-to-date, if migrations are missing, or if the schema has "drifted" (manual untracked changes).
 
-Never edit a migration after it has been deployed. Always create a new migration.
-If you want to edit a migration before deploying it you can use the --create-only flag.
-
-### List of prisma commands
-
-To see a list of prisma commands, run:
+2. diff
 
 ```bash
-pnpm prisma migrate
+pnpm prisma migrate diff
 ```
+
+This command works like `git diff` but for databases. It generates a readable summary of differences between database states.
+With the `--script` flag it generates an executable SQL script used to synchronize schemas without modifying the database.
+
+This can be particularly useful to revert your database schema after a failed up migration on production.
+Read more about that here: https://www.prisma.io/docs/orm/prisma-migrate/workflows/generating-down-migrations
 
 ## Examples from Existing Migrations
 
@@ -322,7 +306,8 @@ CREATE TABLE "User" (
 );
 ```
 
-This migration establishes the base `User` table and a reusable enum, which is later referenced by other tables.
+- This migration establishes the base `User` table and a reusable enum, which is later referenced by other tables.
+- "enum" is a data type that represents allowed values. Here, "Role" can only be "ADMIN" or "USER"
 
 ### Core Domain Schema Expansion
 
@@ -351,9 +336,52 @@ This migration demonstrates:
 
 - Enum reuse for constrained values
 - Incremental schema growth
-- Explicit foreign key relationships
+- Foreign key relationships
 - Defaults and timestamps managed at the database level
 
-## Prisma docs:
+## Troubleshooting
 
-https://www.prisma.io/docs/orm/prisma-migrate (ctrl+clicK)
+### Prisma CLI and Client version mismatch
+
+If you see unexpected runtime errors after upgrading Prisma:
+
+```bash
+pnpm install
+pnpm prisma generate
+```
+
+Ensure `@prisma/client` and `prisma` versions match in `package.json`
+
+### Migration fails with schema drift
+
+```bash
+pnpm prisma migrate reset
+```
+
+**WARNING!** _Keep in mind: this will wipe local data!_
+
+### Prisma Client out of sync
+
+```bash
+pnpm prisma generate
+```
+
+### Production migration not applying
+
+- Ensure `prisma migrate deploy` is being used
+- Verify the database connection string
+- Check applied migrations:
+
+```bash
+pnpm prisma migrate status
+```
+
+### Migration was edited after being applied
+
+Never edit a migration after it has been deployed. Always create a new migration.
+
+Use the `--create-only` flag to generate a migration file without applying it, allowing you to review or edit the SQL before deploying it.
+
+## Prisma docs
+
+https://www.prisma.io/docs/orm/prisma-migrate
