@@ -144,6 +144,10 @@ export default function CourseCatalog() {
                 className="hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => navigate(`/courses/${course.id}`)}
               >
+                {/* Thumbnail placeholder - will be replaced when thumbnail field is added to Course model */}
+                <div className="w-full h-48 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                  <div className="text-muted-foreground text-sm">Course Image</div>
+                </div>
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
                     <CardTitle className="text-xl">{course.title}</CardTitle>
