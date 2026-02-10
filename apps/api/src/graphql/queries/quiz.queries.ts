@@ -1,17 +1,14 @@
 import { builder } from "@graphql/builder";
-import { assertNodeOwnership } from "@graphql/auth/permissions";
+import {
+  assertNodeOwnership,
+  assertTreeOwnership,
+} from "@graphql/auth/permissions";
 
-// Define all Quiz queries here
 builder.queryFields((t) => ({
-  /**
-   * Fetch a single quiz by ID
-   */
   quiz: t.prismaField({
     type: "Quiz",
     nullable: true,
-    args: {
-      id: t.arg.id({ required: true }),
-    },
+    args: { id: t.arg.id({ required: true }) },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
       const isAdmin = ctx.auth.isAdmin();
@@ -21,21 +18,21 @@ builder.queryFields((t) => ({
         where: {
           id,
           deletedAt: null,
-          ...(isAdmin ? {} : { published: true, node: { published: true } }),
+          ...(isAdmin
+            ? {}
+            : {
+                published: true,
+                node: { published: true, tree: { published: true } },
+              }),
         },
       });
     },
   }),
 
-  /**
-   * Fetch quiz by nodeId (1:1)
-   */
   quizzesByNode: t.prismaField({
     type: "Quiz",
     nullable: true,
-    args: {
-      nodeId: t.arg.id({ required: true }),
-    },
+    args: { nodeId: t.arg.id({ required: true }) },
     resolve: async (query, _root, { nodeId }, ctx) => {
       ctx.auth.requireAuth();
       const isAdmin = ctx.auth.isAdmin();
@@ -49,26 +46,26 @@ builder.queryFields((t) => ({
         where: {
           nodeId,
           deletedAt: null,
-          ...(isAdmin ? {} : { published: true, node: { published: true } }),
+          ...(isAdmin
+            ? {}
+            : {
+                published: true,
+                node: { published: true, tree: { published: true } },
+              }),
         },
       });
     },
   }),
 
-  /**
-   * Fetch quizzes by treeId
-   */
   quizzesByTree: t.prismaField({
     type: ["Quiz"],
-    args: {
-      treeId: t.arg.id({ required: true }),
-    },
+    args: { treeId: t.arg.id({ required: true }) },
     resolve: async (query, _root, { treeId }, ctx) => {
       ctx.auth.requireAuth();
       const isAdmin = ctx.auth.isAdmin();
 
       if (isAdmin) {
-        await ctx.auth.assertTreeOwnership(treeId);
+        await assertTreeOwnership(ctx, treeId);
       }
 
       return ctx.prisma.quiz.findMany({
@@ -77,15 +74,11 @@ builder.queryFields((t) => ({
           deletedAt: null,
           node: {
             treeId,
-            ...(isAdmin
-              ? {}
-              : {
-                  published: true,
-                  tree: { published: true },
-                }),
+            ...(isAdmin ? {} : { published: true, tree: { published: true } }),
           },
           ...(isAdmin ? {} : { published: true }),
         },
+        orderBy: { createdAt: "desc" },
       });
     },
   }),
