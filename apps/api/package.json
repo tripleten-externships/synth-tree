@@ -39,7 +39,8 @@
     "graphql-tag": "^2.12.6",
     "mongodb": "^6.20.0",
     "prisma": "^6.17.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^6.0.0",
