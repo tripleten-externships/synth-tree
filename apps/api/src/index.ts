@@ -9,6 +9,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { schema } from "./schema";
 import { createGraphQLContext, GraphQLContext } from "@graphql/context";
 import { prisma } from "@lib/prisma";
+import { logger } from "@lib/logger";
 
 async function start() {
   const app = express();
@@ -33,6 +34,24 @@ async function start() {
       }),
       ApolloServerPluginDrainHttpServer({ httpServer }),
     ],
+    formatError: (err) => {
+      // Log the error with context
+      logger.error("GraphQL Error", {
+        message: err.message,
+        path: err.path,
+        stack: err.extensions?.exception?.stacktrace,
+        // optionally include more context if needed
+      });
+
+      // Return sanitized error for clients in production
+      return {
+        message:
+          process.env.NODE_ENV === "production"
+            ? "Internal server error"
+            : err.message,
+        path: err.path,
+      };
+    },
   });
 
   await server.start();
@@ -45,7 +64,7 @@ async function start() {
       context: async ({ req }) => {
         return createGraphQLContext({ req, prisma });
       },
-    })
+    }),
   );
 
   const port = parseInt(process.env.PORT || "4000", 10);
