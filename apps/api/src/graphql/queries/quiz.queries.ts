@@ -22,7 +22,7 @@ builder.queryFields((t) => ({
             ? {}
             : {
                 published: true,
-                node: { published: true, tree: { published: true } },
+                node: { published: true },
               }),
         },
       });
@@ -37,7 +37,7 @@ builder.queryFields((t) => ({
       ctx.auth.requireAuth();
       const isAdmin = ctx.auth.isAdmin();
 
-      if (isAdmin) {
+      if (!isAdmin) {
         await assertNodeOwnership(ctx, nodeId);
       }
 
@@ -50,7 +50,7 @@ builder.queryFields((t) => ({
             ? {}
             : {
                 published: true,
-                node: { published: true, tree: { published: true } },
+                node: { published: true },
               }),
         },
       });
@@ -64,7 +64,7 @@ builder.queryFields((t) => ({
       ctx.auth.requireAuth();
       const isAdmin = ctx.auth.isAdmin();
 
-      if (isAdmin) {
+      if (!isAdmin) {
         await assertTreeOwnership(ctx, treeId);
       }
 
@@ -74,7 +74,7 @@ builder.queryFields((t) => ({
           deletedAt: null,
           node: {
             treeId,
-            ...(isAdmin ? {} : { published: true, tree: { published: true } }),
+            ...(isAdmin ? {} : { published: true }),
           },
           ...(isAdmin ? {} : { published: true }),
         },
