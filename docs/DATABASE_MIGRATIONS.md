@@ -20,7 +20,7 @@ Before you begin:
 
 - Ensure your database is running.
 - Confirm `DATABASE_URL` points to your local database. (This is in `.env`)
-- Ensure the prisma schema file (`schema.prisma`) exists, this is already set up in the project.
+- Ensure the Prisma schema file (`schema.prisma`) exists; this is already set up in the project.
 - cd into `apps/api`
 
 1. **Update the Prisma Schema**
@@ -97,7 +97,7 @@ This will apply pending migrations only and is safe for CI/CD and production env
 
 Data in development environments can be modified freely, but production data is real and valuable and must be protected.
 
-**REMEMBER** **Never run `prisma migrate dev` against a production database.**
+**REMEMBER:** **Never run `prisma migrate dev` against a production database.**
 
 This command can:
 
@@ -110,7 +110,7 @@ So, running this for production could delete data and break the database.
 
 **Instead, remember, use `prisma migrate deploy` for production**
 
-- This command applies only existing migrations to the production database.
+- This command applies to existing migrations only.
 
 However, it is not generally recommended to run `prisma migrate deploy` locally to deploy changes to a production database.
 Connecting the `DATABASE_URL` local environment variable to the production database is unsafe.
@@ -125,7 +125,7 @@ When rolling back changes, you will need to use a **roll forward** approach usin
 Prisma does not have built-in rollback functionality.
 This reversion of changes is called a down migration, while normal new migrations are called up migrations.
 
-### Rolling back changes
+### Rolling Back Changes
 
 1. Update `schema.prisma` to the previous correct state
 2. Run:
@@ -134,7 +134,7 @@ This reversion of changes is called a down migration, while normal new migration
 pnpm prisma migrate dev --name revert_<issue>
 ```
 
-### Migration failure
+### Migration Failure
 
 When a migration fails and you need to resolve it to run subsequent migrations, run:
 
@@ -143,7 +143,7 @@ pnpm prisma migrate resolve --rolled-back <migration_name>
 ```
 
 - This will not undo any changes, but will tell Prisma to ignore that failed migration.
-- Migration name here is the folder the holds the migration.sql file, for example: "20251102184320_initial_schema_dump"
+- Migration name here is the folder that holds the migration.sql file, for example: "20251102184320_initial_schema_dump"
 
 ## Manual Migration and Data Backfills
 
@@ -182,7 +182,7 @@ pnpm prisma migrate dev --name add_course_status_nullable
 
 This way, no data breaks and the old data is still valid.
 
-2. Deploy and run a backfill with either SQL or a prisma script
+2. Deploy and run a backfill with either SQL or a Prisma script
 
 ```sql
 UPDATE "Course"
@@ -220,7 +220,7 @@ status CourseStatus // non-nullable
 pnpm prisma migrate dev --name enforce_course_status_not_null
 ```
 
-**IMPORTANT IDEA** **Idempotency**
+**IMPORTANT:** **Idempotency**
 
 Backfills need to be "idempotent." Meaning they are safe to be re-run without causing issues.
 This is important as scripts may need to be re-run, deploys may fail, and you might need to retry in production.
@@ -257,7 +257,7 @@ Seeds must also be idempotent.
 
 ## Existing Dev Scripts
 
-Scripts mainted for development are located here:
+Scripts maintained for development are located here:
 
 - `apps/api/scripts/createDevAdminUser.md`
 
@@ -286,7 +286,7 @@ With the `--script` flag it generates an executable SQL script used to synchroni
 This can be particularly useful to revert your database schema after a failed up migration on production.
 Read more about that here: https://www.prisma.io/docs/orm/prisma-migrate/workflows/generating-down-migrations
 
-## Examples from Existing Migrations
+## Examples From Existing Migrations
 
 ### Initial Schema Dump
 
@@ -341,7 +341,7 @@ This migration demonstrates:
 
 ## Troubleshooting
 
-### Prisma CLI and Client version mismatch
+### Prisma CLI and Client version Mismatch
 
 If you see unexpected runtime errors after upgrading Prisma:
 
@@ -352,7 +352,7 @@ pnpm prisma generate
 
 Ensure `@prisma/client` and `prisma` versions match in `package.json`
 
-### Migration fails with schema drift
+### Migration Fails With Schema Drift
 
 ```bash
 pnpm prisma migrate reset
@@ -360,13 +360,13 @@ pnpm prisma migrate reset
 
 **WARNING!** _Keep in mind: this will wipe local data!_
 
-### Prisma Client out of sync
+### Prisma Client Out of Sync
 
 ```bash
 pnpm prisma generate
 ```
 
-### Production migration not applying
+### Production Migration Not Applying
 
 - Ensure `prisma migrate deploy` is being used
 - Verify the database connection string
@@ -376,7 +376,7 @@ pnpm prisma generate
 pnpm prisma migrate status
 ```
 
-### Migration was edited after being applied
+### Migration Was Edited After Being Applied
 
 Never edit a migration after it has been deployed. Always create a new migration.
 
