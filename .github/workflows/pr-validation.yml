@@ -80,20 +80,18 @@ jobs:
       - name: Run ESLint
         run: |
           echo "Running ESLint..."
-          pnpm run lint || true
+          pnpm run lint
           echo "✅ Linting complete"
 
       - name: Run TypeScript type check
         run: |
           echo "Running TypeScript type check..."
-          pnpm run type-check || pnpm exec tsc --noEmit || true
+          pnpm run type-check
           echo "✅ Type check complete"
 
-  test-api:
-    name: Test API
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
-    needs: changes
-    if: needs.changes.outputs.api == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -108,14 +106,100 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run API tests
-        working-directory: apps/api
+      - name: Run unit tests
+        working-directory: apps/infra
+        run: pnpm exec jest --ci --coverage --json --outputFile=coverage/test-results.json --passWithNoTests
+
+      - name: Publish test summary
+        if: always()
         run: |
-          echo "Running API tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          node <<'NODE'
+          const fs = require('fs');
+
+          const summary = process.env.GITHUB_STEP_SUMMARY;
+          const lines = [];
+          const resultsPath = 'apps/infra/coverage/test-results.json';
+
+          if (fs.existsSync(resultsPath)) {
+            const data = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+            const total = data.numTotalTests ?? 0;
+            const passed = data.numPassedTests ?? 0;
+            const failed = data.numFailedTests ?? 0;
+            const skipped = data.numPendingTests ?? 0;
+            lines.push(
+              'Unit Tests (infra): total ' + total + ', passed ' + passed + ', failed ' + failed + ', skipped ' + skipped
+            );
+          } else {
+            lines.push('Unit Tests (infra): no test results found');
+          }
+
+          const coveragePath = 'apps/infra/coverage/coverage-summary.json';
+
+          if (fs.existsSync(coveragePath)) {
+            const cov = JSON.parse(fs.readFileSync(coveragePath, 'utf8')).total || {};
+            const pct = (value) => (typeof value === 'number' ? value + '%' : 'n/a');
+            lines.push(
+              'Coverage (infra): lines ' + pct(cov.lines?.pct) + ', statements ' + pct(cov.statements?.pct) +
+                ', functions ' + pct(cov.functions?.pct) + ', branches ' + pct(cov.branches?.pct)
+            );
+          } else {
+            lines.push('Coverage (infra): no coverage summary found');
+          }
+
+          fs.appendFileSync(summary, lines.join('\n') + '\n');
+          NODE
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run integration tests
+        run: pnpm run test:integration
 
   build-api:
     name: Build API
@@ -406,7 +490,7 @@ jobs:
         working-directory: apps/infra
         run: |
           echo "Running infrastructure tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          pnpm test
 
   summary:
     name: PR Validation Summary
@@ -414,7 +498,8 @@ jobs:
     needs:
       [
         lint-and-typecheck,
-        test-api,
+        unit-tests,
+        integration-tests,
         build-api,
         build-frontend,
         build-storybook,
@@ -428,7 +513,8 @@ jobs:
           echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- Lint & Type Check: ${{ needs.lint-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- API Tests: ${{ needs.test-api.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- API Build: ${{ needs.build-api.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Frontend Build: ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Storybook Build: ${{ needs.build-storybook.result }}" >> $GITHUB_STEP_SUMMARY
@@ -437,7 +523,8 @@ jobs:
 
           # Check if any job failed
           if [[ "${{ needs.lint-and-typecheck.result }}" == "failure" ]] || \
-             [[ "${{ needs.test-api.result }}" == "failure" ]] || \
+             [[ "${{ needs.unit-tests.result }}" == "failure" ]] || \
+             [[ "${{ needs.integration-tests.result }}" == "failure" ]] || \
              [[ "${{ needs.build-api.result }}" == "failure" ]] || \
              [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
              [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
