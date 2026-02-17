@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthFeature } from "./features/auth";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoutes } from "./components/ProtectedRoutes";
+import EditLesson from "./components/EditLesson";
 
 function App() {
   return (
@@ -19,6 +20,10 @@ function App() {
                     path="/"
                     element={<Navigate to="/dashboard" replace />}
                   />
+                  <Route
+                    path="/editlesson"
+                    element={<EditLesson></EditLesson>}
+                  ></Route>
                 </Routes>
               </ProtectedRoutes>
             }
