@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  checks: write
 
 env:
   AWS_REGION: us-east-1
@@ -179,14 +180,6 @@ jobs:
         if: matrix.id == 'theme'
         run: pnpm --filter ${{ matrix.filter }} run test:unit --if-present
 
-      - name: Publish unit test results
-        if: always() && matrix.id == 'infra'
-        uses: dorny/test-reporter@v1
-        with:
-          name: Unit Tests (apps/infra)
-          path: apps/infra/coverage/test-results.json
-          reporter: jest
-
       - name: Publish unit test results (vitest)
         if: always() && (matrix.id == 'api' || matrix.id == 'admin-dashboard' || matrix.id == 'client-frontend' || matrix.id == 'ui')
         uses: dorny/test-reporter@v1
@@ -235,10 +228,12 @@ jobs:
           NODE
 
       - name: Upload coverage to Codecov
-        if: ${{ secrets.CODECOV_TOKEN != '' && matrix.id != 'theme' }}
+        if: ${{ env.CODECOV_TOKEN != '' && matrix.id != 'theme' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ${{ matrix.name }}/coverage/lcov.info
           flags: ${{ matrix.id }}
           name: ${{ matrix.id }}-coverage
@@ -299,6 +294,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Start test database
+        if: matrix.id == 'api'
         run: pnpm db:start
 
       - name: Run integration tests (api)
@@ -318,7 +314,7 @@ jobs:
           reporter: java-junit
 
       - name: Stop test database
-        if: always()
+        if: always() && matrix.id == 'api'
         run: pnpm db:stop
 
   build-api:
