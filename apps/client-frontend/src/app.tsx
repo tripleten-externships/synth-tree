@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary"; // put ErrorBoundary in ProtectedMainLayout() because it gets overwritten by React-Routers default ErrorBoundary otherwise.
+import { ApolloTest } from "./dev/ApolloTest";
 
 import MainLayout from "../layouts/MainLayout";
 import SkillTreeHome from "./pages/SkillTreeHomePage";
@@ -18,6 +19,7 @@ function ProtectedMainLayout() {
       <ProtectedRoute>
         <MainLayout>
           <Outlet />
+          <ApolloTest />
         </MainLayout>
       </ProtectedRoute>
     </ErrorBoundary>
