@@ -15,7 +15,7 @@
     "dev": "pnpm db:start && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
     "lint": "pnpm --filter ./apps/admin-dashboard lint",
     "type-check": "pnpm --filter ./apps/admin-dashboard exec tsc --noEmit && pnpm --filter ./apps/client-frontend exec tsc --noEmit && pnpm --filter ./apps/api exec tsc --noEmit && pnpm --filter ./apps/infra exec tsc --noEmit",
-    "test": "pnpm --filter ./apps/infra test",
+    "test": "pnpm -r --if-present test:unit",
     "test:integration": "pnpm -r --if-present test:integration",
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"

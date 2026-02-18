@@ -8,6 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
+    "test:unit": "jest --coverage",
+    "test:integration": "echo \"No integration tests configured for this package yet\" && exit 0",
     "cdk": "cdk"
   },
   "devDependencies": {

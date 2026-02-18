@@ -7,6 +7,9 @@
     "build": "pnpm generate && tsc -p tsconfig.build.json",
     "generate": "prisma generate",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:unit": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "emit:schema": "ts-node -r tsconfig-paths/register scripts/emit-schema.ts",
     "codegen": "pnpm run emit:schema && graphql-codegen --config codegen.yml",
     "postinstall": "prisma generate",
@@ -42,6 +45,7 @@
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.9",
     "@graphql-codegen/cli": "^6.0.0",
     "@graphql-codegen/typescript": "^5.0.1",
     "@graphql-codegen/typescript-operations": "^5.0.2",
@@ -54,6 +58,7 @@
     "nodemon": "^3.1.10",
     "prisma-generator-pothos-codegen": "^0.7.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^2.1.9"
   }
 }

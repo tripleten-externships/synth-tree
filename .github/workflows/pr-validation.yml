@@ -74,6 +74,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -92,6 +103,28 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: infra
+            name: apps/infra
+            filter: ./apps/infra
+          - id: api
+            name: apps/api
+            filter: ./apps/api
+          - id: admin-dashboard
+            name: apps/admin-dashboard
+            filter: ./apps/admin-dashboard
+          - id: client-frontend
+            name: apps/client-frontend
+            filter: ./apps/client-frontend
+          - id: ui
+            name: packages/ui
+            filter: ./packages/ui
+          - id: theme
+            name: packages/theme
+            filter: ./packages/theme
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -119,15 +152,51 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
+      - name: Run unit tests (infra)
+        if: matrix.id == 'infra'
         working-directory: apps/infra
         run: pnpm exec jest --ci --coverage --json --outputFile=coverage/test-results.json --passWithNoTests
 
+      - name: Run unit tests (vitest)
+        if: matrix.id == 'api' || matrix.id == 'admin-dashboard' || matrix.id == 'client-frontend' || matrix.id == 'ui'
+        run: pnpm --filter ${{ matrix.filter }} exec vitest run --coverage --reporter=default --reporter=junit --outputFile=coverage/junit.xml --passWithNoTests
+
+      - name: Run unit tests (non-vitest)
+        if: matrix.id == 'theme'
+        run: pnpm --filter ${{ matrix.filter }} run test:unit --if-present
+
+      - name: Publish unit test results
+        if: always() && matrix.id == 'infra'
+        uses: dorny/test-reporter@v1
+        with:
+          name: Unit Tests (apps/infra)
+          path: apps/infra/coverage/test-results.json
+          reporter: jest
+
+      - name: Publish unit test results (vitest)
+        if: always() && (matrix.id == 'api' || matrix.id == 'admin-dashboard' || matrix.id == 'client-frontend' || matrix.id == 'ui')
+        uses: dorny/test-reporter@v1
+        with:
+          name: Unit Tests (${{ matrix.name }})
+          path: ${{ matrix.name }}/coverage/junit.xml
+          reporter: java-junit
+
       - name: Publish test summary
-        if: always()
+        if: always() && matrix.id == 'infra'
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -166,18 +235,28 @@ jobs:
           NODE
 
       - name: Upload coverage to Codecov
-        if: ${{ secrets.CODECOV_TOKEN != '' }}
+        if: ${{ secrets.CODECOV_TOKEN != '' && matrix.id != 'theme' }}
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: apps/infra/coverage/lcov.info
-          flags: infra
-          name: infra-coverage
+          files: ${{ matrix.name }}/coverage/lcov.info
+          flags: ${{ matrix.id }}
+          name: ${{ matrix.id }}-coverage
           fail_ci_if_error: true
 
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: api
+            name: apps/api
+            filter: ./apps/api
+          - id: infra
+            name: apps/infra
+            filter: ./apps/infra
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -205,11 +284,42 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run integration tests
-        run: pnpm run test:integration
+      - name: Start test database
+        run: pnpm db:start
+
+      - name: Run integration tests (api)
+        if: matrix.id == 'api'
+        run: pnpm --filter ./apps/api exec vitest run --config vitest.integration.config.ts --reporter=default --reporter=junit --outputFile=coverage/integration-junit.xml --passWithNoTests
+
+      - name: Run integration tests (infra)
+        if: matrix.id == 'infra'
+        run: pnpm --filter ${{ matrix.filter }} run test:integration --if-present
+
+      - name: Publish integration test results
+        if: always() && matrix.id == 'api'
+        uses: dorny/test-reporter@v1
+        with:
+          name: Integration Tests (apps/api)
+          path: apps/api/coverage/integration-junit.xml
+          reporter: java-junit
+
+      - name: Stop test database
+        if: always()
+        run: pnpm db:stop
 
   build-api:
     name: Build API
@@ -267,6 +377,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -277,9 +398,6 @@ jobs:
       - name: Build component library
         working-directory: packages/ui
         run: pnpm build
-
-      - name: Reinstall dependencies (after building libs)
-        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
         working-directory: apps/admin-dashboard
@@ -336,6 +454,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -391,6 +520,17 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
+      - name: Setup node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -506,40 +646,38 @@ jobs:
     name: PR Validation Summary
     runs-on: ubuntu-latest
     needs:
-      [
-        lint-and-typecheck,
-        unit-tests,
-        integration-tests,
-        build-api,
-        build-frontend,
-        build-storybook,
-        cdk-diff,
-        validate-infra,
-      ]
+      - lint-and-typecheck
+      - unit-tests
+      - integration-tests
+      - build-api
+      - build-frontend
+      - build-storybook
+      - cdk-diff
+      - validate-infra
     if: always()
     steps:
       - name: Check results
         run: |
           echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Lint & Type Check: ${{ needs.lint-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- API Build: ${{ needs.build-api.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend Build: ${{ needs.build-frontend.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Storybook Build: ${{ needs.build-storybook.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- CDK Diff: ${{ needs.cdk-diff.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Infrastructure Validation: ${{ needs.validate-infra.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint & Type Check: ${{ needs['lint-and-typecheck'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs['unit-tests'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs['integration-tests'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API Build: ${{ needs['build-api'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend Build: ${{ needs['build-frontend'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Storybook Build: ${{ needs['build-storybook'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- CDK Diff: ${{ needs['cdk-diff'].result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure Validation: ${{ needs['validate-infra'].result }}" >> $GITHUB_STEP_SUMMARY
 
           # Check if any job failed
-          if [[ "${{ needs.lint-and-typecheck.result }}" == "failure" ]] || \
-             [[ "${{ needs.unit-tests.result }}" == "failure" ]] || \
-             [[ "${{ needs.integration-tests.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-api.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
-             [[ "${{ needs.cdk-diff.result }}" == "failure" ]] || \
-             [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
+          if [[ "${{ needs['lint-and-typecheck'].result }}" == "failure" ]] || \
+             [[ "${{ needs['unit-tests'].result }}" == "failure" ]] || \
+             [[ "${{ needs['integration-tests'].result }}" == "failure" ]] || \
+             [[ "${{ needs['build-api'].result }}" == "failure" ]] || \
+             [[ "${{ needs['build-frontend'].result }}" == "failure" ]] || \
+             [[ "${{ needs['build-storybook'].result }}" == "failure" ]] || \
+             [[ "${{ needs['cdk-diff'].result }}" == "failure" ]] || \
+             [[ "${{ needs['validate-infra'].result }}" == "failure" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
             exit 1

@@ -4,6 +4,11 @@
   "main": "src/graphql.ts",
   "types": "src/graphql.ts",
   "private": true,
+  "scripts": {
+    "test": "echo \"No unit tests configured for this package yet\" && exit 0",
+    "test:unit": "echo \"No unit tests configured for this package yet\" && exit 0",
+    "test:integration": "echo \"No integration tests configured for this package yet\" && exit 0"
+  },
   "dependencies": {
     "@apollo/client": "^4.0.9",
     "graphql": "^16.11.0"
