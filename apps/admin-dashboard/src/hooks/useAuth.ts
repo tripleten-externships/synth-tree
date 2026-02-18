@@ -1,4 +1,5 @@
 import type { UserCredential } from "firebase/auth";
+
 import { useAuthContext } from "../contexts/AuthContext";
 import type { FirebaseUser } from "../lib/firebase";
 

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { connectAuthEmulator,getAuth } from "firebase/auth";
 
 // Firebase configuration interface
 interface FirebaseConfig {
@@ -90,12 +90,12 @@ export default app;
 
 // Export auth methods for convenience
 export {
-  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
   GoogleAuthProvider,
-  signOut,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
 } from "firebase/auth";
 
 // Export common Firebase types
