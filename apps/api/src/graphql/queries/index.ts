@@ -9,3 +9,6 @@ import "./skillNode.admin.queries";
 import "./skillNode.owner.queries";
 import "./quiz.queries";
 import "./types/quiz.type";
+import "./progress.queries";
+
+// import queries/*.ts files here
