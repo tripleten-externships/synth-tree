@@ -532,6 +532,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Configure AWS credentials
+        id: aws-credentials
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
@@ -539,11 +541,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Build CDK
+        if: steps.aws-credentials.outcome == 'success'
         working-directory: apps/infra
         run: pnpm build
 
       - name: Generate CDK diff
         id: cdk-diff
+        if: steps.aws-credentials.outcome == 'success'
         working-directory: apps/infra
         continue-on-error: true
         run: |
@@ -560,7 +564,10 @@ jobs:
             const diffPath = 'apps/infra/diff-output.txt';
             let diff = 'No diff output generated';
 
-            if (fs.existsSync(diffPath)) {
+            const credentialsOutcome = '${{ steps.aws-credentials.outcome }}';
+            if (credentialsOutcome !== 'success') {
+              diff = '⚠️ AWS credentials not configured — skipped CDK diff. Set `AWS_ACCESS_KEY_ID_DEV` and `AWS_SECRET_ACCESS_KEY_DEV` secrets to enable this check.';
+            } else if (fs.existsSync(diffPath)) {
               diff = fs.readFileSync(diffPath, 'utf8');
               // Truncate if too long for GitHub comment
               if (diff.length > 60000) {
@@ -569,7 +576,9 @@ jobs:
             }
 
             const exitCode = '${{ steps.cdk-diff.outputs.diff_exit_code }}';
-            const status = exitCode === '0' ? '✅ No infrastructure changes' : '📝 Infrastructure changes detected';
+            const status = credentialsOutcome !== 'success'
+              ? '⚠️ CDK Diff skipped (no AWS credentials)'
+              : exitCode === '0' ? '✅ No infrastructure changes' : '📝 Infrastructure changes detected';
 
             const body = `## ${status}\n\n<details><summary>View CDK diff</summary>\n\n\`\`\`\n${diff}\n\`\`\`\n\n</details>`;
 
