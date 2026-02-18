@@ -11,11 +11,7 @@
     "db:stop": "docker compose down",
     "db:validate": "pnpm --filter ./apps/api prisma validate",
     "db:migrate:dev": "pnpm --filter ./apps/api prisma migrate dev",
-<<<<<<< HEAD
-    "db:studio": "pnpm --filter ./apps/api prisma studio",
-=======
     "db:studio": "pnpm --filter api prisma studio",
->>>>>>> d74f3d2f938d5ebbb263df2ac70a56a6a46eb200
     "dev": "pnpm db:start && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"
