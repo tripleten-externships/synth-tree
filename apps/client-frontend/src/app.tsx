@@ -1,11 +1,10 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ErrorBoundary from "./components/ErrorBoundary"; // put ErrorBoundary in ProtectedMainLayout() because it gets overwritten by React-Routers default ErrorBoundary otherwise.
 import { ApolloTest } from "./dev/ApolloTest";
-
 
 import MainLayout from "../layouts/MainLayout";
 import SkillTreeHome from "./pages/SkillTreeHomePage";
-
 
 import DashboardPage from "./pages/DashboardPage";
 import LessonsPage from "./pages/LessonsPage";
@@ -16,38 +15,40 @@ import NotFoundPage from "./pages/NotFoundPage";
 // A wrapper that combines protection + your layout + an Outlet
 function ProtectedMainLayout() {
   return (
-    <ProtectedRoute>
-      <MainLayout>
-        <Outlet />
-        <ApolloTest />
-      </MainLayout>
-    </ProtectedRoute>
+    <ErrorBoundary>
+      <ProtectedRoute>
+        <MainLayout>
+          <Outlet />
+          <ApolloTest />
+        </MainLayout>
+      </ProtectedRoute>
+    </ErrorBoundary>
   );
 }
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <ProtectedMainLayout />,  // shared shell for all main routes
+    element: <ProtectedMainLayout />, // shared shell for all main routes
     children: [
       {
-        index: true,            // "/" route
+        index: true, // "/" route
         element: <SkillTreeHome />, // SkillTree Home.tsx
       },
       {
-        path: "dashboard",      // "/dashboard"
+        path: "dashboard", // "/dashboard"
         element: <DashboardPage />,
       },
       {
-        path: "lessons",        // "/lessons"
+        path: "lessons", // "/lessons"
         element: <LessonsPage />,
       },
       {
-        path: "skill-trees",    // "/skill-trees"
+        path: "skill-trees", // "/skill-trees"
         element: <SkillTreesPage />,
       },
       {
-        path: "profile",        // "/profile"
+        path: "profile", // "/profile"
         element: <ProfilePage />,
       },
     ],
