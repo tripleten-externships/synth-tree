@@ -54,6 +54,7 @@ export {
 } from "./components/ui/dropdown-menu";
 
 export { Toaster, toast } from "./components/ui/sonner";
+export * from "./components/ui/markdown-editor";
 
 // Export utilities
 export { cn, cnUI } from "./utils";
