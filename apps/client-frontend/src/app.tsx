@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ApolloTest } from "./dev/ApolloTest";
 
 
 import MainLayout from "../layouts/MainLayout";
@@ -18,6 +19,7 @@ function ProtectedMainLayout() {
     <ProtectedRoute>
       <MainLayout>
         <Outlet />
+        <ApolloTest />
       </MainLayout>
     </ProtectedRoute>
   );
