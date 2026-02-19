@@ -19,12 +19,10 @@ builder.prismaObject("Quiz", {
 builder.prismaObject("Question", {
   fields: (t) => ({
     id: t.exposeID("id"),
-    text: t.exposeString("text"),
+    prompt: t.exposeString("prompt"), // match Prisma
     type: t.exposeString("type"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-
-    // Nested options relation
     options: t.relation("options"),
   }),
 });
@@ -34,7 +32,7 @@ builder.prismaObject("Option", {
   fields: (t) => ({
     id: t.exposeID("id"),
     text: t.exposeString("text"),
-    correct: t.exposeBoolean("correct"),
+    isCorrect: t.exposeBoolean("isCorrect"), // match Prisma
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
