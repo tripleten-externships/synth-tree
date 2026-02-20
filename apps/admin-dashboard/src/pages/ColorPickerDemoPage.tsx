@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ColorPicker } from "../components/Colorpicker";
+import { ColorPicker } from "@skilltree/ui";
 
 export function ColorPickerDemoPage() {
   const [selectedColor, setSelectedColor] = useState("#ff0000");

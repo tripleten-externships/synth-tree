@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { ColorPicker } from './Colorpicker';
+import { ColorPicker } from './color-picker';
 
 const meta = {
   title: 'Components/ColorPicker',
