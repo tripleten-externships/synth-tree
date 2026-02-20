@@ -4,6 +4,7 @@ import { assertNodeOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
+import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -365,6 +366,56 @@ builder.mutationFields((t) => ({
       });
 
       return quizOption;
+    },
+  }),
+
+  submitQuizAttempt: t.prismaField({
+    type: "QuizAttempt",
+    args: {
+      quizId: t.arg.id({ required: true }),
+      answers: t.arg.stringList({ required: true }),
+    },
+    resolve: async (query, _root, { quizId, answers }, ctx) => {
+      ctx.auth.requireAuth();
+
+      const existing = await ctx.prisma.quiz.findUnique({
+        where: { id: quizId },
+      });
+
+      if (!existing) {
+        throw new GraphQLError("Quiz not found");
+      }
+
+      const parsedAnswers = answers.map(
+        (a) =>
+          JSON.parse(a) as {
+            questionId: string;
+            answer: { selectedOptionIds?: string[]; text?: string };
+          },
+      );
+
+      const quizAttempt = await ctx.prisma.quizAttempt.create({
+        ...query,
+        data: {
+          quizId,
+          userId: ctx.user!.uid,
+          passed: false,
+          answers: {
+            create: parsedAnswers.map(({ questionId, answer }) => ({
+              questionId,
+              answer,
+            })),
+          },
+        },
+      });
+
+      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+      console.log("Grading summary:", summary);
+
+      return ctx.prisma.quizAttempt.findUniqueOrThrow({
+        ...query,
+        where: { id: quizAttempt.id },
+      });
     },
   }),
 }));
