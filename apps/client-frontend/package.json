@@ -10,14 +10,20 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@apollo/client": "^4.0.9",
+    "@skilltree/api-types": "workspace:*",
     "@skilltree/theme": "workspace:*",
     "@skilltree/ui": "workspace:*",
+    "dompurify": "^3.3.1",
     "firebase": "^11.10.0",
+    "graphql": "^16.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-player": "^3.4.0",
     "react-router-dom": "^7.9.2"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.2.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
