@@ -1,22 +1,9 @@
 import React from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
-import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ContentType } from "@skilltree/api-types";
-import "./LessonViewer.css";
-
-const LESSON_BLOCKS_QUERY = gql`
-  query LessonBlocks($nodeId: ID!) {
-    lessonBlocks(nodeId: $nodeId) {
-      id
-      type
-      content
-      caption
-      order
-    }
-  }
-`;
+import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
 
 interface LessonBlock {
   id: string;
@@ -48,7 +35,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
   const renderHTML = (html: string) => (
     <div
-      className="lesson-html"
+      className="leading-relaxed text-gray-800"
       dangerouslySetInnerHTML={{
         __html: DOMPurify.sanitize(html),
       }}
@@ -56,35 +43,32 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   );
 
   const renderImage = (block: LessonBlock) => (
-    <figure className="lesson-image">
-      <img src={block.content} alt={block.caption || "Lesson image"} />
-      {block.caption && <figcaption>{block.caption}</figcaption>}
+    <figure className="m-0 text-center">
+      <img
+        src={block.content}
+        alt={block.caption || "Lesson image"}
+        className="max-w-full h-auto rounded-lg shadow-md"
+      />
+      {block.caption && (
+        <figcaption className="mt-3 text-sm text-gray-500 italic">{block.caption}</figcaption>
+      )}
     </figure>
   );
 
-  const renderVideo = (url: string) => {
-    return (
-      <div className="lesson-video">
-        <div className="lesson-video-wrapper">
-          <ReactPlayer src={url} controls width="100%" height="100%" />
-        </div>
+  const renderVideo = (url: string) => (
+    <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden shadow-md">
+      <div className="absolute top-0 left-0 w-full h-full">
+        <ReactPlayer src={url} controls width="100%" height="100%" />
       </div>
-    );
-  };
+    </div>
+  );
 
   const renderEmbed = (url: string) => (
-    <div className="lesson-embed" style={{ position: "relative", paddingTop: "56.25%" }}>
+    <div className="relative pt-[56.25%] rounded-lg overflow-hidden shadow-md">
       <iframe
         src={url}
         title="Embedded content"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          border: "none",
-        }}
+        className="absolute top-0 left-0 w-full h-full border-0"
         allowFullScreen
       />
     </div>
@@ -106,14 +90,15 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   };
 
   return (
-    <div className="lesson-viewer">
+    <div className="flex flex-col gap-8">
       {blocks.map((block) => (
-        <div key={block.id} className="lesson-block">
-          {renderBlock(block)}
-        </div>
+        <div key={block.id}>{renderBlock(block)}</div>
       ))}
 
-      <button className="next-button" onClick={onNext}>
+      <button
+        className="mt-8 px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+        onClick={onNext}
+      >
         Next
       </button>
     </div>
