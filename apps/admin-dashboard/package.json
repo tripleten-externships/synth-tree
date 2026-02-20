@@ -11,14 +11,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@apollo/client": "^4.0.9",
     "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@skilltree/config": "workspace:*",
     "@skilltree/theme": "workspace:*",
     "@skilltree/ui": "workspace:*",
     "firebase": "^11.1.0",
-    "graphql": "^16.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.63.0",

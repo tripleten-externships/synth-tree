@@ -240,17 +240,6 @@ export type CourseOrderByWithRelationInput = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export type CourseProgress = {
-  __typename?: 'CourseProgress';
-  completedNodes?: Maybe<Scalars['Int']['output']>;
-  completionPercentage?: Maybe<Scalars['Float']['output']>;
-  courseId?: Maybe<Scalars['ID']['output']>;
-  inProgressNodes?: Maybe<Scalars['Int']['output']>;
-  notStartedNodes?: Maybe<Scalars['Int']['output']>;
-  startedNodes?: Maybe<Scalars['Int']['output']>;
-  totalNodes?: Maybe<Scalars['Int']['output']>;
-};
-
 export enum CourseScalarFieldEnum {
   AuthorId = 'authorId',
   CreatedAt = 'createdAt',
@@ -425,31 +414,13 @@ export type CourseWhereUniqueInput = {
   updatedAt?: InputMaybe<DateTimeFilter>;
 };
 
-export type CreateCourseInput = {
-  defaultTreeTitle?: InputMaybe<Scalars['String']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
-};
-
-export type CreateFirstSkillNodeInput = {
-  title: Scalars['String']['input'];
-  treeId: Scalars['ID']['input'];
-};
-
-export type CreateSkillNodeBelowInput = {
-  referenceNodeId: Scalars['ID']['input'];
-  title: Scalars['String']['input'];
-};
-
-export type CreateSkillNodeToRightInput = {
-  referenceNodeId: Scalars['ID']['input'];
-  title: Scalars['String']['input'];
-};
-
-export type CreateSkillTreeInput = {
-  courseId: Scalars['ID']['input'];
-  description?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
+export type CreateLessonBlockInput = {
+  caption?: InputMaybe<Scalars['String']['input']>;
+  html?: InputMaybe<Scalars['String']['input']>;
+  nodeId: Scalars['ID']['input'];
+  order: Scalars['Int']['input'];
+  type: Scalars['String']['input'];
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -740,17 +711,13 @@ export type JsonNullableWithAggregatesFilter = {
 export type LessonBlocks = {
   __typename?: 'LessonBlocks';
   caption?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
   html?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  meta?: Maybe<Scalars['Json']['output']>;
-  node: SkillNode;
-  nodeId: Scalars['String']['output'];
-  order: Scalars['Int']['output'];
-  status: LessonStatus;
-  type: ContentType;
-  updatedAt: Scalars['DateTime']['output'];
+  id?: Maybe<Scalars['ID']['output']>;
+  node?: Maybe<SkillNode>;
+  order?: Maybe<Scalars['Int']['output']>;
+  type?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
   url?: Maybe<Scalars['String']['output']>;
 };
 
@@ -1095,70 +1062,185 @@ export enum LessonStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createCourse?: Maybe<Course>;
-  createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
-  createQuiz?: Maybe<Quiz>;
-  createSkillNodeBelow?: Maybe<SkillNode>;
-  createSkillNodeToRight?: Maybe<SkillNode>;
-  createSkillTree?: Maybe<SkillTree>;
-  deleteCourse?: Maybe<Course>;
+  createManyCourse: Array<Course>;
+  createManyQuiz: Array<Quiz>;
+  createManyQuizAttempt: Array<QuizAttempt>;
+  createManyQuizAttemptAnswer: Array<QuizAttemptAnswer>;
+  createManyQuizOption: Array<QuizOption>;
+  createManyQuizQuestion: Array<QuizQuestion>;
+  createManySkillNodePrerequisite: Array<SkillNodePrerequisite>;
+  createManySkillTree: Array<SkillTree>;
+  createManyUser: Array<User>;
+  createManyUserNodeProgress: Array<UserNodeProgress>;
+  createOneCourse: Course;
+  createOneQuiz: Quiz;
+  createOneQuizAttempt: QuizAttempt;
+  createOneQuizAttemptAnswer: QuizAttemptAnswer;
+  createOneQuizOption: QuizOption;
+  createOneQuizQuestion: QuizQuestion;
+  createOneSkillNodePrerequisite: SkillNodePrerequisite;
+  createOneSkillTree: SkillTree;
+  createOneUser: User;
+  createOneUserNodeProgress: UserNodeProgress;
   deleteLessonBlock?: Maybe<LessonBlocks>;
-  deleteQuiz?: Maybe<Quiz>;
-  deleteSkillNodeAdvanced?: Maybe<Scalars['Boolean']['output']>;
-  deleteSkillNodeSimple?: Maybe<Scalars['Boolean']['output']>;
-  deleteSkillTree?: Maybe<SkillTree>;
-  deleteUser?: Maybe<User>;
+  deleteManyCourse?: Maybe<BatchPayload>;
+  deleteManyQuiz?: Maybe<BatchPayload>;
+  deleteManyQuizAttempt?: Maybe<BatchPayload>;
+  deleteManyQuizAttemptAnswer?: Maybe<BatchPayload>;
+  deleteManyQuizOption?: Maybe<BatchPayload>;
+  deleteManyQuizQuestion?: Maybe<BatchPayload>;
+  deleteManySkillNodePrerequisite?: Maybe<BatchPayload>;
+  deleteManySkillTree?: Maybe<BatchPayload>;
+  deleteManyUser?: Maybe<BatchPayload>;
+  deleteManyUserNodeProgress?: Maybe<BatchPayload>;
+  deleteOneCourse?: Maybe<Course>;
+  deleteOneQuiz?: Maybe<Quiz>;
+  deleteOneQuizAttempt?: Maybe<QuizAttempt>;
+  deleteOneQuizAttemptAnswer?: Maybe<QuizAttemptAnswer>;
+  deleteOneQuizOption?: Maybe<QuizOption>;
+  deleteOneQuizQuestion?: Maybe<QuizQuestion>;
+  deleteOneSkillNodePrerequisite?: Maybe<SkillNodePrerequisite>;
+  deleteOneSkillTree?: Maybe<SkillTree>;
+  deleteOneUser?: Maybe<User>;
+  deleteOneUserNodeProgress?: Maybe<UserNodeProgress>;
   publishLessonBlock?: Maybe<LessonBlocks>;
-  setUserRole?: Maybe<User>;
-  syncCurrentUser?: Maybe<User>;
-  updateCourse?: Maybe<Course>;
   updateLessonBlock?: Maybe<LessonBlocks>;
-  updateQuiz?: Maybe<Quiz>;
-  updateSkillNode?: Maybe<SkillNode>;
-  updateSkillTree?: Maybe<SkillTree>;
-};
-
-
-export type MutationCreateCourseArgs = {
-  input: CreateCourseInput;
-};
-
-
-export type MutationCreateFirstSkillNodeArgs = {
-  input: CreateFirstSkillNodeInput;
+  updateManyCourse: BatchPayload;
+  updateManyQuiz: BatchPayload;
+  updateManyQuizAttempt: BatchPayload;
+  updateManyQuizAttemptAnswer: BatchPayload;
+  updateManyQuizOption: BatchPayload;
+  updateManyQuizQuestion: BatchPayload;
+  updateManySkillNodePrerequisite: BatchPayload;
+  updateManySkillTree: BatchPayload;
+  updateManyUser: BatchPayload;
+  updateManyUserNodeProgress: BatchPayload;
+  updateOneCourse?: Maybe<Course>;
+  updateOneQuiz?: Maybe<Quiz>;
+  updateOneQuizAttempt?: Maybe<QuizAttempt>;
+  updateOneQuizAttemptAnswer?: Maybe<QuizAttemptAnswer>;
+  updateOneQuizOption?: Maybe<QuizOption>;
+  updateOneQuizQuestion?: Maybe<QuizQuestion>;
+  updateOneSkillNodePrerequisite?: Maybe<SkillNodePrerequisite>;
+  updateOneSkillTree?: Maybe<SkillTree>;
+  updateOneUser?: Maybe<User>;
+  updateOneUserNodeProgress?: Maybe<UserNodeProgress>;
+  upsertOneCourse: Course;
+  upsertOneQuiz: Quiz;
+  upsertOneQuizAttempt: QuizAttempt;
+  upsertOneQuizAttemptAnswer: QuizAttemptAnswer;
+  upsertOneQuizOption: QuizOption;
+  upsertOneQuizQuestion: QuizQuestion;
+  upsertOneSkillNodePrerequisite: SkillNodePrerequisite;
+  upsertOneSkillTree: SkillTree;
+  upsertOneUser: User;
+  upsertOneUserNodeProgress: UserNodeProgress;
 };
 
 
 export type MutationCreateLessonBlockArgs = {
-  input: LessonBlocksCreateInput;
+  input: CreateLessonBlockInput;
 };
 
 
-export type MutationCreateQuizArgs = {
-  nodeId: Scalars['String']['input'];
-  required: Scalars['Boolean']['input'];
-  title: Scalars['String']['input'];
+export type MutationCreateManyCourseArgs = {
+  data: Array<CourseCreateInput>;
 };
 
 
-export type MutationCreateSkillNodeBelowArgs = {
-  input: CreateSkillNodeBelowInput;
+export type MutationCreateManyQuizArgs = {
+  data: Array<QuizCreateInput>;
 };
 
 
-export type MutationCreateSkillNodeToRightArgs = {
-  input: CreateSkillNodeToRightInput;
+export type MutationCreateManyQuizAttemptArgs = {
+  data: Array<QuizAttemptCreateInput>;
 };
 
 
-export type MutationCreateSkillTreeArgs = {
-  input: CreateSkillTreeInput;
+export type MutationCreateManyQuizAttemptAnswerArgs = {
+  data: Array<QuizAttemptAnswerCreateInput>;
 };
 
 
-export type MutationDeleteCourseArgs = {
-  id: Scalars['ID']['input'];
+export type MutationCreateManyQuizOptionArgs = {
+  data: Array<QuizOptionCreateInput>;
+};
+
+
+export type MutationCreateManyQuizQuestionArgs = {
+  data: Array<QuizQuestionCreateInput>;
+};
+
+
+export type MutationCreateManySkillNodePrerequisiteArgs = {
+  data: Array<SkillNodePrerequisiteCreateInput>;
+};
+
+
+export type MutationCreateManySkillTreeArgs = {
+  data: Array<SkillTreeCreateInput>;
+};
+
+
+export type MutationCreateManyUserArgs = {
+  data: Array<UserCreateInput>;
+};
+
+
+export type MutationCreateManyUserNodeProgressArgs = {
+  data: Array<UserNodeProgressCreateInput>;
+};
+
+
+export type MutationCreateOneCourseArgs = {
+  data: CourseCreateInput;
+};
+
+
+export type MutationCreateOneQuizArgs = {
+  data: QuizCreateInput;
+};
+
+
+export type MutationCreateOneQuizAttemptArgs = {
+  data: QuizAttemptCreateInput;
+};
+
+
+export type MutationCreateOneQuizAttemptAnswerArgs = {
+  data: QuizAttemptAnswerCreateInput;
+};
+
+
+export type MutationCreateOneQuizOptionArgs = {
+  data: QuizOptionCreateInput;
+};
+
+
+export type MutationCreateOneQuizQuestionArgs = {
+  data: QuizQuestionCreateInput;
+};
+
+
+export type MutationCreateOneSkillNodePrerequisiteArgs = {
+  data: SkillNodePrerequisiteCreateInput;
+};
+
+
+export type MutationCreateOneSkillTreeArgs = {
+  data: SkillTreeCreateInput;
+};
+
+
+export type MutationCreateOneUserArgs = {
+  data: UserCreateInput;
+};
+
+
+export type MutationCreateOneUserNodeProgressArgs = {
+  data: UserNodeProgressCreateInput;
 };
 
 
@@ -1167,28 +1249,103 @@ export type MutationDeleteLessonBlockArgs = {
 };
 
 
-export type MutationDeleteQuizArgs = {
-  id: Scalars['ID']['input'];
+export type MutationDeleteManyCourseArgs = {
+  where: CourseWhereInput;
 };
 
 
-export type MutationDeleteSkillNodeAdvancedArgs = {
-  id: Scalars['ID']['input'];
+export type MutationDeleteManyQuizArgs = {
+  where: QuizWhereInput;
 };
 
 
-export type MutationDeleteSkillNodeSimpleArgs = {
-  id: Scalars['ID']['input'];
+export type MutationDeleteManyQuizAttemptArgs = {
+  where: QuizAttemptWhereInput;
 };
 
 
-export type MutationDeleteSkillTreeArgs = {
-  id: Scalars['ID']['input'];
+export type MutationDeleteManyQuizAttemptAnswerArgs = {
+  where: QuizAttemptAnswerWhereInput;
 };
 
 
-export type MutationDeleteUserArgs = {
-  id: Scalars['ID']['input'];
+export type MutationDeleteManyQuizOptionArgs = {
+  where: QuizOptionWhereInput;
+};
+
+
+export type MutationDeleteManyQuizQuestionArgs = {
+  where: QuizQuestionWhereInput;
+};
+
+
+export type MutationDeleteManySkillNodePrerequisiteArgs = {
+  where: SkillNodePrerequisiteWhereInput;
+};
+
+
+export type MutationDeleteManySkillTreeArgs = {
+  where: SkillTreeWhereInput;
+};
+
+
+export type MutationDeleteManyUserArgs = {
+  where: UserWhereInput;
+};
+
+
+export type MutationDeleteManyUserNodeProgressArgs = {
+  where: UserNodeProgressWhereInput;
+};
+
+
+export type MutationDeleteOneCourseArgs = {
+  where: CourseWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneQuizArgs = {
+  where: QuizWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneQuizAttemptArgs = {
+  where: QuizAttemptWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneQuizAttemptAnswerArgs = {
+  where: QuizAttemptAnswerWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneQuizOptionArgs = {
+  where: QuizOptionWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneQuizQuestionArgs = {
+  where: QuizQuestionWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneSkillNodePrerequisiteArgs = {
+  where: SkillNodePrerequisiteWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneSkillTreeArgs = {
+  where: SkillTreeWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneUserArgs = {
+  where: UserWhereUniqueInput;
+};
+
+
+export type MutationDeleteOneUserNodeProgressArgs = {
+  where: UserNodeProgressWhereUniqueInput;
 };
 
 
@@ -1197,45 +1354,199 @@ export type MutationPublishLessonBlockArgs = {
 };
 
 
-export type MutationSetUserRoleArgs = {
-  role: Role;
-  userId: Scalars['ID']['input'];
-};
-
-
-export type MutationSyncCurrentUserArgs = {
-  name?: InputMaybe<Scalars['String']['input']>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type MutationUpdateCourseArgs = {
-  id: Scalars['ID']['input'];
-  input: UpdateCourseInput;
-};
-
-
 export type MutationUpdateLessonBlockArgs = {
-  input: LessonBlocksUpdateInput;
+  id: Scalars['ID']['input'];
+  input: UpdateLessonBlockInput;
 };
 
 
-export type MutationUpdateQuizArgs = {
-  id: Scalars['ID']['input'];
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
+export type MutationUpdateManyCourseArgs = {
+  data: CourseUpdateManyMutationInput;
+  where?: InputMaybe<CourseWhereInput>;
 };
 
 
-export type MutationUpdateSkillNodeArgs = {
-  id: Scalars['ID']['input'];
-  input: UpdateSkillNodeInput;
+export type MutationUpdateManyQuizArgs = {
+  data: QuizUpdateManyMutationInput;
+  where?: InputMaybe<QuizWhereInput>;
 };
 
 
-export type MutationUpdateSkillTreeArgs = {
-  id: Scalars['ID']['input'];
-  input: UpdateSkillTreeInput;
+export type MutationUpdateManyQuizAttemptArgs = {
+  data: QuizAttemptUpdateManyMutationInput;
+  where?: InputMaybe<QuizAttemptWhereInput>;
+};
+
+
+export type MutationUpdateManyQuizAttemptAnswerArgs = {
+  data: QuizAttemptAnswerUpdateManyMutationInput;
+  where?: InputMaybe<QuizAttemptAnswerWhereInput>;
+};
+
+
+export type MutationUpdateManyQuizOptionArgs = {
+  data: QuizOptionUpdateManyMutationInput;
+  where?: InputMaybe<QuizOptionWhereInput>;
+};
+
+
+export type MutationUpdateManyQuizQuestionArgs = {
+  data: QuizQuestionUpdateManyMutationInput;
+  where?: InputMaybe<QuizQuestionWhereInput>;
+};
+
+
+export type MutationUpdateManySkillNodePrerequisiteArgs = {
+  data: SkillNodePrerequisiteUpdateManyMutationInput;
+  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
+};
+
+
+export type MutationUpdateManySkillTreeArgs = {
+  data: SkillTreeUpdateManyMutationInput;
+  where?: InputMaybe<SkillTreeWhereInput>;
+};
+
+
+export type MutationUpdateManyUserArgs = {
+  data: UserUpdateManyMutationInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+
+export type MutationUpdateManyUserNodeProgressArgs = {
+  data: UserNodeProgressUpdateManyMutationInput;
+  where?: InputMaybe<UserNodeProgressWhereInput>;
+};
+
+
+export type MutationUpdateOneCourseArgs = {
+  data: CourseUpdateInput;
+  where: CourseWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneQuizArgs = {
+  data: QuizUpdateInput;
+  where: QuizWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneQuizAttemptArgs = {
+  data: QuizAttemptUpdateInput;
+  where: QuizAttemptWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneQuizAttemptAnswerArgs = {
+  data: QuizAttemptAnswerUpdateInput;
+  where: QuizAttemptAnswerWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneQuizOptionArgs = {
+  data: QuizOptionUpdateInput;
+  where: QuizOptionWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneQuizQuestionArgs = {
+  data: QuizQuestionUpdateInput;
+  where: QuizQuestionWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneSkillNodePrerequisiteArgs = {
+  data: SkillNodePrerequisiteUpdateInput;
+  where: SkillNodePrerequisiteWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneSkillTreeArgs = {
+  data: SkillTreeUpdateInput;
+  where: SkillTreeWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneUserArgs = {
+  data: UserUpdateInput;
+  where: UserWhereUniqueInput;
+};
+
+
+export type MutationUpdateOneUserNodeProgressArgs = {
+  data: UserNodeProgressUpdateInput;
+  where: UserNodeProgressWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneCourseArgs = {
+  create: CourseCreateInput;
+  update: CourseUpdateInput;
+  where: CourseWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneQuizArgs = {
+  create: QuizCreateInput;
+  update: QuizUpdateInput;
+  where: QuizWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneQuizAttemptArgs = {
+  create: QuizAttemptCreateInput;
+  update: QuizAttemptUpdateInput;
+  where: QuizAttemptWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneQuizAttemptAnswerArgs = {
+  create: QuizAttemptAnswerCreateInput;
+  update: QuizAttemptAnswerUpdateInput;
+  where: QuizAttemptAnswerWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneQuizOptionArgs = {
+  create: QuizOptionCreateInput;
+  update: QuizOptionUpdateInput;
+  where: QuizOptionWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneQuizQuestionArgs = {
+  create: QuizQuestionCreateInput;
+  update: QuizQuestionUpdateInput;
+  where: QuizQuestionWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneSkillNodePrerequisiteArgs = {
+  create: SkillNodePrerequisiteCreateInput;
+  update: SkillNodePrerequisiteUpdateInput;
+  where: SkillNodePrerequisiteWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneSkillTreeArgs = {
+  create: SkillTreeCreateInput;
+  update: SkillTreeUpdateInput;
+  where: SkillTreeWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneUserArgs = {
+  create: UserCreateInput;
+  update: UserUpdateInput;
+  where: UserWhereUniqueInput;
+};
+
+
+export type MutationUpsertOneUserNodeProgressArgs = {
+  create: UserNodeProgressCreateInput;
+  update: UserNodeProgressUpdateInput;
+  where: UserNodeProgressWhereUniqueInput;
 };
 
 export type NestedBoolFilter = {
@@ -1634,118 +1945,402 @@ export enum ProgressStatus {
 
 export type Query = {
   __typename?: 'Query';
-  adminCourse?: Maybe<Course>;
-  adminGetAllCourses?: Maybe<Array<Course>>;
-  adminMyCourse?: Maybe<Course>;
-  adminMyCoursesWithContent?: Maybe<Array<Course>>;
-  adminMySkillNode?: Maybe<SkillNode>;
-  adminMySkillNodes?: Maybe<Array<SkillNode>>;
-  adminMySkillTree?: Maybe<SkillTree>;
-  adminMySkillTrees?: Maybe<Array<SkillTree>>;
-  adminSkillNode?: Maybe<SkillNode>;
-  adminSkillNodes?: Maybe<Array<SkillNode>>;
-  adminSkillTree?: Maybe<SkillTree>;
-  adminSkillTrees?: Maybe<Array<SkillTree>>;
-  allUsers?: Maybe<Array<User>>;
-  getCourseProgress?: Maybe<CourseProgress>;
+  countCourse: Scalars['Int']['output'];
+  countQuiz: Scalars['Int']['output'];
+  countQuizAttempt: Scalars['Int']['output'];
+  countQuizAttemptAnswer: Scalars['Int']['output'];
+  countQuizOption: Scalars['Int']['output'];
+  countQuizQuestion: Scalars['Int']['output'];
+  countSkillNodePrerequisite: Scalars['Int']['output'];
+  countSkillTree: Scalars['Int']['output'];
+  countUser: Scalars['Int']['output'];
+  countUserNodeProgress: Scalars['Int']['output'];
+  findFirstCourse?: Maybe<Course>;
+  findFirstQuiz?: Maybe<Quiz>;
+  findFirstQuizAttempt?: Maybe<QuizAttempt>;
+  findFirstQuizAttemptAnswer?: Maybe<QuizAttemptAnswer>;
+  findFirstQuizOption?: Maybe<QuizOption>;
+  findFirstQuizQuestion?: Maybe<QuizQuestion>;
+  findFirstSkillNodePrerequisite?: Maybe<SkillNodePrerequisite>;
+  findFirstSkillTree?: Maybe<SkillTree>;
+  findFirstUser?: Maybe<User>;
+  findFirstUserNodeProgress?: Maybe<UserNodeProgress>;
+  findManyCourse: Array<Course>;
+  findManyQuiz: Array<Quiz>;
+  findManyQuizAttempt: Array<QuizAttempt>;
+  findManyQuizAttemptAnswer: Array<QuizAttemptAnswer>;
+  findManyQuizOption: Array<QuizOption>;
+  findManyQuizQuestion: Array<QuizQuestion>;
+  findManySkillNodePrerequisite: Array<SkillNodePrerequisite>;
+  findManySkillTree: Array<SkillTree>;
+  findManyUser: Array<User>;
+  findManyUserNodeProgress: Array<UserNodeProgress>;
+  findUniqueCourse?: Maybe<Course>;
+  findUniqueQuiz?: Maybe<Quiz>;
+  findUniqueQuizAttempt?: Maybe<QuizAttempt>;
+  findUniqueQuizAttemptAnswer?: Maybe<QuizAttemptAnswer>;
+  findUniqueQuizOption?: Maybe<QuizOption>;
+  findUniqueQuizQuestion?: Maybe<QuizQuestion>;
+  findUniqueSkillNodePrerequisite?: Maybe<SkillNodePrerequisite>;
+  findUniqueSkillTree?: Maybe<SkillTree>;
+  findUniqueUser?: Maybe<User>;
+  findUniqueUserNodeProgress?: Maybe<UserNodeProgress>;
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
-  myProgress?: Maybe<Array<UserNodeProgress>>;
-  nodeProgress?: Maybe<UserNodeProgress>;
   skillNode?: Maybe<SkillNode>;
   skillNodes?: Maybe<Array<SkillNode>>;
   skillNodesByTree?: Maybe<Array<SkillNode>>;
 };
 
 
-export type QueryAdminCourseArgs = {
-  id: Scalars['ID']['input'];
+export type QueryCountCourseArgs = {
+  cursor?: InputMaybe<CourseWhereUniqueInput>;
+  distinct?: InputMaybe<Array<CourseScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<CourseOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<CourseWhereInput>;
 };
 
 
-export type QueryAdminGetAllCoursesArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<CourseStatus>;
+export type QueryCountQuizArgs = {
+  cursor?: InputMaybe<QuizWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizWhereInput>;
 };
 
 
-export type QueryAdminMyCourseArgs = {
-  id: Scalars['ID']['input'];
+export type QueryCountQuizAttemptArgs = {
+  cursor?: InputMaybe<QuizAttemptWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptWhereInput>;
 };
 
 
-export type QueryAdminMyCoursesWithContentArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<CourseStatus>;
+export type QueryCountQuizAttemptAnswerArgs = {
+  cursor?: InputMaybe<QuizAttemptAnswerWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptAnswerScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptAnswerOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptAnswerWhereInput>;
 };
 
 
-export type QueryAdminMySkillNodeArgs = {
-  id: Scalars['ID']['input'];
+export type QueryCountQuizOptionArgs = {
+  cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizOptionWhereInput>;
 };
 
 
-export type QueryAdminMySkillNodesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  treeId?: InputMaybe<Scalars['ID']['input']>;
+export type QueryCountQuizQuestionArgs = {
+  cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizQuestionWhereInput>;
 };
 
 
-export type QueryAdminMySkillTreeArgs = {
-  id: Scalars['ID']['input'];
+export type QueryCountSkillNodePrerequisiteArgs = {
+  cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
 };
 
 
-export type QueryAdminMySkillTreesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+export type QueryCountSkillTreeArgs = {
+  cursor?: InputMaybe<SkillTreeWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillTreeScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillTreeOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillTreeWhereInput>;
 };
 
 
-export type QueryAdminSkillNodeArgs = {
-  id: Scalars['ID']['input'];
+export type QueryCountUserArgs = {
+  cursor?: InputMaybe<UserWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserWhereInput>;
 };
 
 
-export type QueryAdminSkillNodesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  treeId?: InputMaybe<Scalars['ID']['input']>;
+export type QueryCountUserNodeProgressArgs = {
+  cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserNodeProgressWhereInput>;
 };
 
 
-export type QueryAdminSkillTreeArgs = {
-  id: Scalars['ID']['input'];
+export type QueryFindFirstCourseArgs = {
+  cursor?: InputMaybe<CourseWhereUniqueInput>;
+  distinct?: InputMaybe<Array<CourseScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<CourseOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<CourseWhereInput>;
 };
 
 
-export type QueryAdminSkillTreesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+export type QueryFindFirstQuizArgs = {
+  cursor?: InputMaybe<QuizWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizWhereInput>;
 };
 
 
-export type QueryAllUsersArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+export type QueryFindFirstQuizAttemptArgs = {
+  cursor?: InputMaybe<QuizAttemptWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptWhereInput>;
 };
 
 
-export type QueryGetCourseProgressArgs = {
-  courseId: Scalars['ID']['input'];
-  userId?: InputMaybe<Scalars['ID']['input']>;
+export type QueryFindFirstQuizAttemptAnswerArgs = {
+  cursor?: InputMaybe<QuizAttemptAnswerWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptAnswerScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptAnswerOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptAnswerWhereInput>;
+};
+
+
+export type QueryFindFirstQuizOptionArgs = {
+  cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizOptionWhereInput>;
+};
+
+
+export type QueryFindFirstQuizQuestionArgs = {
+  cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizQuestionWhereInput>;
+};
+
+
+export type QueryFindFirstSkillNodePrerequisiteArgs = {
+  cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
+};
+
+
+export type QueryFindFirstSkillTreeArgs = {
+  cursor?: InputMaybe<SkillTreeWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillTreeScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillTreeOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillTreeWhereInput>;
+};
+
+
+export type QueryFindFirstUserArgs = {
+  cursor?: InputMaybe<UserWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+
+export type QueryFindFirstUserNodeProgressArgs = {
+  cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserNodeProgressWhereInput>;
+};
+
+
+export type QueryFindManyCourseArgs = {
+  cursor?: InputMaybe<CourseWhereUniqueInput>;
+  distinct?: InputMaybe<Array<CourseScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<CourseOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<CourseWhereInput>;
+};
+
+
+export type QueryFindManyQuizArgs = {
+  cursor?: InputMaybe<QuizWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizWhereInput>;
+};
+
+
+export type QueryFindManyQuizAttemptArgs = {
+  cursor?: InputMaybe<QuizAttemptWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptWhereInput>;
+};
+
+
+export type QueryFindManyQuizAttemptAnswerArgs = {
+  cursor?: InputMaybe<QuizAttemptAnswerWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizAttemptAnswerScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizAttemptAnswerOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizAttemptAnswerWhereInput>;
+};
+
+
+export type QueryFindManyQuizOptionArgs = {
+  cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizOptionWhereInput>;
+};
+
+
+export type QueryFindManyQuizQuestionArgs = {
+  cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
+  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<QuizQuestionWhereInput>;
+};
+
+
+export type QueryFindManySkillNodePrerequisiteArgs = {
+  cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
+};
+
+
+export type QueryFindManySkillTreeArgs = {
+  cursor?: InputMaybe<SkillTreeWhereUniqueInput>;
+  distinct?: InputMaybe<Array<SkillTreeScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<SkillTreeOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<SkillTreeWhereInput>;
+};
+
+
+export type QueryFindManyUserArgs = {
+  cursor?: InputMaybe<UserWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+
+export type QueryFindManyUserNodeProgressArgs = {
+  cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserNodeProgressWhereInput>;
+};
+
+
+export type QueryFindUniqueCourseArgs = {
+  where: CourseWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueQuizArgs = {
+  where: QuizWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueQuizAttemptArgs = {
+  where: QuizAttemptWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueQuizAttemptAnswerArgs = {
+  where: QuizAttemptAnswerWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueQuizOptionArgs = {
+  where: QuizOptionWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueQuizQuestionArgs = {
+  where: QuizQuestionWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueSkillNodePrerequisiteArgs = {
+  where: SkillNodePrerequisiteWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueSkillTreeArgs = {
+  where: SkillTreeWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueUserArgs = {
+  where: UserWhereUniqueInput;
+};
+
+
+export type QueryFindUniqueUserNodeProgressArgs = {
+  where: UserNodeProgressWhereUniqueInput;
 };
 
 
@@ -1762,17 +2357,6 @@ export type QueryLessonBlocksArgs = {
 
 export type QueryLessonBlocksByNodeArgs = {
   nodeId: Scalars['ID']['input'];
-};
-
-
-export type QueryMyProgressArgs = {
-  userId?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type QueryNodeProgressArgs = {
-  nodeId: Scalars['ID']['input'];
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -3459,62 +4043,16 @@ export enum Role {
 
 export type SkillNode = {
   __typename?: 'SkillNode';
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['ID']['output'];
-  lessons: Array<LessonBlocks>;
-  orderInStep: Scalars['Int']['output'];
+  createdAt?: Maybe<Scalars['DateTime']['output']>;
+  id?: Maybe<Scalars['ID']['output']>;
+  lessons?: Maybe<Array<LessonBlocks>>;
+  orderInStep?: Maybe<Scalars['Int']['output']>;
   posX?: Maybe<Scalars['Int']['output']>;
   posY?: Maybe<Scalars['Int']['output']>;
-  prerequisites: Array<SkillNodePrerequisite>;
-  progresses: Array<UserNodeProgress>;
-  quiz?: Maybe<Quiz>;
-  requiredFor: Array<SkillNodePrerequisite>;
-  step: Scalars['Int']['output'];
-  title: Scalars['String']['output'];
-  tree: SkillTree;
-  treeId: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
-};
-
-
-export type SkillNodeLessonsArgs = {
-  cursor?: InputMaybe<LessonBlocksWhereUniqueInput>;
-  distinct?: InputMaybe<Array<LessonBlocksScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<LessonBlocksOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<LessonBlocksWhereInput>;
-};
-
-
-export type SkillNodePrerequisitesArgs = {
-  cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
-  distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
-};
-
-
-export type SkillNodeProgressesArgs = {
-  cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
-  distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<UserNodeProgressWhereInput>;
-};
-
-
-export type SkillNodeRequiredForArgs = {
-  cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
-  distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
+  step?: Maybe<Scalars['Int']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  tree?: Maybe<SkillTree>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type SkillNodeAvgOrderByAggregateInput = {
@@ -4839,21 +5377,12 @@ export enum TransactionIsolationLevel {
   Serializable = 'Serializable'
 }
 
-export type UpdateCourseInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  status?: InputMaybe<CourseStatus>;
-  title?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type UpdateSkillNodeInput = {
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-};
-
-export type UpdateSkillTreeInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
+export type UpdateLessonBlockInput = {
+  caption?: InputMaybe<Scalars['String']['input']>;
+  html?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
