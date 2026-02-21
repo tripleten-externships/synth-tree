@@ -9,11 +9,14 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { schema } from "./schema";
 import { createGraphQLContext, GraphQLContext } from "@graphql/context";
 import { prisma } from "@lib/prisma";
+import { logger } from "@lib/logger";
+
+// ✅ Export app for tests
+export const app = express();
+
+const httpServer = http.createServer(app);
 
 async function start() {
-  const app = express();
-  const httpServer = http.createServer(app);
-
   // Health check endpoint
   app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok" });
@@ -33,6 +36,21 @@ async function start() {
       }),
       ApolloServerPluginDrainHttpServer({ httpServer }),
     ],
+    formatError: (err) => {
+      logger.error("GraphQL Error", {
+        message: err.message,
+        path: err.path,
+        stack: err.extensions?.exception?.stacktrace,
+      });
+
+      return {
+        message:
+          process.env.NODE_ENV === "production"
+            ? "Internal server error"
+            : err.message,
+        path: err.path,
+      };
+    },
   });
 
   await server.start();
@@ -45,7 +63,7 @@ async function start() {
       context: async ({ req }) => {
         return createGraphQLContext({ req, prisma });
       },
-    })
+    }),
   );
 
   const port = parseInt(process.env.PORT || "4000", 10);
@@ -54,4 +72,7 @@ async function start() {
   console.log(`🚀 Server ready at http://localhost:${port}`);
 }
 
-start();
+// Only start server if not imported (important for tests)
+if (require.main === module) {
+  start();
+}

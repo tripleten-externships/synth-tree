@@ -1,5 +1,6 @@
+import { app } from "../../../../index"; // adjust path based on test location
+import request from "supertest";
 import { gradeQuizAttempt } from "../gradeQuizAttempt";
-
 // Mock Prisma transaction client
 const mockTx = {
   quiz: {
