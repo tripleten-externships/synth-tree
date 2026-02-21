@@ -11,10 +11,12 @@ import { createGraphQLContext, GraphQLContext } from "@graphql/context";
 import { prisma } from "@lib/prisma";
 import { logger } from "@lib/logger";
 
-async function start() {
-  const app = express();
-  const httpServer = http.createServer(app);
+// ✅ Export app for tests
+export const app = express();
 
+const httpServer = http.createServer(app);
+
+async function start() {
   // Health check endpoint
   app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({ status: "ok" });
@@ -35,15 +37,12 @@ async function start() {
       ApolloServerPluginDrainHttpServer({ httpServer }),
     ],
     formatError: (err) => {
-      // Log the error with context
       logger.error("GraphQL Error", {
         message: err.message,
         path: err.path,
         stack: err.extensions?.exception?.stacktrace,
-        // optionally include more context if needed
       });
 
-      // Return sanitized error for clients in production
       return {
         message:
           process.env.NODE_ENV === "production"
@@ -73,4 +72,7 @@ async function start() {
   console.log(`🚀 Server ready at http://localhost:${port}`);
 }
 
-start();
+// Only start server if not imported (important for tests)
+if (require.main === module) {
+  start();
+}
