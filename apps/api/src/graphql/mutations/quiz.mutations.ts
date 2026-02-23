@@ -399,7 +399,7 @@ builder.mutationFields((t) => ({
         data: {
           quizId,
           userId: ctx.user!.uid,
-          passed: false,
+          passed: false, //auto grader changes this later.
           answers: {
             create: parsedAnswers.map(({ questionId, answer }) => ({
               questionId,
@@ -410,7 +410,6 @@ builder.mutationFields((t) => ({
       });
 
       const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
-      console.log("Grading summary:", summary);
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
