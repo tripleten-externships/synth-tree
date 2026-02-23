@@ -18,16 +18,12 @@ builder.queryFields((t) => ({
         where: {
           id,
           deletedAt: null,
-          ...(isAdmin
-            ? {}
-            : {
-                published: true,
-                node: { published: true },
-              }),
+          ...(isAdmin ? {} : { published: true }), // only filter published for non-admins
         },
       });
     },
   }),
+}));
 
   quizzesByNode: t.prismaField({
     type: "Quiz",
