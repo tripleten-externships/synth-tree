@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      supertest:
+        specifier: ^7.2.2
+        version: 7.2.2
 
   apps/admin-dashboard:
     dependencies:

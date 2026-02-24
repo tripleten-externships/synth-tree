@@ -16,5 +16,8 @@
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
 }
