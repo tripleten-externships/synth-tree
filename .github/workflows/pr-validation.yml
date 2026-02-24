@@ -226,18 +226,6 @@ jobs:
           fs.appendFileSync(summary, lines.join('\n') + '\n');
           NODE
 
-      - name: Upload coverage to Codecov
-        if: ${{ env.CODECOV_TOKEN != '' && matrix.id != 'theme' }}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ env.CODECOV_TOKEN }}
-          files: ${{ matrix.name }}/coverage/lcov.info
-          flags: ${{ matrix.id }}
-          name: ${{ matrix.id }}-coverage
-          fail_ci_if_error: true
-
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
