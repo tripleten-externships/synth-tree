@@ -66,6 +66,7 @@ async function main() {
       if (password) {
         await admin.auth().updateUser(firebaseUser.uid, {
           password,
+          emailVerified: true,
         });
         console.log(`✅ Updated password for existing Firebase user`);
       }
@@ -74,6 +75,7 @@ async function main() {
         const createUserParams: any = {
           email,
           displayName: name,
+          emailVerified: true,
         };
 
         // Set password if provided for new user
