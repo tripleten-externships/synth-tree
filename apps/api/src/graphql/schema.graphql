@@ -209,11 +209,10 @@ input CourseOrderByWithRelationInput {
 
 type CourseProgress {
   completedNodes: Int
-  completionPercentage: Float
+  completionPercentage: Int
   courseId: ID
   inProgressNodes: Int
   notStartedNodes: Int
-  startedNodes: Int
   totalNodes: Int
 }
 
@@ -1067,12 +1066,16 @@ type Mutation {
   createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
   createQuiz(nodeId: String!, required: Boolean!, title: String!): Quiz
+  createQuizOption(isCorrect: Boolean, questionId: String!, text: String!): QuizOption
+  createQuizQuestion(order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
   createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
   createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
   createSkillTree(input: CreateSkillTreeInput!): SkillTree
   deleteCourse(id: ID!): Course
   deleteLessonBlock(id: ID!): LessonBlocks
   deleteQuiz(id: ID!): Quiz
+  deleteQuizOption(id: ID!): QuizOption
+  deleteQuizQuestion(id: ID!): QuizQuestion
   deleteSkillNodeAdvanced(id: ID!): Boolean
   deleteSkillNodeSimple(id: ID!): Boolean
   deleteSkillTree(id: ID!): SkillTree
@@ -1083,6 +1086,8 @@ type Mutation {
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
+  updateQuizOption(id: ID!, isCorrect: Boolean, text: String): QuizOption
+  updateQuizQuestion(id: ID!, order: Int, prompt: String): QuizQuestion
   updateSkillNode(id: ID!, input: UpdateSkillNodeInput!): SkillNode
   updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
@@ -1498,12 +1503,15 @@ type Query {
   adminSkillTree(id: ID!): SkillTree
   adminSkillTrees(courseId: ID, limit: Int, page: Int, search: String): [SkillTree!]
   allUsers(limit: Int = 25, offset: Int = 0): [User!]
-  getCourseProgress(courseId: ID!, userId: ID): CourseProgress
+  courseProgress(courseId: ID!, userId: ID): CourseProgress
   lessonBlock(id: ID!): LessonBlocks
   lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
   myProgress(userId: ID): [UserNodeProgress!]
   nodeProgress(nodeId: ID!, userId: ID): UserNodeProgress
+  quiz(id: ID!): Quiz
+  quizzesByNode(nodeId: ID!): [Quiz!]
+  quizzesByTree(treeId: ID!): [Quiz!]
   skillNode(id: ID!): SkillNode
   skillNodes(limit: Int = 25, offset: Int = 0): [SkillNode!]
   skillNodesByTree(treeId: ID!): [SkillNode!]

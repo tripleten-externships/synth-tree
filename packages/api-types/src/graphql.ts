@@ -1,42 +1,54 @@
-import { gql } from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
+export type MakeEmpty<
+  T extends { [key: string]: unknown },
+  K extends keyof T,
+> = { [_ in K]?: never };
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
+    };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
-  DateTime: { input: any; output: any; }
-  Json: { input: any; output: any; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
+  DateTime: { input: any; output: any };
+  Json: { input: any; output: any };
   /** Never fill this, its created for inputs that dont have fields */
-  NEVER: { input: any; output: any; }
+  NEVER: { input: any; output: any };
 };
 
 /** Batch payloads from prisma. */
 export type BatchPayload = {
-  __typename?: 'BatchPayload';
+  __typename?: "BatchPayload";
   /** Prisma Batch Payload */
-  count: Scalars['Int']['output'];
+  count: Scalars["Int"]["output"];
 };
 
 export type BoolFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['Boolean']['input']>;
+  set?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type BoolFilter = {
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolFilter>;
 };
 
 export type BoolNullableFilter = {
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolNullableFilter>;
 };
 
@@ -44,7 +56,7 @@ export type BoolNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedBoolNullableFilter>;
   _min?: InputMaybe<NestedBoolNullableFilter>;
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolNullableWithAggregatesFilter>;
 };
 
@@ -52,38 +64,37 @@ export type BoolWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedBoolFilter>;
   _min?: InputMaybe<NestedBoolFilter>;
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
 export enum ContentType {
-  Embed = 'EMBED',
-  Html = 'HTML',
-  Image = 'IMAGE',
-  Video = 'VIDEO'
+  Embed = "EMBED",
+  Html = "HTML",
+  Image = "IMAGE",
+  Video = "VIDEO",
 }
 
 export type Course = {
-  __typename?: 'Course';
+  __typename?: "Course";
   author: User;
-  authorId: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
+  authorId: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  deletedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  description?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
   status: CourseStatus;
-  title: Scalars['String']['output'];
+  title: Scalars["String"]["output"];
   trees: Array<SkillTree>;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type CourseTreesArgs = {
   cursor?: InputMaybe<SkillTreeWhereUniqueInput>;
   distinct?: InputMaybe<Array<SkillTreeScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<SkillTreeOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<SkillTreeWhereInput>;
 };
 
@@ -100,40 +111,40 @@ export type CourseCountOrderByAggregateInput = {
 
 export type CourseCreateInput = {
   author: UserCreateNestedOneWithoutCoursesAuthoredInput;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title: Scalars['String']['input'];
+  title: Scalars["String"]["input"];
   trees?: InputMaybe<SkillTreeCreateNestedManyWithoutCourseInput>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type CourseCreateManyAuthorInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type CourseCreateManyAuthorInputEnvelope = {
   data: Array<CourseCreateManyAuthorInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type CourseCreateManyInput = {
-  authorId: Scalars['String']['input'];
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  authorId: Scalars["String"]["input"];
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type CourseCreateNestedManyWithoutAuthorInput = {
@@ -160,25 +171,25 @@ export type CourseCreateOrConnectWithoutTreesInput = {
 };
 
 export type CourseCreateWithoutAuthorInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title: Scalars['String']['input'];
+  title: Scalars["String"]["input"];
   trees?: InputMaybe<SkillTreeCreateNestedManyWithoutCourseInput>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type CourseCreateWithoutTreesInput = {
   author: UserCreateNestedOneWithoutCoursesAuthoredInput;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type CourseListRelationFilter = {
@@ -241,25 +252,24 @@ export type CourseOrderByWithRelationInput = {
 };
 
 export type CourseProgress = {
-  __typename?: 'CourseProgress';
-  completedNodes?: Maybe<Scalars['Int']['output']>;
-  completionPercentage?: Maybe<Scalars['Float']['output']>;
-  courseId?: Maybe<Scalars['ID']['output']>;
-  inProgressNodes?: Maybe<Scalars['Int']['output']>;
-  notStartedNodes?: Maybe<Scalars['Int']['output']>;
-  startedNodes?: Maybe<Scalars['Int']['output']>;
-  totalNodes?: Maybe<Scalars['Int']['output']>;
+  __typename?: "CourseProgress";
+  completedNodes?: Maybe<Scalars["Int"]["output"]>;
+  completionPercentage?: Maybe<Scalars["Int"]["output"]>;
+  courseId?: Maybe<Scalars["ID"]["output"]>;
+  inProgressNodes?: Maybe<Scalars["Int"]["output"]>;
+  notStartedNodes?: Maybe<Scalars["Int"]["output"]>;
+  totalNodes?: Maybe<Scalars["Int"]["output"]>;
 };
 
 export enum CourseScalarFieldEnum {
-  AuthorId = 'authorId',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Description = 'description',
-  Id = 'id',
-  Status = 'status',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
+  AuthorId = "authorId",
+  CreatedAt = "createdAt",
+  DeletedAt = "deletedAt",
+  Description = "description",
+  Id = "id",
+  Status = "status",
+  Title = "title",
+  UpdatedAt = "updatedAt",
 }
 
 export type CourseScalarRelationFilter = {
@@ -296,8 +306,8 @@ export type CourseScalarWhereWithAggregatesInput = {
 };
 
 export enum CourseStatus {
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
+  Draft = "DRAFT",
+  Published = "PUBLISHED",
 }
 
 export type CourseUpdateInput = {
@@ -418,7 +428,7 @@ export type CourseWhereUniqueInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   description?: InputMaybe<StringNullableFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<EnumCourseStatusFilter>;
   title?: InputMaybe<StringFilter>;
   trees?: InputMaybe<SkillTreeListRelationFilter>;
@@ -426,84 +436,84 @@ export type CourseWhereUniqueInput = {
 };
 
 export type CreateCourseInput = {
-  defaultTreeTitle?: InputMaybe<Scalars['String']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
+  defaultTreeTitle?: InputMaybe<Scalars["String"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
 };
 
 export type CreateFirstSkillNodeInput = {
-  title: Scalars['String']['input'];
-  treeId: Scalars['ID']['input'];
+  title: Scalars["String"]["input"];
+  treeId: Scalars["ID"]["input"];
 };
 
 export type CreateSkillNodeBelowInput = {
-  referenceNodeId: Scalars['ID']['input'];
-  title: Scalars['String']['input'];
+  referenceNodeId: Scalars["ID"]["input"];
+  title: Scalars["String"]["input"];
 };
 
 export type CreateSkillNodeToRightInput = {
-  referenceNodeId: Scalars['ID']['input'];
-  title: Scalars['String']['input'];
+  referenceNodeId: Scalars["ID"]["input"];
+  title: Scalars["String"]["input"];
 };
 
 export type CreateSkillTreeInput = {
-  courseId: Scalars['ID']['input'];
-  description?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
+  courseId: Scalars["ID"]["input"];
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
 };
 
 export type DateTimeFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['DateTime']['input']>;
+  set?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type DateTimeFilter = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type DateTimeNullableFilter = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type DateTimeNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedDateTimeNullableFilter>;
   _min?: InputMaybe<NestedDateTimeNullableFilter>;
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type DateTimeWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedDateTimeFilter>;
   _min?: InputMaybe<NestedDateTimeFilter>;
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type EnumContentTypeFieldUpdateOperationsInput = {
@@ -633,33 +643,33 @@ export type EnumRoleWithAggregatesFilter = {
 };
 
 export type IntFieldUpdateOperationsInput = {
-  decrement?: InputMaybe<Scalars['Int']['input']>;
-  divide?: InputMaybe<Scalars['Int']['input']>;
-  increment?: InputMaybe<Scalars['Int']['input']>;
-  multiply?: InputMaybe<Scalars['Int']['input']>;
-  set?: InputMaybe<Scalars['Int']['input']>;
+  decrement?: InputMaybe<Scalars["Int"]["input"]>;
+  divide?: InputMaybe<Scalars["Int"]["input"]>;
+  increment?: InputMaybe<Scalars["Int"]["input"]>;
+  multiply?: InputMaybe<Scalars["Int"]["input"]>;
+  set?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export type IntFilter = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type IntNullableFilter = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type IntNullableWithAggregatesFilter = {
@@ -668,14 +678,14 @@ export type IntNullableWithAggregatesFilter = {
   _max?: InputMaybe<NestedIntNullableFilter>;
   _min?: InputMaybe<NestedIntNullableFilter>;
   _sum?: InputMaybe<NestedIntNullableFilter>;
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type IntWithAggregatesFilter = {
@@ -684,74 +694,74 @@ export type IntWithAggregatesFilter = {
   _max?: InputMaybe<NestedIntFilter>;
   _min?: InputMaybe<NestedIntFilter>;
   _sum?: InputMaybe<NestedIntFilter>;
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export enum JsonNullValueFilter {
-  AnyNull = 'AnyNull',
-  DbNull = 'DbNull',
-  JsonNull = 'JsonNull'
+  AnyNull = "AnyNull",
+  DbNull = "DbNull",
+  JsonNull = "JsonNull",
 }
 
 export type JsonNullableFilter = {
-  array_contains?: InputMaybe<Scalars['Json']['input']>;
-  array_ends_with?: InputMaybe<Scalars['Json']['input']>;
-  array_starts_with?: InputMaybe<Scalars['Json']['input']>;
-  equals?: InputMaybe<Scalars['Json']['input']>;
-  gt?: InputMaybe<Scalars['Json']['input']>;
-  gte?: InputMaybe<Scalars['Json']['input']>;
-  lt?: InputMaybe<Scalars['Json']['input']>;
-  lte?: InputMaybe<Scalars['Json']['input']>;
+  array_contains?: InputMaybe<Scalars["Json"]["input"]>;
+  array_ends_with?: InputMaybe<Scalars["Json"]["input"]>;
+  array_starts_with?: InputMaybe<Scalars["Json"]["input"]>;
+  equals?: InputMaybe<Scalars["Json"]["input"]>;
+  gt?: InputMaybe<Scalars["Json"]["input"]>;
+  gte?: InputMaybe<Scalars["Json"]["input"]>;
+  lt?: InputMaybe<Scalars["Json"]["input"]>;
+  lte?: InputMaybe<Scalars["Json"]["input"]>;
   mode?: InputMaybe<QueryMode>;
-  not?: InputMaybe<Scalars['Json']['input']>;
-  path?: InputMaybe<Array<Scalars['String']['input']>>;
-  string_contains?: InputMaybe<Scalars['String']['input']>;
-  string_ends_with?: InputMaybe<Scalars['String']['input']>;
-  string_starts_with?: InputMaybe<Scalars['String']['input']>;
+  not?: InputMaybe<Scalars["Json"]["input"]>;
+  path?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  string_contains?: InputMaybe<Scalars["String"]["input"]>;
+  string_ends_with?: InputMaybe<Scalars["String"]["input"]>;
+  string_starts_with?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type JsonNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedJsonNullableFilter>;
   _min?: InputMaybe<NestedJsonNullableFilter>;
-  array_contains?: InputMaybe<Scalars['Json']['input']>;
-  array_ends_with?: InputMaybe<Scalars['Json']['input']>;
-  array_starts_with?: InputMaybe<Scalars['Json']['input']>;
-  equals?: InputMaybe<Scalars['Json']['input']>;
-  gt?: InputMaybe<Scalars['Json']['input']>;
-  gte?: InputMaybe<Scalars['Json']['input']>;
-  lt?: InputMaybe<Scalars['Json']['input']>;
-  lte?: InputMaybe<Scalars['Json']['input']>;
+  array_contains?: InputMaybe<Scalars["Json"]["input"]>;
+  array_ends_with?: InputMaybe<Scalars["Json"]["input"]>;
+  array_starts_with?: InputMaybe<Scalars["Json"]["input"]>;
+  equals?: InputMaybe<Scalars["Json"]["input"]>;
+  gt?: InputMaybe<Scalars["Json"]["input"]>;
+  gte?: InputMaybe<Scalars["Json"]["input"]>;
+  lt?: InputMaybe<Scalars["Json"]["input"]>;
+  lte?: InputMaybe<Scalars["Json"]["input"]>;
   mode?: InputMaybe<QueryMode>;
-  not?: InputMaybe<Scalars['Json']['input']>;
-  path?: InputMaybe<Array<Scalars['String']['input']>>;
-  string_contains?: InputMaybe<Scalars['String']['input']>;
-  string_ends_with?: InputMaybe<Scalars['String']['input']>;
-  string_starts_with?: InputMaybe<Scalars['String']['input']>;
+  not?: InputMaybe<Scalars["Json"]["input"]>;
+  path?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  string_contains?: InputMaybe<Scalars["String"]["input"]>;
+  string_ends_with?: InputMaybe<Scalars["String"]["input"]>;
+  string_starts_with?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type LessonBlocks = {
-  __typename?: 'LessonBlocks';
-  caption?: Maybe<Scalars['String']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  html?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  meta?: Maybe<Scalars['Json']['output']>;
+  __typename?: "LessonBlocks";
+  caption?: Maybe<Scalars["String"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  deletedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  html?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
+  meta?: Maybe<Scalars["Json"]["output"]>;
   node: SkillNode;
-  nodeId: Scalars['String']['output'];
-  order: Scalars['Int']['output'];
+  nodeId: Scalars["String"]["output"];
+  order: Scalars["Int"]["output"];
   status: LessonStatus;
   type: ContentType;
-  updatedAt: Scalars['DateTime']['output'];
-  url?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars["DateTime"]["output"];
+  url?: Maybe<Scalars["String"]["output"]>;
 };
 
 export type LessonBlocksAvgOrderByAggregateInput = {
@@ -774,57 +784,59 @@ export type LessonBlocksCountOrderByAggregateInput = {
 };
 
 export type LessonBlocksCreateInput = {
-  caption?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  html?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
+  caption?: InputMaybe<Scalars["String"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  html?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutLessonsInput;
-  order?: InputMaybe<Scalars['Int']['input']>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
   status?: InputMaybe<LessonStatus>;
   type: ContentType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  url?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type LessonBlocksCreateManyInput = {
-  caption?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  html?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
-  nodeId: Scalars['String']['input'];
-  order?: InputMaybe<Scalars['Int']['input']>;
+  caption?: InputMaybe<Scalars["String"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  html?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
+  nodeId: Scalars["String"]["input"];
+  order?: InputMaybe<Scalars["Int"]["input"]>;
   status?: InputMaybe<LessonStatus>;
   type: ContentType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  url?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type LessonBlocksCreateManyNodeInput = {
-  caption?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  html?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
-  order?: InputMaybe<Scalars['Int']['input']>;
+  caption?: InputMaybe<Scalars["String"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  html?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
   status?: InputMaybe<LessonStatus>;
   type: ContentType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  url?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type LessonBlocksCreateManyNodeInputEnvelope = {
   data: Array<LessonBlocksCreateManyNodeInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type LessonBlocksCreateNestedManyWithoutNodeInput = {
   connect?: InputMaybe<Array<LessonBlocksWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<LessonBlocksCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<LessonBlocksCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<LessonBlocksCreateWithoutNodeInput>>;
   createMany?: InputMaybe<LessonBlocksCreateManyNodeInputEnvelope>;
 };
@@ -835,17 +847,17 @@ export type LessonBlocksCreateOrConnectWithoutNodeInput = {
 };
 
 export type LessonBlocksCreateWithoutNodeInput = {
-  caption?: InputMaybe<Scalars['String']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  html?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
-  order?: InputMaybe<Scalars['Int']['input']>;
+  caption?: InputMaybe<Scalars["String"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  html?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
   status?: InputMaybe<LessonStatus>;
   type: ContentType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  url?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  url?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type LessonBlocksListRelationFilter = {
@@ -923,18 +935,18 @@ export type LessonBlocksOrderByWithRelationInput = {
 };
 
 export enum LessonBlocksScalarFieldEnum {
-  Caption = 'caption',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Html = 'html',
-  Id = 'id',
-  Meta = 'meta',
-  NodeId = 'nodeId',
-  Order = 'order',
-  Status = 'status',
-  Type = 'type',
-  UpdatedAt = 'updatedAt',
-  Url = 'url'
+  Caption = "caption",
+  CreatedAt = "createdAt",
+  DeletedAt = "deletedAt",
+  Html = "html",
+  Id = "id",
+  Meta = "meta",
+  NodeId = "nodeId",
+  Order = "order",
+  Status = "status",
+  Type = "type",
+  UpdatedAt = "updatedAt",
+  Url = "url",
 }
 
 export type LessonBlocksScalarWhereInput = {
@@ -983,7 +995,7 @@ export type LessonBlocksUpdateInput = {
   deletedAt?: InputMaybe<NullableDateTimeFieldUpdateOperationsInput>;
   html?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
   node?: InputMaybe<SkillNodeUpdateOneRequiredWithoutLessonsNestedInput>;
   order?: InputMaybe<IntFieldUpdateOperationsInput>;
   status?: InputMaybe<EnumLessonStatusFieldUpdateOperationsInput>;
@@ -998,7 +1010,7 @@ export type LessonBlocksUpdateManyMutationInput = {
   deletedAt?: InputMaybe<NullableDateTimeFieldUpdateOperationsInput>;
   html?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
   order?: InputMaybe<IntFieldUpdateOperationsInput>;
   status?: InputMaybe<EnumLessonStatusFieldUpdateOperationsInput>;
   type?: InputMaybe<EnumContentTypeFieldUpdateOperationsInput>;
@@ -1013,7 +1025,9 @@ export type LessonBlocksUpdateManyWithWhereWithoutNodeInput = {
 
 export type LessonBlocksUpdateManyWithoutNodeNestedInput = {
   connect?: InputMaybe<Array<LessonBlocksWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<LessonBlocksCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<LessonBlocksCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<LessonBlocksCreateWithoutNodeInput>>;
   createMany?: InputMaybe<LessonBlocksCreateManyNodeInputEnvelope>;
   delete?: InputMaybe<Array<LessonBlocksWhereUniqueInput>>;
@@ -1021,7 +1035,9 @@ export type LessonBlocksUpdateManyWithoutNodeNestedInput = {
   disconnect?: InputMaybe<Array<LessonBlocksWhereUniqueInput>>;
   set?: InputMaybe<Array<LessonBlocksWhereUniqueInput>>;
   update?: InputMaybe<Array<LessonBlocksUpdateWithWhereUniqueWithoutNodeInput>>;
-  updateMany?: InputMaybe<Array<LessonBlocksUpdateManyWithWhereWithoutNodeInput>>;
+  updateMany?: InputMaybe<
+    Array<LessonBlocksUpdateManyWithWhereWithoutNodeInput>
+  >;
   upsert?: InputMaybe<Array<LessonBlocksUpsertWithWhereUniqueWithoutNodeInput>>;
 };
 
@@ -1036,7 +1052,7 @@ export type LessonBlocksUpdateWithoutNodeInput = {
   deletedAt?: InputMaybe<NullableDateTimeFieldUpdateOperationsInput>;
   html?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  meta?: InputMaybe<Scalars['Json']['input']>;
+  meta?: InputMaybe<Scalars["Json"]["input"]>;
   order?: InputMaybe<IntFieldUpdateOperationsInput>;
   status?: InputMaybe<EnumLessonStatusFieldUpdateOperationsInput>;
   type?: InputMaybe<EnumContentTypeFieldUpdateOperationsInput>;
@@ -1077,7 +1093,7 @@ export type LessonBlocksWhereUniqueInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   html?: InputMaybe<StringNullableFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   meta?: InputMaybe<JsonNullableFilter>;
   node?: InputMaybe<SkillNodeWhereInput>;
   nodeId?: InputMaybe<UuidFilter>;
@@ -1089,24 +1105,28 @@ export type LessonBlocksWhereUniqueInput = {
 };
 
 export enum LessonStatus {
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
+  Draft = "DRAFT",
+  Published = "PUBLISHED",
 }
 
 export type Mutation = {
-  __typename?: 'Mutation';
+  __typename?: "Mutation";
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
   createQuiz?: Maybe<Quiz>;
+  createQuizOption?: Maybe<QuizOption>;
+  createQuizQuestion?: Maybe<QuizQuestion>;
   createSkillNodeBelow?: Maybe<SkillNode>;
   createSkillNodeToRight?: Maybe<SkillNode>;
   createSkillTree?: Maybe<SkillTree>;
   deleteCourse?: Maybe<Course>;
   deleteLessonBlock?: Maybe<LessonBlocks>;
   deleteQuiz?: Maybe<Quiz>;
-  deleteSkillNodeAdvanced?: Maybe<Scalars['Boolean']['output']>;
-  deleteSkillNodeSimple?: Maybe<Scalars['Boolean']['output']>;
+  deleteQuizOption?: Maybe<QuizOption>;
+  deleteQuizQuestion?: Maybe<QuizQuestion>;
+  deleteSkillNodeAdvanced?: Maybe<Scalars["Boolean"]["output"]>;
+  deleteSkillNodeSimple?: Maybe<Scalars["Boolean"]["output"]>;
   deleteSkillTree?: Maybe<SkillTree>;
   deleteUser?: Maybe<User>;
   publishLessonBlock?: Maybe<LessonBlocks>;
@@ -1115,136 +1135,149 @@ export type Mutation = {
   updateCourse?: Maybe<Course>;
   updateLessonBlock?: Maybe<LessonBlocks>;
   updateQuiz?: Maybe<Quiz>;
+  updateQuizOption?: Maybe<QuizOption>;
+  updateQuizQuestion?: Maybe<QuizQuestion>;
   updateSkillNode?: Maybe<SkillNode>;
   updateSkillTree?: Maybe<SkillTree>;
 };
-
 
 export type MutationCreateCourseArgs = {
   input: CreateCourseInput;
 };
 
-
 export type MutationCreateFirstSkillNodeArgs = {
   input: CreateFirstSkillNodeInput;
 };
-
 
 export type MutationCreateLessonBlockArgs = {
   input: LessonBlocksCreateInput;
 };
 
-
 export type MutationCreateQuizArgs = {
-  nodeId: Scalars['String']['input'];
-  required: Scalars['Boolean']['input'];
-  title: Scalars['String']['input'];
+  nodeId: Scalars["String"]["input"];
+  required: Scalars["Boolean"]["input"];
+  title: Scalars["String"]["input"];
 };
 
+export type MutationCreateQuizOptionArgs = {
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  questionId: Scalars["String"]["input"];
+  text: Scalars["String"]["input"];
+};
+
+export type MutationCreateQuizQuestionArgs = {
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
+  quizId: Scalars["String"]["input"];
+  type: QuestionType;
+};
 
 export type MutationCreateSkillNodeBelowArgs = {
   input: CreateSkillNodeBelowInput;
 };
 
-
 export type MutationCreateSkillNodeToRightArgs = {
   input: CreateSkillNodeToRightInput;
 };
-
 
 export type MutationCreateSkillTreeArgs = {
   input: CreateSkillTreeInput;
 };
 
-
 export type MutationDeleteCourseArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationDeleteLessonBlockArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationDeleteQuizArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
 
+export type MutationDeleteQuizOptionArgs = {
+  id: Scalars["ID"]["input"];
+};
+
+export type MutationDeleteQuizQuestionArgs = {
+  id: Scalars["ID"]["input"];
+};
 
 export type MutationDeleteSkillNodeAdvancedArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationDeleteSkillNodeSimpleArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationDeleteSkillTreeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationDeleteUserArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationPublishLessonBlockArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type MutationSetUserRoleArgs = {
   role: Role;
-  userId: Scalars['ID']['input'];
+  userId: Scalars["ID"]["input"];
 };
-
 
 export type MutationSyncCurrentUserArgs = {
-  name?: InputMaybe<Scalars['String']['input']>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
 };
-
 
 export type MutationUpdateCourseArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
   input: UpdateCourseInput;
 };
-
 
 export type MutationUpdateLessonBlockArgs = {
   input: LessonBlocksUpdateInput;
 };
 
-
 export type MutationUpdateQuizArgs = {
-  id: Scalars['ID']['input'];
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars["ID"]["input"];
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
+export type MutationUpdateQuizOptionArgs = {
+  id: Scalars["ID"]["input"];
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  text?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type MutationUpdateQuizQuestionArgs = {
+  id: Scalars["ID"]["input"];
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt?: InputMaybe<Scalars["String"]["input"]>;
+};
 
 export type MutationUpdateSkillNodeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
   input: UpdateSkillNodeInput;
 };
 
-
 export type MutationUpdateSkillTreeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
   input: UpdateSkillTreeInput;
 };
 
 export type NestedBoolFilter = {
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolFilter>;
 };
 
 export type NestedBoolNullableFilter = {
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolNullableFilter>;
 };
 
@@ -1252,7 +1285,7 @@ export type NestedBoolNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedBoolNullableFilter>;
   _min?: InputMaybe<NestedBoolNullableFilter>;
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolNullableWithAggregatesFilter>;
 };
 
@@ -1260,58 +1293,58 @@ export type NestedBoolWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedBoolFilter>;
   _min?: InputMaybe<NestedBoolFilter>;
-  equals?: InputMaybe<Scalars['Boolean']['input']>;
+  equals?: InputMaybe<Scalars["Boolean"]["input"]>;
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
 export type NestedDateTimeFilter = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type NestedDateTimeNullableFilter = {
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type NestedDateTimeNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedDateTimeNullableFilter>;
   _min?: InputMaybe<NestedDateTimeNullableFilter>;
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type NestedDateTimeWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedDateTimeFilter>;
   _min?: InputMaybe<NestedDateTimeFilter>;
-  equals?: InputMaybe<Scalars['DateTime']['input']>;
-  gt?: InputMaybe<Scalars['DateTime']['input']>;
-  gte?: InputMaybe<Scalars['DateTime']['input']>;
-  in?: InputMaybe<Array<Scalars['DateTime']['input']>>;
-  lt?: InputMaybe<Scalars['DateTime']['input']>;
-  lte?: InputMaybe<Scalars['DateTime']['input']>;
+  equals?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  gte?: InputMaybe<Scalars["DateTime"]["input"]>;
+  in?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
+  lt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  lte?: InputMaybe<Scalars["DateTime"]["input"]>;
   not?: InputMaybe<NestedDateTimeWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["DateTime"]["input"]>>;
 };
 
 export type NestedEnumContentTypeFilter = {
@@ -1417,47 +1450,47 @@ export type NestedEnumRoleWithAggregatesFilter = {
 };
 
 export type NestedFloatFilter = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  gt?: InputMaybe<Scalars['Float']['input']>;
-  gte?: InputMaybe<Scalars['Float']['input']>;
-  in?: InputMaybe<Array<Scalars['Float']['input']>>;
-  lt?: InputMaybe<Scalars['Float']['input']>;
-  lte?: InputMaybe<Scalars['Float']['input']>;
+  equals?: InputMaybe<Scalars["Float"]["input"]>;
+  gt?: InputMaybe<Scalars["Float"]["input"]>;
+  gte?: InputMaybe<Scalars["Float"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Float"]["input"]>>;
+  lt?: InputMaybe<Scalars["Float"]["input"]>;
+  lte?: InputMaybe<Scalars["Float"]["input"]>;
   not?: InputMaybe<NestedFloatFilter>;
-  notIn?: InputMaybe<Array<Scalars['Float']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Float"]["input"]>>;
 };
 
 export type NestedFloatNullableFilter = {
-  equals?: InputMaybe<Scalars['Float']['input']>;
-  gt?: InputMaybe<Scalars['Float']['input']>;
-  gte?: InputMaybe<Scalars['Float']['input']>;
-  in?: InputMaybe<Array<Scalars['Float']['input']>>;
-  lt?: InputMaybe<Scalars['Float']['input']>;
-  lte?: InputMaybe<Scalars['Float']['input']>;
+  equals?: InputMaybe<Scalars["Float"]["input"]>;
+  gt?: InputMaybe<Scalars["Float"]["input"]>;
+  gte?: InputMaybe<Scalars["Float"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Float"]["input"]>>;
+  lt?: InputMaybe<Scalars["Float"]["input"]>;
+  lte?: InputMaybe<Scalars["Float"]["input"]>;
   not?: InputMaybe<NestedFloatNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['Float']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Float"]["input"]>>;
 };
 
 export type NestedIntFilter = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type NestedIntNullableFilter = {
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type NestedIntNullableWithAggregatesFilter = {
@@ -1466,14 +1499,14 @@ export type NestedIntNullableWithAggregatesFilter = {
   _max?: InputMaybe<NestedIntNullableFilter>;
   _min?: InputMaybe<NestedIntNullableFilter>;
   _sum?: InputMaybe<NestedIntNullableFilter>;
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type NestedIntWithAggregatesFilter = {
@@ -1482,158 +1515,158 @@ export type NestedIntWithAggregatesFilter = {
   _max?: InputMaybe<NestedIntFilter>;
   _min?: InputMaybe<NestedIntFilter>;
   _sum?: InputMaybe<NestedIntFilter>;
-  equals?: InputMaybe<Scalars['Int']['input']>;
-  gt?: InputMaybe<Scalars['Int']['input']>;
-  gte?: InputMaybe<Scalars['Int']['input']>;
-  in?: InputMaybe<Array<Scalars['Int']['input']>>;
-  lt?: InputMaybe<Scalars['Int']['input']>;
-  lte?: InputMaybe<Scalars['Int']['input']>;
+  equals?: InputMaybe<Scalars["Int"]["input"]>;
+  gt?: InputMaybe<Scalars["Int"]["input"]>;
+  gte?: InputMaybe<Scalars["Int"]["input"]>;
+  in?: InputMaybe<Array<Scalars["Int"]["input"]>>;
+  lt?: InputMaybe<Scalars["Int"]["input"]>;
+  lte?: InputMaybe<Scalars["Int"]["input"]>;
   not?: InputMaybe<NestedIntWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["Int"]["input"]>>;
 };
 
 export type NestedJsonNullableFilter = {
-  array_contains?: InputMaybe<Scalars['Json']['input']>;
-  array_ends_with?: InputMaybe<Scalars['Json']['input']>;
-  array_starts_with?: InputMaybe<Scalars['Json']['input']>;
-  equals?: InputMaybe<Scalars['Json']['input']>;
-  gt?: InputMaybe<Scalars['Json']['input']>;
-  gte?: InputMaybe<Scalars['Json']['input']>;
-  lt?: InputMaybe<Scalars['Json']['input']>;
-  lte?: InputMaybe<Scalars['Json']['input']>;
+  array_contains?: InputMaybe<Scalars["Json"]["input"]>;
+  array_ends_with?: InputMaybe<Scalars["Json"]["input"]>;
+  array_starts_with?: InputMaybe<Scalars["Json"]["input"]>;
+  equals?: InputMaybe<Scalars["Json"]["input"]>;
+  gt?: InputMaybe<Scalars["Json"]["input"]>;
+  gte?: InputMaybe<Scalars["Json"]["input"]>;
+  lt?: InputMaybe<Scalars["Json"]["input"]>;
+  lte?: InputMaybe<Scalars["Json"]["input"]>;
   mode?: InputMaybe<QueryMode>;
-  not?: InputMaybe<Scalars['Json']['input']>;
-  path?: InputMaybe<Array<Scalars['String']['input']>>;
-  string_contains?: InputMaybe<Scalars['String']['input']>;
-  string_ends_with?: InputMaybe<Scalars['String']['input']>;
-  string_starts_with?: InputMaybe<Scalars['String']['input']>;
+  not?: InputMaybe<Scalars["Json"]["input"]>;
+  path?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  string_contains?: InputMaybe<Scalars["String"]["input"]>;
+  string_ends_with?: InputMaybe<Scalars["String"]["input"]>;
+  string_starts_with?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type NestedStringFilter = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedStringFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type NestedStringNullableFilter = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedStringNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type NestedStringNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedStringNullableFilter>;
   _min?: InputMaybe<NestedStringNullableFilter>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedStringNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type NestedStringWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedStringFilter>;
   _min?: InputMaybe<NestedStringFilter>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedStringWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type NestedUuidFilter = {
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedUuidFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };
 
 export type NestedUuidWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedStringFilter>;
   _min?: InputMaybe<NestedStringFilter>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   not?: InputMaybe<NestedUuidWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };
 
 export type NullableBoolFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['Boolean']['input']>;
+  set?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['DateTime']['input']>;
+  set?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type NullableIntFieldUpdateOperationsInput = {
-  decrement?: InputMaybe<Scalars['Int']['input']>;
-  divide?: InputMaybe<Scalars['Int']['input']>;
-  increment?: InputMaybe<Scalars['Int']['input']>;
-  multiply?: InputMaybe<Scalars['Int']['input']>;
-  set?: InputMaybe<Scalars['Int']['input']>;
+  decrement?: InputMaybe<Scalars["Int"]["input"]>;
+  divide?: InputMaybe<Scalars["Int"]["input"]>;
+  increment?: InputMaybe<Scalars["Int"]["input"]>;
+  multiply?: InputMaybe<Scalars["Int"]["input"]>;
+  set?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export enum NullableJsonNullValueInput {
-  DbNull = 'DbNull',
-  JsonNull = 'JsonNull'
+  DbNull = "DbNull",
+  JsonNull = "JsonNull",
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['String']['input']>;
+  set?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export enum NullsOrder {
-  First = 'first',
-  Last = 'last'
+  First = "first",
+  Last = "last",
 }
 
 export enum ProgressStatus {
-  Completed = 'COMPLETED',
-  InProgress = 'IN_PROGRESS',
-  NotStarted = 'NOT_STARTED'
+  Completed = "COMPLETED",
+  InProgress = "IN_PROGRESS",
+  NotStarted = "NOT_STARTED",
 }
 
 export type Query = {
-  __typename?: 'Query';
+  __typename?: "Query";
   adminCourse?: Maybe<Course>;
   adminGetAllCourses?: Maybe<Array<Course>>;
   adminMyCourse?: Maybe<Course>;
@@ -1647,231 +1680,221 @@ export type Query = {
   adminSkillTree?: Maybe<SkillTree>;
   adminSkillTrees?: Maybe<Array<SkillTree>>;
   allUsers?: Maybe<Array<User>>;
-  getCourseProgress?: Maybe<CourseProgress>;
+  courseProgress?: Maybe<CourseProgress>;
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
   myProgress?: Maybe<Array<UserNodeProgress>>;
   nodeProgress?: Maybe<UserNodeProgress>;
+  quiz?: Maybe<Quiz>;
+  quizzesByNode?: Maybe<Array<Quiz>>;
+  quizzesByTree?: Maybe<Array<Quiz>>;
   skillNode?: Maybe<SkillNode>;
   skillNodes?: Maybe<Array<SkillNode>>;
   skillNodesByTree?: Maybe<Array<SkillNode>>;
 };
 
-
 export type QueryAdminCourseArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryAdminGetAllCoursesArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  search?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
 };
-
 
 export type QueryAdminMyCourseArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
 
-
 export type QueryAdminMyCoursesWithContentArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  search?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
 };
 
-
 export type QueryAdminMySkillNodeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryAdminMySkillNodesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  treeId?: InputMaybe<Scalars['ID']['input']>;
+  courseId?: InputMaybe<Scalars["ID"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  treeId?: InputMaybe<Scalars["ID"]["input"]>;
 };
-
 
 export type QueryAdminMySkillTreeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryAdminMySkillTreesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+  courseId?: InputMaybe<Scalars["ID"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  search?: InputMaybe<Scalars["String"]["input"]>;
 };
-
 
 export type QueryAdminSkillNodeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryAdminSkillNodesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  treeId?: InputMaybe<Scalars['ID']['input']>;
+  courseId?: InputMaybe<Scalars["ID"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  treeId?: InputMaybe<Scalars["ID"]["input"]>;
 };
-
 
 export type QueryAdminSkillTreeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryAdminSkillTreesArgs = {
-  courseId?: InputMaybe<Scalars['ID']['input']>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  search?: InputMaybe<Scalars['String']['input']>;
+  courseId?: InputMaybe<Scalars["ID"]["input"]>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  page?: InputMaybe<Scalars["Int"]["input"]>;
+  search?: InputMaybe<Scalars["String"]["input"]>;
 };
-
 
 export type QueryAllUsersArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
-
-export type QueryGetCourseProgressArgs = {
-  courseId: Scalars['ID']['input'];
-  userId?: InputMaybe<Scalars['ID']['input']>;
+export type QueryCourseProgressArgs = {
+  courseId: Scalars["ID"]["input"];
+  userId?: InputMaybe<Scalars["ID"]["input"]>;
 };
-
 
 export type QueryLessonBlockArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QueryLessonBlocksArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
 };
-
 
 export type QueryLessonBlocksByNodeArgs = {
-  nodeId: Scalars['ID']['input'];
+  nodeId: Scalars["ID"]["input"];
 };
-
 
 export type QueryMyProgressArgs = {
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  userId?: InputMaybe<Scalars["ID"]["input"]>;
 };
-
 
 export type QueryNodeProgressArgs = {
-  nodeId: Scalars['ID']['input'];
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  nodeId: Scalars["ID"]["input"];
+  userId?: InputMaybe<Scalars["ID"]["input"]>;
 };
 
+export type QueryQuizArgs = {
+  id: Scalars["ID"]["input"];
+};
+
+export type QueryQuizzesByNodeArgs = {
+  nodeId: Scalars["ID"]["input"];
+};
+
+export type QueryQuizzesByTreeArgs = {
+  treeId: Scalars["ID"]["input"];
+};
 
 export type QuerySkillNodeArgs = {
-  id: Scalars['ID']['input'];
+  id: Scalars["ID"]["input"];
 };
-
 
 export type QuerySkillNodesArgs = {
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars["Int"]["input"]>;
+  offset?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
-
 export type QuerySkillNodesByTreeArgs = {
-  treeId: Scalars['ID']['input'];
+  treeId: Scalars["ID"]["input"];
 };
 
 export enum QueryMode {
-  Default = 'default',
-  Insensitive = 'insensitive'
+  Default = "default",
+  Insensitive = "insensitive",
 }
 
 export enum QuestionType {
-  MultipleChoice = 'MULTIPLE_CHOICE',
-  OpenQuestion = 'OPEN_QUESTION',
-  SingleChoice = 'SINGLE_CHOICE'
+  MultipleChoice = "MULTIPLE_CHOICE",
+  OpenQuestion = "OPEN_QUESTION",
+  SingleChoice = "SINGLE_CHOICE",
 }
 
 export type Quiz = {
-  __typename?: 'Quiz';
+  __typename?: "Quiz";
   attempts: Array<QuizAttempt>;
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['ID']['output'];
+  createdAt: Scalars["DateTime"]["output"];
+  deletedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  id: Scalars["ID"]["output"];
   node: SkillNode;
-  nodeId: Scalars['String']['output'];
+  nodeId: Scalars["String"]["output"];
   questions: Array<QuizQuestion>;
-  required: Scalars['Boolean']['output'];
-  title?: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['DateTime']['output'];
+  required: Scalars["Boolean"]["output"];
+  title?: Maybe<Scalars["String"]["output"]>;
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type QuizAttemptsArgs = {
   cursor?: InputMaybe<QuizAttemptWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizAttemptScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizAttemptOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizAttemptWhereInput>;
 };
-
 
 export type QuizQuestionsArgs = {
   cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizQuestionWhereInput>;
 };
 
 export type QuizAttempt = {
-  __typename?: 'QuizAttempt';
+  __typename?: "QuizAttempt";
   answers: Array<QuizAttemptAnswer>;
-  id: Scalars['ID']['output'];
-  passed: Scalars['Boolean']['output'];
+  id: Scalars["ID"]["output"];
+  passed: Scalars["Boolean"]["output"];
   quiz: Quiz;
-  quizId: Scalars['String']['output'];
-  takenAt: Scalars['DateTime']['output'];
+  quizId: Scalars["String"]["output"];
+  takenAt: Scalars["DateTime"]["output"];
   user: User;
-  userId: Scalars['String']['output'];
+  userId: Scalars["String"]["output"];
 };
-
 
 export type QuizAttemptAnswersArgs = {
   cursor?: InputMaybe<QuizAttemptAnswerWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizAttemptAnswerScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizAttemptAnswerOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizAttemptAnswerWhereInput>;
 };
 
 export type QuizAttemptAnswer = {
-  __typename?: 'QuizAttemptAnswer';
-  answer?: Maybe<Scalars['Json']['output']>;
+  __typename?: "QuizAttemptAnswer";
+  answer?: Maybe<Scalars["Json"]["output"]>;
   attempt: QuizAttempt;
-  attemptId: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  isCorrect?: Maybe<Scalars['Boolean']['output']>;
+  attemptId: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  isCorrect?: Maybe<Scalars["Boolean"]["output"]>;
   question: QuizQuestion;
-  questionId: Scalars['String']['output'];
+  questionId: Scalars["String"]["output"];
 };
 
 export type QuizAttemptAnswerAttemptIdQuestionIdCompoundUniqueInput = {
-  attemptId: Scalars['String']['input'];
-  questionId: Scalars['String']['input'];
+  attemptId: Scalars["String"]["input"];
+  questionId: Scalars["String"]["input"];
 };
 
 export type QuizAttemptAnswerCountOrderByAggregateInput = {
@@ -1883,55 +1906,59 @@ export type QuizAttemptAnswerCountOrderByAggregateInput = {
 };
 
 export type QuizAttemptAnswerCreateInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   attempt: QuizAttemptCreateNestedOneWithoutAnswersInput;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
   question: QuizQuestionCreateNestedOneWithoutAnswersInput;
 };
 
 export type QuizAttemptAnswerCreateManyAttemptInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
-  questionId: Scalars['String']['input'];
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  questionId: Scalars["String"]["input"];
 };
 
 export type QuizAttemptAnswerCreateManyAttemptInputEnvelope = {
   data: Array<QuizAttemptAnswerCreateManyAttemptInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptAnswerCreateManyInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
-  attemptId: Scalars['String']['input'];
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
-  questionId: Scalars['String']['input'];
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
+  attemptId: Scalars["String"]["input"];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  questionId: Scalars["String"]["input"];
 };
 
 export type QuizAttemptAnswerCreateManyQuestionInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
-  attemptId: Scalars['String']['input'];
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
+  attemptId: Scalars["String"]["input"];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptAnswerCreateManyQuestionInputEnvelope = {
   data: Array<QuizAttemptAnswerCreateManyQuestionInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptAnswerCreateNestedManyWithoutAttemptInput = {
   connect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptAnswerCreateOrConnectWithoutAttemptInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptAnswerCreateOrConnectWithoutAttemptInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptAnswerCreateWithoutAttemptInput>>;
   createMany?: InputMaybe<QuizAttemptAnswerCreateManyAttemptInputEnvelope>;
 };
 
 export type QuizAttemptAnswerCreateNestedManyWithoutQuestionInput = {
   connect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptAnswerCreateOrConnectWithoutQuestionInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptAnswerCreateOrConnectWithoutQuestionInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptAnswerCreateWithoutQuestionInput>>;
   createMany?: InputMaybe<QuizAttemptAnswerCreateManyQuestionInputEnvelope>;
 };
@@ -1947,17 +1974,17 @@ export type QuizAttemptAnswerCreateOrConnectWithoutQuestionInput = {
 };
 
 export type QuizAttemptAnswerCreateWithoutAttemptInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
   question: QuizQuestionCreateNestedOneWithoutAnswersInput;
 };
 
 export type QuizAttemptAnswerCreateWithoutQuestionInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   attempt: QuizAttemptCreateNestedOneWithoutAnswersInput;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptAnswerListRelationFilter = {
@@ -2006,11 +2033,11 @@ export type QuizAttemptAnswerOrderByWithRelationInput = {
 };
 
 export enum QuizAttemptAnswerScalarFieldEnum {
-  Answer = 'answer',
-  AttemptId = 'attemptId',
-  Id = 'id',
-  IsCorrect = 'isCorrect',
-  QuestionId = 'questionId'
+  Answer = "answer",
+  AttemptId = "attemptId",
+  Id = "id",
+  IsCorrect = "isCorrect",
+  QuestionId = "questionId",
 }
 
 export type QuizAttemptAnswerScalarWhereInput = {
@@ -2036,7 +2063,7 @@ export type QuizAttemptAnswerScalarWhereWithAggregatesInput = {
 };
 
 export type QuizAttemptAnswerUpdateInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   attempt?: InputMaybe<QuizAttemptUpdateOneRequiredWithoutAnswersNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
@@ -2044,7 +2071,7 @@ export type QuizAttemptAnswerUpdateInput = {
 };
 
 export type QuizAttemptAnswerUpdateManyMutationInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
 };
@@ -2061,30 +2088,46 @@ export type QuizAttemptAnswerUpdateManyWithWhereWithoutQuestionInput = {
 
 export type QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput = {
   connect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptAnswerCreateOrConnectWithoutAttemptInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptAnswerCreateOrConnectWithoutAttemptInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptAnswerCreateWithoutAttemptInput>>;
   createMany?: InputMaybe<QuizAttemptAnswerCreateManyAttemptInputEnvelope>;
   delete?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<QuizAttemptAnswerScalarWhereInput>>;
   disconnect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  update?: InputMaybe<Array<QuizAttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput>>;
-  updateMany?: InputMaybe<Array<QuizAttemptAnswerUpdateManyWithWhereWithoutAttemptInput>>;
-  upsert?: InputMaybe<Array<QuizAttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput>>;
+  update?: InputMaybe<
+    Array<QuizAttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<QuizAttemptAnswerUpdateManyWithWhereWithoutAttemptInput>
+  >;
+  upsert?: InputMaybe<
+    Array<QuizAttemptAnswerUpsertWithWhereUniqueWithoutAttemptInput>
+  >;
 };
 
 export type QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput = {
   connect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptAnswerCreateOrConnectWithoutQuestionInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptAnswerCreateOrConnectWithoutQuestionInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptAnswerCreateWithoutQuestionInput>>;
   createMany?: InputMaybe<QuizAttemptAnswerCreateManyQuestionInputEnvelope>;
   delete?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<QuizAttemptAnswerScalarWhereInput>>;
   disconnect?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizAttemptAnswerWhereUniqueInput>>;
-  update?: InputMaybe<Array<QuizAttemptAnswerUpdateWithWhereUniqueWithoutQuestionInput>>;
-  updateMany?: InputMaybe<Array<QuizAttemptAnswerUpdateManyWithWhereWithoutQuestionInput>>;
-  upsert?: InputMaybe<Array<QuizAttemptAnswerUpsertWithWhereUniqueWithoutQuestionInput>>;
+  update?: InputMaybe<
+    Array<QuizAttemptAnswerUpdateWithWhereUniqueWithoutQuestionInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<QuizAttemptAnswerUpdateManyWithWhereWithoutQuestionInput>
+  >;
+  upsert?: InputMaybe<
+    Array<QuizAttemptAnswerUpsertWithWhereUniqueWithoutQuestionInput>
+  >;
 };
 
 export type QuizAttemptAnswerUpdateWithWhereUniqueWithoutAttemptInput = {
@@ -2098,14 +2141,14 @@ export type QuizAttemptAnswerUpdateWithWhereUniqueWithoutQuestionInput = {
 };
 
 export type QuizAttemptAnswerUpdateWithoutAttemptInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   question?: InputMaybe<QuizQuestionUpdateOneRequiredWithoutAnswersNestedInput>;
 };
 
 export type QuizAttemptAnswerUpdateWithoutQuestionInput = {
-  answer?: InputMaybe<Scalars['Json']['input']>;
+  answer?: InputMaybe<Scalars["Json"]["input"]>;
   attempt?: InputMaybe<QuizAttemptUpdateOneRequiredWithoutAnswersNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
@@ -2144,7 +2187,7 @@ export type QuizAttemptAnswerWhereUniqueInput = {
   attempt?: InputMaybe<QuizAttemptWhereInput>;
   attemptId?: InputMaybe<UuidFilter>;
   attemptId_questionId?: InputMaybe<QuizAttemptAnswerAttemptIdQuestionIdCompoundUniqueInput>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   isCorrect?: InputMaybe<BoolNullableFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
@@ -2160,55 +2203,59 @@ export type QuizAttemptCountOrderByAggregateInput = {
 
 export type QuizAttemptCreateInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
 };
 
 export type QuizAttemptCreateManyInput = {
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
-  quizId: Scalars['String']['input'];
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
-  userId: Scalars['String']['input'];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
+  quizId: Scalars["String"]["input"];
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  userId: Scalars["String"]["input"];
 };
 
 export type QuizAttemptCreateManyQuizInput = {
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
-  userId: Scalars['String']['input'];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  userId: Scalars["String"]["input"];
 };
 
 export type QuizAttemptCreateManyQuizInputEnvelope = {
   data: Array<QuizAttemptCreateManyQuizInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptCreateManyUserInput = {
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
-  quizId: Scalars['String']['input'];
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
+  quizId: Scalars["String"]["input"];
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizAttemptCreateManyUserInputEnvelope = {
   data: Array<QuizAttemptCreateManyUserInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizAttemptCreateNestedManyWithoutQuizInput = {
   connect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptCreateOrConnectWithoutQuizInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptCreateOrConnectWithoutQuizInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptCreateWithoutQuizInput>>;
   createMany?: InputMaybe<QuizAttemptCreateManyQuizInputEnvelope>;
 };
 
 export type QuizAttemptCreateNestedManyWithoutUserInput = {
   connect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptCreateOrConnectWithoutUserInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptCreateOrConnectWithoutUserInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptCreateWithoutUserInput>>;
   createMany?: InputMaybe<QuizAttemptCreateManyUserInputEnvelope>;
 };
@@ -2235,27 +2282,27 @@ export type QuizAttemptCreateOrConnectWithoutUserInput = {
 };
 
 export type QuizAttemptCreateWithoutAnswersInput = {
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
 };
 
 export type QuizAttemptCreateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
 };
 
 export type QuizAttemptCreateWithoutUserInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  passed: Scalars["Boolean"]["input"];
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
-  takenAt?: InputMaybe<Scalars['DateTime']['input']>;
+  takenAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizAttemptListRelationFilter = {
@@ -2307,11 +2354,11 @@ export type QuizAttemptOrderByWithRelationInput = {
 };
 
 export enum QuizAttemptScalarFieldEnum {
-  Id = 'id',
-  Passed = 'passed',
-  QuizId = 'quizId',
-  TakenAt = 'takenAt',
-  UserId = 'userId'
+  Id = "id",
+  Passed = "passed",
+  QuizId = "quizId",
+  TakenAt = "takenAt",
+  UserId = "userId",
 }
 
 export type QuizAttemptScalarRelationFilter = {
@@ -2368,7 +2415,9 @@ export type QuizAttemptUpdateManyWithWhereWithoutUserInput = {
 
 export type QuizAttemptUpdateManyWithoutQuizNestedInput = {
   connect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptCreateOrConnectWithoutQuizInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptCreateOrConnectWithoutQuizInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptCreateWithoutQuizInput>>;
   createMany?: InputMaybe<QuizAttemptCreateManyQuizInputEnvelope>;
   delete?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
@@ -2376,13 +2425,17 @@ export type QuizAttemptUpdateManyWithoutQuizNestedInput = {
   disconnect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
   update?: InputMaybe<Array<QuizAttemptUpdateWithWhereUniqueWithoutQuizInput>>;
-  updateMany?: InputMaybe<Array<QuizAttemptUpdateManyWithWhereWithoutQuizInput>>;
+  updateMany?: InputMaybe<
+    Array<QuizAttemptUpdateManyWithWhereWithoutQuizInput>
+  >;
   upsert?: InputMaybe<Array<QuizAttemptUpsertWithWhereUniqueWithoutQuizInput>>;
 };
 
 export type QuizAttemptUpdateManyWithoutUserNestedInput = {
   connect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizAttemptCreateOrConnectWithoutUserInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizAttemptCreateOrConnectWithoutUserInput>
+  >;
   create?: InputMaybe<Array<QuizAttemptCreateWithoutUserInput>>;
   createMany?: InputMaybe<QuizAttemptCreateManyUserInputEnvelope>;
   delete?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
@@ -2390,7 +2443,9 @@ export type QuizAttemptUpdateManyWithoutUserNestedInput = {
   disconnect?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizAttemptWhereUniqueInput>>;
   update?: InputMaybe<Array<QuizAttemptUpdateWithWhereUniqueWithoutUserInput>>;
-  updateMany?: InputMaybe<Array<QuizAttemptUpdateManyWithWhereWithoutUserInput>>;
+  updateMany?: InputMaybe<
+    Array<QuizAttemptUpdateManyWithWhereWithoutUserInput>
+  >;
   upsert?: InputMaybe<Array<QuizAttemptUpsertWithWhereUniqueWithoutUserInput>>;
 };
 
@@ -2478,7 +2533,7 @@ export type QuizAttemptWhereUniqueInput = {
   NOT?: InputMaybe<Array<QuizAttemptWhereInput>>;
   OR?: InputMaybe<Array<QuizAttemptWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   passed?: InputMaybe<BoolFilter>;
   quiz?: InputMaybe<QuizWhereInput>;
   quizId?: InputMaybe<UuidFilter>;
@@ -2499,24 +2554,24 @@ export type QuizCountOrderByAggregateInput = {
 
 export type QuizCreateInput = {
   attempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutQuizInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutQuizInput;
   questions?: InputMaybe<QuizQuestionCreateNestedManyWithoutQuizInput>;
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizCreateManyInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  nodeId: Scalars['String']['input'];
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  nodeId: Scalars["String"]["input"];
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizCreateNestedOneWithoutAttemptsInput = {
@@ -2553,36 +2608,36 @@ export type QuizCreateOrConnectWithoutQuestionsInput = {
 };
 
 export type QuizCreateWithoutAttemptsInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutQuizInput;
   questions?: InputMaybe<QuizQuestionCreateNestedManyWithoutQuizInput>;
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizCreateWithoutNodeInput = {
   attempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutQuizInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   questions?: InputMaybe<QuizQuestionCreateNestedManyWithoutQuizInput>;
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizCreateWithoutQuestionsInput = {
   attempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutQuizInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutQuizInput;
-  required?: InputMaybe<Scalars['Boolean']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  required?: InputMaybe<Scalars["Boolean"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizMaxOrderByAggregateInput = {
@@ -2611,14 +2666,14 @@ export type QuizNullableScalarRelationFilter = {
 };
 
 export type QuizOption = {
-  __typename?: 'QuizOption';
-  createdAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
-  isCorrect: Scalars['Boolean']['output'];
+  __typename?: "QuizOption";
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
+  isCorrect: Scalars["Boolean"]["output"];
   question: QuizQuestion;
-  questionId: Scalars['String']['output'];
-  text: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
+  questionId: Scalars["String"]["output"];
+  text: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
 
 export type QuizOptionCountOrderByAggregateInput = {
@@ -2631,39 +2686,41 @@ export type QuizOptionCountOrderByAggregateInput = {
 };
 
 export type QuizOptionCreateInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
   question: QuizQuestionCreateNestedOneWithoutOptionsInput;
-  text: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  text: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizOptionCreateManyInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
-  questionId: Scalars['String']['input'];
-  text: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  questionId: Scalars["String"]["input"];
+  text: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizOptionCreateManyQuestionInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
-  text: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  text: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizOptionCreateManyQuestionInputEnvelope = {
   data: Array<QuizOptionCreateManyQuestionInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizOptionCreateNestedManyWithoutQuestionInput = {
   connect?: InputMaybe<Array<QuizOptionWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizOptionCreateOrConnectWithoutQuestionInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizOptionCreateOrConnectWithoutQuestionInput>
+  >;
   create?: InputMaybe<Array<QuizOptionCreateWithoutQuestionInput>>;
   createMany?: InputMaybe<QuizOptionCreateManyQuestionInputEnvelope>;
 };
@@ -2674,11 +2731,11 @@ export type QuizOptionCreateOrConnectWithoutQuestionInput = {
 };
 
 export type QuizOptionCreateWithoutQuestionInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
-  text: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  isCorrect?: InputMaybe<Scalars["Boolean"]["input"]>;
+  text: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizOptionListRelationFilter = {
@@ -2732,12 +2789,12 @@ export type QuizOptionOrderByWithRelationInput = {
 };
 
 export enum QuizOptionScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  IsCorrect = 'isCorrect',
-  QuestionId = 'questionId',
-  Text = 'text',
-  UpdatedAt = 'updatedAt'
+  CreatedAt = "createdAt",
+  Id = "id",
+  IsCorrect = "isCorrect",
+  QuestionId = "questionId",
+  Text = "text",
+  UpdatedAt = "updatedAt",
 }
 
 export type QuizOptionScalarWhereInput = {
@@ -2788,16 +2845,24 @@ export type QuizOptionUpdateManyWithWhereWithoutQuestionInput = {
 
 export type QuizOptionUpdateManyWithoutQuestionNestedInput = {
   connect?: InputMaybe<Array<QuizOptionWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizOptionCreateOrConnectWithoutQuestionInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizOptionCreateOrConnectWithoutQuestionInput>
+  >;
   create?: InputMaybe<Array<QuizOptionCreateWithoutQuestionInput>>;
   createMany?: InputMaybe<QuizOptionCreateManyQuestionInputEnvelope>;
   delete?: InputMaybe<Array<QuizOptionWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<QuizOptionScalarWhereInput>>;
   disconnect?: InputMaybe<Array<QuizOptionWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizOptionWhereUniqueInput>>;
-  update?: InputMaybe<Array<QuizOptionUpdateWithWhereUniqueWithoutQuestionInput>>;
-  updateMany?: InputMaybe<Array<QuizOptionUpdateManyWithWhereWithoutQuestionInput>>;
-  upsert?: InputMaybe<Array<QuizOptionUpsertWithWhereUniqueWithoutQuestionInput>>;
+  update?: InputMaybe<
+    Array<QuizOptionUpdateWithWhereUniqueWithoutQuestionInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<QuizOptionUpdateManyWithWhereWithoutQuestionInput>
+  >;
+  upsert?: InputMaybe<
+    Array<QuizOptionUpsertWithWhereUniqueWithoutQuestionInput>
+  >;
 };
 
 export type QuizOptionUpdateWithWhereUniqueWithoutQuestionInput = {
@@ -2837,7 +2902,7 @@ export type QuizOptionWhereUniqueInput = {
   NOT?: InputMaybe<Array<QuizOptionWhereInput>>;
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   isCorrect?: InputMaybe<BoolFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
@@ -2872,36 +2937,34 @@ export type QuizOrderByWithRelationInput = {
 };
 
 export type QuizQuestion = {
-  __typename?: 'QuizQuestion';
+  __typename?: "QuizQuestion";
   answers: Array<QuizAttemptAnswer>;
-  createdAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
   options: Array<QuizOption>;
-  order: Scalars['Int']['output'];
-  prompt: Scalars['String']['output'];
+  order: Scalars["Int"]["output"];
+  prompt: Scalars["String"]["output"];
   quiz: Quiz;
-  quizId: Scalars['String']['output'];
+  quizId: Scalars["String"]["output"];
   type: QuestionType;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type QuizQuestionAnswersArgs = {
   cursor?: InputMaybe<QuizAttemptAnswerWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizAttemptAnswerScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizAttemptAnswerOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizAttemptAnswerWhereInput>;
 };
-
 
 export type QuizQuestionOptionsArgs = {
   cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizOptionWhereInput>;
 };
 
@@ -2921,43 +2984,45 @@ export type QuizQuestionCountOrderByAggregateInput = {
 
 export type QuizQuestionCreateInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
   quiz: QuizCreateNestedOneWithoutQuestionsInput;
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionCreateManyInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
-  quizId: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
+  quizId: Scalars["String"]["input"];
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionCreateManyQuizInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionCreateManyQuizInputEnvelope = {
   data: Array<QuizQuestionCreateManyQuizInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type QuizQuestionCreateNestedManyWithoutQuizInput = {
   connect?: InputMaybe<Array<QuizQuestionWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizQuestionCreateOrConnectWithoutQuizInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizQuestionCreateOrConnectWithoutQuizInput>
+  >;
   create?: InputMaybe<Array<QuizQuestionCreateWithoutQuizInput>>;
   createMany?: InputMaybe<QuizQuestionCreateManyQuizInputEnvelope>;
 };
@@ -2990,36 +3055,36 @@ export type QuizQuestionCreateOrConnectWithoutQuizInput = {
 };
 
 export type QuizQuestionCreateWithoutAnswersInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
   quiz: QuizCreateNestedOneWithoutQuestionsInput;
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionCreateWithoutOptionsInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
   quiz: QuizCreateNestedOneWithoutQuestionsInput;
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionCreateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
-  order?: InputMaybe<Scalars['Int']['input']>;
-  prompt: Scalars['String']['input'];
+  order?: InputMaybe<Scalars["Int"]["input"]>;
+  prompt: Scalars["String"]["input"];
   type: QuestionType;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type QuizQuestionListRelationFilter = {
@@ -3081,13 +3146,13 @@ export type QuizQuestionOrderByWithRelationInput = {
 };
 
 export enum QuizQuestionScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  Order = 'order',
-  Prompt = 'prompt',
-  QuizId = 'quizId',
-  Type = 'type',
-  UpdatedAt = 'updatedAt'
+  CreatedAt = "createdAt",
+  Id = "id",
+  Order = "order",
+  Prompt = "prompt",
+  QuizId = "quizId",
+  Type = "type",
+  UpdatedAt = "updatedAt",
 }
 
 export type QuizQuestionScalarRelationFilter = {
@@ -3153,7 +3218,9 @@ export type QuizQuestionUpdateManyWithWhereWithoutQuizInput = {
 
 export type QuizQuestionUpdateManyWithoutQuizNestedInput = {
   connect?: InputMaybe<Array<QuizQuestionWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<QuizQuestionCreateOrConnectWithoutQuizInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<QuizQuestionCreateOrConnectWithoutQuizInput>
+  >;
   create?: InputMaybe<Array<QuizQuestionCreateWithoutQuizInput>>;
   createMany?: InputMaybe<QuizQuestionCreateManyQuizInputEnvelope>;
   delete?: InputMaybe<Array<QuizQuestionWhereUniqueInput>>;
@@ -3161,7 +3228,9 @@ export type QuizQuestionUpdateManyWithoutQuizNestedInput = {
   disconnect?: InputMaybe<Array<QuizQuestionWhereUniqueInput>>;
   set?: InputMaybe<Array<QuizQuestionWhereUniqueInput>>;
   update?: InputMaybe<Array<QuizQuestionUpdateWithWhereUniqueWithoutQuizInput>>;
-  updateMany?: InputMaybe<Array<QuizQuestionUpdateManyWithWhereWithoutQuizInput>>;
+  updateMany?: InputMaybe<
+    Array<QuizQuestionUpdateManyWithWhereWithoutQuizInput>
+  >;
   upsert?: InputMaybe<Array<QuizQuestionUpsertWithWhereUniqueWithoutQuizInput>>;
 };
 
@@ -3269,7 +3338,7 @@ export type QuizQuestionWhereUniqueInput = {
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
   order?: InputMaybe<IntFilter>;
   prompt?: InputMaybe<StringFilter>;
@@ -3280,13 +3349,13 @@ export type QuizQuestionWhereUniqueInput = {
 };
 
 export enum QuizScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Id = 'id',
-  NodeId = 'nodeId',
-  Required = 'required',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
+  CreatedAt = "createdAt",
+  DeletedAt = "deletedAt",
+  Id = "id",
+  NodeId = "nodeId",
+  Required = "required",
+  Title = "title",
+  UpdatedAt = "updatedAt",
 }
 
 export type QuizScalarRelationFilter = {
@@ -3443,9 +3512,9 @@ export type QuizWhereUniqueInput = {
   attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node?: InputMaybe<SkillNodeWhereInput>;
-  nodeId?: InputMaybe<Scalars['String']['input']>;
+  nodeId?: InputMaybe<Scalars["String"]["input"]>;
   questions?: InputMaybe<QuizQuestionListRelationFilter>;
   required?: InputMaybe<BoolFilter>;
   title?: InputMaybe<StringNullableFilter>;
@@ -3453,67 +3522,63 @@ export type QuizWhereUniqueInput = {
 };
 
 export enum Role {
-  Admin = 'ADMIN',
-  User = 'USER'
+  Admin = "ADMIN",
+  User = "USER",
 }
 
 export type SkillNode = {
-  __typename?: 'SkillNode';
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  id: Scalars['ID']['output'];
+  __typename?: "SkillNode";
+  createdAt: Scalars["DateTime"]["output"];
+  deletedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  id: Scalars["ID"]["output"];
   lessons: Array<LessonBlocks>;
-  orderInStep: Scalars['Int']['output'];
-  posX?: Maybe<Scalars['Int']['output']>;
-  posY?: Maybe<Scalars['Int']['output']>;
+  orderInStep: Scalars["Int"]["output"];
+  posX?: Maybe<Scalars["Int"]["output"]>;
+  posY?: Maybe<Scalars["Int"]["output"]>;
   prerequisites: Array<SkillNodePrerequisite>;
   progresses: Array<UserNodeProgress>;
   quiz?: Maybe<Quiz>;
   requiredFor: Array<SkillNodePrerequisite>;
-  step: Scalars['Int']['output'];
-  title: Scalars['String']['output'];
+  step: Scalars["Int"]["output"];
+  title: Scalars["String"]["output"];
   tree: SkillTree;
-  treeId: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
+  treeId: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type SkillNodeLessonsArgs = {
   cursor?: InputMaybe<LessonBlocksWhereUniqueInput>;
   distinct?: InputMaybe<Array<LessonBlocksScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<LessonBlocksOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<LessonBlocksWhereInput>;
 };
-
 
 export type SkillNodePrerequisitesArgs = {
   cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
   distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
 };
-
 
 export type SkillNodeProgressesArgs = {
   cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
   distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<UserNodeProgressWhereInput>;
 };
-
 
 export type SkillNodeRequiredForArgs = {
   cursor?: InputMaybe<SkillNodePrerequisiteWhereUniqueInput>;
   distinct?: InputMaybe<Array<SkillNodePrerequisiteScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<SkillNodePrerequisiteOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<SkillNodePrerequisiteWhereInput>;
 };
 
@@ -3538,51 +3603,51 @@ export type SkillNodeCountOrderByAggregateInput = {
 };
 
 export type SkillNodeCreateInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateManyInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
-  treeId: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
+  treeId: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateManyTreeInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateManyTreeInputEnvelope = {
   data: Array<SkillNodeCreateManyTreeInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type SkillNodeCreateNestedManyWithoutTreeInput = {
@@ -3653,105 +3718,105 @@ export type SkillNodeCreateOrConnectWithoutTreeInput = {
 };
 
 export type SkillNodeCreateWithoutLessonsInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateWithoutPrerequisitesInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateWithoutProgressesInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateWithoutQuizInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateWithoutRequiredForInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeCreateWithoutTreeInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksCreateNestedManyWithoutNodeInput>;
-  orderInStep?: InputMaybe<Scalars['Int']['input']>;
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
+  orderInStep?: InputMaybe<Scalars["Int"]["input"]>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
   prerequisites?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutNodeInput>;
   progresses?: InputMaybe<UserNodeProgressCreateNestedManyWithoutNodeInput>;
   quiz?: InputMaybe<QuizCreateNestedOneWithoutNodeInput>;
   requiredFor?: InputMaybe<SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput>;
-  step?: InputMaybe<Scalars['Int']['input']>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars["Int"]["input"]>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillNodeListRelationFilter = {
@@ -3828,11 +3893,11 @@ export type SkillNodeOrderByWithRelationInput = {
 };
 
 export type SkillNodePrerequisite = {
-  __typename?: 'SkillNodePrerequisite';
+  __typename?: "SkillNodePrerequisite";
   dependsOn: SkillNode;
-  dependsOnNodeId: Scalars['String']['output'];
+  dependsOnNodeId: Scalars["String"]["output"];
   node: SkillNode;
-  nodeId: Scalars['String']['output'];
+  nodeId: Scalars["String"]["output"];
 };
 
 export type SkillNodePrerequisiteCountOrderByAggregateInput = {
@@ -3846,38 +3911,42 @@ export type SkillNodePrerequisiteCreateInput = {
 };
 
 export type SkillNodePrerequisiteCreateManyDependsOnInput = {
-  nodeId: Scalars['String']['input'];
+  nodeId: Scalars["String"]["input"];
 };
 
 export type SkillNodePrerequisiteCreateManyDependsOnInputEnvelope = {
   data: Array<SkillNodePrerequisiteCreateManyDependsOnInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type SkillNodePrerequisiteCreateManyInput = {
-  dependsOnNodeId: Scalars['String']['input'];
-  nodeId: Scalars['String']['input'];
+  dependsOnNodeId: Scalars["String"]["input"];
+  nodeId: Scalars["String"]["input"];
 };
 
 export type SkillNodePrerequisiteCreateManyNodeInput = {
-  dependsOnNodeId: Scalars['String']['input'];
+  dependsOnNodeId: Scalars["String"]["input"];
 };
 
 export type SkillNodePrerequisiteCreateManyNodeInputEnvelope = {
   data: Array<SkillNodePrerequisiteCreateManyNodeInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type SkillNodePrerequisiteCreateNestedManyWithoutDependsOnInput = {
   connect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput>
+  >;
   create?: InputMaybe<Array<SkillNodePrerequisiteCreateWithoutDependsOnInput>>;
   createMany?: InputMaybe<SkillNodePrerequisiteCreateManyDependsOnInputEnvelope>;
 };
 
 export type SkillNodePrerequisiteCreateNestedManyWithoutNodeInput = {
   connect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillNodePrerequisiteCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillNodePrerequisiteCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<SkillNodePrerequisiteCreateWithoutNodeInput>>;
   createMany?: InputMaybe<SkillNodePrerequisiteCreateManyNodeInputEnvelope>;
 };
@@ -3917,8 +3986,8 @@ export type SkillNodePrerequisiteMinOrderByAggregateInput = {
 };
 
 export type SkillNodePrerequisiteNodeIdDependsOnNodeIdCompoundUniqueInput = {
-  dependsOnNodeId: Scalars['String']['input'];
-  nodeId: Scalars['String']['input'];
+  dependsOnNodeId: Scalars["String"]["input"];
+  nodeId: Scalars["String"]["input"];
 };
 
 export type SkillNodePrerequisiteOrderByRelationAggregateInput = {
@@ -3941,8 +4010,8 @@ export type SkillNodePrerequisiteOrderByWithRelationInput = {
 };
 
 export enum SkillNodePrerequisiteScalarFieldEnum {
-  DependsOnNodeId = 'dependsOnNodeId',
-  NodeId = 'nodeId'
+  DependsOnNodeId = "dependsOnNodeId",
+  NodeId = "nodeId",
 }
 
 export type SkillNodePrerequisiteScalarWhereInput = {
@@ -3967,7 +4036,7 @@ export type SkillNodePrerequisiteUpdateInput = {
 };
 
 export type SkillNodePrerequisiteUpdateManyMutationInput = {
-  _?: InputMaybe<Scalars['NEVER']['input']>;
+  _?: InputMaybe<Scalars["NEVER"]["input"]>;
 };
 
 export type SkillNodePrerequisiteUpdateManyWithWhereWithoutDependsOnInput = {
@@ -3982,30 +4051,46 @@ export type SkillNodePrerequisiteUpdateManyWithWhereWithoutNodeInput = {
 
 export type SkillNodePrerequisiteUpdateManyWithoutDependsOnNestedInput = {
   connect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillNodePrerequisiteCreateOrConnectWithoutDependsOnInput>
+  >;
   create?: InputMaybe<Array<SkillNodePrerequisiteCreateWithoutDependsOnInput>>;
   createMany?: InputMaybe<SkillNodePrerequisiteCreateManyDependsOnInputEnvelope>;
   delete?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<SkillNodePrerequisiteScalarWhereInput>>;
   disconnect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
   set?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  update?: InputMaybe<Array<SkillNodePrerequisiteUpdateWithWhereUniqueWithoutDependsOnInput>>;
-  updateMany?: InputMaybe<Array<SkillNodePrerequisiteUpdateManyWithWhereWithoutDependsOnInput>>;
-  upsert?: InputMaybe<Array<SkillNodePrerequisiteUpsertWithWhereUniqueWithoutDependsOnInput>>;
+  update?: InputMaybe<
+    Array<SkillNodePrerequisiteUpdateWithWhereUniqueWithoutDependsOnInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<SkillNodePrerequisiteUpdateManyWithWhereWithoutDependsOnInput>
+  >;
+  upsert?: InputMaybe<
+    Array<SkillNodePrerequisiteUpsertWithWhereUniqueWithoutDependsOnInput>
+  >;
 };
 
 export type SkillNodePrerequisiteUpdateManyWithoutNodeNestedInput = {
   connect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillNodePrerequisiteCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillNodePrerequisiteCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<SkillNodePrerequisiteCreateWithoutNodeInput>>;
   createMany?: InputMaybe<SkillNodePrerequisiteCreateManyNodeInputEnvelope>;
   delete?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<SkillNodePrerequisiteScalarWhereInput>>;
   disconnect?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
   set?: InputMaybe<Array<SkillNodePrerequisiteWhereUniqueInput>>;
-  update?: InputMaybe<Array<SkillNodePrerequisiteUpdateWithWhereUniqueWithoutNodeInput>>;
-  updateMany?: InputMaybe<Array<SkillNodePrerequisiteUpdateManyWithWhereWithoutNodeInput>>;
-  upsert?: InputMaybe<Array<SkillNodePrerequisiteUpsertWithWhereUniqueWithoutNodeInput>>;
+  update?: InputMaybe<
+    Array<SkillNodePrerequisiteUpdateWithWhereUniqueWithoutNodeInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<SkillNodePrerequisiteUpdateManyWithWhereWithoutNodeInput>
+  >;
+  upsert?: InputMaybe<
+    Array<SkillNodePrerequisiteUpsertWithWhereUniqueWithoutNodeInput>
+  >;
 };
 
 export type SkillNodePrerequisiteUpdateWithWhereUniqueWithoutDependsOnInput = {
@@ -4060,16 +4145,16 @@ export type SkillNodePrerequisiteWhereUniqueInput = {
 };
 
 export enum SkillNodeScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Id = 'id',
-  OrderInStep = 'orderInStep',
-  PosX = 'posX',
-  PosY = 'posY',
-  Step = 'step',
-  Title = 'title',
-  TreeId = 'treeId',
-  UpdatedAt = 'updatedAt'
+  CreatedAt = "createdAt",
+  DeletedAt = "deletedAt",
+  Id = "id",
+  OrderInStep = "orderInStep",
+  PosX = "posX",
+  PosY = "posY",
+  Step = "step",
+  Title = "title",
+  TreeId = "treeId",
+  UpdatedAt = "updatedAt",
 }
 
 export type SkillNodeScalarRelationFilter = {
@@ -4117,15 +4202,15 @@ export type SkillNodeSumOrderByAggregateInput = {
 };
 
 export type SkillNodeTreeIdPosXPosYCompoundUniqueInput = {
-  posX: Scalars['Int']['input'];
-  posY: Scalars['Int']['input'];
-  treeId: Scalars['String']['input'];
+  posX: Scalars["Int"]["input"];
+  posY: Scalars["Int"]["input"];
+  treeId: Scalars["String"]["input"];
 };
 
 export type SkillNodeTreeIdStepOrderInStepCompoundUniqueInput = {
-  orderInStep: Scalars['Int']['input'];
-  step: Scalars['Int']['input'];
-  treeId: Scalars['String']['input'];
+  orderInStep: Scalars["Int"]["input"];
+  step: Scalars["Int"]["input"];
+  treeId: Scalars["String"]["input"];
 };
 
 export type SkillNodeUpdateInput = {
@@ -4413,7 +4498,7 @@ export type SkillNodeWhereUniqueInput = {
   OR?: InputMaybe<Array<SkillNodeWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   lessons?: InputMaybe<LessonBlocksListRelationFilter>;
   orderInStep?: InputMaybe<IntFilter>;
   posX?: InputMaybe<IntNullableFilter>;
@@ -4432,25 +4517,24 @@ export type SkillNodeWhereUniqueInput = {
 };
 
 export type SkillTree = {
-  __typename?: 'SkillTree';
+  __typename?: "SkillTree";
   course: Course;
-  courseId: Scalars['String']['output'];
-  createdAt: Scalars['DateTime']['output'];
-  deletedAt?: Maybe<Scalars['DateTime']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
+  courseId: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  deletedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  description?: Maybe<Scalars["String"]["output"]>;
+  id: Scalars["ID"]["output"];
   nodes: Array<SkillNode>;
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['DateTime']['output'];
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type SkillTreeNodesArgs = {
   cursor?: InputMaybe<SkillNodeWhereUniqueInput>;
   distinct?: InputMaybe<Array<SkillNodeScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<SkillNodeOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<SkillNodeWhereInput>;
 };
 
@@ -4466,42 +4550,44 @@ export type SkillTreeCountOrderByAggregateInput = {
 
 export type SkillTreeCreateInput = {
   course: CourseCreateNestedOneWithoutTreesInput;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   nodes?: InputMaybe<SkillNodeCreateNestedManyWithoutTreeInput>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillTreeCreateManyCourseInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillTreeCreateManyCourseInputEnvelope = {
   data: Array<SkillTreeCreateManyCourseInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type SkillTreeCreateManyInput = {
-  courseId: Scalars['String']['input'];
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  courseId: Scalars["String"]["input"];
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillTreeCreateNestedManyWithoutCourseInput = {
   connect?: InputMaybe<Array<SkillTreeWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillTreeCreateOrConnectWithoutCourseInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillTreeCreateOrConnectWithoutCourseInput>
+  >;
   create?: InputMaybe<Array<SkillTreeCreateWithoutCourseInput>>;
   createMany?: InputMaybe<SkillTreeCreateManyCourseInputEnvelope>;
 };
@@ -4523,23 +4609,23 @@ export type SkillTreeCreateOrConnectWithoutNodesInput = {
 };
 
 export type SkillTreeCreateWithoutCourseInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   nodes?: InputMaybe<SkillNodeCreateNestedManyWithoutTreeInput>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillTreeCreateWithoutNodesInput = {
   course: CourseCreateNestedOneWithoutTreesInput;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  deletedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  title: Scalars['String']['input'];
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  deletedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  title: Scalars["String"]["input"];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type SkillTreeListRelationFilter = {
@@ -4598,13 +4684,13 @@ export type SkillTreeOrderByWithRelationInput = {
 };
 
 export enum SkillTreeScalarFieldEnum {
-  CourseId = 'courseId',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Description = 'description',
-  Id = 'id',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
+  CourseId = "courseId",
+  CreatedAt = "createdAt",
+  DeletedAt = "deletedAt",
+  Description = "description",
+  Id = "id",
+  Title = "title",
+  UpdatedAt = "updatedAt",
 }
 
 export type SkillTreeScalarRelationFilter = {
@@ -4665,7 +4751,9 @@ export type SkillTreeUpdateManyWithWhereWithoutCourseInput = {
 
 export type SkillTreeUpdateManyWithoutCourseNestedInput = {
   connect?: InputMaybe<Array<SkillTreeWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<SkillTreeCreateOrConnectWithoutCourseInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<SkillTreeCreateOrConnectWithoutCourseInput>
+  >;
   create?: InputMaybe<Array<SkillTreeCreateWithoutCourseInput>>;
   createMany?: InputMaybe<SkillTreeCreateManyCourseInputEnvelope>;
   delete?: InputMaybe<Array<SkillTreeWhereUniqueInput>>;
@@ -4673,7 +4761,9 @@ export type SkillTreeUpdateManyWithoutCourseNestedInput = {
   disconnect?: InputMaybe<Array<SkillTreeWhereUniqueInput>>;
   set?: InputMaybe<Array<SkillTreeWhereUniqueInput>>;
   update?: InputMaybe<Array<SkillTreeUpdateWithWhereUniqueWithoutCourseInput>>;
-  updateMany?: InputMaybe<Array<SkillTreeUpdateManyWithWhereWithoutCourseInput>>;
+  updateMany?: InputMaybe<
+    Array<SkillTreeUpdateManyWithWhereWithoutCourseInput>
+  >;
   upsert?: InputMaybe<Array<SkillTreeUpsertWithWhereUniqueWithoutCourseInput>>;
 };
 
@@ -4751,152 +4841,149 @@ export type SkillTreeWhereUniqueInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   description?: InputMaybe<StringNullableFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   nodes?: InputMaybe<SkillNodeListRelationFilter>;
   title?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
 };
 
 export enum SortOrder {
-  Asc = 'asc',
-  Desc = 'desc'
+  Asc = "asc",
+  Desc = "desc",
 }
 
 export type StringFieldUpdateOperationsInput = {
-  set?: InputMaybe<Scalars['String']['input']>;
+  set?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type StringFilter = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedStringFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type StringNullableFilter = {
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedStringNullableFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type StringNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedStringNullableFilter>;
   _min?: InputMaybe<NestedStringNullableFilter>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedStringNullableWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type StringWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedStringFilter>;
   _min?: InputMaybe<NestedStringFilter>;
-  contains?: InputMaybe<Scalars['String']['input']>;
-  endsWith?: InputMaybe<Scalars['String']['input']>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  contains?: InputMaybe<Scalars["String"]["input"]>;
+  endsWith?: InputMaybe<Scalars["String"]["input"]>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedStringWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
-  startsWith?: InputMaybe<Scalars['String']['input']>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  startsWith?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export enum TransactionIsolationLevel {
-  ReadCommitted = 'ReadCommitted',
-  ReadUncommitted = 'ReadUncommitted',
-  RepeatableRead = 'RepeatableRead',
-  Serializable = 'Serializable'
+  ReadCommitted = "ReadCommitted",
+  ReadUncommitted = "ReadUncommitted",
+  RepeatableRead = "RepeatableRead",
+  Serializable = "Serializable",
 }
 
 export type UpdateCourseInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<CourseStatus>;
-  title?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type UpdateSkillNodeInput = {
-  posX?: InputMaybe<Scalars['Int']['input']>;
-  posY?: InputMaybe<Scalars['Int']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
+  posX?: InputMaybe<Scalars["Int"]["input"]>;
+  posY?: InputMaybe<Scalars["Int"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type UpdateSkillTreeInput = {
-  description?: InputMaybe<Scalars['String']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type User = {
-  __typename?: 'User';
+  __typename?: "User";
   coursesAuthored: Array<Course>;
-  createdAt: Scalars['DateTime']['output'];
-  email: Scalars['String']['output'];
-  id: Scalars['ID']['output'];
-  name?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars["DateTime"]["output"];
+  email: Scalars["String"]["output"];
+  id: Scalars["ID"]["output"];
+  name?: Maybe<Scalars["String"]["output"]>;
   nodeProgress: Array<UserNodeProgress>;
-  photoUrl?: Maybe<Scalars['String']['output']>;
+  photoUrl?: Maybe<Scalars["String"]["output"]>;
   quizAttempts: Array<QuizAttempt>;
   role: Role;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt: Scalars["DateTime"]["output"];
 };
-
 
 export type UserCoursesAuthoredArgs = {
   cursor?: InputMaybe<CourseWhereUniqueInput>;
   distinct?: InputMaybe<Array<CourseScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<CourseOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<CourseWhereInput>;
 };
-
 
 export type UserNodeProgressArgs = {
   cursor?: InputMaybe<UserNodeProgressWhereUniqueInput>;
   distinct?: InputMaybe<Array<UserNodeProgressScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<UserNodeProgressOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<UserNodeProgressWhereInput>;
 };
-
 
 export type UserQuizAttemptsArgs = {
   cursor?: InputMaybe<QuizAttemptWhereUniqueInput>;
   distinct?: InputMaybe<Array<QuizAttemptScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizAttemptOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars["Int"]["input"]>;
+  take?: InputMaybe<Scalars["Int"]["input"]>;
   where?: InputMaybe<QuizAttemptWhereInput>;
 };
 
@@ -4912,25 +4999,25 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserCreateInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  email: Scalars['String']['input'];
-  id: Scalars['String']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  email: Scalars["String"]["input"];
+  id: Scalars["String"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserCreateManyInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  email: Scalars['String']['input'];
-  id: Scalars['String']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  email: Scalars["String"]["input"];
+  id: Scalars["String"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
   role?: InputMaybe<Role>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserCreateNestedOneWithoutCoursesAuthoredInput = {
@@ -4967,39 +5054,39 @@ export type UserCreateOrConnectWithoutQuizAttemptsInput = {
 };
 
 export type UserCreateWithoutCoursesAuthoredInput = {
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  email: Scalars['String']['input'];
-  id: Scalars['String']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  email: Scalars["String"]["input"];
+  id: Scalars["String"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserCreateWithoutNodeProgressInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  email: Scalars['String']['input'];
-  id: Scalars['String']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  email: Scalars["String"]["input"];
+  id: Scalars["String"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserCreateWithoutQuizAttemptsInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  email: Scalars['String']['input'];
-  id: Scalars['String']['input'];
-  name?: InputMaybe<Scalars['String']['input']>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  email: Scalars["String"]["input"];
+  id: Scalars["String"]["input"];
+  name?: InputMaybe<Scalars["String"]["input"]>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
-  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  photoUrl?: InputMaybe<Scalars["String"]["input"]>;
   role?: InputMaybe<Role>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserMaxOrderByAggregateInput = {
@@ -5023,16 +5110,16 @@ export type UserMinOrderByAggregateInput = {
 };
 
 export type UserNodeProgress = {
-  __typename?: 'UserNodeProgress';
-  completedAt?: Maybe<Scalars['DateTime']['output']>;
-  createdAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
+  __typename?: "UserNodeProgress";
+  completedAt?: Maybe<Scalars["DateTime"]["output"]>;
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["ID"]["output"];
   node: SkillNode;
-  nodeId: Scalars['String']['output'];
+  nodeId: Scalars["String"]["output"];
   status: ProgressStatus;
-  updatedAt: Scalars['DateTime']['output'];
+  updatedAt: Scalars["DateTime"]["output"];
   user: User;
-  userId: Scalars['String']['output'];
+  userId: Scalars["String"]["output"];
 };
 
 export type UserNodeProgressCountOrderByAggregateInput = {
@@ -5046,63 +5133,67 @@ export type UserNodeProgressCountOrderByAggregateInput = {
 };
 
 export type UserNodeProgressCreateInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutProgressesInput;
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   user: UserCreateNestedOneWithoutNodeProgressInput;
 };
 
 export type UserNodeProgressCreateManyInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  nodeId: Scalars['String']['input'];
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  nodeId: Scalars["String"]["input"];
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  userId: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  userId: Scalars["String"]["input"];
 };
 
 export type UserNodeProgressCreateManyNodeInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  userId: Scalars['String']['input'];
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  userId: Scalars["String"]["input"];
 };
 
 export type UserNodeProgressCreateManyNodeInputEnvelope = {
   data: Array<UserNodeProgressCreateManyNodeInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type UserNodeProgressCreateManyUserInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
-  nodeId: Scalars['String']['input'];
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
+  nodeId: Scalars["String"]["input"];
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserNodeProgressCreateManyUserInputEnvelope = {
   data: Array<UserNodeProgressCreateManyUserInput>;
-  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+  skipDuplicates?: InputMaybe<Scalars["Boolean"]["input"]>;
 };
 
 export type UserNodeProgressCreateNestedManyWithoutNodeInput = {
   connect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<UserNodeProgressCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<UserNodeProgressCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<UserNodeProgressCreateWithoutNodeInput>>;
   createMany?: InputMaybe<UserNodeProgressCreateManyNodeInputEnvelope>;
 };
 
 export type UserNodeProgressCreateNestedManyWithoutUserInput = {
   connect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<UserNodeProgressCreateOrConnectWithoutUserInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<UserNodeProgressCreateOrConnectWithoutUserInput>
+  >;
   create?: InputMaybe<Array<UserNodeProgressCreateWithoutUserInput>>;
   createMany?: InputMaybe<UserNodeProgressCreateManyUserInputEnvelope>;
 };
@@ -5118,21 +5209,21 @@ export type UserNodeProgressCreateOrConnectWithoutUserInput = {
 };
 
 export type UserNodeProgressCreateWithoutNodeInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
   user: UserCreateNestedOneWithoutNodeProgressInput;
 };
 
 export type UserNodeProgressCreateWithoutUserInput = {
-  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
-  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  completedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  createdAt?: InputMaybe<Scalars["DateTime"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node: SkillNodeCreateNestedOneWithoutProgressesInput;
   status?: InputMaybe<ProgressStatus>;
-  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  updatedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
 export type UserNodeProgressListRelationFilter = {
@@ -5191,13 +5282,13 @@ export type UserNodeProgressOrderByWithRelationInput = {
 };
 
 export enum UserNodeProgressScalarFieldEnum {
-  CompletedAt = 'completedAt',
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  NodeId = 'nodeId',
-  Status = 'status',
-  UpdatedAt = 'updatedAt',
-  UserId = 'userId'
+  CompletedAt = "completedAt",
+  CreatedAt = "createdAt",
+  Id = "id",
+  NodeId = "nodeId",
+  Status = "status",
+  UpdatedAt = "updatedAt",
+  UserId = "userId",
 }
 
 export type UserNodeProgressScalarWhereInput = {
@@ -5256,30 +5347,46 @@ export type UserNodeProgressUpdateManyWithWhereWithoutUserInput = {
 
 export type UserNodeProgressUpdateManyWithoutNodeNestedInput = {
   connect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<UserNodeProgressCreateOrConnectWithoutNodeInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<UserNodeProgressCreateOrConnectWithoutNodeInput>
+  >;
   create?: InputMaybe<Array<UserNodeProgressCreateWithoutNodeInput>>;
   createMany?: InputMaybe<UserNodeProgressCreateManyNodeInputEnvelope>;
   delete?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<UserNodeProgressScalarWhereInput>>;
   disconnect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
   set?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  update?: InputMaybe<Array<UserNodeProgressUpdateWithWhereUniqueWithoutNodeInput>>;
-  updateMany?: InputMaybe<Array<UserNodeProgressUpdateManyWithWhereWithoutNodeInput>>;
-  upsert?: InputMaybe<Array<UserNodeProgressUpsertWithWhereUniqueWithoutNodeInput>>;
+  update?: InputMaybe<
+    Array<UserNodeProgressUpdateWithWhereUniqueWithoutNodeInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<UserNodeProgressUpdateManyWithWhereWithoutNodeInput>
+  >;
+  upsert?: InputMaybe<
+    Array<UserNodeProgressUpsertWithWhereUniqueWithoutNodeInput>
+  >;
 };
 
 export type UserNodeProgressUpdateManyWithoutUserNestedInput = {
   connect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  connectOrCreate?: InputMaybe<Array<UserNodeProgressCreateOrConnectWithoutUserInput>>;
+  connectOrCreate?: InputMaybe<
+    Array<UserNodeProgressCreateOrConnectWithoutUserInput>
+  >;
   create?: InputMaybe<Array<UserNodeProgressCreateWithoutUserInput>>;
   createMany?: InputMaybe<UserNodeProgressCreateManyUserInputEnvelope>;
   delete?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
   deleteMany?: InputMaybe<Array<UserNodeProgressScalarWhereInput>>;
   disconnect?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
   set?: InputMaybe<Array<UserNodeProgressWhereUniqueInput>>;
-  update?: InputMaybe<Array<UserNodeProgressUpdateWithWhereUniqueWithoutUserInput>>;
-  updateMany?: InputMaybe<Array<UserNodeProgressUpdateManyWithWhereWithoutUserInput>>;
-  upsert?: InputMaybe<Array<UserNodeProgressUpsertWithWhereUniqueWithoutUserInput>>;
+  update?: InputMaybe<
+    Array<UserNodeProgressUpdateWithWhereUniqueWithoutUserInput>
+  >;
+  updateMany?: InputMaybe<
+    Array<UserNodeProgressUpdateManyWithWhereWithoutUserInput>
+  >;
+  upsert?: InputMaybe<
+    Array<UserNodeProgressUpsertWithWhereUniqueWithoutUserInput>
+  >;
 };
 
 export type UserNodeProgressUpdateWithWhereUniqueWithoutNodeInput = {
@@ -5323,8 +5430,8 @@ export type UserNodeProgressUpsertWithWhereUniqueWithoutUserInput = {
 };
 
 export type UserNodeProgressUserIdNodeIdCompoundUniqueInput = {
-  nodeId: Scalars['String']['input'];
-  userId: Scalars['String']['input'];
+  nodeId: Scalars["String"]["input"];
+  userId: Scalars["String"]["input"];
 };
 
 export type UserNodeProgressWhereInput = {
@@ -5348,7 +5455,7 @@ export type UserNodeProgressWhereUniqueInput = {
   OR?: InputMaybe<Array<UserNodeProgressWhereInput>>;
   completedAt?: InputMaybe<DateTimeNullableFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   node?: InputMaybe<SkillNodeWhereInput>;
   nodeId?: InputMaybe<UuidFilter>;
   status?: InputMaybe<EnumProgressStatusFilter>;
@@ -5385,13 +5492,13 @@ export type UserOrderByWithRelationInput = {
 };
 
 export enum UserScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Email = 'email',
-  Id = 'id',
-  Name = 'name',
-  PhotoUrl = 'photoUrl',
-  Role = 'role',
-  UpdatedAt = 'updatedAt'
+  CreatedAt = "createdAt",
+  Email = "email",
+  Id = "id",
+  Name = "name",
+  PhotoUrl = "photoUrl",
+  Role = "role",
+  UpdatedAt = "updatedAt",
 }
 
 export type UserScalarRelationFilter = {
@@ -5550,8 +5657,8 @@ export type UserWhereUniqueInput = {
   OR?: InputMaybe<Array<UserWhereInput>>;
   coursesAuthored?: InputMaybe<CourseListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  email?: InputMaybe<Scalars['String']['input']>;
-  id?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars["String"]["input"]>;
+  id?: InputMaybe<Scalars["String"]["input"]>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
@@ -5561,28 +5668,28 @@ export type UserWhereUniqueInput = {
 };
 
 export type UuidFilter = {
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedUuidFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };
 
 export type UuidWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntFilter>;
   _max?: InputMaybe<NestedStringFilter>;
   _min?: InputMaybe<NestedStringFilter>;
-  equals?: InputMaybe<Scalars['String']['input']>;
-  gt?: InputMaybe<Scalars['String']['input']>;
-  gte?: InputMaybe<Scalars['String']['input']>;
-  in?: InputMaybe<Array<Scalars['String']['input']>>;
-  lt?: InputMaybe<Scalars['String']['input']>;
-  lte?: InputMaybe<Scalars['String']['input']>;
+  equals?: InputMaybe<Scalars["String"]["input"]>;
+  gt?: InputMaybe<Scalars["String"]["input"]>;
+  gte?: InputMaybe<Scalars["String"]["input"]>;
+  in?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  lt?: InputMaybe<Scalars["String"]["input"]>;
+  lte?: InputMaybe<Scalars["String"]["input"]>;
   mode?: InputMaybe<QueryMode>;
   not?: InputMaybe<NestedUuidWithAggregatesFilter>;
-  notIn?: InputMaybe<Array<Scalars['String']['input']>>;
+  notIn?: InputMaybe<Array<Scalars["String"]["input"]>>;
 };

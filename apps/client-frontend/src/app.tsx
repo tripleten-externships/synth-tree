@@ -11,6 +11,7 @@ import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import LessonViewerDemoPage from "./pages/LessonViewerDemoPage";
 
 // A wrapper that combines protection + your layout + an Outlet
 function ProtectedMainLayout() {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
         element: <ProfilePage />,
       },
     ],
+  },
+  {
+    path: "demo/lesson-viewer",  // "/demo/lesson-viewer" - standalone demo
+    element: <LessonViewerDemoPage />,
   },
   {
     path: "*",
