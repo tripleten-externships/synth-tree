@@ -56,6 +56,7 @@ storybook-static/
 *.pid.lock
 tmp/
 temp/
+tmpclaude-*
 
 
 **/scripts/credentials  

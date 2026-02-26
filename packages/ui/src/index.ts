@@ -54,6 +54,7 @@ export {
 } from "./components/ui/dropdown-menu";
 
 export { Toaster, toast } from "./components/ui/sonner";
+export { ColorPicker } from "./components/ui/color-picker";
 
 // Export utilities
 export { cn, cnUI } from "./utils";
