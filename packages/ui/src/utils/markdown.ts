@@ -3,9 +3,9 @@ import DOMPurify from "dompurify";
 
 // this is to convert mardown source to HTML & sanitize its output to prevent XSS
 
-export function renderMarkdownToSafeHtml(mardown: string): string {
+export function renderMarkdownToSafeHtml(markdown: string): string {
     // marked config for github markdown and readable line breaks
-    const rawHtml = marked(mardown ?? "", {
+    const rawHtml = marked(markdown ?? "", {
         gfm: true,
         breaks: true,
     }) as string;

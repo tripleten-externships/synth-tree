@@ -36,19 +36,37 @@ function getSelection(textarea: HTMLTextAreaElement) {
 }
 
 // wrap selection w left/right tokens
-function applyWrap(
+function toggleWrap(
   textarea: HTMLTextAreaElement,
   current: string,
   opts: { left: string; right?: string; placeholder?: string },
 ) {
   const { start, end, selected } = getSelection(textarea);
-
   const left = opts.left;
   const right = opts.right ?? opts.left;
 
-  const hasSelection = selected.length > 0;
-  const content = hasSelection ? selected : (opts.placeholder ?? "");
+  // case 1: selection exists & is already wrapped
+  const isWrapped =
+    selected.startsWith(left) &&
+    selected.endsWith(right) &&
+    selected.length >= left.length + right.length;
 
+  if (selected.length > 0 && isWrapped) {
+    const unwrapped = selected.slice(
+      left.length,
+      selected.length - right.length,
+    );
+    const next = current.slice(0, start) + unwrapped + current.slice(end);
+    return {
+      next,
+      cursorStart: start,
+      cursorEnd: start + unwrapped.length,
+    };
+  }
+
+  // case 2: no selection but cursor is b/w wrappers
+  // wrap placeholder
+  const content = selected.length > 0 ? selected : (opts.placeholder ?? "");
   const next =
     current.slice(0, start) + left + content + right + current.slice(end);
 
@@ -81,7 +99,7 @@ function applyLinePrefix(
   return { next, cursorStart, cursorEnd };
 }
 
-// prefix each selected line w a token
+// prefix each selected line w heading token
 function applyHeading(
   textarea: HTMLTextAreaElement,
   current: string,
@@ -167,7 +185,7 @@ export function MarkdownEditor({
     }, 0);
   }
 
-  // fn to guard for diasbled state & missing textarea el
+  // fn to guard for disabled state & missing textarea el
   function requireTextarea() {
     const textarea = textareaRef.current;
     if (!textarea) return null;
@@ -175,12 +193,89 @@ export function MarkdownEditor({
     return textarea;
   }
 
+  // fn for enter list continuation
+  function onEditorKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (disabled) return;
+    if (e.key !== "Enter") return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { start, end } = getSelection(textarea);
+    if (start !== end) return; // only when no selection
+
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+
+    const lineStart = before.lastIndexOf("\n") + 1;
+    const line = before.slice(lineStart);
+
+    // bullet list
+    const bulletMatch = line.match(/^(\s*)([-*+])\s(.*)$/);
+    if (bulletMatch) {
+      e.preventDefault();
+
+      const indent = bulletMatch[1] ?? "";
+      const marker = bulletMatch[2] ?? "-"; // <- -, * or +
+      const content = bulletMatch[3] ?? ""; // <- actual text after marker
+
+      // if current bullet is empty, end list (remove "- " / "* " / "+ ")
+      if (content.trim() === "") {
+        const next = value.slice(0, lineStart) + indent + "\n" + after;
+        const cursor = lineStart + indent.length + 1;
+        return updateWithSelection({
+          next,
+          cursorStart: cursor,
+          cursorEnd: cursor,
+        });
+      }
+
+      const insert = `\n${indent}${marker} `;
+      const next = before + insert + after;
+      const cursor = start + insert.length;
+      return updateWithSelection({
+        next,
+        cursorStart: cursor,
+        cursorEnd: cursor,
+      });
+    }
+
+    // numbered list
+    const numMatch = line.match(/^(\s*)(\d+)\.\s(.*)$/);
+    if (numMatch) {
+      e.preventDefault();
+      const indent = numMatch[1] ?? "";
+      const n = Number(numMatch[2] ?? "1");
+      const content = numMatch[3] ?? "";
+
+      // if current item is empty, end list (remove "n. ")
+      if (content.trim() === "") {
+        const next = value.slice(0, lineStart) + indent + "\n" + after;
+        const cursor = lineStart + indent.length + 1;
+        return updateWithSelection({
+          next,
+          cursorStart: cursor,
+          cursorEnd: cursor,
+        });
+      }
+
+      const insert = `\n${indent}${n + 1}. `;
+      const next = before + insert + after;
+      const cursor = start + insert.length;
+      return updateWithSelection({
+        next,
+        cursorStart: cursor,
+        cursorEnd: cursor,
+      });
+    }
+  }
+
   // fns for toolbar actions (bold, italic, headings, lists, links, codeblocks)
   function onBold() {
     const textarea = requireTextarea();
     if (!textarea) return;
     updateWithSelection(
-      applyWrap(textarea, value, { left: "**", placeholder: "bold text" }),
+      toggleWrap(textarea, value, { left: "**", placeholder: "bold text" }),
     );
   }
 
@@ -188,7 +283,7 @@ export function MarkdownEditor({
     const textarea = requireTextarea();
     if (!textarea) return;
     updateWithSelection(
-      applyWrap(textarea, value, { left: "*", placeholder: "italic text" }),
+      toggleWrap(textarea, value, { left: "*", placeholder: "italic text" }),
     );
   }
 
@@ -196,7 +291,7 @@ export function MarkdownEditor({
     const textarea = requireTextarea();
     if (!textarea) return;
     updateWithSelection(
-      applyWrap(textarea, value, { left: "`", placeholder: "code" }),
+      toggleWrap(textarea, value, { left: "`", placeholder: "code" }),
     );
   }
 
@@ -270,6 +365,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onBold}
             disabled={disabled}
+            aria-label="Bold"
+            title="Bold"
           >
             Bold
           </Button>
@@ -278,6 +375,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onItalic}
             disabled={disabled}
+            aria-label="Italic"
+            title="Italic"
           >
             Italic
           </Button>
@@ -286,6 +385,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onInlineCode}
             disabled={disabled}
+            aria-label="Inline code"
+            title="Inline code"
           >
             Inline code
           </Button>
@@ -294,6 +395,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onCodeBlock}
             disabled={disabled}
+            aria-label="Code block"
+            title="Code block"
           >
             Code block
           </Button>
@@ -309,6 +412,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onH1}
             disabled={disabled}
+            aria-label="H1"
+            title="H1"
           >
             H1
           </Button>
@@ -317,6 +422,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onH2}
             disabled={disabled}
+            aria-label="H2"
+            title="H2"
           >
             H2
           </Button>
@@ -325,6 +432,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onH3}
             disabled={disabled}
+            aria-label="H3"
+            title="H3"
           >
             H3
           </Button>
@@ -340,6 +449,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onBullets}
             disabled={disabled}
+            aria-label="Bullets"
+            title="Bullets"
           >
             Bullets
           </Button>
@@ -348,6 +459,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onNumbers}
             disabled={disabled}
+            aria-label="Numbers"
+            title="Numbers"
           >
             Numbered
           </Button>
@@ -356,6 +469,8 @@ export function MarkdownEditor({
             variant="secondary"
             onClick={onLink}
             disabled={disabled}
+            aria-label="Link"
+            title="Link"
           >
             Link
           </Button>
@@ -416,6 +531,7 @@ export function MarkdownEditor({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
+        onKeyDown={onEditorKeyDown}
       />
     </div>
   );
