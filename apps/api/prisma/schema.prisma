@@ -255,6 +255,7 @@ model QuizOption {
   questionId String   @db.Uuid
   text       String
   isCorrect  Boolean  @default(false)
+  imageUrl   String? // optional image uploaded via FileUpload (ST-118)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
