@@ -18,7 +18,7 @@ builder.queryFields((t) => ({
         where: {
           id,
           deletedAt: null,
-          ...(isAdmin ? {} : { published: true }), // only filter Quiz.published for non-admins
+          ...(isAdmin ? {} : { published: true }),
         },
       });
     },
@@ -41,7 +41,7 @@ builder.queryFields((t) => ({
         where: {
           nodeId,
           deletedAt: null,
-          ...(isAdmin ? {} : { published: true }), // only filter Quiz.published
+          ...(isAdmin ? {} : { published: true }),
         },
       });
     },
@@ -62,13 +62,12 @@ builder.queryFields((t) => ({
         ...query,
         where: {
           deletedAt: null,
-          node: {
-            treeId, // only valid SkillNode field
-          },
-          ...(isAdmin ? {} : { published: true }), // only filter Quiz.published
+          node: { treeId },
+          ...(isAdmin ? {} : { published: true }),
         },
         orderBy: { createdAt: "desc" },
       });
     },
   }),
 }));
+
