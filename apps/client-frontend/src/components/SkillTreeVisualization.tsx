@@ -1,11 +1,10 @@
 import React from "react";
 import ReactFlow, {
-  Node,
-  Edge,
   Background,
   Controls,
   MarkerType,
 } from "react-flow-renderer";
+import type { Node as RFNode, Edge as RFEdge } from "react-flow-renderer";
 
 interface SkillNodeData {
   id: string;
@@ -13,7 +12,7 @@ interface SkillNodeData {
   posX: number;
   posY: number;
   status: "completed" | "unlocked" | "locked";
-  prerequisiteTitle?: string; // for tooltip on locked nodes
+  prerequisiteTitle?: string;
 }
 
 interface SkillEdgeData {
@@ -24,7 +23,7 @@ interface SkillEdgeData {
 interface SkillTreeVisualizationProps {
   nodesData: SkillNodeData[];
   edgesData: SkillEdgeData[];
-  onNodeClick?: (nodeId: string) => void; // navigate to lesson viewer
+  onNodeClick?: (nodeId: string) => void;
 }
 
 const SkillTreeVisualization: React.FC<SkillTreeVisualizationProps> = ({
@@ -32,8 +31,8 @@ const SkillTreeVisualization: React.FC<SkillTreeVisualizationProps> = ({
   edgesData,
   onNodeClick,
 }) => {
-  // Map SkillNodeData → React Flow Node
-  const nodes: Node[] = nodesData.map((node) => ({
+  // Correctly type the nodes: RFNode<{ label: string }>
+  const nodes: RFNode<{ label: string }>[] = nodesData.map((node) => ({
     id: node.id,
     data: { label: node.title },
     position: { x: node.posX, y: node.posY },
@@ -53,8 +52,7 @@ const SkillTreeVisualization: React.FC<SkillTreeVisualizationProps> = ({
     },
   }));
 
-  // Map SkillEdgeData → React Flow Edge
-  const edges: Edge[] = edgesData.map((edge) => ({
+  const edges: RFEdge[] = edgesData.map((edge) => ({
     id: `e-${edge.fromNodeId}-${edge.toNodeId}`,
     source: edge.fromNodeId,
     target: edge.toNodeId,
@@ -63,8 +61,10 @@ const SkillTreeVisualization: React.FC<SkillTreeVisualizationProps> = ({
     markerEnd: { type: MarkerType.ArrowClosed },
   }));
 
-  // Node click handler
-  const handleNodeClick = (event: React.MouseEvent, node: Node) => {
+  const handleNodeClick = (
+    event: React.MouseEvent,
+    node: RFNode<{ label: string }>,
+  ) => {
     const clickedNode = nodesData.find((n) => n.id === node.id);
     if (!clickedNode) return;
 
