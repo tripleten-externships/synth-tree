@@ -18,12 +18,11 @@ builder.queryFields((t) => ({
         where: {
           id,
           deletedAt: null,
-          ...(isAdmin ? {} : { published: true }), // only filter published for non-admins
+          ...(isAdmin ? {} : { published: true }),
         },
       });
     },
   }),
-}));
 
   quizzesByNode: t.prismaField({
     type: "Quiz",
@@ -42,12 +41,7 @@ builder.queryFields((t) => ({
         where: {
           nodeId,
           deletedAt: null,
-          ...(isAdmin
-            ? {}
-            : {
-                published: true,
-                node: { published: true },
-              }),
+          ...(isAdmin ? {} : { published: true }),
         },
       });
     },
@@ -70,7 +64,6 @@ builder.queryFields((t) => ({
           deletedAt: null,
           node: {
             treeId,
-            ...(isAdmin ? {} : { published: true }),
           },
           ...(isAdmin ? {} : { published: true }),
         },
