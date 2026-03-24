@@ -1,20 +1,10 @@
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
+import { ApolloClient, InMemoryCache} from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import { MockLink } from "@apollo/client/testing";
 import { LessonViewer } from "../components/LessonViewer";
 import { ContentType } from "@skilltree/api-types";
 
-const LESSON_BLOCKS_QUERY = gql`
-  query LessonBlocks($nodeId: ID!) {
-    lessonBlocks(nodeId: $nodeId) {
-      id
-      type
-      content
-      caption
-      order
-    }
-  }
-`;
+import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
 
 // Mock data for demonstration
 const mocks = [
@@ -27,11 +17,11 @@ const mocks = [
     },
     result: {
       data: {
-        lessonBlocks: [
+        lessonBlocksByNode: [
           {
             id: "1",
             type: ContentType.Html,
-            content:
+            html:
               "<h2>Welcome to React Basics</h2><p>This is an <strong>HTML block</strong> with rich text content. You'll learn the fundamentals of React including components, props, and state.</p>",
             caption: null,
             order: 1,
@@ -40,7 +30,7 @@ const mocks = [
           {
             id: "2",
             type: ContentType.Image,
-            content: "https://picsum.photos/800/400?random=1",
+            url: "https://picsum.photos/800/400?random=1",
             caption: "Figure 1: Sample diagram showing component hierarchy",
             order: 2,
             __typename: "LessonBlock",
@@ -48,7 +38,7 @@ const mocks = [
           {
             id: "3",
             type: ContentType.Html,
-            content:
+            html:
               "<h3>Key Concepts</h3><ul><li>Components are reusable pieces of UI</li><li>Props pass data from parent to child</li><li>State manages dynamic data</li></ul>",
             caption: null,
             order: 3,
@@ -57,7 +47,7 @@ const mocks = [
           {
             id: "4",
             type: ContentType.Video,
-            content: "https://www.youtube.com/watch?v=acEOASYioGY",
+            url: "https://www.youtube.com/watch?v=acEOASYioGY",
             caption: null,
             order: 4,
             __typename: "LessonBlock",
@@ -65,7 +55,7 @@ const mocks = [
           {
             id: "5",
             type: ContentType.Html,
-            content:
+            html:
               "<h3>Next Steps</h3><p>After completing this lesson, you'll be ready to build your first React component. Click the button below to continue to the quiz!</p>",
             caption: null,
             order: 5,

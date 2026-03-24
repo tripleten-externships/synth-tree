@@ -1082,6 +1082,7 @@ type Mutation {
   deleteUser(id: ID!): User
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
+  submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
   syncCurrentUser(name: String, photoUrl: String): User
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
@@ -1509,6 +1510,8 @@ type Query {
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
   myProgress(userId: ID): [UserNodeProgress!]
   nodeProgress(nodeId: ID!, userId: ID): UserNodeProgress
+  publicCourse(id: ID!): Course
+  publicGetAllCourses(limit: Int, page: Int, search: String, status: CourseStatus): [Course!]
   quiz(id: ID!): Quiz
   quizzesByNode(nodeId: ID!): [Quiz!]
   quizzesByTree(treeId: ID!): [Quiz!]

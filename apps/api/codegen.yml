@@ -11,3 +11,8 @@ generates:
       withHooks: true
       withHOC: false
       withComponent: false
+documents:
+  - "./src/**/*.{ts,tsx}"
+  - "../admin-dashboard/src/**/*.{ts,tsx}"
+  - "../client-frontend/src/**/*.{ts,tsx}"
+
