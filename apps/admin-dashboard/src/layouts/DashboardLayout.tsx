@@ -28,7 +28,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <img
             src={SkillTreeLogo}
             alt="SkillTree logo"
-            className="h-6 w-auto"
+            className="h-6 w-auto dark:brightness-0 dark:invert"
           />
         </div>
         {/* RIGHT: Courses link, avatar + admin badge container*/}
@@ -48,7 +48,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <img
                     src={user?.photoURL || GenericAvatar}
                     alt={user?.displayName || "User"}
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full dark:brightness-0 dark:invert"
                   />
                 </button>
               </DropdownMenuTrigger>
