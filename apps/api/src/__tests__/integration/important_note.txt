@@ -1,0 +1,12 @@
+heres command to run test:
+
+// run docker furst
+docker-compose up -d
+
+cd apps/api
+
+// run all test
+pnpm test
+
+// run integration test only
+pnpm test:integration
