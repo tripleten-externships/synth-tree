@@ -1,13 +1,15 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import ErrorBoundary from "./src/components/ErrorBoundary";
+import { ApolloProvider } from "@apollo/client/react";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <ErrorBoundary>
+import App from "./src/app";
+import { apolloClient } from "./src/lib/apollo";
+import "./src/index.css";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ApolloProvider client={apolloClient}>
       <App />
-    </ErrorBoundary>
-  </React.StrictMode>,
+    </ApolloProvider>
+  </StrictMode>
 );

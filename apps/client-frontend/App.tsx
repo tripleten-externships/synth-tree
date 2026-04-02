@@ -1,10 +1,10 @@
-import MainLayout from "./layouts/MainLayout";
-import Home from "./src/pages/SkillTreeHomePage";
+// import MainLayout from "./layouts/MainLayout";
+// import Home from "./src/pages/SkillTreeHomePage";
 
-export default function App() {
-  return (
-    <MainLayout>
-      <Home />
-    </MainLayout>
-  );
-}
+// export default function App() {
+//   return (
+//     <MainLayout>
+//       <Home />
+//     </MainLayout>
+//   );
+// }

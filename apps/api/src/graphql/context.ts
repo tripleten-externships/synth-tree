@@ -36,13 +36,15 @@ export async function createGraphQLContext({
         const userRecord = await prisma.user.findUnique({
           where: { id: decoded.uid },
         });
-        if (!userRecord) {
-          throw new GraphQLError(`No user found for UID ${decoded.uid}`);
-        }
-        user = {
+        // Don't throw if user not found — syncCurrentUser will create them
+        user = userRecord ? {
           uid: decoded.uid,
           email: decoded.email,
           role: userRecord.role,
+        } : {
+          uid: decoded.uid,
+         email: decoded.email,
+          role: Role.USER,
         };
       } catch (error) {
         // Token verification failed, user remains null

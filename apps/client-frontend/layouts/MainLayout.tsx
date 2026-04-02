@@ -1,12 +1,9 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import type { ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 
-type MainLayoutProps = {
-  children: ReactNode;
-};
 
-export default function MainLayout({ children }: MainLayoutProps) {
+export default function MainLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Top navigation */}
@@ -14,7 +11,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main content area */}
       <main className="flex-1 container mx-auto px-4 py-8">
-        {children}
+        <Outlet />
       </main>
 
       {/* Footer */}

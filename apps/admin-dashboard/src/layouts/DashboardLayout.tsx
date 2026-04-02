@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@skilltree/ui";
 import {
   DropdownMenu,
@@ -16,7 +16,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       <nav
@@ -54,8 +55,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="p-4 mr-8">
                 {/* TODO: Add navigation links/actions for Profile and Logout */}
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                 <DropdownMenuItem onClick={() => navigate("/profile")}>
+      Profile
+    </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Badge>

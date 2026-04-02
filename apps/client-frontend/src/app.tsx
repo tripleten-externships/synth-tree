@@ -18,10 +18,8 @@ function ProtectedMainLayout() {
   return (
     <ErrorBoundary>
       <ProtectedRoute>
-        <MainLayout>
-          <Outlet />
-          <ApolloTest />
-        </MainLayout>
+        <MainLayout />
+        <ApolloTest />
       </ProtectedRoute>
     </ErrorBoundary>
   );
