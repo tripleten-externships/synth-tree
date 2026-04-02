@@ -1,11 +1,12 @@
 import { gql } from "@apollo/client";
 
 export const LESSON_BLOCKS_QUERY = gql`
-  query LessonBlocks($nodeId: ID!) {
-    lessonBlocks(nodeId: $nodeId) {
+  query LessonBlocksByNode($nodeId: ID!) {
+    lessonBlocksByNode(nodeId: $nodeId) {
       id
       type
-      content
+      html
+      url
       caption
       order
     }

@@ -48,6 +48,9 @@ storybook-static/
 
 # Misc
 *.tgz
+
+# Sprint plans / local dev notes
+docs/sprint-plans/
 *.tar.gz
 
 # Lock/Temp
