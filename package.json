@@ -16,5 +16,9 @@
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@apollo/client": "^4.0.9",
+    "graphql": "^16.11.0"
+  }
 }
