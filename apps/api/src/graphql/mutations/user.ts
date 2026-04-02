@@ -48,9 +48,9 @@ builder.mutationFields((t) => ({
           role: PrismaRole.USER, // use Prisma enum
         },
         update: {
-          email,
-          name: args.name ?? null,
-          photoUrl: args.photoUrl ?? null,
+        email,
+        ...(args.name !== null && args.name !== undefined ? { name: args.name } : {}),
+        ...(args.photoUrl !== null && args.photoUrl !== undefined ? { photoUrl: args.photoUrl } : {}),
         },
       });
 

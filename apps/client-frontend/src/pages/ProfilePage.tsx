@@ -6,7 +6,6 @@ import type { SyncCurrentUserResponse } from "../graphql/queries/currentUser";
 import useAuth from "../hooks/useAuth";
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import GenericAvatar from "../../assets/avatar-generic.svg";
 
 
 // Shape of the user returned by syncCurrentUser
@@ -40,7 +39,7 @@ export default function ProfilePage() {
     id: "mock",
     name: "Jane Doe",
     email: "jane@example.com",
-    photoUrl: GenericAvatar,
+    photoUrl: "", // empty string so avatar initial fallback shows
     role: "Student",
     stats: {
       courses: 3,
@@ -51,7 +50,8 @@ export default function ProfilePage() {
 
   // ------------------------------------------------------------
   // 3) Load the user on first render
-  //    syncUser() with no variables fetches the current user
+  //    Wait for Firebase auth state before firing mutation
+  //    so the Bearer token is ready and attached by apollo.ts
   // ------------------------------------------------------------
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -143,22 +143,32 @@ useEffect(() => {
         <section className="bg-white p-6 rounded-lg shadow space-y-4 mt-6">
           <h3 className="text-xl font-semibold">Edit Profile</h3>
 
-          <label className="block">
+           <label className="block">
             <span className="text-gray-700">Name</span>
+            {/* defaultValue + key so input resets when real data loads.
+                onFocus selects all text for easy replacement.
+                onBlur updates state only when user leaves the field. */}
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              defaultValue={name}
+              key={name}
+              onFocus={(e) => e.target.select()}
+              onBlur={(e) => setName(e.target.value)}
               className="mt-1 block w-full border rounded p-2"
             />
           </label>
 
           <label className="block">
             <span className="text-gray-700">Photo URL</span>
+            {/* Same pattern as name — onBlur prevents avatar flickering
+                while typing/deleting a long URL. onFocus selects all
+                so user can replace the whole URL in one click + type. */}
             <input
               type="text"
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
+              defaultValue={photoUrl}
+              key={photoUrl}
+              onFocus={(e) => e.target.select()}
+              onBlur={(e) => setPhotoUrl(e.target.value)}
               className="mt-1 block w-full border rounded p-2"
             />
           </label>
