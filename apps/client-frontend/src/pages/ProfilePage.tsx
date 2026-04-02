@@ -53,14 +53,18 @@ export default function ProfilePage() {
   //    Wait for Firebase auth state before firing mutation
   //    so the Bearer token is ready and attached by apollo.ts
   // ------------------------------------------------------------
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-    if (firebaseUser) {
-      syncUser();
-    }
-  });
-  return () => unsubscribe();
-}, []);
+  const [firebaseLoading, setFirebaseLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        syncUser();
+      }
+      // Firebase has finished checking — user logged in or not
+      setFirebaseLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
   // ------------------------------------------------------------
   // 4) Real user or fallback
   // ------------------------------------------------------------
@@ -82,19 +86,23 @@ useEffect(() => {
     }
   }, [data]);
 
-  // ------------------------------------------------------------
+ // ------------------------------------------------------------
   // 7) Save handler — updates the user profile
   // ------------------------------------------------------------
   const handleSave = () => {
-    syncUser({
-      variables: { name, photoUrl },
-    });
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      // No Firebase session — redirect to login
+      window.location.href = "http://localhost:5173/auth/login";
+      return;
+    }
+    syncUser({ variables: { name, photoUrl } });
   };
 
   // ------------------------------------------------------------
   // 8) Loading + Error states
   // ------------------------------------------------------------
-  if (loading && !data) {
+  if (firebaseLoading || (loading && !data)) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-gray-600">Loading profile...</p>
