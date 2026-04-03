@@ -19,6 +19,7 @@
     "@skilltree/ui": "workspace:*",
     "firebase": "^11.1.0",
     "graphql": "^16.11.0",
+    "lucide-react": "^0.344.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.63.0",
