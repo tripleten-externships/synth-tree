@@ -1,5 +1,4 @@
 import { builder } from "@graphql/builder";
-import { requireAdmin } from "@graphql/auth/requireAuth";
 import { Prisma } from "@prisma/client";
 import {
   CreateCourseInput,
@@ -18,7 +17,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { input }, ctx) => {
       const userId = ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       return ctx.prisma.$transaction(async (tx) => {
         const course = await tx.course.create({
@@ -55,7 +53,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id, input }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       await assertCourseOwnership(ctx, id);
 
@@ -93,7 +90,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       // 1. Ensure the course actually exists (minimal fetch, no query)
       const existing = await ctx.prisma.course.findUnique({

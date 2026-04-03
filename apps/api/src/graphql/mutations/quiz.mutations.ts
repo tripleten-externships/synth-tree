@@ -1,5 +1,4 @@
 import { builder } from "@graphql/builder";
-import { requireAdmin } from "@graphql/auth/requireAuth";
 import { assertNodeOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
@@ -16,7 +15,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { nodeId, title, required }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       await assertNodeOwnership(ctx, nodeId); //ensures that the user owns the current node
 
@@ -42,7 +40,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id, title, required }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id },
@@ -75,7 +72,6 @@ builder.mutationFields((t) => ({
     args: { id: t.arg.id({ required: true }) },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id },
@@ -126,7 +122,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { quizId, type, prompt, order }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
@@ -164,7 +159,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id, prompt, order }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quizQuestion.findUnique({
         where: { id },
@@ -197,7 +191,6 @@ builder.mutationFields((t) => ({
     args: { id: t.arg.id({ required: true }) },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quizQuestion.findUnique({
         where: { id },
@@ -232,7 +225,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { questionId, text, isCorrect }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quizQuestion.findUnique({
         where: { id: questionId },
@@ -288,7 +280,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id, text, isCorrect }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quizOption.findUnique({
         where: { id },
@@ -345,7 +336,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       const existing = await ctx.prisma.quizOption.findUnique({
         where: { id },
