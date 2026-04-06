@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
-
+import * as Apollo from '@apollo/client';
+import * as ApolloReactHooks from '@apollo/client/react';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -7,7 +8,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
-
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -1831,6 +1832,19 @@ export type QueryMyProgressArgs = {
 export type QueryNodeProgressArgs = {
   nodeId: Scalars['ID']['input'];
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryPublicCourseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPublicGetAllCoursesArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<CourseStatus>;
 };
 
 
@@ -5665,10 +5679,47 @@ export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetMyCoursesQuery = { __typename?: 'Query', adminMyCoursesWithContent?: Array<{ __typename?: 'Course', id: string, title: string }> | null };
 
+export type AdminGetAllCoursesQueryVariables = Exact<{
+  status?: InputMaybe<CourseStatus>;
+}>;
+
+
+export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, author: { __typename?: 'User', id: string, name?: string | null, email: string } }> | null };
+
+export type DeleteCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteCourseMutation = { __typename?: 'Mutation', deleteCourse?: { __typename?: 'Course', id: string } | null };
+
+export type UpdateCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateCourseInput;
+}>;
+
+
+export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
+
+export type CreateCourseMutationVariables = Exact<{
+  input: CreateCourseInput;
+}>;
+
+
+export type CreateCourseMutation = { __typename?: 'Mutation', createCourse?: { __typename?: 'Course', id: string, title: string } | null };
+
 export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type PingQuery = { __typename: 'Query' };
+
+export type SyncCurrentUserMutationVariables = Exact<{
+  name?: InputMaybe<Scalars['String']['input']>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -5714,22 +5765,172 @@ export const GetMyCoursesDocument = gql`
  *   },
  * });
  */
-export function useGetMyCoursesQuery(baseOptions?: Apollo.QueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
+export function useGetMyCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
+        return ApolloReactHooks.useQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
       }
-export function useGetMyCoursesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
+export function useGetMyCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
         }
-export function useGetMyCoursesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
+export function useGetMyCoursesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetMyCoursesQuery, GetMyCoursesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetMyCoursesQuery, GetMyCoursesQueryVariables>(GetMyCoursesDocument, options);
         }
 export type GetMyCoursesQueryHookResult = ReturnType<typeof useGetMyCoursesQuery>;
 export type GetMyCoursesLazyQueryHookResult = ReturnType<typeof useGetMyCoursesLazyQuery>;
 export type GetMyCoursesSuspenseQueryHookResult = ReturnType<typeof useGetMyCoursesSuspenseQuery>;
 export type GetMyCoursesQueryResult = Apollo.QueryResult<GetMyCoursesQuery, GetMyCoursesQueryVariables>;
+export const AdminGetAllCoursesDocument = gql`
+    query AdminGetAllCourses($status: CourseStatus) {
+  adminGetAllCourses(status: $status) {
+    id
+    title
+    description
+    status
+    author {
+      id
+      name
+      email
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminGetAllCoursesQuery__
+ *
+ * To run a query within a React component, call `useAdminGetAllCoursesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminGetAllCoursesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminGetAllCoursesQuery({
+ *   variables: {
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useAdminGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+      }
+export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+        }
+export function useAdminGetAllCoursesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+        }
+export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
+export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
+export type AdminGetAllCoursesSuspenseQueryHookResult = ReturnType<typeof useAdminGetAllCoursesSuspenseQuery>;
+export type AdminGetAllCoursesQueryResult = Apollo.QueryResult<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>;
+export const DeleteCourseDocument = gql`
+    mutation DeleteCourse($id: ID!) {
+  deleteCourse(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteCourseMutationFn = Apollo.MutationFunction<DeleteCourseMutation, DeleteCourseMutationVariables>;
+
+/**
+ * __useDeleteCourseMutation__
+ *
+ * To run a mutation, you first call `useDeleteCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCourseMutation, { data, loading, error }] = useDeleteCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteCourseMutation, DeleteCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteCourseMutation, DeleteCourseMutationVariables>(DeleteCourseDocument, options);
+      }
+export type DeleteCourseMutationHookResult = ReturnType<typeof useDeleteCourseMutation>;
+export type DeleteCourseMutationResult = Apollo.MutationResult<DeleteCourseMutation>;
+export type DeleteCourseMutationOptions = Apollo.BaseMutationOptions<DeleteCourseMutation, DeleteCourseMutationVariables>;
+export const UpdateCourseDocument = gql`
+    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
+  updateCourse(id: $id, input: $input) {
+    id
+    status
+  }
+}
+    `;
+export type UpdateCourseMutationFn = Apollo.MutationFunction<UpdateCourseMutation, UpdateCourseMutationVariables>;
+
+/**
+ * __useUpdateCourseMutation__
+ *
+ * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+      }
+export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
+export type UpdateCourseMutationResult = Apollo.MutationResult<UpdateCourseMutation>;
+export type UpdateCourseMutationOptions = Apollo.BaseMutationOptions<UpdateCourseMutation, UpdateCourseMutationVariables>;
+export const CreateCourseDocument = gql`
+    mutation CreateCourse($input: CreateCourseInput!) {
+  createCourse(input: $input) {
+    id
+    title
+  }
+}
+    `;
+export type CreateCourseMutationFn = Apollo.MutationFunction<CreateCourseMutation, CreateCourseMutationVariables>;
+
+/**
+ * __useCreateCourseMutation__
+ *
+ * To run a mutation, you first call `useCreateCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCourseMutation, { data, loading, error }] = useCreateCourseMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateCourseMutation, CreateCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateCourseMutation, CreateCourseMutationVariables>(CreateCourseDocument, options);
+      }
+export type CreateCourseMutationHookResult = ReturnType<typeof useCreateCourseMutation>;
+export type CreateCourseMutationResult = Apollo.MutationResult<CreateCourseMutation>;
+export type CreateCourseMutationOptions = Apollo.BaseMutationOptions<CreateCourseMutation, CreateCourseMutationVariables>;
 export const PingDocument = gql`
     query Ping {
   __typename
@@ -5751,22 +5952,60 @@ export const PingDocument = gql`
  *   },
  * });
  */
-export function usePingQuery(baseOptions?: Apollo.QueryHookOptions<PingQuery, PingQueryVariables>) {
+export function usePingQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PingQuery, PingQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PingQuery, PingQueryVariables>(PingDocument, options);
+        return ApolloReactHooks.useQuery<PingQuery, PingQueryVariables>(PingDocument, options);
       }
-export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQuery, PingQueryVariables>) {
+export function usePingLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PingQuery, PingQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PingQuery, PingQueryVariables>(PingDocument, options);
+          return ApolloReactHooks.useLazyQuery<PingQuery, PingQueryVariables>(PingDocument, options);
         }
-export function usePingSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PingQuery, PingQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PingQuery, PingQueryVariables>(PingDocument, options);
+export function usePingSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PingQuery, PingQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PingQuery, PingQueryVariables>(PingDocument, options);
         }
 export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingSuspenseQueryHookResult = ReturnType<typeof usePingSuspenseQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
+export const SyncCurrentUserDocument = gql`
+    mutation SyncCurrentUser($name: String, $photoUrl: String) {
+  syncCurrentUser(name: $name, photoUrl: $photoUrl) {
+    id
+    email
+    name
+    photoUrl
+    role
+  }
+}
+    `;
+export type SyncCurrentUserMutationFn = Apollo.MutationFunction<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>;
+
+/**
+ * __useSyncCurrentUserMutation__
+ *
+ * To run a mutation, you first call `useSyncCurrentUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSyncCurrentUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [syncCurrentUserMutation, { data, loading, error }] = useSyncCurrentUserMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      photoUrl: // value for 'photoUrl'
+ *   },
+ * });
+ */
+export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
+      }
+export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export type SyncCurrentUserMutationResult = Apollo.MutationResult<SyncCurrentUserMutation>;
+export type SyncCurrentUserMutationOptions = Apollo.BaseMutationOptions<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>;
 export const LessonBlocksByNodeDocument = gql`
     query LessonBlocksByNode($nodeId: ID!) {
   lessonBlocksByNode(nodeId: $nodeId) {
@@ -5796,17 +6035,17 @@ export const LessonBlocksByNodeDocument = gql`
  *   },
  * });
  */
-export function useLessonBlocksByNodeQuery(baseOptions: Apollo.QueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables> & ({ variables: LessonBlocksByNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useLessonBlocksByNodeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables> & ({ variables: LessonBlocksByNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
+        return ApolloReactHooks.useQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
       }
-export function useLessonBlocksByNodeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>) {
+export function useLessonBlocksByNodeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
+          return ApolloReactHooks.useLazyQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
         }
-export function useLessonBlocksByNodeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
+export function useLessonBlocksByNodeSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<LessonBlocksByNodeQuery, LessonBlocksByNodeQueryVariables>(LessonBlocksByNodeDocument, options);
         }
 export type LessonBlocksByNodeQueryHookResult = ReturnType<typeof useLessonBlocksByNodeQuery>;
 export type LessonBlocksByNodeLazyQueryHookResult = ReturnType<typeof useLessonBlocksByNodeLazyQuery>;
@@ -5844,17 +6083,17 @@ export const PublicCourseDocument = gql`
  *   },
  * });
  */
-export function usePublicCourseQuery(baseOptions: Apollo.QueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables> & ({ variables: PublicCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function usePublicCourseQuery(baseOptions: ApolloReactHooks.QueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables> & ({ variables: PublicCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
+        return ApolloReactHooks.useQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
       }
-export function usePublicCourseLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables>) {
+export function usePublicCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
+          return ApolloReactHooks.useLazyQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
         }
-export function usePublicCourseSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
+export function usePublicCourseSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PublicCourseQuery, PublicCourseQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PublicCourseQuery, PublicCourseQueryVariables>(PublicCourseDocument, options);
         }
 export type PublicCourseQueryHookResult = ReturnType<typeof usePublicCourseQuery>;
 export type PublicCourseLazyQueryHookResult = ReturnType<typeof usePublicCourseLazyQuery>;
@@ -5891,17 +6130,17 @@ export const PublicGetAllCoursesDocument = gql`
  *   },
  * });
  */
-export function usePublicGetAllCoursesQuery(baseOptions?: Apollo.QueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
+export function usePublicGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
+        return ApolloReactHooks.useQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
       }
-export function usePublicGetAllCoursesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
+export function usePublicGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
+          return ApolloReactHooks.useLazyQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
         }
-export function usePublicGetAllCoursesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
+export function usePublicGetAllCoursesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PublicGetAllCoursesQuery, PublicGetAllCoursesQueryVariables>(PublicGetAllCoursesDocument, options);
         }
 export type PublicGetAllCoursesQueryHookResult = ReturnType<typeof usePublicGetAllCoursesQuery>;
 export type PublicGetAllCoursesLazyQueryHookResult = ReturnType<typeof usePublicGetAllCoursesLazyQuery>;
