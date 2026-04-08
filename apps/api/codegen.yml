@@ -11,6 +11,7 @@ generates:
       withHooks: true
       withHOC: false
       withComponent: false
+      apolloReactHooksImportFrom: "@apollo/client/react"
 documents:
   - "./src/**/*.{ts,tsx}"
   - "../admin-dashboard/src/**/*.{ts,tsx}"
