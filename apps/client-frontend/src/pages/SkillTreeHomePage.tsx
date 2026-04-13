@@ -5,6 +5,8 @@
 import { usePublicGetAllCoursesQuery } from "@skilltree/api-types";
 import { useNavigate } from "react-router-dom";
 import NodeIcon from "../../assets/node-icon.svg";
+// CourseCard component — displays each course as a styled clickable card
+import CourseCard from "../components/CourseCard";
 
 export default function Home() {
     const navigate = useNavigate();
@@ -38,15 +40,14 @@ const mockCourses = [
 {/* {data?.publicGetAllCourses?.map((course: typeof data.publicGetAllCourses[number]) => ( */}
 
 {/* MOCK DATA - remove this line when real database courses are available */}
+{/* Using CourseCard component instead of plain div — swap back to plain div if CourseCard is removed */}
 {(mockCourses).map((course) => (
-          <div
+          <CourseCard
             key={course.id}
-            className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm cursor-pointer"
-            onClick={() => navigate(`/courses/${course.id}`)}
-          >
-            <h3 className="mb-2 text-lg font-semibold">{course.title}</h3>
-            <p className="text-sm text-gray-600">{course.description}</p>
-          </div>
+            id={course.id}
+            title={course.title}
+            description={course.description ?? ""}
+          />
         ))}
       </div>
       <div className="mt-10 w-full max-w-3xl rounded-3xl border border-gray-200 bg-white p-10 shadow-sm">
