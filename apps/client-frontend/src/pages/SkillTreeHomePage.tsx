@@ -8,6 +8,14 @@ import NodeIcon from "../../assets/node-icon.svg";
 
 export default function Home() {
     const navigate = useNavigate();
+
+// MOCK DATA - placeholder only, replace when real database courses are available
+const mockCourses = [
+  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
+  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
+  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
+];
+
     const { data, loading, error } = usePublicGetAllCoursesQuery();
 
     if (loading) return <div>Loading...</div>;
@@ -26,7 +34,11 @@ export default function Home() {
 
       {/* COURSE CARDS */}
       <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
-{data?.publicGetAllCourses?.map((course: typeof data.publicGetAllCourses[number]) => (
+{/* TODO: uncomment this when database has real courses */}
+{/* {data?.publicGetAllCourses?.map((course: typeof data.publicGetAllCourses[number]) => ( */}
+
+{/* MOCK DATA - remove this line when real database courses are available */}
+{(mockCourses).map((course) => (
           <div
             key={course.id}
             className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm cursor-pointer"
