@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 
-import { uploadFile } from "../lib/upload";
+import { uploadFile, compressImage } from "../lib/upload";
 import { GENERATE_UPLOAD_URL } from "../graphql/mutations";
 import styles from "./FileUpload.module.css";
 
@@ -134,17 +134,23 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleUploadFile = async (fileToUpload: File) => {
     setState("uploading");
     try {
+      // Compress image if applicable
+      let finalFile = fileToUpload;
+      if (fileToUpload.type.startsWith("image/")) {
+        finalFile = await compressImage(fileToUpload, { quality: 0.85 });
+      }
+
       const { data } = await generateUploadUrl({
         variables: {
-          fileName: fileToUpload.name,
-          contentType: fileToUpload.type,
-          fileSize: fileToUpload.size,
+          fileName: finalFile.name,
+          contentType: finalFile.type,
+          fileSize: finalFile.size,
         },
       });
 
       const generateUrlData = data as { generateUploadUrl?: { uploadUrl: string; publicUrl: string } } | undefined;
       if (generateUrlData?.generateUploadUrl) {
-        await uploadFile(fileToUpload, generateUrlData.generateUploadUrl.uploadUrl, (prog) => {
+        await uploadFile(finalFile, generateUrlData.generateUploadUrl.uploadUrl, (prog) => {
           setProgress(prog.percentage);
         });
         setState("complete");
