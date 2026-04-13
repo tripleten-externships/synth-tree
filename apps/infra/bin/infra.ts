@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { getConfig, ENVIRONMENTS, type Environment } from "../lib/config";
 import { NetworkStack } from "../lib/network-stack";
@@ -7,6 +6,7 @@ import { DatabaseStack } from "../lib/database-stack";
 import { ApiStack } from "../lib/api-stack";
 import { FrontendStack } from "../lib/frontend-stack";
 import { StorybookStack } from "../lib/storybook-stack";
+import { StorageStack } from "../lib/storage-stack";
 
 /**
  * Synth Tree Infrastructure CDK App
@@ -96,10 +96,18 @@ const databaseStack = new DatabaseStack(
 // Database stack depends on network stack
 databaseStack.addDependency(networkStack);
 
+// Storage Stack
+// S3 bucket for file uploads
+// No dependencies
+const storageStack = new StorageStack(parentStack, `${config.name}-Storage`, {
+  env,
+  description: `Storage infrastructure for Synth Tree ${config.name} environment`,
+  tags: config.tags,
+});
 /**
  * API Stack
  * ECS Fargate service, Application Load Balancer
- * Depends on: Network Stack, Database Stack
+ * Depends on: Network Stack, Database Stack, Storage Stack
  */
 const apiStack = new ApiStack(parentStack, `${config.name}-Api`, {
   env,
@@ -111,12 +119,13 @@ const apiStack = new ApiStack(parentStack, `${config.name}-Api`, {
   ecsSecurityGroup: networkStack.ecsSecurityGroup,
   databaseSecret: databaseStack.secret,
   databaseCluster: databaseStack.cluster,
+  uploadBucket: storageStack.uploadBucket,
 });
 
 // API stack depends on both network and database stacks
 apiStack.addDependency(networkStack);
 apiStack.addDependency(databaseStack);
-
+apiStack.addDependency(storageStack);
 /**
  * Frontend Stack
  * S3 bucket, CloudFront distribution for React app

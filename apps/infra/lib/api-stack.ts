@@ -10,6 +10,7 @@ import * as certificatemanager from "aws-cdk-lib/aws-certificatemanager";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53Targets from "aws-cdk-lib/aws-route53-targets";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as applicationautoscaling from "aws-cdk-lib/aws-applicationautoscaling";
 import { Construct } from "constructs";
 import { EnvironmentConfig } from "./config";
@@ -24,6 +25,7 @@ export interface ApiStackProps extends cdk.StackProps {
   ecsSecurityGroup: ec2.ISecurityGroup;
   databaseSecret: secretsmanager.ISecret;
   databaseCluster: rds.IDatabaseCluster;
+  uploadBucket: s3.IBucket;
 }
 
 /**
@@ -82,6 +84,7 @@ export class ApiStack extends cdk.Stack {
       ecsSecurityGroup,
       databaseSecret,
       databaseCluster,
+      uploadBucket,
     } = props;
 
     // ========================================
@@ -307,6 +310,9 @@ export class ApiStack extends cdk.Stack {
     // Grant permissions to read database secret
     databaseSecret.grantRead(taskRole);
 
+    // Grant permissions to read s3 bucket (for file uploads)
+    uploadBucket.grantReadWrite(taskRole);
+
     // Grant permissions to read parameters from Parameter Store
     taskRole.addToPolicy(
       new iam.PolicyStatement({
@@ -360,6 +366,7 @@ export class ApiStack extends cdk.Stack {
         DATABASE_HOST: databaseCluster.clusterEndpoint.hostname,
         DATABASE_PORT: databaseCluster.clusterEndpoint.port.toString(),
         DATABASE_NAME: config.database.databaseName,
+        UPLOAD_BUCKET_NAME: uploadBucket.bucketName,
       },
       secrets: {
         // Database credentials from Secrets Manager
@@ -384,7 +391,7 @@ export class ApiStack extends cdk.Stack {
           firebaseSecret,
           "private_key",
         ),
-      },
+              },
       containerName: "api",
       essential: true,
       healthCheck: {

@@ -1114,6 +1114,7 @@ export type Mutation = {
   deleteSkillNodeSimple?: Maybe<Scalars['Boolean']['output']>;
   deleteSkillTree?: Maybe<SkillTree>;
   deleteUser?: Maybe<User>;
+  getUploadUrls?: Maybe<PresignedUploadPayload>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   setUserRole?: Maybe<User>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1222,6 +1223,13 @@ export type MutationDeleteSkillTreeArgs = {
 
 export type MutationDeleteUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationGetUploadUrlsArgs = {
+  contentType: Scalars['String']['input'];
+  fileName: Scalars['String']['input'];
+  fileSize: Scalars['Int']['input'];
 };
 
 
@@ -1678,6 +1686,13 @@ export enum NullsOrder {
   First = 'first',
   Last = 'last'
 }
+
+export type PresignedUploadPayload = {
+  __typename?: 'PresignedUploadPayload';
+  fileKey?: Maybe<Scalars['String']['output']>;
+  publicUrl?: Maybe<Scalars['String']['output']>;
+  uploadUrl?: Maybe<Scalars['String']['output']>;
+};
 
 export enum ProgressStatus {
   Completed = 'COMPLETED',

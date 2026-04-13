@@ -12,7 +12,7 @@
     "db:validate": "pnpm --filter ./apps/api prisma validate",
     "db:migrate:dev": "pnpm --filter ./apps/api prisma migrate dev",
     "db:studio": "pnpm --filter api prisma studio",
-    "dev": "pnpm db:start && pnpm --filter ./packages/theme build && pnpm --filter ./packages/ui build && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
+    "dev": "pnpm db:start && pnpm --filter ./packages/theme build && pnpm --filter ./packages/ui build && pnpm --parallel --filter admin-dashboard --filter @skilltree/client-frontend --filter api dev",
     "storybook": "pnpm --filter ./packages/ui storybook",
     "build": "pnpm -r build"
   },

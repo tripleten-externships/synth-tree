@@ -1080,6 +1080,7 @@ type Mutation {
   deleteSkillNodeSimple(id: ID!): Boolean
   deleteSkillTree(id: ID!): SkillTree
   deleteUser(id: ID!): User
+  getUploadUrls(contentType: String!, fileName: String!, fileSize: Int!): PresignedUploadPayload
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
   submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
@@ -1482,6 +1483,12 @@ input NullableStringFieldUpdateOperationsInput {
 enum NullsOrder {
   first
   last
+}
+
+type PresignedUploadPayload {
+  fileKey: String
+  publicUrl: String
+  uploadUrl: String
 }
 
 enum ProgressStatus {
