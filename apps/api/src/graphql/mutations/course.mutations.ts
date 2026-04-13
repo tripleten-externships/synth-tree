@@ -7,6 +7,7 @@ import {
 } from "@graphql/inputs/course.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
+import logger from '@lib/logger'; // Structured logger for tracking course creation and admin actions
 
 builder.mutationFields((t) => ({
   // ===== Courses =====
@@ -38,6 +39,8 @@ builder.mutationFields((t) => ({
             description: course.description ?? null,
           },
         });
+
+        logger.info({ userId, courseId: course.id, title: course.title }, 'Course created'); // Audit log for course creation — useful for admin tracking and debugging
 
         return tx.course.findUniqueOrThrow({
           ...query,

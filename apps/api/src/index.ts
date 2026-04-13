@@ -9,6 +9,8 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { schema } from "./schema";
 import { createGraphQLContext, GraphQLContext } from "@graphql/context";
 import { prisma } from "@lib/prisma";
+import { apolloLoggingPlugin } from "@lib/apolloLoggingPlugin"; // Custom plugin that logs GraphQL request lifecycle + errors with context
+import logger from "@lib/logger"; // Centralized Pino logger (pretty in dev, JSON in prod)
 
 async function start() {
   const app = express();
@@ -32,7 +34,18 @@ async function start() {
         includeCookies: true,
       }),
       ApolloServerPluginDrainHttpServer({ httpServer }),
+      apolloLoggingPlugin, // Enables structured logging for every GraphQL request + error
     ],
+      formatError: (formattedError) => { 
+        // In production, hide stack traces and internal details from clients
+        if (process.env.NODE_ENV === 'production') {
+        return {
+        message: formattedError.message,
+        extensions: { code: formattedError.extensions?.code },
+      };
+  }
+  return formattedError; // Full error details in development
+},
   });
 
   await server.start();
@@ -51,7 +64,7 @@ async function start() {
   const port = parseInt(process.env.PORT || "4000", 10);
   await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
 
-  console.log(`🚀 Server ready at http://localhost:${port}`);
+  logger.info(`🚀 Server ready at http://localhost:${port}`); // Log server startup for visibility in local/dev environments
 }
 
 start();
