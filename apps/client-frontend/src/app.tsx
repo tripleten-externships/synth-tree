@@ -12,6 +12,8 @@ import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import LessonViewerDemoPage from "./pages/LessonViewerDemoPage";
+// CourseDetailPage - shows full details of a single course when clicked
+import CourseDetailPage from "./pages/CourseDetailPage";
 
 // A wrapper that combines protection + your layout + an Outlet
 function ProtectedMainLayout() {
@@ -49,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "profile", // "/profile"
         element: <ProfilePage />,
+      },
+      {
+        path: "courses/:courseId", // "/courses/:courseId - loads when a course card is clicked"
+        element: <CourseDetailPage />,
       },
     ],
   },
