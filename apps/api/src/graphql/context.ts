@@ -2,6 +2,7 @@ import { Request } from "express";
 import { PrismaClient, Role } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { admin } from "../firebase";
+import logger from '@lib/logger'; // Logger used for auth-related warnings and request context visibility
 
 export interface GraphQLContext {
   user: {
@@ -48,7 +49,7 @@ export async function createGraphQLContext({
         };
       } catch (error) {
         // Token verification failed, user remains null
-        console.error("Token verification failed:", error);
+        logger.warn({ err: error }, 'Token verification failed'); // Warn when Firebase token verification fails — user remains unauthenticated
       }
     }
   }

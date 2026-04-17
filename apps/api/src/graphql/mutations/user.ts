@@ -3,6 +3,7 @@ import { builder } from "@graphql/builder";
 import { Role as PrismaRole } from "@prisma/client";
 import { Role as RoleEnum } from "@graphql/__generated__/inputs";
 import { requireAdmin } from "@graphql/auth/requireAuth";
+import logger from '@lib/logger'; // Structured logger for tracking user sync and account events
 
 // Sync current User.
 // A token will be sent in the headers of the Apollo Client from the frontend when a User signs up through the firebase sdk
@@ -18,6 +19,7 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _parent, args, context) => {
       const firebaseUid = context.auth.requireAuth();
+      logger.debug({ userId: firebaseUid }, 'Syncing current user'); // Debug-level log to trace user sync flow during development
       const ctxUser = context.user;
 
       const email = ctxUser?.email ?? null;
@@ -54,6 +56,7 @@ builder.mutationFields((t) => ({
         },
       });
 
+      logger.info({ userId: user.id, email: user.email }, 'User synced'); // High-level audit log for successful user creation/update
       return user;
     },
   }),

@@ -4,6 +4,7 @@ import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
+import logger from '@lib/logger'; // Structured logger used for tracking quiz-related events
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -366,7 +367,7 @@ builder.mutationFields((t) => ({
       answers: t.arg.stringList({ required: true }),
     },
     resolve: async (query, _root, { quizId, answers }, ctx) => {
-      ctx.auth.requireAuth();
+      const userId = ctx.auth.requireAuth(); // Capture userId for logging and audit purposes
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
@@ -400,6 +401,8 @@ builder.mutationFields((t) => ({
       });
 
       const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+
+      logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
