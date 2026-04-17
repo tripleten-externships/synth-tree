@@ -11,6 +11,10 @@ import * as route53 from "aws-cdk-lib/aws-route53";
 import * as route53Targets from "aws-cdk-lib/aws-route53-targets";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as applicationautoscaling from "aws-cdk-lib/aws-applicationautoscaling";
+import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
+import * as cloudwatchActions from "aws-cdk-lib/aws-cloudwatch-actions";
+import * as sns from "aws-cdk-lib/aws-sns";
+import * as snsSubscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import { Construct } from "constructs";
 import { EnvironmentConfig } from "./config";
 
@@ -71,6 +75,12 @@ export class ApiStack extends cdk.Stack {
    * The API URL (ALB DNS name or custom domain)
    */
   public readonly apiUrl: string;
+
+  // SNS that receive cloudWatch alarm notification
+  public readonly alarmTopic: sns.Topic;
+
+  // CloudWatch dashboard for API, ECS, and RDS monitoring
+  public readonly dashboard: cloudwatch.Dashboard;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
@@ -135,7 +145,9 @@ export class ApiStack extends cdk.Stack {
      * Create internet-facing Application Load Balancer
      * Deployed in public subnets
      */
-    this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, "Alb", {
+
+    // this.loadBalancer = new elbv2.ApplicationLoadBalancer(this, "Alb", {
+    const alb = new elbv2.ApplicationLoadBalancer(this, "Alb", {
       vpc,
       internetFacing: true,
       securityGroup: albSecurityGroup,
@@ -145,8 +157,9 @@ export class ApiStack extends cdk.Stack {
       loadBalancerName: `${config.name}-api-alb`,
       deletionProtection: config.name === "synth-tree-prod",
     });
-
-    cdk.Tags.of(this.loadBalancer).add("Name", `${config.name}-api-alb`);
+    this.loadBalancer = alb;
+    // cdk.Tags.of(this.loadBalancer).add("Name", `${config.name}-api-alb`);
+    cdk.Tags.of(alb).add("Name", `${config.name}-api-alb`);
 
     /**
      * Create target group for ECS tasks
@@ -176,7 +189,8 @@ export class ApiStack extends cdk.Stack {
     /**
      * HTTP listener - redirects to HTTPS
      */
-    this.loadBalancer.addListener("HttpListener", {
+    // this.loadBalancer.addListener("HttpListener", {
+    alb.addListener("HttpListener", {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       defaultAction: elbv2.ListenerAction.redirect({
@@ -189,7 +203,8 @@ export class ApiStack extends cdk.Stack {
     /**
      * HTTPS listener - forwards to target group
      */
-    this.loadBalancer.addListener("HttpsListener", {
+    // this.loadBalancer.addListener("HttpListener", {
+    alb.addListener("HttpsListener", {
       port: 443,
       protocol: elbv2.ApplicationProtocol.HTTPS,
       certificates: [certificate],
@@ -483,10 +498,426 @@ export class ApiStack extends cdk.Stack {
       });
     }
 
-    // ========================================
-    // CloudFormation Outputs
-    // ========================================
+    //================================================================================================================================================================
+    //================================================================================================================================================================
+    //================================================================================================================================================================
 
+    // Monitoring: SNS alarm topic
+    /*
+     SNS topic for cloudWatch alarm notification
+     if alarmEmail is set in config, an email subscription is created
+     the subscriber must confirm the email before notification is sent
+     */
+    this.alarmTopic = new sns.Topic(this, "AlarmTopic", {
+      topicName: `${config.name}-api-alarms`,
+      displayName: `${config.name} API Alarms`,
+    });
+
+    if (config.monitoring.alarmEmail) {
+      this.alarmTopic.addSubscription(
+        new snsSubscriptions.EmailSubscription(config.monitoring.alarmEmail),
+      );
+    }
+
+    // Monitoring: cloudwatch metrics
+
+    const metricPeriod = cdk.Duration.minutes(5);
+
+    // ALB metrics
+    const requestCount = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "RequestCount",
+      dimensionsMap: { LoadBalancer: alb.loadBalancerFullName },
+      statistic: "Sum",
+      period: metricPeriod,
+      label: "Request Count",
+    });
+
+    const targetResponseTime = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "TargetResponseTime",
+      dimensionsMap: { LoadBalancer: alb.loadBalancerFullName },
+      statistic: "p99",
+      period: metricPeriod,
+      label: "Latency p99 (s)",
+    });
+
+    const http5xxCount = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "HTTPCode_Target_5XX_Count",
+      dimensionsMap: { LoadBalancer: alb.loadBalancerFullName },
+      statistic: "Sum",
+      period: metricPeriod,
+      label: "5XX Errors",
+    });
+
+    const http4xxCount = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "HTTPCode_Target_4XX_Count",
+      dimensionsMap: { LoadBalancer: alb.loadBalancerFullName },
+      statistic: "Sum",
+      period: metricPeriod,
+      label: "4XX Errors",
+    });
+
+    const healthyHostCount = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "HealthyHostCount",
+      dimensionsMap: {
+        LoadBalancer: alb.loadBalancerFullName,
+        TargetGroup: targetGroup.targetGroupFullName,
+      },
+      statistic: "Minimum",
+      period: metricPeriod,
+      label: "Healthy Hosts",
+    });
+
+    const unhealthyHostCount = new cloudwatch.Metric({
+      namespace: "AWS/ApplicationELB",
+      metricName: "UnHealthyHostCount",
+      dimensionsMap: {
+        LoadBalancer: alb.loadBalancerFullName,
+        TargetGroup: targetGroup.targetGroupFullName,
+      },
+      statistic: "Maximum",
+      period: metricPeriod,
+      label: "Unhealthy Hosts",
+    });
+
+    // ECS metrics
+    const ecsCpu = this.service.metricCpuUtilization({
+      period: metricPeriod,
+      label: "ECS CPU (%)",
+    });
+
+    const ecsMemory = this.service.metricMemoryUtilization({
+      period: metricPeriod,
+      label: "ECS Memory (%)",
+    });
+
+    // Running task count from container insight
+    const ecsTaskCount = new cloudwatch.Metric({
+      namespace: "ECS/ContainerInsights",
+      metricName: "RunningTaskCount",
+      dimensionsMap: {
+        ClusterName: this.cluster.clusterName,
+        ServiceName: this.service.serviceName,
+      },
+      statistic: "Average",
+      period: metricPeriod,
+      label: "Running Tasks",
+    });
+
+    // RDS/Aurora metrics
+    const rdsConnections = new cloudwatch.Metric({
+      namespace: "AWS/RDS",
+      metricName: "DatabaseConnections",
+      dimensionsMap: { DBClusterIdentifier: databaseCluster.clusterIdentifier },
+      statistic: "Average",
+      period: metricPeriod,
+      label: "DB Connections",
+    });
+
+    const rdsCpu = new cloudwatch.Metric({
+      namespace: "AWS/RDS",
+      metricName: "CPUUtilization",
+      dimensionsMap: { DBClusterIdentifier: databaseCluster.clusterIdentifier },
+      statistic: "Average",
+      period: metricPeriod,
+      label: "RDS CPU (%)",
+    });
+
+    const rdsCapacity = new cloudwatch.Metric({
+      namespace: "AWS/RDS",
+      metricName: "ServerlessDatabaseCapacity",
+      dimensionsMap: { DBClusterIdentifier: databaseCluster.clusterIdentifier },
+      statistic: "Average",
+      period: metricPeriod,
+      label: "Aurora Capacity (ACUs)",
+    });
+
+    const rdsCommitLatency = new cloudwatch.Metric({
+      namespace: "AWS/RDS",
+      metricName: "CommitLatency",
+      dimensionsMap: { DBClusterIdentifier: databaseCluster.clusterIdentifier },
+      statistic: "Average",
+      period: metricPeriod,
+      label: "Commit Latency (ms)",
+    });
+
+    // ================================================================================
+    // Monitoring: cloudWatch alarm
+    const alarmAction = new cloudwatchActions.SnsAction(this.alarmTopic);
+
+    // ALB p99 latency exceed threshold
+    const latencyAlarm = new cloudwatch.Alarm(this, "HighLatencyAlarm", {
+      alarmName: `${config.name}-high-latency`,
+      alarmDescription: `API p99 latency exceeded ${config.monitoring.latencyThresholdSeconds}s`,
+      metric: targetResponseTime,
+      threshold: config.monitoring.latencyThresholdSeconds,
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    latencyAlarm.addAlarmAction(alarmAction);
+    latencyAlarm.addOkAction(alarmAction);
+
+    /*
+     5XX error rate alarm using following math expression to calculate traffic:  rate = (5xx count / total request) * 100
+     treatMissingData = NOT_BREACHING handle the zero-request case safely
+     */
+    const errorRateAlarm = new cloudwatch.Alarm(this, "HighErrorRateAlarm", {
+      alarmName: `${config.name}-high-error-rate`,
+      alarmDescription: `5XX error rate exceeded ${config.monitoring.errorRateThresholdPercent}%`,
+      metric: new cloudwatch.MathExpression({
+        expression: "m5xx / mRequests * 100",
+        usingMetrics: { m5xx: http5xxCount, mRequests: requestCount },
+        period: metricPeriod,
+        label: "5XX Error Rate (%)",
+      }),
+      threshold: config.monitoring.errorRateThresholdPercent,
+      evaluationPeriods: 2,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    errorRateAlarm.addAlarmAction(alarmAction);
+    errorRateAlarm.addOkAction(alarmAction);
+
+    // one or more ALB target became unhealthy
+    const unhealthyHostAlarm = new cloudwatch.Alarm(
+      this,
+      "UnhealthyHostsAlarm",
+      {
+        alarmName: `${config.name}-unhealthy-hosts`,
+        alarmDescription: "One or more ALB targets are unhealthy",
+        metric: unhealthyHostCount,
+        threshold: 0,
+        evaluationPeriods: 2,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      },
+    );
+    unhealthyHostAlarm.addAlarmAction(alarmAction);
+    unhealthyHostAlarm.addOkAction(alarmAction);
+
+    // ECS cpu utilization alarm
+    const ecsCpuAlarm = new cloudwatch.Alarm(this, "EcsCpuAlarm", {
+      alarmName: `${config.name}-ecs-high-cpu`,
+      alarmDescription: `ECS CPU exceeded ${config.monitoring.cpuAlarmPercent}%`,
+      metric: ecsCpu,
+      threshold: config.monitoring.cpuAlarmPercent,
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    ecsCpuAlarm.addAlarmAction(alarmAction);
+    ecsCpuAlarm.addOkAction(alarmAction);
+
+    // ECS memory utilization alarm
+    const ecsMemoryAlarm = new cloudwatch.Alarm(this, "EcsMemoryAlarm", {
+      alarmName: `${config.name}-ecs-high-memory`,
+      alarmDescription: `ECS memory exceeded ${config.monitoring.memoryAlarmPercent}%`,
+      metric: ecsMemory,
+      threshold: config.monitoring.memoryAlarmPercent,
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    ecsMemoryAlarm.addAlarmAction(alarmAction);
+    ecsMemoryAlarm.addOkAction(alarmAction);
+
+    // RDS cpu utilization alarm
+    const rdsCpuAlarm = new cloudwatch.Alarm(this, "RdsCpuAlarm", {
+      alarmName: `${config.name}-rds-high-cpu`,
+      alarmDescription: `RDS CPU exceeded ${config.monitoring.cpuAlarmPercent}%`,
+      metric: rdsCpu,
+      threshold: config.monitoring.cpuAlarmPercent,
+      evaluationPeriods: 3,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+    rdsCpuAlarm.addAlarmAction(alarmAction);
+    rdsCpuAlarm.addOkAction(alarmAction);
+
+    // RDS database connection count alarm
+    const rdsConnectionsAlarm = new cloudwatch.Alarm(
+      this,
+      "RdsConnectionsAlarm",
+      {
+        alarmName: `${config.name}-rds-high-connections`,
+        alarmDescription: `RDS connections exceeded ${config.monitoring.dbConnectionAlarmThreshold}`,
+        metric: rdsConnections,
+        threshold: config.monitoring.dbConnectionAlarmThreshold,
+        evaluationPeriods: 2,
+        comparisonOperator:
+          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      },
+    );
+    rdsConnectionsAlarm.addAlarmAction(alarmAction);
+    rdsConnectionsAlarm.addOkAction(alarmAction);
+
+    // ================================================================================
+
+    // Monitoring: cloudwatch dashboard
+    this.dashboard = new cloudwatch.Dashboard(this, "ApiDashboard", {
+      dashboardName: `${config.name}-api-dashboard`,
+      defaultInterval: cdk.Duration.hours(3),
+    });
+
+    // this is header
+    this.dashboard.addWidgets(
+      new cloudwatch.TextWidget({
+        markdown: [
+          `# ${config.name} — API Monitoring`,
+          `**Region:** ${this.region} | **API:** ${this.apiUrl} | _5-minute metric periods_`,
+        ].join("\n"),
+        width: 24,
+        height: 1,
+      }),
+    );
+
+    // alarm status overview
+    this.dashboard.addWidgets(
+      new cloudwatch.AlarmStatusWidget({
+        title: "Alarm Status",
+        alarms: [
+          latencyAlarm,
+          errorRateAlarm,
+          unhealthyHostAlarm,
+          ecsCpuAlarm,
+          ecsMemoryAlarm,
+          rdsCpuAlarm,
+          rdsConnectionsAlarm,
+        ],
+        width: 24,
+        height: 3,
+      }),
+    );
+
+    // ALB - request rate, latency, errors, host health
+    this.dashboard.addWidgets(
+      new cloudwatch.GraphWidget({
+        title: "Request Rate",
+        left: [requestCount],
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "Latency p99 (seconds)",
+        left: [targetResponseTime],
+        leftYAxis: { label: "Seconds", showUnits: false },
+        leftAnnotations: [
+          {
+            value: config.monitoring.latencyThresholdSeconds,
+            color: cloudwatch.Color.RED,
+            label: "Alarm threshold",
+          },
+        ],
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "HTTP Error Counts",
+        left: [http5xxCount, http4xxCount],
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "Target Health",
+        left: [healthyHostCount, unhealthyHostCount],
+        width: 6,
+        height: 6,
+      }),
+    );
+
+    // ECS - cpu, memory, running task count
+    this.dashboard.addWidgets(
+      new cloudwatch.GraphWidget({
+        title: "ECS CPU Utilization",
+        left: [ecsCpu],
+        leftYAxis: { label: "Percent", min: 0, max: 100, showUnits: false },
+        leftAnnotations: [
+          {
+            value: config.monitoring.cpuAlarmPercent,
+            color: cloudwatch.Color.RED,
+            label: "Alarm threshold",
+          },
+        ],
+        width: 8,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "ECS Memory Utilization",
+        left: [ecsMemory],
+        leftYAxis: { label: "Percent", min: 0, max: 100, showUnits: false },
+        leftAnnotations: [
+          {
+            value: config.monitoring.memoryAlarmPercent,
+            color: cloudwatch.Color.RED,
+            label: "Alarm threshold",
+          },
+        ],
+        width: 8,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "Running Task Count",
+        left: [ecsTaskCount],
+        width: 8,
+        height: 6,
+      }),
+    );
+
+    // RDS - connection, cpu, aurora capacity, commit latency
+    this.dashboard.addWidgets(
+      new cloudwatch.GraphWidget({
+        title: "RDS Database Connections",
+        left: [rdsConnections],
+        leftAnnotations: [
+          {
+            value: config.monitoring.dbConnectionAlarmThreshold,
+            color: cloudwatch.Color.RED,
+            label: "Alarm threshold",
+          },
+        ],
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "RDS CPU Utilization",
+        left: [rdsCpu],
+        leftYAxis: { label: "Percent", min: 0, max: 100, showUnits: false },
+        leftAnnotations: [
+          {
+            value: config.monitoring.cpuAlarmPercent,
+            color: cloudwatch.Color.RED,
+            label: "Alarm threshold",
+          },
+        ],
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "Aurora Serverless Capacity (ACUs)",
+        left: [rdsCapacity],
+        leftYAxis: { label: "ACUs", showUnits: false },
+        width: 6,
+        height: 6,
+      }),
+      new cloudwatch.GraphWidget({
+        title: "RDS Commit Latency",
+        left: [rdsCommitLatency],
+        leftYAxis: { label: "Milliseconds", showUnits: false },
+        width: 6,
+        height: 6,
+      }),
+    );
+
+    // ================================================================================
+
+    // CloudFormation output
     new cdk.CfnOutput(this, "ApiUrl", {
       value: this.apiUrl,
       description: "API endpoint URL",
@@ -527,6 +958,18 @@ export class ApiStack extends cdk.Stack {
       value: apiRepository.repositoryUri,
       description: "ECR repository URI for the API",
       exportName: `${config.name}-ApiRepositoryUri`,
+    });
+
+    new cdk.CfnOutput(this, "DashboardUrl", {
+      value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${config.name}-api-dashboard`,
+      description: "CloudWatch dashboard URL",
+      exportName: `${config.name}-DashboardUrl`,
+    });
+
+    new cdk.CfnOutput(this, "AlarmTopicArn", {
+      value: this.alarmTopic.topicArn,
+      description: "SNS alarm topic ARN",
+      exportName: `${config.name}-AlarmTopicArn`,
     });
   }
 }
