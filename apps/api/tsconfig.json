@@ -6,7 +6,6 @@
     "module": "CommonJS",
     "esModuleInterop": true,
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@graphql/*": ["./src/graphql/*"],
       "@lib/*": ["./src/lib/*"]

@@ -2,6 +2,7 @@ import { Request } from "express";
 import { PrismaClient, Role } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { admin } from "../firebase";
+import logger from '@lib/logger'; // Logger used for auth-related warnings and request context visibility
 
 export interface GraphQLContext {
   user: {
@@ -36,17 +37,19 @@ export async function createGraphQLContext({
         const userRecord = await prisma.user.findUnique({
           where: { id: decoded.uid },
         });
-        if (!userRecord) {
-          throw new GraphQLError(`No user found for UID ${decoded.uid}`);
-        }
-        user = {
+        // Don't throw if user not found — syncCurrentUser will create them
+        user = userRecord ? {
           uid: decoded.uid,
           email: decoded.email,
           role: userRecord.role,
+        } : {
+          uid: decoded.uid,
+         email: decoded.email,
+          role: Role.USER,
         };
       } catch (error) {
         // Token verification failed, user remains null
-        console.error("Token verification failed:", error);
+        logger.warn({ err: error }, 'Token verification failed'); // Warn when Firebase token verification fails — user remains unauthenticated
       }
     }
   }

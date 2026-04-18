@@ -13,6 +13,81 @@ interface FileUploadProps {
   className?: string;
 }
 
+// Helper functions to replace nested ternaries
+const getIconName = (accept: "image" | "video" | "both"): string => {
+  switch (accept) {
+    case "image":
+      return "image";
+    case "video":
+      return "video";
+    case "both":
+      return "file";
+    default:
+      return "file";
+  }
+};
+
+const getSubtitleText = (accept: "image" | "video" | "both"): string => {
+  switch (accept) {
+    case "image":
+      return "JPEG, PNG, GIF, WebP up to 10MB";
+    case "video":
+      return "MP4, WebM up to 100MB";
+    case "both":
+      return "Images (JPEG, PNG, GIF, WebP up to 10MB) or Videos (MP4, WebM up to 100MB)";
+    default:
+      return "";
+  }
+};
+
+const getAcceptAttribute = (accept: "image" | "video" | "both"): string => {
+  switch (accept) {
+    case "image":
+      return "image/*";
+    case "video":
+      return "video/*";
+    case "both":
+      return "image/*,video/*";
+    default:
+      return "";
+  }
+};
+
+const renderPreview = (
+  fileUrl: string | null,
+  posterUrl: string | null,
+  videoRef: React.RefObject<HTMLVideoElement | null>
+): React.ReactNode => {
+  if (fileUrl && (fileUrl.startsWith("blob:") || /\.(jpeg|jpg|png|gif|webp)/.test(fileUrl))) {
+    return (
+      <img 
+        src={fileUrl} 
+        alt="preview" 
+        className={styles.preview}
+      />
+    );
+  }
+  if (posterUrl) {
+    return (
+      <video 
+        ref={videoRef}
+        src={fileUrl || ""} 
+        controls 
+        poster={posterUrl}
+        className={styles.videoPreview}
+      />
+    );
+  }
+  return (
+    <video 
+      ref={videoRef}
+      src={fileUrl || ""} 
+      controls 
+      className={styles.videoPreview}
+    />
+  );
+};
+
 const FileUpload: React.FC<FileUploadProps> = ({ 
   accept = "both", 
   onUploadComplete, 
@@ -175,23 +250,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
           className={styles.dropZone}
         >
           <div className={styles.icon}>
-            {accept === "image" ? "image" : accept === "video" ? "video" : "file"}
+            {getIconName(accept)}
           </div>
           <p className={styles.title}>
             Drag & drop your {accept === "both" ? "file" : accept} here or click to browse
           </p>
           <p className={styles.subtitle}>
-            {accept === "image" 
-              ? "JPEG, PNG, GIF, WebP up to 10MB" 
-              : accept === "video"
-              ? "MP4, WebM up to 100MB"
-              : "Images (JPEG, PNG, GIF, WebP up to 10MB) or Videos (MP4, WebM up to 100MB)"}
+            {getSubtitleText(accept)}
           </p>
           <input
             ref={fileInputRef}
             type="file"
             onChange={handleFileSelect}
-            accept={accept === "image" ? "image/*" : accept === "video" ? "video/*" : "image/*,video/*"}
+            accept={getAcceptAttribute(accept)}
             className={styles.fileInput}
             title={`Select ${accept === "both" ? "image or video" : accept} file`}
           />
@@ -220,28 +291,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       {state === "complete" && (
         <div className={styles.complete}>
-          {fileUrl && (fileUrl.startsWith("blob:") || /\.(jpeg|jpg|png|gif|webp)/.test(fileUrl)) ? (
-            <img 
-              src={fileUrl || ""} 
-              alt="preview" 
-              className={styles.preview}
-            />
-          ) : posterUrl ? (
-            <video 
-              ref={videoRef}
-              src={fileUrl || ""} 
-              controls 
-              poster={posterUrl}
-              className={styles.videoPreview}
-            />
-          ) : (
-            <video 
-              ref={videoRef}
-              src={fileUrl || ""} 
-              controls 
-              className={styles.videoPreview}
-            />
-          )}
+          {renderPreview(fileUrl, posterUrl, videoRef)}
           <div className={styles.buttonContainer}>
             <button 
               onClick={() => {

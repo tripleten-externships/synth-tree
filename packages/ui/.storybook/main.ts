@@ -21,14 +21,12 @@ const config: StorybookConfig = {
     },
   },
   viteFinal: async (config) => {
-    // Ensure CSS is processed correctly
     if (config.css) {
       config.css.postcss = {
         plugins: [require("tailwindcss"), require("autoprefixer")],
       };
     }
 
-    // Add alias resolution for @/* paths and workspace packages
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,

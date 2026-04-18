@@ -1,6 +1,7 @@
 {
   "name": "skilltree-monorepo",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "workspaces": [
     "apps/*",
@@ -14,7 +15,16 @@
     "db:studio": "pnpm --filter api prisma studio",
     "dev": "pnpm db:start && pnpm --filter ./packages/theme build && pnpm --filter ./packages/ui build && pnpm --parallel --filter admin-dashboard --filter @skilltree/client-frontend --filter api dev",
     "storybook": "pnpm --filter ./packages/ui storybook",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@apollo/client": "^4.0.9",
+    "@eslint/js": "^9.36.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "graphql": "^16.11.0"
+  }
 }

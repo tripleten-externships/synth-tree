@@ -6,6 +6,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ColorPickerDemoPage } from "./pages/ColorPickerDemoPage";
+import CoursesList from "./pages/courses/CoursesList";
 import { ToastProvider } from "./components/Toast";
 
 function App() {
@@ -16,35 +17,26 @@ function App() {
           <ToastProvider>
             <Routes>
               <Route path="/auth/*" element={<AuthFeature />} />
-              <Route
+<Route
                 path="/*"
                 element={
                   <ProtectedRoutes>
                     <Routes>
                       <Route
                         path="/dashboard"
-                        element={
-                          <DashboardLayout>
-                            <div className="flex flex-col ml-16 items-start mt-16">
-                              <h1 className="text-3xl font-bold mb-2">
-                                Courses
-                              </h1>
-                              <p className="text-lg text-muted-foreground mb-8">
-                                No courses yet
-                              </p>
-                              <div className="flex flex-col items-center justify-center border border-gray-200 rounded-lg w-72 h-40">
-                                <span className="text-3xl mb-2">+</span>
-                                <span className="text-base font-bold">
-                                  New Course
-                                </span>
-                              </div>
-                            </div>
-                          </DashboardLayout>
-                        }
+                        element={<Navigate to="/courses" replace />}
                       />
                       <Route
                         path="/"
-                        element={<Navigate to="/dashboard" replace />}
+                        element={<Navigate to="/courses" replace />}
+                      />
+                      <Route
+                        path="/courses"
+                        element={
+                          <DashboardLayout>
+                            <CoursesList />
+                          </DashboardLayout>
+                        }
                       />
                       <Route
                         path="/color-picker-demo"

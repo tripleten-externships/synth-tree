@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@skilltree/ui";
 import {
   DropdownMenu,
@@ -16,7 +16,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       <nav
@@ -28,7 +29,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <img
             src={SkillTreeLogo}
             alt="SkillTree logo"
-            className="h-6 w-auto"
+            className="h-6 w-auto dark:brightness-0 dark:invert"
           />
         </div>
         {/* RIGHT: Courses link, avatar + admin badge container*/}
@@ -48,14 +49,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <img
                     src={user?.photoURL || GenericAvatar}
                     alt={user?.displayName || "User"}
-                    className="h-8 w-8 rounded-full"
+                    className="h-8 w-8 rounded-full dark:brightness-0 dark:invert"
                   />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="p-4 mr-8">
                 {/* TODO: Add navigation links/actions for Profile and Logout */}
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                 <DropdownMenuItem onClick={() => navigate("/profile")}>
+      Profile
+    </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Badge>

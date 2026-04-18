@@ -1,5 +1,4 @@
 import { builder } from "@graphql/builder";
-import { requireAdmin } from "@graphql/auth/requireAuth";
 import { Prisma } from "@prisma/client";
 import {
   CreateCourseInput,
@@ -7,6 +6,7 @@ import {
 } from "@graphql/inputs/course.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
+import logger from '@lib/logger'; // Structured logger for tracking course creation and admin actions
 
 builder.mutationFields((t) => ({
   // ===== Courses =====
@@ -18,7 +18,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { input }, ctx) => {
       const userId = ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       return ctx.prisma.$transaction(async (tx) => {
         const course = await tx.course.create({
@@ -39,6 +38,8 @@ builder.mutationFields((t) => ({
           },
         });
 
+        logger.info({ userId, courseId: course.id, title: course.title }, 'Course created'); // Audit log for course creation — useful for admin tracking and debugging
+
         return tx.course.findUniqueOrThrow({
           ...query,
           where: { id: course.id },
@@ -55,7 +56,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id, input }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       await assertCourseOwnership(ctx, id);
 
@@ -93,7 +93,6 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-      requireAdmin(ctx);
 
       // 1. Ensure the course actually exists (minimal fetch, no query)
       const existing = await ctx.prisma.course.findUnique({
