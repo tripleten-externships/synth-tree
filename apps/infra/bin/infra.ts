@@ -45,27 +45,20 @@ console.log(`📍 Region: ${config.region}`);
 console.log(`🌐 Domain: ${config.domain}`);
 
 // Define CDK environment
+// For CI/CD validation: use a placeholder account if CDK_DEFAULT_ACCOUNT is not set
+const accountId = config.account || process.env.CDK_DEFAULT_ACCOUNT || "123456789012";
+
 const env = {
-  account: config.account || process.env.CDK_DEFAULT_ACCOUNT,
+  account: accountId,
   region: config.region,
 };
-
-/**
- * Parent Stack
- * Groups all infrastructure stacks together in CloudFormation
- */
-const parentStack = new cdk.Stack(app, `${config.name}-Stack`, {
-  env,
-  description: `Stack for Synth Tree ${config.name} environment`,
-  tags: config.tags,
-});
 
 /**
  * Network Stack
  * VPC, subnets, NAT gateways, security groups
  * No dependencies
  */
-const networkStack = new NetworkStack(parentStack, `${config.name}-Network`, {
+const networkStack = new NetworkStack(app, `${config.name}-Network`, {
   env,
   description: `Network infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
@@ -78,7 +71,7 @@ const networkStack = new NetworkStack(parentStack, `${config.name}-Network`, {
  * Depends on: Network Stack
  */
 const databaseStack = new DatabaseStack(
-  parentStack,
+  app,
   `${config.name}-Database`,
   {
     env,
@@ -99,7 +92,7 @@ databaseStack.addDependency(networkStack);
 // Storage Stack
 // S3 bucket for file uploads
 // No dependencies
-const storageStack = new StorageStack(parentStack, `${config.name}-Storage`, {
+const storageStack = new StorageStack(app, `${config.name}-Storage`, {
   env,
   description: `Storage infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
@@ -109,7 +102,7 @@ const storageStack = new StorageStack(parentStack, `${config.name}-Storage`, {
  * ECS Fargate service, Application Load Balancer
  * Depends on: Network Stack, Database Stack, Storage Stack
  */
-const apiStack = new ApiStack(parentStack, `${config.name}-Api`, {
+const apiStack = new ApiStack(app, `${config.name}-Api`, {
   env,
   description: `API infrastructure for Synth Tree ${config.name} environment`,
   tags: config.tags,
@@ -132,7 +125,7 @@ apiStack.addDependency(storageStack);
  * Independent - no dependencies
  */
 const frontendStack = new FrontendStack(
-  parentStack,
+  app,
   `${config.name}-Frontend`,
   {
     env,
@@ -148,7 +141,7 @@ const frontendStack = new FrontendStack(
  * Independent - no dependencies
  */
 const storybookStack = new StorybookStack(
-  parentStack,
+  app,
   `${config.name}-Storybook`,
   {
     env,

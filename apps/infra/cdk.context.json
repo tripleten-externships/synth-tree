@@ -30,5 +30,17 @@
   "hosted-zone:account=109698388873:domainName=synth-tree.com:region=us-east-1": {
     "Id": "/hostedzone/Z009822734Z86QRLNUPW1",
     "Name": "synth-tree.com."
+  },
+  "availability-zones:account=123456789012:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "hosted-zone:account=123456789012:domainName=synth-tree.com:region=us-east-1": {
+    "Id": "/hostedzone/Z08929842PUOGFTMM24WV",
+    "Name": "synth-tree.com."
   }
 }
