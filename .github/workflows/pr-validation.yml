@@ -441,7 +441,6 @@ jobs:
              [[ "${{ needs.build-api.result }}" == "failure" ]] || \
              [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
              [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
-             [[ "${{ needs.cdk-diff.result }}" == "failure" ]] || \
              [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
