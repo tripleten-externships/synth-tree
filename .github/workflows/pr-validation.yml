@@ -271,7 +271,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.infra == 'true'
-    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -442,6 +441,7 @@ jobs:
              [[ "${{ needs.build-api.result }}" == "failure" ]] || \
              [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
              [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
+             [[ "${{ needs.cdk-diff.result }}" == "failure" ]] || \
              [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
