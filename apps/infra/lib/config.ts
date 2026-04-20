@@ -78,7 +78,7 @@ export interface EnvironmentConfig {
  */
 export const devConfig: EnvironmentConfig = {
   name: "synth-tree-dev",
-  account: process.env.CDK_DEFAULT_ACCOUNT || "",
+  account: process.env.CDK_DEFAULT_ACCOUNT || "516217144302",
   region: "us-east-1",
 
   // Domains
