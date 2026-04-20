@@ -204,7 +204,7 @@ export const prodConfig: EnvironmentConfig = {
 
   // Monitoring: for stricter thresholds for prod
   monitoring: {
-    alarmEmail: "dong5455993@gmail.com", // this is my own email for testing, you can replace with ur own email
+    alarmEmail: "......", // email for recieve alarm
     latencyThresholdSeconds: 2,
     errorRateThresholdPercent: 1,
     cpuAlarmPercent: 80,
