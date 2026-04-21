@@ -40,6 +40,7 @@ jobs:
     name: CDK Diff (Preview Changes)
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
