@@ -59,6 +59,16 @@ export interface EnvironmentConfig {
   // Secrets Manager
   secretsRotationDays: number;
 
+  // Monitoring and alarm
+  monitoring: {
+    alarmEmail?: string; // email for SNS alarm notification
+    latencyThresholdSeconds: number; // p99 ALB response time alarm threshold
+    errorRateThresholdPercent: number; // 5xx error rate alarm threshold
+    cpuAlarmPercent: number; // ECS and RDS CPU utilization alarm threshold
+    memoryAlarmPercent: number; // ECS memory utilization alarm threshold
+    dbConnectionAlarmThreshold: number; // RDS database connections alarm threshold
+  };
+
   // Resource tags
   tags: Record<string, string>;
 }
@@ -68,7 +78,7 @@ export interface EnvironmentConfig {
  */
 export const devConfig: EnvironmentConfig = {
   name: "synth-tree-dev",
-  account: process.env.CDK_DEFAULT_ACCOUNT || "",
+  account: process.env.CDK_DEFAULT_ACCOUNT || "516217144302",
   region: "us-east-1",
 
   // Domains
@@ -118,6 +128,15 @@ export const devConfig: EnvironmentConfig = {
 
   // Secrets rotation
   secretsRotationDays: 90,
+
+  // Monitoring: for relaxed thresholds for dev, you can always replace or test with other variables
+  monitoring: {
+    latencyThresholdSeconds: 3,
+    errorRateThresholdPercent: 5,
+    cpuAlarmPercent: 85,
+    memoryAlarmPercent: 85,
+    dbConnectionAlarmThreshold: 50,
+  },
 
   // Tags
   tags: {
@@ -182,6 +201,16 @@ export const prodConfig: EnvironmentConfig = {
 
   // Secrets rotation
   secretsRotationDays: 30,
+
+  // Monitoring: for stricter thresholds for prod
+  monitoring: {
+    alarmEmail: "......", // email for recieve alarm
+    latencyThresholdSeconds: 2,
+    errorRateThresholdPercent: 1,
+    cpuAlarmPercent: 80,
+    memoryAlarmPercent: 80,
+    dbConnectionAlarmThreshold: 100,
+  },
 
   // Tags
   tags: {
