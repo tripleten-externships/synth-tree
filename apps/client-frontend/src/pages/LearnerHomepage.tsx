@@ -26,17 +26,23 @@ export default function LearnerHomepage() {
   // Fake enrolled courses — the student is actively taking these
   // Each has a progress number (0-100) representing percent complete
   // TODO: replace with a real query for this user's enrollments (e.g. useGetMyEnrolledCoursesQuery)
+  // TODO: when real data exists, calculate each course's progress from UserNodeProgress records.
+  //       The ticket says "Calculate completion percentage from UserNodeProgress records."
+  //       Approach: for each enrolled course, count how many lesson nodes the student has completed
+  //       from UserNodeProgress where userId matches and status === "completed", divide by the total
+  //       number of nodes in that course, multiply by 100. Replace the hardcoded progress: 45 / 20
+  //       values in the mock data below with this calculated number.
   const mockEnrolledCourses = [
-    { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry", progress: 45 },
-    { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts", progress: 20 },
+    { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry", progress: 45, category: "Chemistry", lastAccessed: "2026-04-22" },
+    { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts", progress: 20, category: "Physics", lastAccessed: "2026-04-18" },
   ];
 
   // Fake available courses — the student has NOT enrolled in these yet
   // No progress field because the student hasn't started them
   // TODO: replace with a query like useGetAvailableCoursesForUserQuery
   const mockAvailableCourses = [
-    { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
-    { id: "4", title: "Linear Algebra", description: "Vectors, matrices, and transformations" },
+    { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles", category: "Math" },
+    { id: "4", title: "Linear Algebra", description: "Vectors, matrices, and transformations", category: "Math" },
   ];
 
   // =============================
@@ -48,14 +54,46 @@ export default function LearnerHomepage() {
   // =============================
   const [sortOrder, setSortOrder] = useState("default");
 
+  // =============================
+  // FILTER STATE
+  // Second piece of "memory" — remembers which category the student is filtering by.
+  // "all" means "show everything, don't filter". Otherwise shows only courses matching.
+  // =============================
+  const [filterCategory, setFilterCategory] = useState("all");
+
   // Build the sorted list of enrolled courses based on what the student picked.
   // [...mockEnrolledCourses] makes a copy so we don't mutate the original array.
   // .sort() rearranges based on the compare function we provide.
   const sortedEnrolledCourses = [...mockEnrolledCourses].sort((a, b) => {
     if (sortOrder === "progress-high") return b.progress - a.progress; // highest progress first
     if (sortOrder === "progress-low") return a.progress - b.progress;  // lowest progress first
+    // Sort by lastAccessed date, newest first. Dates are ISO strings like "2026-04-22"
+    // so string comparison works correctly (later dates compare greater than earlier ones).
+    if (sortOrder === "recently-accessed") return b.lastAccessed.localeCompare(a.lastAccessed);
     return 0; // "default" — leave the array in its original order
   });
+
+  // Apply the category filter on top of the sorted list.
+  // If filterCategory is "all" we keep everything; otherwise keep only matching courses.
+  // This runs every render — when filterCategory changes, the visible list updates automatically.
+  const visibleEnrolledCourses =
+    filterCategory === "all"
+      ? sortedEnrolledCourses
+      : sortedEnrolledCourses.filter((course) => course.category === filterCategory);
+
+  // =============================
+  // ICON HELPER
+  // Returns an emoji icon for each course based on its category field.
+  // Fallback emoji is used if a category is missing or unrecognized, so nothing crashes.
+  // TODO: swap these emojis for proper hexagon SVG icons to match the design PNG
+  //       (docs/Skill Tree Platform/Skill Tree Homepage.png) in a follow-up styling pass.
+  // =============================
+  function getCourseIcon(category?: string): string {
+    if (category === "Chemistry") return "🧪"; // beaker for chemistry courses
+    if (category === "Physics") return "⚛️";   // atom symbol for physics courses
+    if (category === "Math") return "📐";      // triangle ruler for math courses
+    return "📚";                                // fallback: generic book
+  }
 
   return (
     // Outer wrapper:
@@ -111,26 +149,45 @@ export default function LearnerHomepage() {
             Your Enrolled Courses
           </h2>
 
-          {/* Sort dropdown — student picks an option, state updates, cards re-sort */}
-          <label className="text-sm text-gray-500">
-            Sort:
-            {/* value = what's currently selected. onChange = run setSortOrder when user picks a new option. */}
-            <select
-              className="ml-2 rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm text-[#212121]"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-            >
-              <option value="default">Default order</option>
-              <option value="progress-high">Most progress first</option>
-              <option value="progress-low">Least progress first</option>
-            </select>
-          </label>
+          {/* Controls: filter dropdown + sort dropdown side by side */}
+          <div className="flex items-center gap-3 text-sm text-gray-500">
+            {/* Filter dropdown — narrows the list by category */}
+            <label>
+              Filter:
+              <select
+                className="ml-2 rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm text-[#212121]"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+              >
+                <option value="all">All categories</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+              </select>
+            </label>
+
+            {/* Sort dropdown — student picks an option, state updates, cards re-sort */}
+            <label>
+              Sort:
+              {/* value = what's currently selected. onChange = run setSortOrder when user picks a new option. */}
+              <select
+                className="ml-2 rounded-lg border border-gray-300 bg-white px-2 py-1 text-sm text-[#212121]"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
+                <option value="default">Default order</option>
+                <option value="progress-high">Most progress first</option>
+                <option value="progress-low">Least progress first</option>
+                <option value="recently-accessed">Recently accessed</option>
+              </select>
+            </label>
+          </div>
         </div>
         {/* Enrolled course cards — one per course the student is taking */}
         {/* Uses CSS grid: 1 column on mobile, 2 columns on tablets/desktops */}
         {/* Empty state: if the student has no enrolled courses, show a friendly message with a CTA.
             Otherwise show the grid of cards. This is a conditional render using the ? : ternary. */}
-        {sortedEnrolledCourses.length === 0 ? (
+        {visibleEnrolledCourses.length === 0 ? (
           // Empty state message — shown when there are zero enrolled courses
           <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center flex flex-col items-center gap-3">
             <p className="text-lg font-semibold text-[#212121]">
@@ -151,16 +208,21 @@ export default function LearnerHomepage() {
           // Non-empty state — show the actual grid of cards
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Loop through sortedEnrolledCourses and render one card per course */}
-            {sortedEnrolledCourses.map((course) => (
+            {visibleEnrolledCourses.map((course) => (
             // key={course.id} helps React track each card efficiently
             <div
               key={course.id}
               className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col gap-3"
             >
-              {/* Course title */}
-              <h3 className="text-lg font-semibold text-[#212121]">
-                {course.title}
-              </h3>
+              {/* Header row: icon + course title side by side */}
+              <div className="flex items-center gap-2">
+                {/* Category icon — shows what kind of course this is at a glance */}
+                <span className="text-2xl" aria-hidden="true">{getCourseIcon(course.category)}</span>
+                {/* Course title */}
+                <h3 className="text-lg font-semibold text-[#212121]">
+                  {course.title}
+                </h3>
+              </div>
 
               {/* Short description */}
               <p className="text-sm text-gray-500">
@@ -220,10 +282,15 @@ export default function LearnerHomepage() {
               // Card wrapper: white rounded box with a thin border, padded, stacks children vertically with gaps
               className="rounded-2xl border border-gray-200 bg-white p-6 flex flex-col gap-3"
             >
-              {/* Course title */}
-              <h3 className="text-lg font-semibold text-[#212121]">
-                {course.title}
-              </h3>
+              {/* Header row: icon + course title side by side */}
+              <div className="flex items-center gap-2">
+                {/* Category icon — shows what kind of course this is at a glance */}
+                <span className="text-2xl" aria-hidden="true">{getCourseIcon(course.category)}</span>
+                {/* Course title */}
+                <h3 className="text-lg font-semibold text-[#212121]">
+                  {course.title}
+                </h3>
+              </div>
 
               {/* Short description */}
               <p className="text-sm text-gray-500">
