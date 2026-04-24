@@ -14,6 +14,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import LessonViewerDemoPage from "./pages/LessonViewerDemoPage";
 // CourseDetailPage - shows full details of a single course when clicked
 import CourseDetailPage from "./pages/CourseDetailPage";
+// LearnerHomepage - student-facing dashboard showing enrolled courses, progress, stats (ST-100)
+import LearnerHomepage from "./pages/LearnerHomepage";
 
 // A wrapper that combines protection + your layout + an Outlet
 function ProtectedMainLayout() {
@@ -55,6 +57,12 @@ const router = createBrowserRouter([
       {
         path: "courses/:courseId", // "/courses/:courseId - loads when a course card is clicked"
         element: <CourseDetailPage />,
+      },
+      {
+        // "/my-courses" — student-facing dashboard (ST-100)
+        // Shows enrolled courses, available courses, progress bars, stats, filters
+        path: "my-courses",
+        element: <LearnerHomepage />,
       },
     ],
   },
