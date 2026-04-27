@@ -6,5 +6,6 @@ import "./skillNode.structural.mutations";
 import "./skillNode.delete.simple.mutations";
 import "./skillNode.delete.advanced.mutations";
 import "./quiz.mutations";
+import "./upload.mutations";
 
 // Import mutations/*.ts files here

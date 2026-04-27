@@ -8,7 +8,7 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
-  setupFiles: ["dotenv/config"],
+  setupFiles: ["dotenv/config", "<rootDir>/jest.setup.js"],
   moduleNameMapper: {
     "^@graphql/(.*)$": "<rootDir>/src/graphql/$1",
     "^@lib/(.*)$": "<rootDir>/src/lib/$1",

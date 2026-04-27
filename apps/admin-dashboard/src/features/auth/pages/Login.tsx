@@ -100,6 +100,9 @@ export function Login() {
       .then(loginWithCredential)
       .catch((err) => {
         if (err.code == "auth/multi-factor-auth-required") {
+          if (!recaptchaVerifier) {
+            throw new Error("reCAPTCHA verifier not initialized");
+          }
           const resolver = getMultiFactorResolver(auth, err);
           const phoneInfoOptions = {
             multiFactorHint: resolver.hints[0],
@@ -107,7 +110,7 @@ export function Login() {
           };
           const phoneAuthProvider = new PhoneAuthProvider(auth);
           phoneAuthProvider
-            .verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier!)
+            .verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier)
             .then((verificationId) => {
               setResolver(resolver);
               setVerificationId(verificationId);
@@ -140,6 +143,9 @@ export function Login() {
       .then(loginWithCredential)
       .catch((err) => {
         if (err.code == "auth/multi-factor-auth-required") {
+          if (!recaptchaVerifier) {
+            throw new Error("reCAPTCHA verifier not initialized");
+          }
           const resolver = getMultiFactorResolver(auth, err);
           const phoneInfoOptions = {
             multiFactorHint: resolver.hints[0],
@@ -147,7 +153,7 @@ export function Login() {
           };
           const phoneAuthProvider = new PhoneAuthProvider(auth);
           phoneAuthProvider
-            .verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier!)
+            .verifyPhoneNumber(phoneInfoOptions, recaptchaVerifier)
             .then((verificationId) => {
               setResolver(resolver);
               setVerificationId(verificationId);
@@ -193,7 +199,7 @@ export function Login() {
     setRecaptchaVerifier(
       new RecaptchaVerifier(auth, "recaptcha-container-id", {
         size: "invisible",
-        callback: function () {
+        callback () {
           //console.log(response);
         },
       })

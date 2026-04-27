@@ -17,6 +17,9 @@ export interface EnvironmentConfig {
   storybookDomain: string;
   hostedZoneName: string;
 
+  // CORS — origins allowed to upload to S3
+  allowedOrigins: string[];
+
   // VPC Configuration
   vpcCidr: string;
   publicSubnetCidrs: string[];
@@ -86,6 +89,7 @@ export const devConfig: EnvironmentConfig = {
   apiDomain: "api.dev.synth-tree.com",
   storybookDomain: "storybook.dev.synth-tree.com",
   hostedZoneName: "synth-tree.com",
+  allowedOrigins: ["http://localhost:5173", "https://dev.synth-tree.com"],
 
   // VPC - 10.0.0.0/16
   vpcCidr: "10.0.0.0/16",
@@ -160,6 +164,7 @@ export const prodConfig: EnvironmentConfig = {
   apiDomain: "api.synth-tree.com",
   storybookDomain: "storybook.synth-tree.com",
   hostedZoneName: "synth-tree.com",
+  allowedOrigins: ["https://app.synth-tree.com"],
 
   // VPC - 10.0.0.0/16
   vpcCidr: "10.0.0.0/16",

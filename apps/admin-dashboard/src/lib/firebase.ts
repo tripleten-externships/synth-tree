@@ -75,7 +75,7 @@ if (
     connectAuthEmulator(auth, "http://localhost:9099", {
       disableWarnings: true,
     });
-    console.log("Connected to Firebase Auth emulator");
+    console.info("Connected to Firebase Auth emulator");
   } catch (error) {
     // Emulator connection failed, continue with production auth
     console.warn(

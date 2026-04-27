@@ -8,6 +8,7 @@
     ],
     "declaration": true,
     "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noImplicitThis": true,
@@ -21,8 +22,10 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
+    "types": ["node"],
     "typeRoots": [
-      "./node_modules/@types"
+      "./node_modules/@types",
+      "../../node_modules/@types"
     ]
   },
   "exclude": [

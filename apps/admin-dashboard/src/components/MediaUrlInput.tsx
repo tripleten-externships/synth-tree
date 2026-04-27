@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import FileUpload from './FileUpload';
 
 interface MediaUrlInputProps {
   name: string;
@@ -75,13 +76,14 @@ export function MediaUrlInput({
   captionLabel = 'Caption',
   captionPlaceholder = 'Enter a caption for this media (optional)',
 }: MediaUrlInputProps) {
-  const { register, watch, formState: { errors } } = useFormContext();
+  const { register, watch, setValue, formState: { errors } } = useFormContext();
   
   const urlValue = watch(name) as string;
   const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
   const [videoProvider, setVideoProvider] = useState<VideoProvider | null>(null);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
 
  
   useEffect(() => {
@@ -168,6 +170,25 @@ export function MediaUrlInput({
           <p className="mt-1 text-sm text-yellow-600">
             URL is valid but not recognized as an image or supported video (YouTube/Vimeo)
           </p>
+        )}
+        <button
+          type="button"
+          className="mt-2 text-sm text-blue-500 hover:underline"
+          onClick={() => setShowUpload(!showUpload)}
+        >
+          {showUpload ? 'Hide upload' : 'Upload a file'}
+        </button>
+
+        {showUpload && (
+          <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+            <FileUpload
+              accept="both"
+              onUploadComplete={(url) => {
+                setValue(name, url);
+                setShowUpload(false);
+              }}
+            />
+          </div>
         )}
       </div>
 
