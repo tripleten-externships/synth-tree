@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "module": "CommonJS",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
