@@ -8,8 +8,8 @@ enum QuestionType {
 }
 
 type SelectedAnswer = { selectedOptionIds: string[] };
-type OpenAnswer = { text: string };
-type AnswerJson = SelectedAnswer | OpenAnswer;
+// type OpenAnswer = { text: string };
+// type _AnswerJson = SelectedAnswer | OpenAnswer;
 
 // Type guard for SelectedAnswer
 function isSelectedAnswer(answer: any): answer is SelectedAnswer {

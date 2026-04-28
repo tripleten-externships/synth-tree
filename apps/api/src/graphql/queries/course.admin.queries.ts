@@ -1,11 +1,11 @@
 import { builder } from "@graphql/builder";
 import { requireAdmin } from "@graphql/auth/requireAuth";
 import { CourseStatus } from "@graphql/__generated__/inputs";
-import {
-  assertCourseOwnership,
-  assertTreeOwnership,
-  assertNodeOwnership,
-} from "@graphql/auth/permissions";
+// import {
+//   assertCourseOwnership,
+//   assertTreeOwnership,
+//   assertNodeOwnership,
+// } from "@graphql/auth/permissions";
 
 // All Admin Get All of Courses, Trees and Nodes .
 // Mutations enfore ownership.

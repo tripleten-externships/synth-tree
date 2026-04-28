@@ -87,9 +87,9 @@ export async function deleteSkillNodeAndRebuildGating(
 
         // Update local copy so we use correct values below if needed
         n.orderInStep = newOrderInStep;
-        // @ts-ignore
+       
         n.posX = newOrderInStep;
-        // @ts-ignore
+      
         n.posY = step;
       }
     }

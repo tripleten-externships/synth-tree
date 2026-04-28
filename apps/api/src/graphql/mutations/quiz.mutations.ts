@@ -409,7 +409,8 @@ builder.mutationFields((t) => ({
         },
       });
 
-      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+      //const _summary = 
+      await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,

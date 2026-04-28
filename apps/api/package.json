@@ -15,7 +15,11 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "create:dev-admin": "ts-node -r tsconfig-paths/register scripts/createDevAdminUser.ts",
-    "refresh:dev-token": "ts-node -r tsconfig-paths/register scripts/refreshDevToken.ts"
+    "refresh:dev-token": "ts-node -r tsconfig-paths/register scripts/refreshDevToken.ts",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "test": "jest --testPathIgnorePatterns='integration' --passWithNoTests",
+    "test:integration": "jest --testPathPattern='integration' --passWithNoTests"
   },
   "dependencies": {
     "@apollo/server": "^5.0.0",
@@ -51,6 +55,9 @@
     "@types/jest": "^29.5.14",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "^9.36.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.17.1",
