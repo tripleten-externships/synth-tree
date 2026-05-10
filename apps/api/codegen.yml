@@ -11,6 +11,11 @@ generates:
       withHooks: true
       withHOC: false
       withComponent: false
+      # Apollo Client v4 removed these v3-only types from the public surface.
+      # Disable them to keep generated code valid against v4.
+      withMutationFn: false
+      withResultType: false
+      withMutationOptionsType: false
       apolloReactHooksImportFrom: "@apollo/client/react"
 documents:
   - "./src/**/*.{ts,tsx}"

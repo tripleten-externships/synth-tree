@@ -19,8 +19,7 @@ export default function Home() {
   if (error) return <div>Error: {error.message}</div>;
 
   const apiCourses = data?.publicGetAllCourses ?? [];
-  const courses: Array<{ id: string; title: string; description: string | null }> =
-    apiCourses.length > 0 ? apiCourses : placeholderCourses;
+  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
 
   return (
     <div className="flex flex-col items-center text-center gap-6">

@@ -63,8 +63,14 @@ Before starting work:
 ```bash
 pnpm install
 pnpm db:start              # Postgres in Docker
+pnpm db:migrate:dev        # Apply Prisma migrations
+pnpm db:seed:local-users   # Seed admin@local.dev + learner@local.dev (one-time)
 pnpm dev                   # API + admin-dashboard + client-frontend in parallel
 ```
+
+Authentication setup (Firebase service account, env vars, creating extra test
+personas) is documented in
+[`docs/engineering/local-auth.md`](./docs/engineering/local-auth.md).
 
 Before pushing:
 

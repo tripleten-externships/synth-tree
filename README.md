@@ -21,7 +21,12 @@ pnpm db:start
 # 4. Run migrations
 pnpm db:migrate:dev
 
-# 5. Run everything in parallel: API, admin-dashboard, client-frontend
+# 5. (One-time) Seed local test users — admin@local.dev + learner@local.dev
+#    First fill in apps/api/.env with the local Firebase service-account path —
+#    see docs/engineering/local-auth.md for the full setup.
+pnpm db:seed:local-users
+
+# 6. Run everything in parallel: API, admin-dashboard, client-frontend
 pnpm dev
 ```
 

@@ -41,8 +41,10 @@ export function getFirebaseConfig(): FirebaseOptions {
  * Returns a singleton FirebaseApp + Auth pair for the current page.
  * Re-uses an existing app if one has already been initialized (HMR-safe).
  *
- * In dev, automatically connects to the Firebase Auth emulator unless
- * `VITE_USE_FIREBASE_EMULATOR=false` is set.
+ * Connects to the Firebase Auth emulator (localhost:9099) ONLY when
+ * `VITE_USE_FIREBASE_EMULATOR=true` is set. The default is to use the real
+ * Firebase project the env vars point at — typically the shared "local"
+ * Firebase project.
  */
 export function initFirebaseAuth(): { app: FirebaseApp; auth: Auth } {
   const app = getApps()[0] ?? initializeApp(getFirebaseConfig());
@@ -50,14 +52,14 @@ export function initFirebaseAuth(): { app: FirebaseApp; auth: Auth } {
 
   if (
     import.meta.env.DEV &&
-    import.meta.env.VITE_USE_FIREBASE_EMULATOR !== "false"
+    import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true"
   ) {
     try {
       connectAuthEmulator(auth, "http://localhost:9099", {
         disableWarnings: true,
       });
     } catch {
-      // Emulator not running — silently fall through to production auth.
+      // Emulator not running — silently fall through to the real project.
     }
   }
 
