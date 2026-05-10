@@ -204,7 +204,6 @@ export const prodConfig: EnvironmentConfig = {
 
   // Monitoring: for stricter thresholds for prod
   monitoring: {
-    alarmEmail: "......", // email for recieve alarm
     latencyThresholdSeconds: 2,
     errorRateThresholdPercent: 1,
     cpuAlarmPercent: 80,

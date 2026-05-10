@@ -85,14 +85,8 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
-    const {
-      config,
-      vpc,
-      albSecurityGroup,
-      ecsSecurityGroup,
-      databaseSecret,
-      databaseCluster,
-    } = props;
+    const { config, vpc, albSecurityGroup, ecsSecurityGroup, databaseSecret, databaseCluster } =
+      props;
 
     // ========================================
     // ECR Repository
@@ -104,9 +98,7 @@ export class ApiStack extends cdk.Stack {
     const apiRepository = new ecr.Repository(this, "ApiRepository", {
       repositoryName: `${config.name}-api`,
       removalPolicy:
-        config.name === "synth-tree-prod"
-          ? cdk.RemovalPolicy.RETAIN
-          : cdk.RemovalPolicy.DESTROY,
+        config.name === "synth-tree-prod" ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
       emptyOnDelete: config.name !== "synth-tree-prod", // Clean up images when stack is deleted
       imageScanOnPush: true, // Enable vulnerability scanning
     });
@@ -127,15 +119,10 @@ export class ApiStack extends cdk.Stack {
      * Create SSL/TLS certificate for the API domain
      * Uses DNS validation with Route53
      */
-    const certificate = new certificatemanager.Certificate(
-      this,
-      "ApiCertificate",
-      {
-        domainName: config.apiDomain,
-        validation:
-          certificatemanager.CertificateValidation.fromDns(hostedZone),
-      },
-    );
+    const certificate = new certificatemanager.Certificate(this, "ApiCertificate", {
+      domainName: config.apiDomain,
+      validation: certificatemanager.CertificateValidation.fromDns(hostedZone),
+    });
 
     // ========================================
     // Application Load Balancer
@@ -165,26 +152,22 @@ export class ApiStack extends cdk.Stack {
      * Create target group for ECS tasks
      * Health check on /health endpoint
      */
-    const targetGroup = new elbv2.ApplicationTargetGroup(
-      this,
-      "ApiTargetGroup",
-      {
-        vpc,
-        port: config.ecs.containerPort,
-        protocol: elbv2.ApplicationProtocol.HTTP,
-        targetType: elbv2.TargetType.IP,
-        healthCheck: {
-          enabled: true,
-          path: config.ecs.healthCheckPath,
-          interval: cdk.Duration.seconds(30),
-          timeout: cdk.Duration.seconds(5),
-          healthyThresholdCount: 2,
-          unhealthyThresholdCount: 3,
-          healthyHttpCodes: "200",
-        },
-        deregistrationDelay: cdk.Duration.seconds(30),
+    const targetGroup = new elbv2.ApplicationTargetGroup(this, "ApiTargetGroup", {
+      vpc,
+      port: config.ecs.containerPort,
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      targetType: elbv2.TargetType.IP,
+      healthCheck: {
+        enabled: true,
+        path: config.ecs.healthCheckPath,
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 3,
+        healthyHttpCodes: "200",
       },
-    );
+      deregistrationDelay: cdk.Duration.seconds(30),
+    });
 
     /**
      * HTTP listener - redirects to HTTPS
@@ -276,9 +259,7 @@ export class ApiStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
       description: "ECS task execution role for API service",
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "service-role/AmazonECSTaskExecutionRolePolicy",
-        ),
+        iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"),
       ],
     });
 
@@ -341,21 +322,17 @@ export class ApiStack extends cdk.Stack {
      * Create Fargate task definition
      * Defines CPU, memory, and container configuration
      */
-    const taskDefinition = new ecs.FargateTaskDefinition(
-      this,
-      "ApiTaskDefinition",
-      {
-        family: `${config.name}-api`,
-        cpu: config.ecs.cpu,
-        memoryLimitMiB: config.ecs.memory,
-        executionRole: taskExecutionRole,
-        taskRole: taskRole,
-        runtimePlatform: {
-          cpuArchitecture: ecs.CpuArchitecture.X86_64,
-          operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
-        },
+    const taskDefinition = new ecs.FargateTaskDefinition(this, "ApiTaskDefinition", {
+      family: `${config.name}-api`,
+      cpu: config.ecs.cpu,
+      memoryLimitMiB: config.ecs.memory,
+      executionRole: taskExecutionRole,
+      taskRole: taskRole,
+      runtimePlatform: {
+        cpuArchitecture: ecs.CpuArchitecture.X86_64,
+        operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
       },
-    );
+    });
 
     /**
      * Add container to task definition
@@ -369,8 +346,7 @@ export class ApiStack extends cdk.Stack {
         logGroup: logGroup,
       }),
       environment: {
-        NODE_ENV:
-          config.name === "synth-tree-prod" ? "production" : "development",
+        NODE_ENV: config.name === "synth-tree-prod" ? "production" : "development",
         PORT: config.ecs.containerPort.toString(),
         DATABASE_HOST: databaseCluster.clusterEndpoint.hostname,
         DATABASE_PORT: databaseCluster.clusterEndpoint.port.toString(),
@@ -378,27 +354,12 @@ export class ApiStack extends cdk.Stack {
       },
       secrets: {
         // Database credentials from Secrets Manager
-        DATABASE_USERNAME: ecs.Secret.fromSecretsManager(
-          databaseSecret,
-          "username",
-        ),
-        DATABASE_PASSWORD: ecs.Secret.fromSecretsManager(
-          databaseSecret,
-          "password",
-        ),
+        DATABASE_USERNAME: ecs.Secret.fromSecretsManager(databaseSecret, "username"),
+        DATABASE_PASSWORD: ecs.Secret.fromSecretsManager(databaseSecret, "password"),
         // Firebase credentials from Secrets Manager
-        FIREBASE_PROJECT_ID: ecs.Secret.fromSecretsManager(
-          firebaseSecret,
-          "project_id",
-        ),
-        FIREBASE_CLIENT_EMAIL: ecs.Secret.fromSecretsManager(
-          firebaseSecret,
-          "client_email",
-        ),
-        FIREBASE_PRIVATE_KEY: ecs.Secret.fromSecretsManager(
-          firebaseSecret,
-          "private_key",
-        ),
+        FIREBASE_PROJECT_ID: ecs.Secret.fromSecretsManager(firebaseSecret, "project_id"),
+        FIREBASE_CLIENT_EMAIL: ecs.Secret.fromSecretsManager(firebaseSecret, "client_email"),
+        FIREBASE_PRIVATE_KEY: ecs.Secret.fromSecretsManager(firebaseSecret, "private_key"),
       },
       containerName: "api",
       essential: true,
@@ -684,20 +645,15 @@ export class ApiStack extends cdk.Stack {
     errorRateAlarm.addOkAction(alarmAction);
 
     // one or more ALB target became unhealthy
-    const unhealthyHostAlarm = new cloudwatch.Alarm(
-      this,
-      "UnhealthyHostsAlarm",
-      {
-        alarmName: `${config.name}-unhealthy-hosts`,
-        alarmDescription: "One or more ALB targets are unhealthy",
-        metric: unhealthyHostCount,
-        threshold: 0,
-        evaluationPeriods: 2,
-        comparisonOperator:
-          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      },
-    );
+    const unhealthyHostAlarm = new cloudwatch.Alarm(this, "UnhealthyHostsAlarm", {
+      alarmName: `${config.name}-unhealthy-hosts`,
+      alarmDescription: "One or more ALB targets are unhealthy",
+      metric: unhealthyHostCount,
+      threshold: 0,
+      evaluationPeriods: 2,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
     unhealthyHostAlarm.addAlarmAction(alarmAction);
     unhealthyHostAlarm.addOkAction(alarmAction);
 
@@ -741,20 +697,15 @@ export class ApiStack extends cdk.Stack {
     rdsCpuAlarm.addOkAction(alarmAction);
 
     // RDS database connection count alarm
-    const rdsConnectionsAlarm = new cloudwatch.Alarm(
-      this,
-      "RdsConnectionsAlarm",
-      {
-        alarmName: `${config.name}-rds-high-connections`,
-        alarmDescription: `RDS connections exceeded ${config.monitoring.dbConnectionAlarmThreshold}`,
-        metric: rdsConnections,
-        threshold: config.monitoring.dbConnectionAlarmThreshold,
-        evaluationPeriods: 2,
-        comparisonOperator:
-          cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-      },
-    );
+    const rdsConnectionsAlarm = new cloudwatch.Alarm(this, "RdsConnectionsAlarm", {
+      alarmName: `${config.name}-rds-high-connections`,
+      alarmDescription: `RDS connections exceeded ${config.monitoring.dbConnectionAlarmThreshold}`,
+      metric: rdsConnections,
+      threshold: config.monitoring.dbConnectionAlarmThreshold,
+      evaluationPeriods: 2,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
     rdsConnectionsAlarm.addAlarmAction(alarmAction);
     rdsConnectionsAlarm.addOkAction(alarmAction);
 
