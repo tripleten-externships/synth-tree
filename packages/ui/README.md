@@ -1,6 +1,6 @@
-# @skilltree/ui
+# @synth-tree/ui
 
-Shared component library for SkillTree applications.
+Shared component library for Synth Tree applications.
 
 ## Getting Started
 
@@ -12,13 +12,13 @@ pnpm build
 ## Responsibilities
 
 - Provides reusable React components (buttons, inputs, modals, etc.).
-- Enforces the design system defined in @skilltree/theme.
+- Enforces the design system defined in @synth-tree/theme.
 - Exposes components with stable APIs for contractors and internal apps.
 
 ## Usage
 
 ```
-import { Button } from "@skilltree/ui";
+import { Button } from "@synth-tree/ui";
 
 export function MyForm() {
   return <Button variant="primary">Submit</Button>;
@@ -28,4 +28,4 @@ export function MyForm() {
 ## Notes
 
 - All components should follow accessibility best practices (ARIA, keyboard nav).
-- Keep package dependencies minimal; prefer consuming helpers from @skilltree/utils if possible.
+- Keep package dependencies minimal; prefer consuming helpers from @synth-tree/utils if possible.

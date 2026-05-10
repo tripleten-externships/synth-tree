@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This directory contains automated CI/CD workflows for the SkillTree monorepo. All workflows are based on the comprehensive CI/CD guide at [`apps/infra/CI_CD.md`](../../apps/infra/CI_CD.md).
+This directory contains automated CI/CD workflows for the Synth Tree monorepo. All workflows are based on the comprehensive CI/CD guide at [`apps/infra/CI_CD.md`](../../apps/infra/CI_CD.md).
 
 ## 📋 Overview
 

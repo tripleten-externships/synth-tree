@@ -1,14 +1,14 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Badge } from "@skilltree/ui";
+import { Badge } from "@synth-tree/ui";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@skilltree/ui";
+} from "@synth-tree/ui";
 import useAuth from "../hooks/useAuth";
-import SkillTreeLogo from "../assets/skilltree.svg";
+import SynthTreeLogo from "../assets/synth-tree.svg";
 import GenericAvatar from "../assets/avatar-generic.svg";
 
 interface DashboardLayoutProps {
@@ -27,8 +27,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* LEFT: Logo */}
         <div className="flex items-center">
           <img
-            src={SkillTreeLogo}
-            alt="SkillTree logo"
+            src={SynthTreeLogo}
+            alt="Synth Tree logo"
             className="h-6 w-auto dark:brightness-0 dark:invert"
           />
         </div>

@@ -100,7 +100,7 @@ export const devConfig: EnvironmentConfig = {
     backupRetentionDays: 7,
     autoPauseMinutes: 15, // Auto-pause after 15 minutes of inactivity
     instanceCount: 1,
-    databaseName: "skilltree",
+    databaseName: "synthtree",
   },
 
   // ECS - Minimal configuration for dev
@@ -173,7 +173,7 @@ export const prodConfig: EnvironmentConfig = {
     maxCapacity: 8,
     backupRetentionDays: 30,
     instanceCount: 2, // Multi-AZ for HA
-    databaseName: "skilltree",
+    databaseName: "synthtree",
   },
 
   // ECS - Production configuration

@@ -1,5 +1,5 @@
 {
-  "name": "@skilltree/client-frontend",
+  "name": "@synth-tree/client-frontend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,9 +11,10 @@
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
-    "@skilltree/api-types": "workspace:*",
-    "@skilltree/theme": "workspace:*",
-    "@skilltree/ui": "workspace:*",
+    "@synth-tree/api-types": "workspace:*",
+    "@synth-tree/config": "workspace:*",
+    "@synth-tree/theme": "workspace:*",
+    "@synth-tree/ui": "workspace:*",
     "dompurify": "^3.3.1",
     "firebase": "^11.10.0",
     "graphql": "^16.11.0",

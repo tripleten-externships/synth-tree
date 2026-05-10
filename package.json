@@ -1,5 +1,5 @@
 {
-  "name": "skilltree-monorepo",
+  "name": "synth-tree",
   "private": true,
   "version": "0.1.0",
   "workspaces": [
@@ -9,16 +9,25 @@
   "scripts": {
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
-    "db:validate": "pnpm --filter ./apps/api prisma validate",
-    "db:migrate:dev": "pnpm --filter ./apps/api prisma migrate dev",
-    "db:studio": "pnpm --filter api prisma studio",
-    "dev": "pnpm db:start && pnpm --filter ./packages/theme build && pnpm --filter ./packages/ui build && pnpm --parallel --filter './apps/admin-dashboard' --filter './apps/client-frontend' --filter './apps/api' dev",
-    "storybook": "pnpm --filter ./packages/ui storybook",
-    "build": "pnpm -r build"
+    "db:validate": "pnpm --filter @synth-tree/api prisma validate",
+    "db:migrate:dev": "pnpm --filter @synth-tree/api prisma migrate dev",
+    "db:studio": "pnpm --filter @synth-tree/api prisma studio",
+    "dev": "pnpm db:start && pnpm --filter @synth-tree/theme build && pnpm --filter @synth-tree/ui build && pnpm --parallel --filter @synth-tree/admin-dashboard --filter @synth-tree/client-frontend --filter @synth-tree/api dev",
+    "storybook": "pnpm --filter @synth-tree/ui storybook",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r --if-present lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "pnpm -r --if-present type-check",
+    "test": "pnpm -r --if-present test"
   },
   "packageManager": "pnpm@10.17.1",
   "devDependencies": {
     "@apollo/client": "^4.0.9",
-    "graphql": "^16.11.0"
+    "@eslint/js": "^9.36.0",
+    "eslint": "^9.36.0",
+    "graphql": "^16.11.0",
+    "prettier": "^3.3.3",
+    "typescript-eslint": "^8.44.0"
   }
 }

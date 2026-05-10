@@ -1,5 +1,5 @@
 {
-  "name": "admin-dashboard",
+  "name": "@synth-tree/admin-dashboard",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,15 +8,15 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "type-check": "tsc -b --noEmit"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",
     "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
-    "@skilltree/config": "workspace:*",
-    "@skilltree/theme": "workspace:*",
-    "@skilltree/ui": "workspace:*",
+    "@synth-tree/config": "workspace:*",
+    "@synth-tree/theme": "workspace:*",
+    "@synth-tree/ui": "workspace:*",
     "firebase": "^11.1.0",
     "graphql": "^16.11.0",
     "lucide-react": "^0.344.0",

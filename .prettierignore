@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/build
+**/cdk.out
+**/storybook-static
+**/__generated__
+**/coverage
+pnpm-lock.yaml

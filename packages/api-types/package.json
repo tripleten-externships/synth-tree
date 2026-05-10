@@ -1,5 +1,5 @@
 {
-  "name": "@skilltree/api-types",
+  "name": "@synth-tree/api-types",
   "version": "0.1.0",
   "main": "src/graphql.ts",
   "types": "src/graphql.ts",

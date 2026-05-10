@@ -1,14 +1,14 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: skilltree-postgres
+    container_name: synth-tree-postgres
     restart: unless-stopped
     ports:
       - "${DB_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: skilltree
+      POSTGRES_DB: synthtree
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,12 +24,12 @@ volumes:
 # ================================
 # Host: localhost
 # Port: 5432
-# Database: skilltree
+# Database: synthtree
 # User: postgres
 # Password: postgres
 #
 # Prisma Connection String:
-# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/skilltree?schema=public"
+# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/synthtree?schema=public"
 #
 # Usage:
 # ------
@@ -46,4 +46,4 @@ volumes:
 #   docker compose logs -f postgres
 #
 # Access PostgreSQL CLI:
-#   docker compose exec postgres psql -U postgres -d skilltree
+#   docker compose exec postgres psql -U postgres -d synthtree

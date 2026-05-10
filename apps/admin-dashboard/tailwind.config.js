@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import { createTailwindConfig } from "@skilltree/theme/tailwind";
+import { createTailwindConfig } from "@synth-tree/theme/tailwind";
 
 export default createTailwindConfig({
   content: [

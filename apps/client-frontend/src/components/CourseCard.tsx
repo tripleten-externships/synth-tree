@@ -1,5 +1,5 @@
-// Importing pre-built Card pieces from the shared UI library (@skilltree/ui)
-import { Card, CardContent, CardTitle, CardDescription } from "@skilltree/ui";
+// Importing pre-built Card pieces from the shared UI library (@synth-tree/ui)
+import { Card, CardContent, CardTitle, CardDescription } from "@synth-tree/ui";
 
 // useNavigate lets us send the user to a different page when they click the card
 import { useNavigate } from "react-router-dom";

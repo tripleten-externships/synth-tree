@@ -31,7 +31,7 @@ const config: StorybookConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": require("path").resolve(__dirname, "../src"),
-      "@skilltree/theme": require("path").resolve(__dirname, "../../theme/src"),
+      "@synth-tree/theme": require("path").resolve(__dirname, "../../theme/src"),
     };
 
     return config;

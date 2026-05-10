@@ -272,21 +272,21 @@ export class DatabaseStack extends cdk.Stack {
      * for easy access by ECS tasks and other services
      */
     new ssm.StringParameter(this, "DbEndpointParameter", {
-      parameterName: `/skilltree/${config.name}/database/endpoint`,
+      parameterName: `/synth-tree/${config.name}/database/endpoint`,
       stringValue: this.databaseEndpoint,
       description: "Database cluster endpoint",
       tier: ssm.ParameterTier.STANDARD,
     });
 
     new ssm.StringParameter(this, "DbPortParameter", {
-      parameterName: `/skilltree/${config.name}/database/port`,
+      parameterName: `/synth-tree/${config.name}/database/port`,
       stringValue: this.databasePort.toString(),
       description: "Database port",
       tier: ssm.ParameterTier.STANDARD,
     });
 
     new ssm.StringParameter(this, "DbNameParameter", {
-      parameterName: `/skilltree/${config.name}/database/name`,
+      parameterName: `/synth-tree/${config.name}/database/name`,
       stringValue: this.databaseName,
       description: "Database name",
       tier: ssm.ParameterTier.STANDARD,
@@ -295,7 +295,7 @@ export class DatabaseStack extends cdk.Stack {
     // Create connection string parameter (without password)
     const connectionStringTemplate = `postgresql://postgres:<PASSWORD>@${this.databaseEndpoint}:${this.databasePort}/${this.databaseName}`;
     new ssm.StringParameter(this, "DbConnectionStringParameter", {
-      parameterName: `/skilltree/${config.name}/database/connection-string-template`,
+      parameterName: `/synth-tree/${config.name}/database/connection-string-template`,
       stringValue: connectionStringTemplate,
       description: "Database connection string template (replace <PASSWORD>)",
       tier: ssm.ParameterTier.STANDARD,

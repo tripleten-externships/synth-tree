@@ -1,9 +1,9 @@
-import "@skilltree/theme/styles/globals.css";
+import "@synth-tree/theme/styles/globals.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { ThemeProvider } from "@skilltree/theme";
+import { ThemeProvider } from "@synth-tree/theme";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 
 import { ApolloProvider } from "@apollo/client/react";

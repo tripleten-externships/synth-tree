@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
   Input,
-} from "@skilltree/ui";
+} from "@synth-tree/ui";
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import skillTreeImg from "../../assets/skilltree.svg";
+import synthTreeImg from "../assets/synth-tree.svg";
 
 interface Props {
   children?: React.ReactNode;
@@ -32,8 +32,8 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="bg-white flex flex-col items-center p-5 rounded-3xl w-4/5 md:w-1/2">
             <img
               className="w-14 sm:max-w-xs mb-5"
-              src={skillTreeImg}
-              alt="SkillTree Logo"
+              src={synthTreeImg}
+              alt="Synth Tree Logo"
             />
             <h1 className="text-4xl">It seems something went wrong...</h1>
 

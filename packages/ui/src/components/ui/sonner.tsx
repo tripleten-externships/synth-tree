@@ -1,4 +1,4 @@
-import { useColorMode } from "@skilltree/theme";
+import { useColorMode } from "@synth-tree/theme";
 import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;

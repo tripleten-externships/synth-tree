@@ -26,7 +26,7 @@ export default defineConfig({
       external: [
         "react",
         "react-dom",
-        "@skilltree/theme",
+        "@synth-tree/theme",
         "@radix-ui/react-slot",
         "@radix-ui/react-dialog",
         "@radix-ui/react-label",
@@ -41,7 +41,7 @@ export default defineConfig({
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
-          "@skilltree/theme": "SkillTreeTheme",
+          "@synth-tree/theme": "SkillTreeTheme",
         },
       },
     },

@@ -12,7 +12,7 @@ pnpm dev --filter ./apps/admin-dashboard
 ## Responsibilities
 
 - Provides top-level routing, layout, and navigation.
-- Composes internal packages (@skilltree/ui, @skilltree/theme, @skilltree/config).
+- Composes internal packages (@synth-tree/ui, @synth-tree/theme, @synth-tree/config).
 - Integrates contractor-delivered packages.
 
 ## Tech Stack

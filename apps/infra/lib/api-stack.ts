@@ -289,7 +289,7 @@ export class ApiStack extends cdk.Stack {
     const firebaseSecret = secretsmanager.Secret.fromSecretNameV2(
       this,
       "FirebaseSecret",
-      `/skilltree/${config.name}/firebase`,
+      `/synth-tree/${config.name}/firebase`,
     );
 
     // Grant permissions to read Firebase secret
@@ -301,7 +301,7 @@ export class ApiStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameters", "ssm:GetParameter"],
         resources: [
-          `arn:aws:ssm:${this.region}:${this.account}:parameter/skilltree/${config.name}/*`,
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/synth-tree/${config.name}/*`,
         ],
       }),
     );
@@ -328,7 +328,7 @@ export class ApiStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameters", "ssm:GetParameter"],
         resources: [
-          `arn:aws:ssm:${this.region}:${this.account}:parameter/skilltree/${config.name}/*`,
+          `arn:aws:ssm:${this.region}:${this.account}:parameter/synth-tree/${config.name}/*`,
         ],
       }),
     );

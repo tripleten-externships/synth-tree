@@ -8,12 +8,12 @@
 
 <!--
   Link to the Jira task this PR addresses.
-  Format: ST-XXX
-  Example: ST-123
+  Format: SYN-XXX
+  Example: SYN-123
 -->
 
-**Jira Task ID:** ST-XXX
-**Jira Link:** [ST-XXX](https://your-jira-instance.atlassian.net/browse/ST-XXX)
+**Jira Task ID:** SYN-XXX
+**Jira Link:** [SYN-XXX](https://your-jira-instance.atlassian.net/browse/SYN-XXX)
 
 ---
 
@@ -116,7 +116,7 @@
 - [ ] ✅ I have added tests that prove my fix is effective or that my feature works
 - [ ] ✅ I have updated documentation (if needed)
 - [ ] ✅ My changes generate no new warnings or errors
-- [ ] ✅ My branch name follows the convention: `feature/ST-XXX-description` or `bugfix/ST-XXX-description`
+- [ ] ✅ My branch name follows the convention: `feature/SYN-XXX-description` or `bugfix/SYN-XXX-description`
 
 ---
 

@@ -1,4 +1,4 @@
-import { createTailwindConfig } from "@skilltree/theme/tailwind";
+import { createTailwindConfig } from "@synth-tree/theme/tailwind";
 
 /** @type {import('tailwindcss').Config} */
 export default createTailwindConfig({

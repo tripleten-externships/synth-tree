@@ -1,7 +1,7 @@
 import type { Preview } from "@storybook/react";
 import React, { useEffect } from "react";
-import { ThemeProvider, useTheme } from "@skilltree/theme";
-import "@skilltree/theme/styles/globals.css";
+import { ThemeProvider, useTheme } from "@synth-tree/theme";
+import "@synth-tree/theme/styles/globals.css";
 
 const ColorModeLoader = ({ colorMode }) => {
   const { setColorMode } = useTheme();

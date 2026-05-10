@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, useColorMode } from "@skilltree/ui";
+import { Button, useColorMode } from "@synth-tree/ui";
 import { FaMoon, FaSun } from "react-icons/fa";
 
 interface AuthLayoutProps {

@@ -1,10 +1,10 @@
-import "./lessonBlock";
-import "./user";
+// Side-effect imports — each module registers its mutation fields with the
+// shared Pothos builder. Keep this list alphabetized by domain.
 import "./course.mutations";
-import "./skillTree.mutations";
-import "./skillNode.structural.mutations";
-import "./skillNode.delete.simple.mutations";
-import "./skillNode.delete.advanced.mutations";
+import "./lessonBlock.mutations";
 import "./quiz.mutations";
-
-// Import mutations/*.ts files here
+import "./skillNode.delete.advanced.mutations";
+import "./skillNode.delete.simple.mutations";
+import "./skillNode.structural.mutations";
+import "./skillTree.mutations";
+import "./user.mutations";

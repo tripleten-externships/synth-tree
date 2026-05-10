@@ -2,7 +2,7 @@ import React from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
 import { useQuery } from "@apollo/client/react";
-import { ContentType } from "@skilltree/api-types";
+import { ContentType } from "@synth-tree/api-types";
 import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
 
 interface LessonBlock {

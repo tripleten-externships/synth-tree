@@ -1,6 +1,6 @@
-# @skilltree/theme
+# @synth-tree/theme
 
-Theme tokens and design primitives for SkillTree applications.
+Theme tokens and design primitives for Synth Tree applications.
 
 ## Getting Started
 
@@ -13,12 +13,12 @@ pnpm build
 
 - Provides design tokens (colors, spacing, typography, breakpoints).
 - Ensures consistent look-and-feel across apps and contractor-delivered packages.
-- Exports theme objects/hooks compatible with @skilltree/ui.
+- Exports theme objects/hooks compatible with @synth-tree/ui.
 
 ## Usage
 
 ```
-import { useTheme } from "@skilltree/theme";
+import { useTheme } from "@synth-tree/theme";
 
 function Example() {
   const theme = useTheme();

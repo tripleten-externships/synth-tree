@@ -1,5 +1,5 @@
 {
-  "name": "@skilltree/ui",
+  "name": "@synth-tree/ui",
   "description": "Shared design system / component library",
   "version": "0.1.0",
   "type": "module",
@@ -36,7 +36,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toggle-group": "^1.1.11",
-    "@skilltree/theme": "workspace:*",
+    "@synth-tree/theme": "workspace:*",
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",
     "dompurify": "^3.3.1",

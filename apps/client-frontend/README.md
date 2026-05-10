@@ -1,6 +1,6 @@
 # Client Frontend
 
-React 19 + Vite 7 + TS + Tailwind. Uses `@skilltree/ui` and `@skilltree/theme`.
+React 19 + Vite 7 + TS + Tailwind. Uses `@synth-tree/ui` and `@synth-tree/theme`.
 
 ## Scripts
 

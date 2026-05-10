@@ -67,4 +67,4 @@ export {
   ThemeProvider,
   type Theme,
   type ColorMode,
-} from "@skilltree/theme";
+} from "@synth-tree/theme";

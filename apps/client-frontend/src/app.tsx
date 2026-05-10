@@ -1,27 +1,25 @@
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import ProtectedRoute from "./components/ProtectedRoute";
-import ErrorBoundary from "./components/ErrorBoundary"; // put ErrorBoundary in ProtectedMainLayout() because it gets overwritten by React-Routers default ErrorBoundary otherwise.
-import { ApolloTest } from "./dev/ApolloTest";
+// ErrorBoundary lives inside ProtectedMainLayout because React Router's default
+// ErrorBoundary would otherwise replace it.
+import ErrorBoundary from "./components/ErrorBoundary";
+import MainLayout from "./layouts/MainLayout";
 
-import MainLayout from "../layouts/MainLayout";
 import SkillTreeHome from "./pages/SkillTreeHomePage";
-
 import DashboardPage from "./pages/DashboardPage";
 import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
-import NotFoundPage from "./pages/NotFoundPage";
-import LessonViewerDemoPage from "./pages/LessonViewerDemoPage";
-// CourseDetailPage - shows full details of a single course when clicked
 import CourseDetailPage from "./pages/CourseDetailPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
-// A wrapper that combines protection + your layout + an Outlet
+// Shared shell for all authenticated routes.
 function ProtectedMainLayout() {
   return (
     <ErrorBoundary>
       <ProtectedRoute>
         <MainLayout />
-        <ApolloTest />
       </ProtectedRoute>
     </ErrorBoundary>
   );
@@ -30,37 +28,15 @@ function ProtectedMainLayout() {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <ProtectedMainLayout />, // shared shell for all main routes
+    element: <ProtectedMainLayout />,
     children: [
-      {
-        index: true, // "/" route
-        element: <SkillTreeHome />, // SkillTree Home.tsx
-      },
-      {
-        path: "dashboard", // "/dashboard"
-        element: <DashboardPage />,
-      },
-      {
-        path: "lessons", // "/lessons"
-        element: <LessonsPage />,
-      },
-      {
-        path: "skill-trees", // "/skill-trees"
-        element: <SkillTreesPage />,
-      },
-      {
-        path: "profile", // "/profile"
-        element: <ProfilePage />,
-      },
-      {
-        path: "courses/:courseId", // "/courses/:courseId - loads when a course card is clicked"
-        element: <CourseDetailPage />,
-      },
+      { index: true, element: <SkillTreeHome /> },
+      { path: "dashboard", element: <DashboardPage /> },
+      { path: "lessons", element: <LessonsPage /> },
+      { path: "skill-trees", element: <SkillTreesPage /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "courses/:courseId", element: <CourseDetailPage /> },
     ],
-  },
-  {
-    path: "demo/lesson-viewer",  // "/demo/lesson-viewer" - standalone demo
-    element: <LessonViewerDemoPage />,
   },
   {
     path: "*",
