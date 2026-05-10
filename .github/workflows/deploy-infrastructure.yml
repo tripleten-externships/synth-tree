@@ -226,23 +226,35 @@ jobs:
 
           for stack in $STACKS; do
             echo "Checking drift for $stack..."
-            
-            if aws cloudformation describe-stacks --stack-name $stack > /dev/null 2>&1; then
-              DRIFT_ID=$(aws cloudformation detect-stack-drift --stack-name $stack --query StackDriftDetectionId --output text)
-              
-              # Wait for drift detection to complete
-              sleep 10
-              
-              STATUS=$(aws cloudformation describe-stack-drift-detection-status \
-                --stack-drift-detection-id $DRIFT_ID \
-                --query StackDriftStatus --output text)
-              
-              if [ "$STATUS" != "IN_SYNC" ]; then
-                echo "::warning::Drift detected in $stack - Status: $STATUS"
-              else
-                echo "✅ $stack is in sync"
-              fi
-            else
+
+            if ! aws cloudformation describe-stacks --stack-name "$stack" > /dev/null 2>&1; then
               echo "⚠️ Stack $stack does not exist - skipping"
+              continue
+            fi
+
+            DRIFT_ID=$(aws cloudformation detect-stack-drift \
+              --stack-name "$stack" \
+              --query StackDriftDetectionId \
+              --output text)
+
+            # Poll until drift detection finishes (up to ~3 minutes).
+            for i in $(seq 1 18); do
+              DETECTION_STATUS=$(aws cloudformation describe-stack-drift-detection-status \
+                --stack-drift-detection-id "$DRIFT_ID" \
+                --query DetectionStatus --output text)
+              if [ "$DETECTION_STATUS" != "DETECTION_IN_PROGRESS" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            STATUS=$(aws cloudformation describe-stack-drift-detection-status \
+              --stack-drift-detection-id "$DRIFT_ID" \
+              --query StackDriftStatus --output text)
+
+            if [ "$STATUS" != "IN_SYNC" ]; then
+              echo "::warning::Drift detected in $stack - Status: $STATUS"
+            else
+              echo "✅ $stack is in sync"
             fi
           done

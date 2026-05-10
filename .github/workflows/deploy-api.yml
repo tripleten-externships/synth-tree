@@ -91,18 +91,25 @@ jobs:
       - name: Get ECS cluster and service info
         id: ecs-info
         run: |
-          CLUSTER=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-dev-Api \
-            --query 'Stacks[0].Outputs[?OutputKey==`ClusterName`].OutputValue' \
+          # Use CloudFormation exports (stable names) rather than stack
+          # names: CDK puts the API stack in a nested stack whose physical
+          # name has an auto-generated hash suffix that changes between
+          # deploys. The export names defined in api-stack.ts are stable.
+          CLUSTER=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-dev-ClusterName'].Value" \
+            --output text)
+          SERVICE=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-dev-ServiceName'].Value" \
             --output text)
 
-          SERVICE=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-dev-Api \
-            --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
-            --output text)
+          if [ -z "$CLUSTER" ] || [ "$CLUSTER" = "None" ] || \
+             [ -z "$SERVICE" ] || [ "$SERVICE" = "None" ]; then
+            echo "::error::Could not resolve synth-tree-dev-ClusterName / -ServiceName exports. Has the dev infra been deployed?"
+            exit 1
+          fi
 
-          echo "cluster=${CLUSTER:-synth-tree-dev-api-cluster}" >> $GITHUB_OUTPUT
-          echo "service=${SERVICE:-synth-tree-dev-api-service}" >> $GITHUB_OUTPUT
+          echo "cluster=$CLUSTER" >> $GITHUB_OUTPUT
+          echo "service=$SERVICE" >> $GITHUB_OUTPUT
 
       - name: Update ECS task definition
         id: task-def
@@ -261,18 +268,21 @@ jobs:
       - name: Get ECS cluster and service info
         id: ecs-info
         run: |
-          CLUSTER=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-prod-Api \
-            --query 'Stacks[0].Outputs[?OutputKey==`ClusterName`].OutputValue' \
+          CLUSTER=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-prod-ClusterName'].Value" \
+            --output text)
+          SERVICE=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-prod-ServiceName'].Value" \
             --output text)
 
-          SERVICE=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-prod-Api \
-            --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
-            --output text)
+          if [ -z "$CLUSTER" ] || [ "$CLUSTER" = "None" ] || \
+             [ -z "$SERVICE" ] || [ "$SERVICE" = "None" ]; then
+            echo "::error::Could not resolve synth-tree-prod-ClusterName / -ServiceName exports. Has the prod infra been deployed?"
+            exit 1
+          fi
 
-          echo "cluster=${CLUSTER:-synth-tree-prod-api-cluster}" >> $GITHUB_OUTPUT
-          echo "service=${SERVICE:-synth-tree-prod-api-service}" >> $GITHUB_OUTPUT
+          echo "cluster=$CLUSTER" >> $GITHUB_OUTPUT
+          echo "service=$SERVICE" >> $GITHUB_OUTPUT
 
       - name: Update ECS task definition
         id: task-def

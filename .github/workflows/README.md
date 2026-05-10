@@ -276,8 +276,16 @@ Solution: Infrastructure must be deployed first (creates ECR repositories)
 **CloudFormation Stack Not Found**
 
 ```
-Error: Stack synth-tree-dev-Frontend not found
+Error: Could not resolve synth-tree-dev-frontend-BucketName export
 Solution: Deploy infrastructure before deploying applications
+
+App-deploy workflows look up resources by CloudFormation **export name**
+(e.g. `synth-tree-dev-ClusterName`, `synth-tree-dev-frontend-BucketName`)
+rather than by stack name. The exports are defined in `apps/infra/lib/`
+and stay stable across stack restructures. Drift-detection and
+deployment-outputs workflows do query by stack name — the names are
+predictable (`synth-tree-{env}-{Network|Database|Api|Frontend|Storybook}`),
+one top-level CloudFormation stack per domain.
 ```
 
 **Health Check Failed**

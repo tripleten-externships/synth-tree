@@ -111,15 +111,20 @@ jobs:
       - name: Get S3 bucket and CloudFront distribution
         id: infra
         run: |
-          BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-dev-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-frontend-BucketName`].OutputValue' \
+          # The frontend stack is nested under synth-tree-dev-Stack with an
+          # auto-hashed physical name. Look it up by export name instead.
+          BUCKET=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-dev-frontend-BucketName'].Value" \
+            --output text)
+          DIST_ID=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-dev-frontend-DistributionId'].Value" \
             --output text)
 
-          DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-dev-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-dev-frontend-DistributionId`].OutputValue' \
-            --output text)
+          if [ -z "$BUCKET" ] || [ "$BUCKET" = "None" ] || \
+             [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
+            echo "::error::Could not resolve frontend exports for dev. Has the infra been deployed?"
+            exit 1
+          fi
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
           echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
@@ -267,15 +272,18 @@ jobs:
       - name: Get S3 bucket and CloudFront distribution
         id: infra
         run: |
-          BUCKET=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-prod-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-frontend-BucketName`].OutputValue' \
+          BUCKET=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-prod-frontend-BucketName'].Value" \
+            --output text)
+          DIST_ID=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-prod-frontend-DistributionId'].Value" \
             --output text)
 
-          DIST_ID=$(aws cloudformation describe-stacks \
-            --stack-name synth-tree-prod-Frontend \
-            --query 'Stacks[0].Outputs[?ExportName==`synth-tree-prod-frontend-DistributionId`].OutputValue' \
-            --output text)
+          if [ -z "$BUCKET" ] || [ "$BUCKET" = "None" ] || \
+             [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
+            echo "::error::Could not resolve frontend exports for prod. Has the infra been deployed?"
+            exit 1
+          fi
 
           echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
           echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
