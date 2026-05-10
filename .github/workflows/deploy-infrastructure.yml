@@ -107,7 +107,7 @@ jobs:
         run: |
           aws cloudformation describe-stacks \
             --region ${{ env.AWS_REGION }} \
-            --query 'Stacks[?starts_with(StackName, `dev-`)].{Name:StackName, Outputs:Outputs}' \
+            --query 'Stacks[?starts_with(StackName, `synth-tree-dev-`)].{Name:StackName, Outputs:Outputs}' \
             > deployment-outputs-dev.json
 
           echo "Deployment outputs saved"
@@ -191,7 +191,7 @@ jobs:
         run: |
           aws cloudformation describe-stacks \
             --region ${{ env.AWS_REGION }} \
-            --query 'Stacks[?starts_with(StackName, `prod-`)].{Name:StackName, Outputs:Outputs}' \
+            --query 'Stacks[?starts_with(StackName, `synth-tree-prod-`)].{Name:StackName, Outputs:Outputs}' \
             > deployment-outputs-prod.json
 
           echo "Deployment outputs saved"
@@ -221,7 +221,8 @@ jobs:
 
       - name: Detect stack drift
         run: |
-          STACKS="${{ matrix.environment }}-Network ${{ matrix.environment }}-Database ${{ matrix.environment }}-Api ${{ matrix.environment }}-Frontend ${{ matrix.environment }}-Storybook"
+          PREFIX="synth-tree-${{ matrix.environment }}"
+          STACKS="$PREFIX-Network $PREFIX-Database $PREFIX-Api $PREFIX-Frontend $PREFIX-Storybook"
 
           for stack in $STACKS; do
             echo "Checking drift for $stack..."

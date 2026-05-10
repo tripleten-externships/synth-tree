@@ -68,7 +68,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: dev-api
+          ECR_REPOSITORY: synth-tree-dev-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build with cache from monorepo root
@@ -101,8 +101,8 @@ jobs:
             --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
             --output text)
 
-          echo "cluster=${CLUSTER:-dev-api-cluster}" >> $GITHUB_OUTPUT
-          echo "service=${SERVICE:-dev-api-service}" >> $GITHUB_OUTPUT
+          echo "cluster=${CLUSTER:-synth-tree-dev-api-cluster}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE:-synth-tree-dev-api-service}" >> $GITHUB_OUTPUT
 
       - name: Update ECS task definition
         id: task-def
@@ -238,7 +238,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: prod-api
+          ECR_REPOSITORY: synth-tree-prod-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build with cache from monorepo root
@@ -267,12 +267,12 @@ jobs:
             --output text)
 
           SERVICE=$(aws cloudformation describe-stacks \
-            --stack-name prod-Api \
+            --stack-name synth-tree-prod-Api \
             --query 'Stacks[0].Outputs[?OutputKey==`ServiceName`].OutputValue' \
             --output text)
 
-          echo "cluster=${CLUSTER:-prod-api-cluster}" >> $GITHUB_OUTPUT
-          echo "service=${SERVICE:-prod-api-service}" >> $GITHUB_OUTPUT
+          echo "cluster=${CLUSTER:-synth-tree-prod-api-cluster}" >> $GITHUB_OUTPUT
+          echo "service=${SERVICE:-synth-tree-prod-api-service}" >> $GITHUB_OUTPUT
 
       - name: Update ECS task definition
         id: task-def

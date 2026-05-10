@@ -133,20 +133,11 @@ RUN echo '{\n\
   }\n\
 }' > /app/apps/api/tsconfig.runtime.json
 
-# Create startup script that constructs DATABASE_URL, runs migrations, then starts the app
-RUN echo '#!/bin/sh\n\
-set -e\n\
-\n\
-# Construct DATABASE_URL from environment variables\n\
-export DATABASE_URL="postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}"\n\
-\n\
-echo "Running database migrations..."\n\
-npx prisma migrate deploy --schema=./prisma/schema.prisma\n\
-\n\
-echo "Starting application..."\n\
-export TS_NODE_PROJECT=./tsconfig.runtime.json\n\
-exec node -r tsconfig-paths/register dist/index.js' > /app/apps/api/start.sh && \
-    chmod +x /app/apps/api/start.sh
+# Copy the startup script from the repo (URL-encodes credentials, runs
+# migrations, execs node). Tracked in git with +x so the bit survives the
+# COPY; we belt-and-braces re-chmod here too.
+COPY apps/api/scripts/start.sh /app/apps/api/start.sh
+RUN chmod +x /app/apps/api/start.sh
 
 # Start the application
 CMD ["/app/apps/api/start.sh"]

@@ -276,7 +276,7 @@ Solution: Infrastructure must be deployed first (creates ECR repositories)
 **CloudFormation Stack Not Found**
 
 ```
-Error: Stack dev-Frontend not found
+Error: Stack synth-tree-dev-Frontend not found
 Solution: Deploy infrastructure before deploying applications
 ```
 
@@ -298,11 +298,13 @@ Solution: Check ECS service logs, verify security groups, and service configurat
 **AWS CloudWatch Logs:**
 
 ```bash
-# API logs
-aws logs tail /aws/ecs/dev-api --follow
+# API logs (CloudWatch log group as defined by the API stack)
+aws logs tail /ecs/synth-tree-dev/api --follow
 
 # ECS deployment events
-aws ecs describe-services --cluster dev-api-cluster --services dev-api-service
+aws ecs describe-services \
+  --cluster synth-tree-dev-api-cluster \
+  --services synth-tree-dev-api-service
 ```
 
 ## 📚 Additional Resources
