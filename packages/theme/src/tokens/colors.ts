@@ -135,7 +135,7 @@ export const colorVariables = {
     "--color-popover-foreground": "0 0% 0%",
     "--color-primary": "257.9412 100% 60%",
     "--color-primary-foreground": "0 0% 100%",
-    "--color-brand": "258 100% 60%%",
+    "--color-brand": "258 100% 60%",
     "--color-brand-foreground": "0 0% 100%",
     "--color-secondary": "214.2857 24.1379% 94.3137%",
     "--color-secondary-foreground": "0 0% 3.1373%",
