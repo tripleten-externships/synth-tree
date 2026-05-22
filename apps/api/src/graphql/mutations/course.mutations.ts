@@ -1,12 +1,10 @@
 import { builder } from "@graphql/builder";
 import { Prisma } from "@prisma/client";
-import {
-  CreateCourseInput,
-  UpdateCourseInput,
-} from "@graphql/inputs/course.inputs";
+import { CreateCourseInput, UpdateCourseInput } from "@graphql/inputs/course.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
-import logger from '@lib/logger'; // Structured logger for tracking course creation and admin actions
+import logger from "@lib/logger"; // Structured logger for tracking course creation and admin actions
+import { requireAdmin } from "@graphql/auth/requireAuth";
 
 builder.mutationFields((t) => ({
   // ===== Courses =====
@@ -38,7 +36,7 @@ builder.mutationFields((t) => ({
           },
         });
 
-        logger.info({ userId, courseId: course.id, title: course.title }, 'Course created'); // Audit log for course creation — useful for admin tracking and debugging
+        logger.info({ userId, courseId: course.id, title: course.title }, "Course created"); // Audit log for course creation — useful for admin tracking and debugging
 
         return tx.course.findUniqueOrThrow({
           ...query,
@@ -80,6 +78,48 @@ builder.mutationFields((t) => ({
         ...query,
         where: { id },
         data,
+      });
+
+      return updatedCourse;
+    },
+  }),
+
+  publishCourse: t.prismaField({
+    type: "Course",
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    resolve: async (query, _root, { id }, ctx) => {
+      ctx.auth.requireAuth();
+      requireAdmin(ctx);
+
+      const updatedCourse = await ctx.prisma.course.update({
+        ...query,
+        where: { id },
+        data: {
+          status: "PUBLISHED",
+        },
+      });
+
+      return updatedCourse;
+    },
+  }),
+
+  unpublishCourse: t.prismaField({
+    type: "Course",
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    resolve: async (query, _root, { id }, ctx) => {
+      ctx.auth.requireAuth();
+      requireAdmin(ctx);
+
+      const updatedCourse = await ctx.prisma.course.update({
+        ...query,
+        where: { id },
+        data: {
+          status: "DRAFT",
+        },
       });
 
       return updatedCourse;

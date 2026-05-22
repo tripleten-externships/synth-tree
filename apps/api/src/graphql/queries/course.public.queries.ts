@@ -19,8 +19,8 @@ builder.queryFields((t) => ({
       return ctx.prisma.course.findMany({
         ...query,
         where: {
-          deletedAt: null,
-          ...(status ? { status } : {}),
+  deletedAt: null,
+  status: "PUBLISHED",
           ...(search
             ? {
                 title: {
