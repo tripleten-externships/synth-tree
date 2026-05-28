@@ -8,8 +8,7 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "preserveConstEnums": true
+    "baseUrl": "."
   },
   "include": ["apps", "packages"]
 }
