@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
-import { useAdminGetAllCoursesQuery, AdminGetAllCoursesDocument, CourseStatus } from "@synth-tree/api-types";
-import type { AdminGetAllCoursesQuery } from "@synth-tree/api-types";
+import { useAdminGetAllCoursesQuery, AdminGetAllCoursesDocument } from "@synth-tree/api-types";
+import type { AdminGetAllCoursesQuery, CourseStatus } from "@synth-tree/api-types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -80,7 +80,7 @@ function relativeTime(dateInput: string | Date): string {
 // ─── 4. SUB-COMPONENTS ────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }: { status: CourseStatus }) => {
-  const isPublished = status === CourseStatus.Published;
+  const isPublished = status === 'PUBLISHED';
   return (
     <span
       className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded"
@@ -154,7 +154,7 @@ const CourseCard = ({ course, onDelete, onPublish, onEdit }: CourseCardProps) =>
             Edit course
           </DropdownMenuItem>
           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPublish(course.id); }}>
-            {course.status === CourseStatus.Published ? "Unpublish" : "Publish course"}
+            {course.status === 'PUBLISHED' ? "Unpublish" : "Publish course"}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -277,7 +277,7 @@ const CoursesList = () => {
   const handlePublish = (id: string) => {
     const course = courses.find((c) => c.id === id);
     if (!course) return;
-    const newStatus = course.status === CourseStatus.Published ? CourseStatus.Draft : CourseStatus.Published;
+    const newStatus = course.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
     updateCourse({ variables: { id, input: { status: newStatus } } });
   };
 
@@ -297,7 +297,7 @@ const CoursesList = () => {
           <h1 className="text-3xl font-bold">Courses</h1>
           {!loading && !error && (
             <p className="text-sm text-gray-500 mt-1">
-              {courses.length} courses · {courses.filter((c) => c.status === CourseStatus.Published).length} published
+              {courses.length} courses · {courses.filter((c) => c.status === 'PUBLISHED').length} published
             </p>
           )}
         </div>
@@ -417,7 +417,7 @@ const CoursesList = () => {
                             Edit course
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handlePublish(course.id); }}>
-                            {course.status === CourseStatus.Published ? "Unpublish" : "Publish course"}
+                            {course.status === 'PUBLISHED' ? "Unpublish" : "Publish course"}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             variant="destructive"
