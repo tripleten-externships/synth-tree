@@ -5683,7 +5683,7 @@ export type AdminGetAllCoursesQueryVariables = Exact<{
 }>;
 
 
-export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, author: { __typename?: 'User', id: string, name?: string | null, email: string } }> | null };
+export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, updatedAt: string, author: { __typename?: 'User', id: string, name?: string | null, email: string } }> | null };
 
 export type DeleteCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5776,6 +5776,7 @@ export const AdminGetAllCoursesDocument = gql`
     title
     description
     status
+    updatedAt
     author {
       id
       name
