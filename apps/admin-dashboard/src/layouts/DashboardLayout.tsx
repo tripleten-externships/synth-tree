@@ -58,20 +58,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center">
-                {(["compact", "regular", "comfy"] as const).map((option) => (
-                  <button
-                    key={option}
-                onClick={() => setDensity(option)}
-                className={`px-2 py-1 text-xs rounded-md capitalize ${
-                  density === option
+              {(["compact", "regular", "comfy"] as const).map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setDensity(option)}
+                  className={`px-2 py-1 text-xs rounded-md capitalize ${
+                    density === option
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
+                  }`}
+                >
                 {option}
-              </button>
-            ))}
-          </DropdownMenuContent>
+                </button>
+              ))}
+            </DropdownMenuContent>
           </DropdownMenu>
           <div className="flex items-center gap-1">
             {/* avatar + admin badge container */}
