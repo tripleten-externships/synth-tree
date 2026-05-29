@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Badge } from "@synth-tree/ui";
+import { useDensity } from "@synth-tree/theme";
+import { Badge, useColorMode } from "@synth-tree/ui";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,6 +11,7 @@ import {
 import useAuth from "../hooks/useAuth";
 import SynthTreeLogo from "../assets/synth-tree.svg";
 import GenericAvatar from "../assets/avatar-generic.svg";
+import {Sun, Moon, LayoutList} from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -17,6 +19,8 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
+  const { colorMode, toggleColorMode } = useColorMode();
+  const { density, setDensity } = useDensity();
   const navigate = useNavigate();
   return (
     <div className="min-h-screen flex flex-col text-foreground">
@@ -38,6 +42,37 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link to="/courses" className="font-medium">
             Courses
           </Link>
+          {/* Color mode toggle */}
+          <button
+            className="p-2 rounded-[10px] hover:bg-muted"
+            aria-label="Toggle dark mode"
+            onClick={toggleColorMode}
+          >
+            {colorMode === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </button>
+          {/* Density */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 rounded-[10px] hover:bg-muted" aria-label="Toggle density">
+                <LayoutList className="h-5 w-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+                {(["compact", "regular", "comfy"] as const).map((option) => (
+                  <button
+                    key={option}
+                onClick={() => setDensity(option)}
+                className={`px-2 py-1 text-xs rounded-md capitalize ${
+                  density === option
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </DropdownMenuContent>
+          </DropdownMenu>
           <div className="flex items-center gap-1">
             {/* avatar + admin badge container */}
             <DropdownMenu>
