@@ -7,6 +7,13 @@ const meta: Meta<typeof Progress> = {
   parameters: {
     layout: "centered",
   },
+  decorators: [
+    (Story) => (
+      <div className="w-[300px]">
+        <Story />
+      </div>
+    ),
+  ],
   tags: ["autodocs"],
   argTypes: {
     variant: {
@@ -37,6 +44,8 @@ export const Success: Story = {
   args: {
     value: 80,
     variant: "success",
+    max: 100,
+    size: "md",
   },
 };
 
@@ -44,6 +53,8 @@ export const Warning: Story = {
   args: {
     value: 50,
     variant: "warning",
+    max: 100,
+    size: "md",
   },
 };
 
@@ -51,6 +62,32 @@ export const Destructive: Story = {
   args: {
     value: 30,
     variant: "destructive",
+    max: 100,
+    size: "md",
+  },
+};
+
+export const Small: Story = {
+  args: {
+    value: 70,
+    max: 100,
+    size: "sm",
+  },
+};
+
+export const Medium: Story = {
+  args: {
+    value: 70,
+    max: 100,
+    size: "md",
+  },
+};
+
+export const Large: Story = {
+  args: {
+    value: 70,
+    max: 100,
+    size: "lg",
   },
 };
 
