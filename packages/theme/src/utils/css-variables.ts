@@ -1,5 +1,6 @@
 import { colorVariables } from "../tokens/colors";
 import type { ColorMode } from "../types";
+import type { Density } from "../types";
 
 // CSS custom property utilities for runtime theme switching
 export function setCSSVariables(mode: ColorMode = "light") {
@@ -23,6 +24,14 @@ export function setCSSVariables(mode: ColorMode = "light") {
     } else {
       root.classList.remove("dark");
     }
+  }
+}
+
+export function setDensityClass(density: Density = "regular") {
+  if (typeof document !== "undefined") {
+    const root = document.documentElement;
+
+    root.setAttribute("data-density", density);
   }
 }
 
