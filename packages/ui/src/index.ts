@@ -62,6 +62,7 @@ export {
   type HexStyle,
 } from "./components/ui/hex";
 export * from "./components/ui/markdown-editor";
+export * from "./components/ui/progress";
 
 // Export utilities
 export { cn, cnUI } from "./utils";
