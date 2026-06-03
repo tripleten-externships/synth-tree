@@ -7,6 +7,7 @@ export type {
   Breakpoints,
   Theme,
   ColorMode,
+  Density,
   ThemeContextValue,
 } from "./theme";
 
