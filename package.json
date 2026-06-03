@@ -9,9 +9,9 @@
   "scripts": {
     "db:start": "docker compose up -d",
     "db:stop": "docker compose down",
-    "db:validate": "pnpm --filter @synth-tree/api prisma validate",
-    "db:migrate:dev": "pnpm --filter @synth-tree/api prisma migrate dev",
-    "db:studio": "pnpm --filter @synth-tree/api prisma studio",
+    "db:validate": "pnpm --filter @synth-tree/api run prisma:validate",
+    "db:migrate:dev": "pnpm --filter @synth-tree/api run prisma:migrate:dev",
+    "db:studio": "pnpm --filter @synth-tree/api run prisma:studio",
     "db:seed:local-users": "pnpm --filter @synth-tree/api db:seed:local-users",
     "create:user": "pnpm --filter @synth-tree/api create:user --",
     "refresh:token": "pnpm --filter @synth-tree/api refresh:token --",

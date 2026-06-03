@@ -1,6 +1,8 @@
 import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
+import { useNavigate } from "react-router-dom";
+// CSS file for this page's custom styles
+import "./SkillTreeHomePage.css";
 
-import NodeIcon from "../assets/node-icon.svg";
 // CourseCard component — displays each course as a styled clickable card
 import CourseCard from "../components/CourseCard";
 
@@ -14,6 +16,8 @@ const placeholderCourses = [
 
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
+  // navigate() lets us send the user to a different page when they click something
+  const navigate = useNavigate();
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -43,13 +47,12 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="mt-10 w-full max-w-3xl rounded-3xl border border-gray-200 bg-white p-10 shadow-sm">
-        <img
-          src={NodeIcon}
-          alt="More courses coming soon"
-          className="h-12 mx-auto mb-4"
-        />
-        <p className="text-gray-500">More courses coming soon</p>
+      {/* "Browse catalog" card — clicking it takes the user to the full course catalog page.
+          The dashed border style matches the design mock for this card.
+          TODO: the design shows a circle icon above the text — we don't have that asset yet.
+          Once we find or receive the correct SVG file, add it here as an <img> above the <p>. */}
+      <div className="browse-catalog-card" onClick={() => navigate("/catalog")}>
+        <p>Browse catalog</p>
       </div>
     </div>
   );
