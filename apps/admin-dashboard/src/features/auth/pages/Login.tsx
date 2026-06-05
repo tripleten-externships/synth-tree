@@ -269,7 +269,13 @@ export function Login() {
                 Sign in with Google
               </Button>
             )}
-            <Button variant="ghost">Forgot Password</Button>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => navigate("/auth/forgot-password")}
+            >
+              Forgot password?
+            </Button>
           </div>
         </CardFooter>
       </Card>
