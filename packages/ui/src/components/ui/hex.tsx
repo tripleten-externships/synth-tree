@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/utils";
-import { Icon, type IconName } from "./icon";
+import { ICON_OPTIONS, type IconId, getIconLabel } from "./icon-selector/icon-options";
 
 const HEX_CLIP =
   "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)";
@@ -10,7 +10,7 @@ export type HexStatus = "completed" | "current" | "unlocked" | "locked";
 export type HexStyle = "solid" | "outline" | "textured";
 
 export type HexProps = {
-  icon: IconName;
+  icon: IconId;
   status?: HexStatus;
   size?: number;
   hexStyle?: HexStyle;
@@ -73,6 +73,11 @@ function getFacetClass(status: HexStatus) {
   return "bg-white/20";
 }
 
+function getIconComponent(iconId: IconId) {
+  const match = ICON_OPTIONS.find((opt) => opt.id === iconId);
+  return match ? match.Icon : ICON_OPTIONS[0].Icon;
+}
+
 function Hex({
   icon,
   status = "current",
@@ -82,11 +87,11 @@ function Hex({
   className,
   "aria-label": ariaLabel,
 }: HexProps) {
-  const label = ariaLabel ?? icon;
-  const iconSize = Math.max(12, Math.round(size * 0.5));
+  const label = ariaLabel ?? getIconLabel(icon);
 
   const fillClass = getFillClass(status);
   const iconColor = getIconColorClass(status, hexStyle);
+  const IconComponent = getIconComponent(icon);
 
   const showHollow = hexStyle === "outline" || status === "unlocked";
   const showSolidFill = hexStyle === "solid" && status !== "unlocked";
@@ -106,18 +111,7 @@ function Hex({
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (!onClick) return;
-    if (e.key === "Enter") {
-      e.preventDefault();
-      onClick();
-    }
-    if (e.key === " ") {
-      e.preventDefault();
-    }
-  }
-
-  function handleKeyUp(e: React.KeyboardEvent) {
-    if (!onClick) return;
-    if (e.key === " ") {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onClick();
     }
@@ -156,8 +150,9 @@ function Hex({
           "relative z-10 inline-flex items-center justify-center",
           iconColor
         )}
+        style={{ width: "50%", height: "50%" }}
       >
-        <Icon name={icon} size={iconSize} />
+        <IconComponent className="h-full w-full" />
       </span>
     </>
   );
@@ -169,7 +164,6 @@ function Hex({
         style={wrapperStyle}
         onClick={onClick}
         onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
         role="button"
         tabIndex={0}
         aria-label={label}

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ICON_NAMES } from "./icon";
+import { ICON_OPTIONS } from "./icon-selector/icon-options";
 import { Hex, type HexStatus, type HexStyle } from "./hex";
 
 const STATUSES: HexStatus[] = ["completed", "current", "unlocked", "locked"];
@@ -11,7 +11,7 @@ function HexVariantCell({
   status,
   hexStyle,
 }: {
-  icon: (typeof ICON_NAMES)[number];
+  icon: (typeof ICON_OPTIONS)[number]["id"];
   size: number;
   status: HexStatus;
   hexStyle: HexStyle;
@@ -34,7 +34,7 @@ const meta: Meta<typeof Hex> = {
   argTypes: {
     icon: {
       control: { type: "select" },
-      options: [...ICON_NAMES],
+      options: ICON_OPTIONS.map((o) => o.id),
     },
     status: {
       control: { type: "select" },
