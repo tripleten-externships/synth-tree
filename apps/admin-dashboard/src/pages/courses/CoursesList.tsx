@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MoreHorizontal,
   Plus,
@@ -267,6 +267,23 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
 const CoursesList = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  useEffect(() => {
+    try {
+      const v = window.localStorage.getItem("adminCoursesView");
+      if (v === "grid" || v === "list") setViewMode(v);
+    } catch (e) {
+    }
+  }, []);
+
+  const setAndPersistView = (v: "grid" | "list") => {
+    setViewMode(v);
+    try {
+      window.localStorage.setItem("adminCoursesView", v);
+    } catch (e) {
+    }
+  };
 
   const { data, loading, error } = useQuery<{ adminGetAllCourses: Course[] }>(
     GET_ALL_COURSES,
@@ -322,6 +339,29 @@ const CoursesList = () => {
 
       {/* ── Filter pills ── */}
       <div className="flex gap-2 mb-6">
+        {/* View toggle (grid / list) */}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setAndPersistView("grid")}
+            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              viewMode === "grid"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Grid
+          </button>
+          <button
+            onClick={() => setAndPersistView("list")}
+            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+              viewMode === "list"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            List
+          </button>
+        </div>
         {filterOptions.map((opt) => (
           <button
             key={opt.value}
@@ -370,19 +410,63 @@ const CoursesList = () => {
         </div>
       )}
 
-      {/* ── Grid ── */}
+      {/* ── Grid / List views ── */}
       {!loading && !error && courses.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              onDelete={handleDelete}
-              onPublish={handlePublish}
-            />
-          ))}
-          <NewCourseCard onClick={() => setModalOpen(true)} />
-        </div>
+        <>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onDelete={handleDelete}
+                  onPublish={handlePublish}
+                />
+              ))}
+              <NewCourseCard onClick={() => setModalOpen(true)} />
+            </div>
+          ) : (
+            <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-gray-50 text-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Course</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium">Chapters</th>
+                    <th className="px-4 py-3 font-medium">Learners</th>
+                    <th className="px-4 py-3 font-medium">Completion</th>
+                    <th className="px-4 py-3 font-medium">Edited</th>
+                    <th className="px-4 py-3 font-medium" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {courses.map((course) => (
+                    <tr key={course.id} className="border-t">
+                      <td className="px-4 py-3 align-top">
+                        <div className="font-medium text-gray-900" style={{ color: '#111827' }}>{course.title}</div>
+                        <div className="text-xs text-gray-500">by {course.author.name ?? course.author.email}</div>
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <StatusBadge status={course.status} />
+                      </td>
+                      <td className="px-4 py-3 align-top">—</td>
+                      <td className="px-4 py-3 align-top">—</td>
+                      <td className="px-4 py-3 align-top">—</td>
+                      <td className="px-4 py-3 align-top">—</td>
+                      <td className="px-4 py-3 align-top">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => alert("Open course") } className="text-sm text-blue-600">Open</button>
+                          <button onClick={() => handlePublish(course.id)} className="text-sm text-gray-600">{course.status === "PUBLISHED" ? "Unpublish" : "Publish"}</button>
+                          <button onClick={() => handleDelete(course.id)} className="text-sm text-red-600">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Create Course Modal ── */}
