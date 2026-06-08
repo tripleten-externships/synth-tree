@@ -1,7 +1,5 @@
 // Importing pre-built Card pieces from the shared UI library (@synth-tree/ui)
 import { Card, CardContent, CardTitle, CardDescription } from "@synth-tree/ui";
-// CSS file for styles that are easier to write in plain CSS than Tailwind (e.g. clip-path)
-import "./CourseCard.css";
 // ReactNode is a TypeScript type that means "anything React can render" —
 // a component, a string, a <div>, etc. We use it so TypeScript knows the
 // icon prop can hold any kind of renderable React content.
@@ -58,7 +56,10 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             TODO: revisit once the API returns an icon field on Course, or once lucide-react
             is added as a direct dependency here (to match the admin dashboard's approach). */}
         {icon && (
-          <div className="course-card-hex">
+          <div
+            className="w-16 h-16 bg-blue-500 flex items-center justify-center text-white mb-4"
+            style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}
+          >
             {icon}
           </div>
         )}
@@ -76,7 +77,7 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             shows "8.4k learners". The dot separator " · " only renders if both chapters and
             hours are present, so we never get a floating dot if one is missing. */}
         {(chapters != null || hours != null || learners != null) && (
-          <div className="course-card-stats">
+          <div className="flex justify-between text-sm text-gray-500 mb-2">
             <span>
               {chapters != null && `${chapters} chapters`}
               {chapters != null && hours != null && " · "}
@@ -91,13 +92,13 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             using an inline style, so progress={42} makes it fill 42% of the track. */}
         {progress != null && (
           <div>
-            <div className="course-card-progress-track">
+            <div className="w-full h-1.5 bg-gray-200 rounded-full mb-1">
               <div
-                className="course-card-progress-bar"
+                className="h-1.5 bg-blue-500 rounded-full"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="course-card-progress-label">{progress}% complete</p>
+            <p className="text-sm text-gray-500">{progress}% complete</p>
           </div>
         )}
       </CardContent>

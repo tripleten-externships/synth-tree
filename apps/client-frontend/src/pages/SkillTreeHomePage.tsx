@@ -1,9 +1,5 @@
 import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
 import { useNavigate } from "react-router-dom";
-// CSS file for this page's custom styles
-import "./SkillTreeHomePage.css";
-
-// CourseCard component — displays each course as a styled clickable card
 import CourseCard from "../components/CourseCard";
 
 // Placeholder courses shown when the database has nothing published yet.
@@ -51,8 +47,11 @@ export default function Home() {
           The dashed border style matches the design mock for this card.
           TODO: the design shows a circle icon above the text — we don't have that asset yet.
           Once we find or receive the correct SVG file, add it here as an <img> above the <p>. */}
-      <div className="browse-catalog-card" onClick={() => navigate("/catalog")}>
-        <p>Browse catalog</p>
+      <div
+        className="mt-10 w-full max-w-3xl rounded-3xl border-2 border-dashed border-gray-300 bg-white p-10 shadow-sm cursor-pointer transition-shadow hover:shadow-lg text-center"
+        onClick={() => navigate("/catalog")}
+      >
+        <p className="text-gray-500">Browse catalog</p>
       </div>
     </div>
   );
