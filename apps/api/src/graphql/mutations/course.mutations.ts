@@ -107,10 +107,16 @@ builder.mutationFields((t) => ({
       await assertCourseOwnership(ctx, id);
 
       // 3. Delete and return the deleted entity using the GraphQL selection (`query`)
-      const deleted = await ctx.prisma.course.delete({
+      const deleted = await ctx.prisma.course.update({
         ...query,
         where: { id },
+         data: { deletedAt: new Date() },
       });
+
+       logger.info(
+      { courseId: id, title: existing.title },
+      'Course soft-deleted'
+    );
 
       return deleted;
     },
