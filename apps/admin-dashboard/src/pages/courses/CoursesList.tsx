@@ -339,7 +339,7 @@ const CoursesList = () => {
 
       {/* ── Filter pills ── */}
       <div className="flex gap-2 mb-6">
-        {/* View toggle (grid / list) */}
+        {/* View toggle (grid / list)  */}
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => setAndPersistView("grid")}
