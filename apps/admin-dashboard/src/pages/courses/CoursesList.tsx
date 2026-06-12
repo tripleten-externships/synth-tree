@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   MoreHorizontal,
   Plus,
@@ -21,6 +21,7 @@ import {
   DialogFooter,
   Input,
 } from "@synth-tree/ui";
+import { SkeletonList } from "../../components/SkeletonList";
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 
@@ -267,21 +268,26 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
 const CoursesList = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
-  useEffect(() => {
-    try {
-      const v = window.localStorage.getItem("adminCoursesView");
-      if (v === "grid" || v === "list") setViewMode(v);
-    } catch (e) {
+  const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
+    if (typeof window === "undefined") {
+      return "grid";
     }
-  }, []);
+
+    try {
+      const savedView = window.localStorage.getItem("adminCoursesView");
+      return savedView === "grid" || savedView === "list" ? savedView : "grid";
+    } catch (error) {
+      console.error("Failed to read admin courses view preference:", error);
+      return "grid";
+    }
+  });
 
   const setAndPersistView = (v: "grid" | "list") => {
     setViewMode(v);
     try {
       window.localStorage.setItem("adminCoursesView", v);
-    } catch (e) {
+    } catch (error) {
+      console.error("Failed to persist admin courses view preference:", error);
     }
   };
 
@@ -338,9 +344,25 @@ const CoursesList = () => {
       </div>
 
       {/* ── Filter pills ── */}
-      <div className="flex gap-2 mb-6">
-        {/* View toggle (grid / list)  */}
-        <div className="ml-auto flex items-center gap-2">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        {/* Status filter pills on the left */}
+        <div className="flex flex-wrap gap-2">
+          {filterOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setStatusFilter(opt.value)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                statusFilter === opt.value
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {/* View toggle (grid / list) on the right */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setAndPersistView("grid")}
             className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
@@ -362,19 +384,6 @@ const CoursesList = () => {
             List
           </button>
         </div>
-        {filterOptions.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => setStatusFilter(opt.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              statusFilter === opt.value
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
       </div>
 
       {/* ── Error state ── */}
@@ -386,11 +395,15 @@ const CoursesList = () => {
 
       {/* ── Loading skeletons ── */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((n) => (
-            <SkeletonCard key={n} />
-          ))}
-        </div>
+        viewMode === "grid" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((n) => (
+              <SkeletonCard key={n} />
+            ))}
+          </div>
+        ) : (
+          <SkeletonList />
+        )
       )}
 
       {/* ── Empty state ── */}
@@ -443,7 +456,7 @@ const CoursesList = () => {
                   {courses.map((course) => (
                     <tr key={course.id} className="border-t">
                       <td className="px-4 py-3 align-top">
-                        <div className="font-medium text-gray-900" style={{ color: '#111827' }}>{course.title}</div>
+                        <div className="font-medium text-gray-900">{course.title}</div>
                         <div className="text-xs text-gray-500">by {course.author.name ?? course.author.email}</div>
                       </td>
                       <td className="px-4 py-3 align-top">
