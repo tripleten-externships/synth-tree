@@ -13,6 +13,7 @@ import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import SignUpPage from "./pages/auth/SignUpPage";
 
 // Shared shell for all authenticated routes.
 function ProtectedMainLayout() {
@@ -42,7 +43,9 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFoundPage />,
   },
-]);
+  {path: "/auth/signup",
+    element: <SignUpPage />},
+],);
 
 export default function App() {
   return <RouterProvider router={router} />;
