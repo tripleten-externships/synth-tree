@@ -1701,6 +1701,7 @@ export type Query = {
   adminSkillTrees?: Maybe<Array<SkillTree>>;
   allUsers?: Maybe<Array<User>>;
   courseProgress?: Maybe<CourseProgress>;
+  currentUser?: Maybe<User>;
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
@@ -4952,6 +4953,7 @@ export type User = {
   nodeProgress: Array<UserNodeProgress>;
   photoUrl?: Maybe<Scalars['String']['output']>;
   quizAttempts: Array<QuizAttempt>;
+  recommendedNext?: Maybe<Array<SkillNode>>;
   role: Role;
   updatedAt: Scalars['DateTime']['output'];
 };
@@ -4984,6 +4986,11 @@ export type UserQuizAttemptsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<QuizAttemptWhereInput>;
+};
+
+
+export type UserRecommendedNextArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type UserCountOrderByAggregateInput = {
@@ -5734,6 +5741,13 @@ export type PublicGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>
 
 export type PublicGetAllCoursesQuery = { __typename?: 'Query', publicGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, description?: string | null }> }> | null };
 
+export type RecommendedNextQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
+
 
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
@@ -6061,3 +6075,50 @@ export function usePublicGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.L
         }
 export type PublicGetAllCoursesQueryHookResult = ReturnType<typeof usePublicGetAllCoursesQuery>;
 export type PublicGetAllCoursesLazyQueryHookResult = ReturnType<typeof usePublicGetAllCoursesLazyQuery>;
+export const RecommendedNextDocument = gql`
+    query RecommendedNext($limit: Int) {
+  currentUser {
+    recommendedNext(limit: $limit) {
+      id
+      title
+      step
+      orderInStep
+      tree {
+        id
+        title
+        course {
+          id
+          title
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useRecommendedNextQuery__
+ *
+ * To run a query within a React component, call `useRecommendedNextQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRecommendedNextQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRecommendedNextQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useRecommendedNextQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RecommendedNextQuery, RecommendedNextQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<RecommendedNextQuery, RecommendedNextQueryVariables>(RecommendedNextDocument, options);
+      }
+export function useRecommendedNextLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RecommendedNextQuery, RecommendedNextQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<RecommendedNextQuery, RecommendedNextQueryVariables>(RecommendedNextDocument, options);
+        }
+export type RecommendedNextQueryHookResult = ReturnType<typeof useRecommendedNextQuery>;
+export type RecommendedNextLazyQueryHookResult = ReturnType<typeof useRecommendedNextLazyQuery>;

@@ -1505,6 +1505,7 @@ type Query {
   adminSkillTrees(courseId: ID, limit: Int, page: Int, search: String): [SkillTree!]
   allUsers(limit: Int = 25, offset: Int = 0): [User!]
   courseProgress(courseId: ID!, userId: ID): CourseProgress
+  currentUser: User
   lessonBlock(id: ID!): LessonBlocks
   lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
@@ -4486,6 +4487,7 @@ type User {
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   photoUrl: String
   quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
+  recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   updatedAt: DateTime!
 }
