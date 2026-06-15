@@ -151,7 +151,7 @@ builder.queryFields((t) => ({
          ? 0
          : Math.round((completedNodes / totalNodes) * 100);
 
-     return {
+          return {
        courseId: args.courseId,
        totalNodes,
        inProgressNodes,
