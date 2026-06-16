@@ -65,9 +65,7 @@ export function ForgotPassword() {
               <Button
                 className="w-full"
                 type="button"
-                onClick={() => {
-                  window.location.href = "/auth/login";
-                }}
+                onClick={() => navigate("/auth/login")}
               >
                 Back to login
               </Button>
@@ -113,7 +111,7 @@ export function ForgotPassword() {
               type="button"
               onClick={() => navigate("/auth/login")}
             >
-              back to login
+              Back to login
             </Button>
           </div>
         </CardFooter>
