@@ -1,6 +1,7 @@
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MoreHorizontal,
   Plus,
@@ -266,6 +267,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
 // ─── 6. MAIN PAGE ─────────────────────────────────────────────────────────────
 
 const CoursesList = () => {
+  const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
@@ -468,7 +470,7 @@ const CoursesList = () => {
                       <td className="px-4 py-3 align-top">—</td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => alert("Open course") } className="text-sm text-blue-600">Open</button>
+                          <button onClick={() => navigate(`/courses/${course.id}/edit`)} className="text-sm text-blue-600">Open</button>
                           <button onClick={() => handlePublish(course.id)} className="text-sm text-gray-600">{course.status === "PUBLISHED" ? "Unpublish" : "Publish"}</button>
                           <button onClick={() => handleDelete(course.id)} className="text-sm text-red-600">Delete</button>
                         </div>
