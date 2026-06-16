@@ -36,16 +36,6 @@ function App() {
                         </DashboardLayout>
                       }
                     />
-                   <Route
-                      path="/courses/:id/edit"
-                      element={
-                        <DashboardLayout>
-                          <div className="flex items-center justify-center h-full py-24 text-gray-400">
-                            Edit course — coming soon (SYN-25)
-                          </div>
-                        </DashboardLayout>
-                      }
-                    />
                   </Routes>
                 </ProtectedRoutes>
               }
