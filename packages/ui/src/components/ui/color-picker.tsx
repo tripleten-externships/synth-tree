@@ -99,10 +99,9 @@ function hsvToHex(h: number, s: number, v: number): string {
   else [r, g, b] = [c, 0, x];
 
   const toHex = (n: number) =>
-    (() => {
-      const hex = Math.round((n + m) * 255).toString(16);
-      return hex.length === 1 ? `0${hex}` : hex;
-    })();
+    Math.round((n + m) * 255)
+      .toString(16)
+      .padStart(2, "0");
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
