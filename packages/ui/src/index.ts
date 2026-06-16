@@ -55,6 +55,12 @@ export {
 
 export { Toaster, toast } from "./components/ui/sonner";
 export { ColorPicker } from "./components/ui/color-picker";
+export {
+  Hex,
+  type HexProps,
+  type HexStatus,
+  type HexStyle,
+} from "./components/ui/hex";
 export * from "./components/ui/markdown-editor";
 
 // Export utilities
