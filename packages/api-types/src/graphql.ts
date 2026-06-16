@@ -58,12 +58,11 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
-export enum ContentType {
-  Embed = 'EMBED',
-  Html = 'HTML',
-  Image = 'IMAGE',
-  Video = 'VIDEO'
-}
+export type ContentType =
+  | 'EMBED'
+  | 'HTML'
+  | 'IMAGE'
+  | 'VIDEO';
 
 export type Course = {
   __typename?: 'Course';
@@ -252,16 +251,15 @@ export type CourseProgress = {
   totalNodes?: Maybe<Scalars['Int']['output']>;
 };
 
-export enum CourseScalarFieldEnum {
-  AuthorId = 'authorId',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Description = 'description',
-  Id = 'id',
-  Status = 'status',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
-}
+export type CourseScalarFieldEnum =
+  | 'authorId'
+  | 'createdAt'
+  | 'deletedAt'
+  | 'description'
+  | 'id'
+  | 'status'
+  | 'title'
+  | 'updatedAt';
 
 export type CourseScalarRelationFilter = {
   is?: InputMaybe<CourseWhereInput>;
@@ -296,10 +294,9 @@ export type CourseScalarWhereWithAggregatesInput = {
   updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
 };
 
-export enum CourseStatus {
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
-}
+export type CourseStatus =
+  | 'DRAFT'
+  | 'PUBLISHED';
 
 export type CourseUpdateInput = {
   author?: InputMaybe<UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput>;
@@ -695,11 +692,10 @@ export type IntWithAggregatesFilter = {
   notIn?: InputMaybe<Array<Scalars['Int']['input']>>;
 };
 
-export enum JsonNullValueFilter {
-  AnyNull = 'AnyNull',
-  DbNull = 'DbNull',
-  JsonNull = 'JsonNull'
-}
+export type JsonNullValueFilter =
+  | 'AnyNull'
+  | 'DbNull'
+  | 'JsonNull';
 
 export type JsonNullableFilter = {
   array_contains?: InputMaybe<Scalars['Json']['input']>;
@@ -923,20 +919,19 @@ export type LessonBlocksOrderByWithRelationInput = {
   url?: InputMaybe<SortOrder>;
 };
 
-export enum LessonBlocksScalarFieldEnum {
-  Caption = 'caption',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Html = 'html',
-  Id = 'id',
-  Meta = 'meta',
-  NodeId = 'nodeId',
-  Order = 'order',
-  Status = 'status',
-  Type = 'type',
-  UpdatedAt = 'updatedAt',
-  Url = 'url'
-}
+export type LessonBlocksScalarFieldEnum =
+  | 'caption'
+  | 'createdAt'
+  | 'deletedAt'
+  | 'html'
+  | 'id'
+  | 'meta'
+  | 'nodeId'
+  | 'order'
+  | 'status'
+  | 'type'
+  | 'updatedAt'
+  | 'url';
 
 export type LessonBlocksScalarWhereInput = {
   AND?: InputMaybe<Array<LessonBlocksScalarWhereInput>>;
@@ -1089,10 +1084,9 @@ export type LessonBlocksWhereUniqueInput = {
   url?: InputMaybe<StringNullableFilter>;
 };
 
-export enum LessonStatus {
-  Draft = 'DRAFT',
-  Published = 'PUBLISHED'
-}
+export type LessonStatus =
+  | 'DRAFT'
+  | 'PUBLISHED';
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -1114,10 +1108,12 @@ export type Mutation = {
   deleteSkillNodeSimple?: Maybe<Scalars['Boolean']['output']>;
   deleteSkillTree?: Maybe<SkillTree>;
   deleteUser?: Maybe<User>;
+  publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   setUserRole?: Maybe<User>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
   syncCurrentUser?: Maybe<User>;
+  unpublishCourse?: Maybe<Course>;
   updateCourse?: Maybe<Course>;
   updateLessonBlock?: Maybe<LessonBlocks>;
   updateQuiz?: Maybe<Quiz>;
@@ -1225,6 +1221,11 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationPublishCourseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationPublishLessonBlockArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1245,6 +1246,11 @@ export type MutationSubmitQuizAttemptArgs = {
 export type MutationSyncCurrentUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUnpublishCourseArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1665,25 +1671,22 @@ export type NullableIntFieldUpdateOperationsInput = {
   set?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export enum NullableJsonNullValueInput {
-  DbNull = 'DbNull',
-  JsonNull = 'JsonNull'
-}
+export type NullableJsonNullValueInput =
+  | 'DbNull'
+  | 'JsonNull';
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: InputMaybe<Scalars['String']['input']>;
 };
 
-export enum NullsOrder {
-  First = 'first',
-  Last = 'last'
-}
+export type NullsOrder =
+  | 'first'
+  | 'last';
 
-export enum ProgressStatus {
-  Completed = 'COMPLETED',
-  InProgress = 'IN_PROGRESS',
-  NotStarted = 'NOT_STARTED'
-}
+export type ProgressStatus =
+  | 'COMPLETED'
+  | 'IN_PROGRESS'
+  | 'NOT_STARTED';
 
 export type Query = {
   __typename?: 'Query';
@@ -1878,16 +1881,14 @@ export type QuerySkillNodesByTreeArgs = {
   treeId: Scalars['ID']['input'];
 };
 
-export enum QueryMode {
-  Default = 'default',
-  Insensitive = 'insensitive'
-}
+export type QueryMode =
+  | 'default'
+  | 'insensitive';
 
-export enum QuestionType {
-  MultipleChoice = 'MULTIPLE_CHOICE',
-  OpenQuestion = 'OPEN_QUESTION',
-  SingleChoice = 'SINGLE_CHOICE'
-}
+export type QuestionType =
+  | 'MULTIPLE_CHOICE'
+  | 'OPEN_QUESTION'
+  | 'SINGLE_CHOICE';
 
 export type Quiz = {
   __typename?: 'Quiz';
@@ -2092,13 +2093,12 @@ export type QuizAttemptAnswerOrderByWithRelationInput = {
   questionId?: InputMaybe<SortOrder>;
 };
 
-export enum QuizAttemptAnswerScalarFieldEnum {
-  Answer = 'answer',
-  AttemptId = 'attemptId',
-  Id = 'id',
-  IsCorrect = 'isCorrect',
-  QuestionId = 'questionId'
-}
+export type QuizAttemptAnswerScalarFieldEnum =
+  | 'answer'
+  | 'attemptId'
+  | 'id'
+  | 'isCorrect'
+  | 'questionId';
 
 export type QuizAttemptAnswerScalarWhereInput = {
   AND?: InputMaybe<Array<QuizAttemptAnswerScalarWhereInput>>;
@@ -2393,13 +2393,12 @@ export type QuizAttemptOrderByWithRelationInput = {
   userId?: InputMaybe<SortOrder>;
 };
 
-export enum QuizAttemptScalarFieldEnum {
-  Id = 'id',
-  Passed = 'passed',
-  QuizId = 'quizId',
-  TakenAt = 'takenAt',
-  UserId = 'userId'
-}
+export type QuizAttemptScalarFieldEnum =
+  | 'id'
+  | 'passed'
+  | 'quizId'
+  | 'takenAt'
+  | 'userId';
 
 export type QuizAttemptScalarRelationFilter = {
   is?: InputMaybe<QuizAttemptWhereInput>;
@@ -2818,14 +2817,13 @@ export type QuizOptionOrderByWithRelationInput = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export enum QuizOptionScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  IsCorrect = 'isCorrect',
-  QuestionId = 'questionId',
-  Text = 'text',
-  UpdatedAt = 'updatedAt'
-}
+export type QuizOptionScalarFieldEnum =
+  | 'createdAt'
+  | 'id'
+  | 'isCorrect'
+  | 'questionId'
+  | 'text'
+  | 'updatedAt';
 
 export type QuizOptionScalarWhereInput = {
   AND?: InputMaybe<Array<QuizOptionScalarWhereInput>>;
@@ -3167,15 +3165,14 @@ export type QuizQuestionOrderByWithRelationInput = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export enum QuizQuestionScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  Order = 'order',
-  Prompt = 'prompt',
-  QuizId = 'quizId',
-  Type = 'type',
-  UpdatedAt = 'updatedAt'
-}
+export type QuizQuestionScalarFieldEnum =
+  | 'createdAt'
+  | 'id'
+  | 'order'
+  | 'prompt'
+  | 'quizId'
+  | 'type'
+  | 'updatedAt';
 
 export type QuizQuestionScalarRelationFilter = {
   is?: InputMaybe<QuizQuestionWhereInput>;
@@ -3366,15 +3363,14 @@ export type QuizQuestionWhereUniqueInput = {
   updatedAt?: InputMaybe<DateTimeFilter>;
 };
 
-export enum QuizScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Id = 'id',
-  NodeId = 'nodeId',
-  Required = 'required',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
-}
+export type QuizScalarFieldEnum =
+  | 'createdAt'
+  | 'deletedAt'
+  | 'id'
+  | 'nodeId'
+  | 'required'
+  | 'title'
+  | 'updatedAt';
 
 export type QuizScalarRelationFilter = {
   is?: InputMaybe<QuizWhereInput>;
@@ -3539,10 +3535,9 @@ export type QuizWhereUniqueInput = {
   updatedAt?: InputMaybe<DateTimeFilter>;
 };
 
-export enum Role {
-  Admin = 'ADMIN',
-  User = 'USER'
-}
+export type Role =
+  | 'ADMIN'
+  | 'USER';
 
 export type SkillNode = {
   __typename?: 'SkillNode';
@@ -4027,10 +4022,9 @@ export type SkillNodePrerequisiteOrderByWithRelationInput = {
   nodeId?: InputMaybe<SortOrder>;
 };
 
-export enum SkillNodePrerequisiteScalarFieldEnum {
-  DependsOnNodeId = 'dependsOnNodeId',
-  NodeId = 'nodeId'
-}
+export type SkillNodePrerequisiteScalarFieldEnum =
+  | 'dependsOnNodeId'
+  | 'nodeId';
 
 export type SkillNodePrerequisiteScalarWhereInput = {
   AND?: InputMaybe<Array<SkillNodePrerequisiteScalarWhereInput>>;
@@ -4146,18 +4140,17 @@ export type SkillNodePrerequisiteWhereUniqueInput = {
   nodeId_dependsOnNodeId?: InputMaybe<SkillNodePrerequisiteNodeIdDependsOnNodeIdCompoundUniqueInput>;
 };
 
-export enum SkillNodeScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Id = 'id',
-  OrderInStep = 'orderInStep',
-  PosX = 'posX',
-  PosY = 'posY',
-  Step = 'step',
-  Title = 'title',
-  TreeId = 'treeId',
-  UpdatedAt = 'updatedAt'
-}
+export type SkillNodeScalarFieldEnum =
+  | 'createdAt'
+  | 'deletedAt'
+  | 'id'
+  | 'orderInStep'
+  | 'posX'
+  | 'posY'
+  | 'step'
+  | 'title'
+  | 'treeId'
+  | 'updatedAt';
 
 export type SkillNodeScalarRelationFilter = {
   is?: InputMaybe<SkillNodeWhereInput>;
@@ -4684,15 +4677,14 @@ export type SkillTreeOrderByWithRelationInput = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export enum SkillTreeScalarFieldEnum {
-  CourseId = 'courseId',
-  CreatedAt = 'createdAt',
-  DeletedAt = 'deletedAt',
-  Description = 'description',
-  Id = 'id',
-  Title = 'title',
-  UpdatedAt = 'updatedAt'
-}
+export type SkillTreeScalarFieldEnum =
+  | 'courseId'
+  | 'createdAt'
+  | 'deletedAt'
+  | 'description'
+  | 'id'
+  | 'title'
+  | 'updatedAt';
 
 export type SkillTreeScalarRelationFilter = {
   is?: InputMaybe<SkillTreeWhereInput>;
@@ -4844,10 +4836,9 @@ export type SkillTreeWhereUniqueInput = {
   updatedAt?: InputMaybe<DateTimeFilter>;
 };
 
-export enum SortOrder {
-  Asc = 'asc',
-  Desc = 'desc'
-}
+export type SortOrder =
+  | 'asc'
+  | 'desc';
 
 export type StringFieldUpdateOperationsInput = {
   set?: InputMaybe<Scalars['String']['input']>;
@@ -4919,12 +4910,11 @@ export type StringWithAggregatesFilter = {
   startsWith?: InputMaybe<Scalars['String']['input']>;
 };
 
-export enum TransactionIsolationLevel {
-  ReadCommitted = 'ReadCommitted',
-  ReadUncommitted = 'ReadUncommitted',
-  RepeatableRead = 'RepeatableRead',
-  Serializable = 'Serializable'
-}
+export type TransactionIsolationLevel =
+  | 'ReadCommitted'
+  | 'ReadUncommitted'
+  | 'RepeatableRead'
+  | 'Serializable';
 
 export type UpdateCourseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -5283,15 +5273,14 @@ export type UserNodeProgressOrderByWithRelationInput = {
   userId?: InputMaybe<SortOrder>;
 };
 
-export enum UserNodeProgressScalarFieldEnum {
-  CompletedAt = 'completedAt',
-  CreatedAt = 'createdAt',
-  Id = 'id',
-  NodeId = 'nodeId',
-  Status = 'status',
-  UpdatedAt = 'updatedAt',
-  UserId = 'userId'
-}
+export type UserNodeProgressScalarFieldEnum =
+  | 'completedAt'
+  | 'createdAt'
+  | 'id'
+  | 'nodeId'
+  | 'status'
+  | 'updatedAt'
+  | 'userId';
 
 export type UserNodeProgressScalarWhereInput = {
   AND?: InputMaybe<Array<UserNodeProgressScalarWhereInput>>;
@@ -5477,15 +5466,14 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: InputMaybe<SortOrder>;
 };
 
-export enum UserScalarFieldEnum {
-  CreatedAt = 'createdAt',
-  Email = 'email',
-  Id = 'id',
-  Name = 'name',
-  PhotoUrl = 'photoUrl',
-  Role = 'role',
-  UpdatedAt = 'updatedAt'
-}
+export type UserScalarFieldEnum =
+  | 'createdAt'
+  | 'email'
+  | 'id'
+  | 'name'
+  | 'photoUrl'
+  | 'role'
+  | 'updatedAt';
 
 export type UserScalarRelationFilter = {
   is?: InputMaybe<UserWhereInput>;
@@ -5680,17 +5668,15 @@ export type UuidWithAggregatesFilter = {
   notIn?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
+
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetMyCoursesQuery = { __typename?: 'Query', adminMyCoursesWithContent?: Array<{ __typename?: 'Course', id: string, title: string }> | null };
-
-export type AdminGetAllCoursesQueryVariables = Exact<{
-  status?: InputMaybe<CourseStatus>;
-}>;
-
-
-export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, author: { __typename?: 'User', id: string, name?: string | null, email: string } }> | null };
 
 export type DeleteCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5699,13 +5685,19 @@ export type DeleteCourseMutationVariables = Exact<{
 
 export type DeleteCourseMutation = { __typename?: 'Mutation', deleteCourse?: { __typename?: 'Course', id: string } | null };
 
-export type UpdateCourseMutationVariables = Exact<{
+export type PublishCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  input: UpdateCourseInput;
 }>;
 
 
-export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
+export type PublishCourseMutation = { __typename?: 'Mutation', publishCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
+
+export type UnpublishCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UnpublishCourseMutation = { __typename?: 'Mutation', unpublishCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
 
 export type CreateCourseMutationVariables = Exact<{
   input: CreateCourseInput;
@@ -5749,6 +5741,46 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const AdminGetAllCoursesDocument = gql`
+    query AdminGetAllCourses {
+  adminGetAllCourses {
+    id
+    title
+    status
+    updatedAt
+    author {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminGetAllCoursesQuery__
+ *
+ * To run a query within a React component, call `useAdminGetAllCoursesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminGetAllCoursesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminGetAllCoursesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAdminGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+      }
+export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+        }
+export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
+export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -5783,48 +5815,6 @@ export function useGetMyCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
         }
 export type GetMyCoursesQueryHookResult = ReturnType<typeof useGetMyCoursesQuery>;
 export type GetMyCoursesLazyQueryHookResult = ReturnType<typeof useGetMyCoursesLazyQuery>;
-export const AdminGetAllCoursesDocument = gql`
-    query AdminGetAllCourses($status: CourseStatus) {
-  adminGetAllCourses(status: $status) {
-    id
-    title
-    description
-    status
-    author {
-      id
-      name
-      email
-    }
-  }
-}
-    `;
-
-/**
- * __useAdminGetAllCoursesQuery__
- *
- * To run a query within a React component, call `useAdminGetAllCoursesQuery` and pass it any options that fit your needs.
- * When your component renders, `useAdminGetAllCoursesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAdminGetAllCoursesQuery({
- *   variables: {
- *      status: // value for 'status'
- *   },
- * });
- */
-export function useAdminGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
-      }
-export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
-        }
-export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
-export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
 export const DeleteCourseDocument = gql`
     mutation DeleteCourse($id: ID!) {
   deleteCourse(id: $id) {
@@ -5855,9 +5845,9 @@ export function useDeleteCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<DeleteCourseMutation, DeleteCourseMutationVariables>(DeleteCourseDocument, options);
       }
 export type DeleteCourseMutationHookResult = ReturnType<typeof useDeleteCourseMutation>;
-export const UpdateCourseDocument = gql`
-    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
-  updateCourse(id: $id, input: $input) {
+export const PublishCourseDocument = gql`
+    mutation PublishCourse($id: ID!) {
+  publishCourse(id: $id) {
     id
     status
   }
@@ -5865,28 +5855,58 @@ export const UpdateCourseDocument = gql`
     `;
 
 /**
- * __useUpdateCourseMutation__
+ * __usePublishCourseMutation__
  *
- * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * To run a mutation, you first call `usePublishCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePublishCourseMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ * const [publishCourseMutation, { data, loading, error }] = usePublishCourseMutation({
  *   variables: {
  *      id: // value for 'id'
- *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+export function usePublishCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<PublishCourseMutation, PublishCourseMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+        return ApolloReactHooks.useMutation<PublishCourseMutation, PublishCourseMutationVariables>(PublishCourseDocument, options);
       }
-export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
+export type PublishCourseMutationHookResult = ReturnType<typeof usePublishCourseMutation>;
+export const UnpublishCourseDocument = gql`
+    mutation UnpublishCourse($id: ID!) {
+  unpublishCourse(id: $id) {
+    id
+    status
+  }
+}
+    `;
+
+/**
+ * __useUnpublishCourseMutation__
+ *
+ * To run a mutation, you first call `useUnpublishCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnpublishCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unpublishCourseMutation, { data, loading, error }] = useUnpublishCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUnpublishCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UnpublishCourseMutation, UnpublishCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UnpublishCourseMutation, UnpublishCourseMutationVariables>(UnpublishCourseDocument, options);
+      }
+export type UnpublishCourseMutationHookResult = ReturnType<typeof useUnpublishCourseMutation>;
 export const CreateCourseDocument = gql`
     mutation CreateCourse($input: CreateCourseInput!) {
   createCourse(input: $input) {
