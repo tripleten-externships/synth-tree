@@ -83,8 +83,8 @@ describe("gradeQuizAttempt", () => {
     expect(result.passed).toBe(true);
     expect(result.message).toBe("Passed");
   });
-  // OPEN_QUESTION triggers manual review
-  it("handles OPEN_QUESTION as manual review", async () => {
+  // OPEN_QUESTION-only quiz passes outright (SYN-54: nothing to grade against)
+  it("passes an open-only quiz with a single OPEN_QUESTION", async () => {
     const mockQuiz = {
       questions: [
         {
@@ -108,10 +108,8 @@ describe("gradeQuizAttempt", () => {
 
     const result = await gradeQuizAttempt(mockTx as any, "attempt3");
     expect(result.correctCount).toBe(0);
-    expect(result.passed).toBe(null); // Expect null for manual review
-    expect(result.message).toBe(
-      "Passed pending manual review of open question(s)",
-    );
+    expect(result.passed).toBe(true); // SYN-54: open-only quiz passes
+    expect(result.message).toBe("Passed");
   });
   // MULTIPLE_CHOICE partially correct (includes incorrect option)
   it("fails when MULTIPLE_CHOICE answer is partially correct", async () => {
@@ -173,10 +171,8 @@ describe("gradeQuizAttempt", () => {
 
     const result = await gradeQuizAttempt(mockTx as any, "attempt6");
     expect(result.correctCount).toBe(0);
-    expect(result.passed).toBe(null);
-    expect(result.message).toBe(
-      "Passed pending manual review of open question(s)",
-    );
+    expect(result.passed).toBe(true); // SYN-54: open-only quiz passes
+    expect(result.message).toBe("Passed");
   });
   // Quiz with all three types of questions - all auto-gradable correct
   it("handles a quiz with SINGLE_CHOICE, MULTIPLE_CHOICE, and OPEN_QUESTION", async () => {
