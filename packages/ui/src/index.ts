@@ -62,6 +62,7 @@ export {
   type HexStyle,
 } from "./components/ui/hex";
 export * from "./components/ui/markdown-editor";
+export * from "./components/ui/progress";
 export { Icon, type IconName, ICON_NAMES } from "./components/ui/icon";
 
 // Export utilities
