@@ -1,5 +1,10 @@
+import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { useQuery, useMutation } from "@apollo/client/react";
+import {
+  useAdminGetAllCoursesQuery,
+  AdminGetAllCoursesDocument,
+} from "@synth-tree/api-types";
+import type { AdminGetAllCoursesQuery, CourseStatus } from "@synth-tree/api-types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,22 +32,6 @@ import { SkeletonList } from "../../components/SkeletonList";
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 
-const GET_ALL_COURSES = gql`
-  query AdminGetAllCourses($status: CourseStatus) {
-    adminGetAllCourses(status: $status) {
-      id
-      title
-      description
-      status
-      author {
-        id
-        name
-        email
-      }
-    }
-  }
-`;
-
 const DELETE_COURSE = gql`
   mutation DeleteCourse($id: ID!) {
     deleteCourse(id: $id) {
@@ -69,7 +58,6 @@ const UNPUBLISH_COURSE = gql`
   }
 `;
 
-
 const CREATE_COURSE = gql`
   mutation CreateCourse($input: CreateCourseInput!) {
     createCourse(input: $input) {
@@ -81,22 +69,30 @@ const CREATE_COURSE = gql`
 
 // ─── 2. TYPES ─────────────────────────────────────────────────────────────────
 
-type CourseStatus = "DRAFT" | "PUBLISHED";
 type StatusFilter = "ALL" | CourseStatus;
 
-type Course = {
-  id: string;
-  title: string;
-  description?: string | null;
-  status: CourseStatus;
-  author: {
-    id: string;
-    name?: string | null;
-    email: string;
-  };
-};
+type Course = NonNullable<AdminGetAllCoursesQuery["adminGetAllCourses"]>[number];
 
-// ─── 3. SUB-COMPONENTS ────────────────────────────────────────────────────────
+// ─── 3. HELPERS ───────────────────────────────────────────────────────────────
+
+function relativeTime(dateInput: string | Date): string {
+  const diffMs = Date.now() - new Date(dateInput).getTime();
+
+  const minutes = Math.floor(diffMs / 60_000);
+  const hours = Math.floor(diffMs / 3_600_000);
+  const days = Math.floor(diffMs / 86_400_000);
+  const weeks = Math.floor(days / 7);
+  const months = Math.floor(days / 30);
+
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  if (weeks < 5) return `${weeks}w ago`;
+  return `${months}mo ago`;
+}
+
+// ─── 4. SUB-COMPONENTS ────────────────────────────────────────────────────────
 
 const StatusBadge = ({ status }: { status: CourseStatus }) => {
   const isPublished = status === "PUBLISHED";
@@ -142,32 +138,55 @@ const NewCourseCard = ({ onClick }: { onClick: () => void }) => (
   </button>
 );
 
-// ─── 4. COURSE CARD ───────────────────────────────────────────────────────────
+// ─── 5. COURSE CARD ───────────────────────────────────────────────────────────
 
 type CourseCardProps = {
   course: Course;
   onDelete: (id: string) => void;
   onPublish: (id: string) => void;
+  onEdit: (id: string) => void;
   Icon?: LucideIcon;
 };
 
-const CourseCard = ({ course, onDelete, onPublish, Icon }: CourseCardProps) => (
-  <div className="border border-gray-200 rounded-xl p-6 relative hover:shadow-md transition-shadow">
+const CourseCard = ({ course, onDelete, onPublish, onEdit, Icon }: CourseCardProps) => (
+  <div
+    className="border border-gray-200 rounded-xl p-6 relative hover:shadow-md transition-shadow cursor-pointer"
+    onClick={() => onEdit(course.id)}
+  >
     <div className="absolute top-4 right-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1 rounded hover:bg-gray-100">
+          <button
+            className="p-1 rounded hover:bg-gray-100"
+            onClick={(e) => e.stopPropagation()}
+          >
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => alert("TODO: open edit modal")}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(course.id);
+            }}
+          >
             Edit course
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onPublish(course.id)}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation();
+              onPublish(course.id);
+            }}
+          >
             {course.status === "PUBLISHED" ? "Unpublish course" : "Publish course"}
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={() => onDelete(course.id)}>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(course.id);
+            }}
+          >
             Delete course
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -176,15 +195,14 @@ const CourseCard = ({ course, onDelete, onPublish, Icon }: CourseCardProps) => (
 
     <HexIcon Icon={Icon} />
     <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
-    {course.description && (
-      <p className="text-sm text-gray-500 mb-3 line-clamp-2">{course.description}</p>
-    )}
-    <p className="text-xs text-gray-400 mb-3">by {course.author.name ?? course.author.email}</p>
+    <p className="text-xs text-gray-400 mb-1">by {course.author.name ?? "Unknown"}</p>
+    <p className="text-xs text-gray-400 mb-3">edited {relativeTime(course.updatedAt)}</p>
+
     <StatusBadge status={course.status} />
   </div>
 );
 
-// ─── 5. CREATE COURSE MODAL ───────────────────────────────────────────────────
+// ─── 6. CREATE COURSE MODAL ───────────────────────────────────────────────────
 
 type CreateCourseModalProps = {
   open: boolean;
@@ -197,7 +215,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   const [description, setDescription] = useState("");
 
   const [createCourse, { loading }] = useMutation(CREATE_COURSE, {
-    refetchQueries: [{ query: GET_ALL_COURSES }],
+    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
     onCompleted: () => {
       setTitle("");
       setDescription("");
@@ -260,7 +278,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   );
 };
 
-// ─── 6. MAIN PAGE ─────────────────────────────────────────────────────────────
+// ─── 7. MAIN PAGE ─────────────────────────────────────────────────────────────
 
 const CoursesList = () => {
   const navigate = useNavigate();
@@ -289,20 +307,18 @@ const CoursesList = () => {
     }
   };
 
-  const { data, loading, error } = useQuery<{ adminGetAllCourses: Course[] }>(GET_ALL_COURSES, {
-    variables: statusFilter !== "ALL" ? { status: statusFilter } : {},
-  });
+  const { data, loading, error } = useAdminGetAllCoursesQuery();
 
   const [deleteCourse] = useMutation(DELETE_COURSE, {
-    refetchQueries: [{ query: GET_ALL_COURSES }],
+    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
   });
 
   const [publishCourse] = useMutation(PUBLISH_COURSE, {
-    refetchQueries: [{ query: GET_ALL_COURSES }],
+    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
   });
 
   const [unpublishCourse] = useMutation(UNPUBLISH_COURSE, {
-    refetchQueries: [{ query: GET_ALL_COURSES }],
+    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
   });
 
   const handleDelete = (id: string) => {
@@ -330,7 +346,17 @@ const CoursesList = () => {
     }
   };
 
-  const courses: Course[] = data?.adminGetAllCourses ?? [];
+  const handleEdit = (id: string) => {
+    navigate(`/courses/${id}/edit`);
+  };
+
+  const allCourses: Course[] = data?.adminGetAllCourses ?? [];
+
+  const courses =
+    statusFilter === "ALL"
+      ? allCourses
+      : allCourses.filter((c) => c.status === statusFilter);
+
   const isEmpty = !loading && !error && courses.length === 0;
 
   const filterOptions: { label: string; value: StatusFilter }[] = [
@@ -353,7 +379,7 @@ const CoursesList = () => {
         </button>
       </div>
 
-      {/* ── Filter pills ── */}
+      {/* ── Filter pills + view toggle ── */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         {/* Status filter pills on the left */}
         <div className="flex flex-wrap gap-2">
@@ -404,8 +430,8 @@ const CoursesList = () => {
       )}
 
       {/* ── Loading skeletons ── */}
-      {loading && (
-        viewMode === "grid" ? (
+      {loading &&
+        (viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
               <SkeletonCard key={n} />
@@ -413,8 +439,7 @@ const CoursesList = () => {
           </div>
         ) : (
           <SkeletonList />
-        )
-      )}
+        ))}
 
       {/* ── Empty state ── */}
       {isEmpty && (
@@ -442,6 +467,7 @@ const CoursesList = () => {
                   course={course}
                   onDelete={handleDelete}
                   onPublish={handlePublish}
+                  onEdit={handleEdit}
                 />
               ))}
               <NewCourseCard onClick={() => setModalOpen(true)} />
@@ -465,7 +491,7 @@ const CoursesList = () => {
                     <tr key={course.id} className="border-t">
                       <td className="px-4 py-3 align-top">
                         <div className="font-medium text-gray-900">{course.title}</div>
-                        <div className="text-xs text-gray-500">by {course.author.name ?? course.author.email}</div>
+                        <div className="text-xs text-gray-500">by {course.author.name ?? "Unknown"}</div>
                       </td>
                       <td className="px-4 py-3 align-top">
                         <StatusBadge status={course.status} />
@@ -473,7 +499,7 @@ const CoursesList = () => {
                       <td className="px-4 py-3 align-top">—</td>
                       <td className="px-4 py-3 align-top">—</td>
                       <td className="px-4 py-3 align-top">—</td>
-                      <td className="px-4 py-3 align-top">—</td>
+                      <td className="px-4 py-3 align-top">{relativeTime(course.updatedAt)}</td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex items-center gap-2">
                           <button onClick={() => navigate(`/courses/${course.id}/edit`)} className="text-sm text-blue-600">Open</button>
