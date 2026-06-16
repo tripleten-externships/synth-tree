@@ -8,7 +8,10 @@ const tabs = [
 
 export default function BottomTabBar() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-gray-200 bg-white shadow-lg md:hidden">
+    <nav
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background shadow-lg md:hidden"
+    >
       <div className="mx-auto grid h-16 max-w-md grid-cols-3">
         {tabs.map(({ label, to }) => (
           <NavLink
@@ -18,7 +21,7 @@ export default function BottomTabBar() {
             className={({ isActive }) =>
               [
                 "flex items-center justify-center text-sm font-medium transition-colors",
-                isActive ? "text-[#212121]" : "text-gray-500",
+                isActive ? "text-foreground" : "text-muted-foreground",
               ].join(" ")
             }
           >
