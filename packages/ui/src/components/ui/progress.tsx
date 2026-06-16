@@ -54,7 +54,8 @@ export function Progress({
   className,
   ...props
 }: ProgressProps) {
-  const percentage = Math.min((value / max) * 100, 100);
+  // Guard against max <= 0 (division) and clamp to [0, 100].
+  const percentage = Math.min(Math.max((value / (max || 1)) * 100, 0), 100);
 
   return (
     <div
