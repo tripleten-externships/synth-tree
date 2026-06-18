@@ -17,10 +17,10 @@ generator pothosCrud {
   // The environment variable will override the path hardcoded here.
 }
 
-// Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information  
-// The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models. 
-//Rewards and Gamification intentionally not implemented yet.  
-// Leaving comments in the schema file. Request removal if the team does not want this. 
+// Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information
+// The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models.
+//Rewards and Gamification intentionally not implemented yet.
+// Leaving comments in the schema file. Request removal if the team does not want this.
 
 datasource db {
   provider = "postgresql"
@@ -43,6 +43,7 @@ enum ContentType {
   VIDEO
   EMBED
   HTML
+  PAGE_BREAK
 }
 
 enum LessonStatus {
@@ -207,8 +208,8 @@ model LessonBlocks {
 // Quiz
 // - At most one quiz per node (nodeId is unique).
 // - `required` means the quiz must be taken for completion logic,
-//   but grading uses only booleans in v1 (no numeric scores). 
-// Rewards can be used later on and completed lessons result in points or unit of choice. 
+//   but grading uses only booleans in v1 (no numeric scores).
+// Rewards can be used later on and completed lessons result in points or unit of choice.
 // ================================================================
 model Quiz {
   id        String    @id @default(uuid()) @db.Uuid
