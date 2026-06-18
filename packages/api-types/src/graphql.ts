@@ -62,6 +62,7 @@ export type ContentType =
   | 'EMBED'
   | 'HTML'
   | 'IMAGE'
+  | 'PAGE_BREAK'
   | 'VIDEO';
 
 export type Course = {
@@ -1108,10 +1109,12 @@ export type Mutation = {
   deleteSkillNodeSimple?: Maybe<Scalars['Boolean']['output']>;
   deleteSkillTree?: Maybe<SkillTree>;
   deleteUser?: Maybe<User>;
+  publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   setUserRole?: Maybe<User>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
   syncCurrentUser?: Maybe<User>;
+  unpublishCourse?: Maybe<Course>;
   updateCourse?: Maybe<Course>;
   updateLessonBlock?: Maybe<LessonBlocks>;
   updateQuiz?: Maybe<Quiz>;
@@ -1219,6 +1222,11 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationPublishCourseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type MutationPublishLessonBlockArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1239,6 +1247,11 @@ export type MutationSubmitQuizAttemptArgs = {
 export type MutationSyncCurrentUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationUnpublishCourseArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5649,6 +5662,11 @@ export type UuidWithAggregatesFilter = {
   notIn?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
+export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
+
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5661,13 +5679,19 @@ export type DeleteCourseMutationVariables = Exact<{
 
 export type DeleteCourseMutation = { __typename?: 'Mutation', deleteCourse?: { __typename?: 'Course', id: string } | null };
 
-export type UpdateCourseMutationVariables = Exact<{
+export type PublishCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
-  input: UpdateCourseInput;
 }>;
 
 
-export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
+export type PublishCourseMutation = { __typename?: 'Mutation', publishCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
+
+export type UnpublishCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UnpublishCourseMutation = { __typename?: 'Mutation', unpublishCourse?: { __typename?: 'Course', id: string, status: CourseStatus } | null };
 
 export type CreateCourseMutationVariables = Exact<{
   input: CreateCourseInput;
@@ -5704,6 +5728,46 @@ export type PublicGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>
 export type PublicGetAllCoursesQuery = { __typename?: 'Query', publicGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, description?: string | null }> }> | null };
 
 
+export const AdminGetAllCoursesDocument = gql`
+    query AdminGetAllCourses {
+  adminGetAllCourses {
+    id
+    title
+    status
+    updatedAt
+    author {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminGetAllCoursesQuery__
+ *
+ * To run a query within a React component, call `useAdminGetAllCoursesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminGetAllCoursesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminGetAllCoursesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAdminGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+      }
+export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
+        }
+export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
+export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -5768,9 +5832,9 @@ export function useDeleteCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<DeleteCourseMutation, DeleteCourseMutationVariables>(DeleteCourseDocument, options);
       }
 export type DeleteCourseMutationHookResult = ReturnType<typeof useDeleteCourseMutation>;
-export const UpdateCourseDocument = gql`
-    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
-  updateCourse(id: $id, input: $input) {
+export const PublishCourseDocument = gql`
+    mutation PublishCourse($id: ID!) {
+  publishCourse(id: $id) {
     id
     status
   }
@@ -5778,28 +5842,58 @@ export const UpdateCourseDocument = gql`
     `;
 
 /**
- * __useUpdateCourseMutation__
+ * __usePublishCourseMutation__
  *
- * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * To run a mutation, you first call `usePublishCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePublishCourseMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ * const [publishCourseMutation, { data, loading, error }] = usePublishCourseMutation({
  *   variables: {
  *      id: // value for 'id'
- *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+export function usePublishCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<PublishCourseMutation, PublishCourseMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+        return ApolloReactHooks.useMutation<PublishCourseMutation, PublishCourseMutationVariables>(PublishCourseDocument, options);
       }
-export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
+export type PublishCourseMutationHookResult = ReturnType<typeof usePublishCourseMutation>;
+export const UnpublishCourseDocument = gql`
+    mutation UnpublishCourse($id: ID!) {
+  unpublishCourse(id: $id) {
+    id
+    status
+  }
+}
+    `;
+
+/**
+ * __useUnpublishCourseMutation__
+ *
+ * To run a mutation, you first call `useUnpublishCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnpublishCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unpublishCourseMutation, { data, loading, error }] = useUnpublishCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUnpublishCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UnpublishCourseMutation, UnpublishCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UnpublishCourseMutation, UnpublishCourseMutationVariables>(UnpublishCourseDocument, options);
+      }
+export type UnpublishCourseMutationHookResult = ReturnType<typeof useUnpublishCourseMutation>;
 export const CreateCourseDocument = gql`
     mutation CreateCourse($input: CreateCourseInput!) {
   createCourse(input: $input) {
@@ -5988,48 +6082,3 @@ export function usePublicGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.L
         }
 export type PublicGetAllCoursesQueryHookResult = ReturnType<typeof usePublicGetAllCoursesQuery>;
 export type PublicGetAllCoursesLazyQueryHookResult = ReturnType<typeof usePublicGetAllCoursesLazyQuery>;
-
-export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
-
-export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: string, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
-
-export const AdminGetAllCoursesDocument = gql`
-    query AdminGetAllCourses {
-  adminGetAllCourses {
-    id
-    title
-    status
-    updatedAt
-    author {
-      id
-      name
-    }
-  }
-}
-    `;
-
-/**
- * __useAdminGetAllCoursesQuery__
- *
- * To run a query within a React component, call `useAdminGetAllCoursesQuery` and pass it any options that fit your needs.
- * When your component renders, `useAdminGetAllCoursesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAdminGetAllCoursesQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAdminGetAllCoursesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
-      }
-export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<AdminGetAllCoursesQuery, AdminGetAllCoursesQueryVariables>(AdminGetAllCoursesDocument, options);
-        }
-export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
-export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;

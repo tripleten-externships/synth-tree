@@ -38,6 +38,7 @@ enum ContentType {
   EMBED
   HTML
   IMAGE
+  PAGE_BREAK
   VIDEO
 }
 
@@ -1080,10 +1081,12 @@ type Mutation {
   deleteSkillNodeSimple(id: ID!): Boolean
   deleteSkillTree(id: ID!): SkillTree
   deleteUser(id: ID!): User
+  publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
   submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
   syncCurrentUser(name: String, photoUrl: String): User
+  unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
