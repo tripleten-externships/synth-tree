@@ -2,7 +2,7 @@ import React from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
 import { useQuery } from "@apollo/client/react";
-import { ContentType } from "@synth-tree/api-types";
+import type { ContentType } from "@synth-tree/api-types";
 import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
 
 interface LessonBlock {
@@ -63,26 +63,66 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     </div>
   );
 
-  const renderEmbed = (url: string) => (
-    <div className="relative pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-      <iframe
-        src={url}
-        title="Embedded content"
-        className="absolute top-0 left-0 w-full h-full border-0"
-        allowFullScreen
-      />
-    </div>
-  );
+  const isAllowedEmbedUrl = (url: string) => {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname.replace(/^www\./, "");
+
+      return [
+        "youtube.com",
+        "youtube-nocookie.com",
+        "youtu.be",
+        "vimeo.com",
+        "player.vimeo.com",
+        "codepen.io",
+        "cdpn.io",
+      ].includes(hostname);
+    } catch {
+      return false;
+    }
+  };
+
+  const getEmbedSrc = (content: string) => {
+    const sanitizedContent = DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ["iframe"],
+      ALLOWED_ATTR: ["src", "title", "allow", "allowfullscreen", "frameborder"],
+    });
+
+    const doc = new DOMParser().parseFromString(sanitizedContent, "text/html");
+    const iframeSrc = doc.querySelector("iframe")?.getAttribute("src");
+    const src = iframeSrc ?? DOMPurify.sanitize(content).trim();
+
+    return isAllowedEmbedUrl(src) ? src : null;
+  };
+
+  const renderEmbed = (content: string) => {
+    const embedSrc = getEmbedSrc(content);
+
+    if (!embedSrc) {
+      return null;
+    }
+
+    return (
+      <div className="relative pt-[56.25%] rounded-lg overflow-hidden shadow-md">
+        <iframe
+          src={embedSrc}
+          title="Embedded content"
+          className="absolute top-0 left-0 w-full h-full border-0"
+          allowFullScreen
+        />
+      </div>
+    );
+  };
 
   const renderBlock = (block: LessonBlock) => {
     switch (block.type) {
-      case ContentType.Html:
+      case "HTML":
         return renderHTML(block.content);
-      case ContentType.Image:
+      case "IMAGE":
         return renderImage(block);
-      case ContentType.Video:
+      case "VIDEO":
         return renderVideo(block.content);
-      case ContentType.Embed:
+      case "EMBED":
         return renderEmbed(block.content);
       default:
         return null;
