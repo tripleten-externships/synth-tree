@@ -134,6 +134,19 @@
       0px 8px 10px -1px hsl(0 0% 0% / 0.16);
     --shadow-2xl: 0px 2px 3px 0px hsl(0 0% 0% / 0.4);
   }
+
+  [data-density="compact"] {
+    --spacing: 0.2rem;
+    --radius: 0.75rem;
+  }
+  [data-density="regular"] {
+    --spacing: 0.27rem;
+    --radius: 1.4rem;
+  }
+  [data-density="comfy"] {
+    --spacing: 0.35rem;
+    --radius: 1.75rem;
+  }
 }
 
 @layer base {
