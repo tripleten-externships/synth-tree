@@ -663,9 +663,30 @@ input IntWithAggregatesFilter {
 
 scalar Json
 
+input JsonFilter {
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
+}
+
 enum JsonNullValueFilter {
   AnyNull
   DbNull
+  JsonNull
+}
+
+enum JsonNullValueInput {
   JsonNull
 }
 
@@ -690,6 +711,26 @@ input JsonNullableWithAggregatesFilter {
   _count: NestedIntNullableFilter
   _max: NestedJsonNullableFilter
   _min: NestedJsonNullableFilter
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
+}
+
+input JsonWithAggregatesFilter {
+  _count: NestedIntFilter
+  _max: NestedJsonFilter
+  _min: NestedJsonFilter
   array_contains: Json
   array_ends_with: Json
   array_starts_with: Json
@@ -1083,6 +1124,7 @@ type Mutation {
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
+  startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
   syncCurrentUser(name: String, photoUrl: String): User
   unpublishCourse(id: ID!): Course
@@ -1350,6 +1392,23 @@ input NestedIntWithAggregatesFilter {
   lte: Int
   not: NestedIntWithAggregatesFilter
   notIn: [Int!]
+}
+
+input NestedJsonFilter {
+  array_contains: Json
+  array_ends_with: Json
+  array_starts_with: Json
+  equals: Json
+  gt: Json
+  gte: Json
+  lt: Json
+  lte: Json
+  mode: QueryMode
+  not: Json
+  path: [String!]
+  string_contains: String
+  string_ends_with: String
+  string_starts_with: String
 }
 
 input NestedJsonNullableFilter {
@@ -4491,7 +4550,10 @@ type User {
   quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
+  streak: UserStreak
   updatedAt: DateTime!
+  xp: UserXp
+  xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
 }
 
 input UserCountOrderByAggregateInput {
@@ -4514,7 +4576,10 @@ input UserCreateInput {
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
 
 input UserCreateManyInput {
@@ -4545,6 +4610,24 @@ input UserCreateNestedOneWithoutQuizAttemptsInput {
   create: UserCreateWithoutQuizAttemptsInput
 }
 
+input UserCreateNestedOneWithoutStreakInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutStreakInput
+  create: UserCreateWithoutStreakInput
+}
+
+input UserCreateNestedOneWithoutXpEventsInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutXpEventsInput
+  create: UserCreateWithoutXpEventsInput
+}
+
+input UserCreateNestedOneWithoutXpInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutXpInput
+  create: UserCreateWithoutXpInput
+}
+
 input UserCreateOrConnectWithoutCoursesAuthoredInput {
   create: UserCreateWithoutCoursesAuthoredInput!
   where: UserWhereUniqueInput!
@@ -4560,6 +4643,21 @@ input UserCreateOrConnectWithoutQuizAttemptsInput {
   where: UserWhereUniqueInput!
 }
 
+input UserCreateOrConnectWithoutStreakInput {
+  create: UserCreateWithoutStreakInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateOrConnectWithoutXpEventsInput {
+  create: UserCreateWithoutXpEventsInput!
+  where: UserWhereUniqueInput!
+}
+
+input UserCreateOrConnectWithoutXpInput {
+  create: UserCreateWithoutXpInput!
+  where: UserWhereUniqueInput!
+}
+
 input UserCreateWithoutCoursesAuthoredInput {
   createdAt: DateTime
   email: String!
@@ -4569,7 +4667,10 @@ input UserCreateWithoutCoursesAuthoredInput {
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
 
 input UserCreateWithoutNodeProgressInput {
@@ -4581,7 +4682,10 @@ input UserCreateWithoutNodeProgressInput {
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
 
 input UserCreateWithoutQuizAttemptsInput {
@@ -4593,7 +4697,55 @@ input UserCreateWithoutQuizAttemptsInput {
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
   role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
+}
+
+input UserCreateWithoutStreakInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
+}
+
+input UserCreateWithoutXpEventsInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
+  updatedAt: DateTime
+  xp: UserXpCreateNestedOneWithoutUserInput
+}
+
+input UserCreateWithoutXpInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  email: String!
+  id: String!
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
+  updatedAt: DateTime
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
 
 input UserMaxOrderByAggregateInput {
@@ -4974,7 +5126,10 @@ input UserOrderByWithRelationInput {
   photoUrl: SortOrder
   quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
+  streak: UserStreakOrderByWithRelationInput
   updatedAt: SortOrder
+  xp: UserXpOrderByWithRelationInput
+  xpEvents: XpEventOrderByRelationAggregateInput
 }
 
 enum UserScalarFieldEnum {
@@ -5005,6 +5160,180 @@ input UserScalarWhereWithAggregatesInput {
   updatedAt: DateTimeWithAggregatesFilter
 }
 
+type UserStreak {
+  currentDays: Int!
+  lastActive: DateTime
+  longestDays: Int!
+  user: User!
+  userId: ID!
+}
+
+input UserStreakAvgOrderByAggregateInput {
+  currentDays: SortOrder
+  longestDays: SortOrder
+}
+
+input UserStreakCountOrderByAggregateInput {
+  currentDays: SortOrder
+  lastActive: SortOrder
+  longestDays: SortOrder
+  userId: SortOrder
+}
+
+input UserStreakCreateInput {
+  currentDays: Int
+  lastActive: DateTime
+  longestDays: Int
+  user: UserCreateNestedOneWithoutStreakInput!
+}
+
+input UserStreakCreateManyInput {
+  currentDays: Int
+  lastActive: DateTime
+  longestDays: Int
+  userId: String!
+}
+
+input UserStreakCreateNestedOneWithoutUserInput {
+  connect: UserStreakWhereUniqueInput
+  connectOrCreate: UserStreakCreateOrConnectWithoutUserInput
+  create: UserStreakCreateWithoutUserInput
+}
+
+input UserStreakCreateOrConnectWithoutUserInput {
+  create: UserStreakCreateWithoutUserInput!
+  where: UserStreakWhereUniqueInput!
+}
+
+input UserStreakCreateWithoutUserInput {
+  currentDays: Int
+  lastActive: DateTime
+  longestDays: Int
+}
+
+input UserStreakMaxOrderByAggregateInput {
+  currentDays: SortOrder
+  lastActive: SortOrder
+  longestDays: SortOrder
+  userId: SortOrder
+}
+
+input UserStreakMinOrderByAggregateInput {
+  currentDays: SortOrder
+  lastActive: SortOrder
+  longestDays: SortOrder
+  userId: SortOrder
+}
+
+input UserStreakNullableScalarRelationFilter {
+  is: UserStreakWhereInput
+  isNot: UserStreakWhereInput
+}
+
+input UserStreakOrderByWithAggregationInput {
+  _avg: UserStreakAvgOrderByAggregateInput
+  _count: UserStreakCountOrderByAggregateInput
+  _max: UserStreakMaxOrderByAggregateInput
+  _min: UserStreakMinOrderByAggregateInput
+  _sum: UserStreakSumOrderByAggregateInput
+  currentDays: SortOrder
+  lastActive: SortOrder
+  longestDays: SortOrder
+  userId: SortOrder
+}
+
+input UserStreakOrderByWithRelationInput {
+  currentDays: SortOrder
+  lastActive: SortOrder
+  longestDays: SortOrder
+  user: UserOrderByWithRelationInput
+  userId: SortOrder
+}
+
+enum UserStreakScalarFieldEnum {
+  currentDays
+  lastActive
+  longestDays
+  userId
+}
+
+input UserStreakScalarWhereWithAggregatesInput {
+  AND: [UserStreakScalarWhereWithAggregatesInput!]
+  NOT: [UserStreakScalarWhereWithAggregatesInput!]
+  OR: [UserStreakScalarWhereWithAggregatesInput!]
+  currentDays: IntWithAggregatesFilter
+  lastActive: DateTimeNullableWithAggregatesFilter
+  longestDays: IntWithAggregatesFilter
+  userId: StringWithAggregatesFilter
+}
+
+input UserStreakSumOrderByAggregateInput {
+  currentDays: SortOrder
+  longestDays: SortOrder
+}
+
+input UserStreakUpdateInput {
+  currentDays: IntFieldUpdateOperationsInput
+  lastActive: NullableDateTimeFieldUpdateOperationsInput
+  longestDays: IntFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutStreakNestedInput
+}
+
+input UserStreakUpdateManyMutationInput {
+  currentDays: IntFieldUpdateOperationsInput
+  lastActive: NullableDateTimeFieldUpdateOperationsInput
+  longestDays: IntFieldUpdateOperationsInput
+}
+
+input UserStreakUpdateOneWithoutUserNestedInput {
+  connect: UserStreakWhereUniqueInput
+  connectOrCreate: UserStreakCreateOrConnectWithoutUserInput
+  create: UserStreakCreateWithoutUserInput
+  delete: UserStreakWhereInput
+  disconnect: UserStreakWhereInput
+  update: UserStreakUpdateToOneWithWhereWithoutUserInput
+  upsert: UserStreakUpsertWithoutUserInput
+}
+
+input UserStreakUpdateToOneWithWhereWithoutUserInput {
+  data: UserStreakUpdateWithoutUserInput!
+  where: UserStreakWhereInput
+}
+
+input UserStreakUpdateWithoutUserInput {
+  currentDays: IntFieldUpdateOperationsInput
+  lastActive: NullableDateTimeFieldUpdateOperationsInput
+  longestDays: IntFieldUpdateOperationsInput
+}
+
+input UserStreakUpsertWithoutUserInput {
+  create: UserStreakCreateWithoutUserInput!
+  update: UserStreakUpdateWithoutUserInput!
+  where: UserStreakWhereInput
+}
+
+input UserStreakWhereInput {
+  AND: [UserStreakWhereInput!]
+  NOT: [UserStreakWhereInput!]
+  OR: [UserStreakWhereInput!]
+  currentDays: IntFilter
+  lastActive: DateTimeNullableFilter
+  longestDays: IntFilter
+  user: UserWhereInput
+  userId: StringFilter
+}
+
+input UserStreakWhereUniqueInput {
+  AND: [UserStreakWhereInput!]
+  NOT: [UserStreakWhereInput!]
+  OR: [UserStreakWhereInput!]
+  currentDays: IntFilter
+  lastActive: DateTimeNullableFilter
+  longestDays: IntFilter
+  user: UserWhereInput
+  userId: String
+}
+
 input UserUpdateInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
@@ -5015,7 +5344,10 @@ input UserUpdateInput {
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
 
 input UserUpdateManyMutationInput {
@@ -5052,6 +5384,30 @@ input UserUpdateOneRequiredWithoutQuizAttemptsNestedInput {
   upsert: UserUpsertWithoutQuizAttemptsInput
 }
 
+input UserUpdateOneRequiredWithoutStreakNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutStreakInput
+  create: UserCreateWithoutStreakInput
+  update: UserUpdateToOneWithWhereWithoutStreakInput
+  upsert: UserUpsertWithoutStreakInput
+}
+
+input UserUpdateOneRequiredWithoutXpEventsNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutXpEventsInput
+  create: UserCreateWithoutXpEventsInput
+  update: UserUpdateToOneWithWhereWithoutXpEventsInput
+  upsert: UserUpsertWithoutXpEventsInput
+}
+
+input UserUpdateOneRequiredWithoutXpNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutXpInput
+  create: UserCreateWithoutXpInput
+  update: UserUpdateToOneWithWhereWithoutXpInput
+  upsert: UserUpsertWithoutXpInput
+}
+
 input UserUpdateToOneWithWhereWithoutCoursesAuthoredInput {
   data: UserUpdateWithoutCoursesAuthoredInput!
   where: UserWhereInput
@@ -5067,6 +5423,21 @@ input UserUpdateToOneWithWhereWithoutQuizAttemptsInput {
   where: UserWhereInput
 }
 
+input UserUpdateToOneWithWhereWithoutStreakInput {
+  data: UserUpdateWithoutStreakInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutXpEventsInput {
+  data: UserUpdateWithoutXpEventsInput!
+  where: UserWhereInput
+}
+
+input UserUpdateToOneWithWhereWithoutXpInput {
+  data: UserUpdateWithoutXpInput!
+  where: UserWhereInput
+}
+
 input UserUpdateWithoutCoursesAuthoredInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
@@ -5076,7 +5447,10 @@ input UserUpdateWithoutCoursesAuthoredInput {
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
 
 input UserUpdateWithoutNodeProgressInput {
@@ -5088,7 +5462,10 @@ input UserUpdateWithoutNodeProgressInput {
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
 
 input UserUpdateWithoutQuizAttemptsInput {
@@ -5100,7 +5477,55 @@ input UserUpdateWithoutQuizAttemptsInput {
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
+}
+
+input UserUpdateWithoutStreakInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
+}
+
+input UserUpdateWithoutXpEventsInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+}
+
+input UserUpdateWithoutXpInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
 
 input UserUpsertWithoutCoursesAuthoredInput {
@@ -5121,6 +5546,24 @@ input UserUpsertWithoutQuizAttemptsInput {
   where: UserWhereInput
 }
 
+input UserUpsertWithoutStreakInput {
+  create: UserCreateWithoutStreakInput!
+  update: UserUpdateWithoutStreakInput!
+  where: UserWhereInput
+}
+
+input UserUpsertWithoutXpEventsInput {
+  create: UserCreateWithoutXpEventsInput!
+  update: UserUpdateWithoutXpEventsInput!
+  where: UserWhereInput
+}
+
+input UserUpsertWithoutXpInput {
+  create: UserCreateWithoutXpInput!
+  update: UserUpdateWithoutXpInput!
+  where: UserWhereInput
+}
+
 input UserWhereInput {
   AND: [UserWhereInput!]
   NOT: [UserWhereInput!]
@@ -5134,7 +5577,10 @@ input UserWhereInput {
   photoUrl: StringNullableFilter
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
+  streak: UserStreakWhereInput
   updatedAt: DateTimeFilter
+  xp: UserXpWhereInput
+  xpEvents: XpEventListRelationFilter
 }
 
 input UserWhereUniqueInput {
@@ -5150,7 +5596,198 @@ input UserWhereUniqueInput {
   photoUrl: StringNullableFilter
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
+  streak: UserStreakWhereInput
   updatedAt: DateTimeFilter
+  xp: UserXpWhereInput
+  xpEvents: XpEventListRelationFilter
+}
+
+type UserXp {
+  todayAsOf: DateTime!
+  todayXp: Int!
+  totalXp: Int!
+  user: User!
+  userId: ID!
+  weeklyXp: Json!
+}
+
+input UserXpAvgOrderByAggregateInput {
+  todayXp: SortOrder
+  totalXp: SortOrder
+}
+
+input UserXpCountOrderByAggregateInput {
+  todayAsOf: SortOrder
+  todayXp: SortOrder
+  totalXp: SortOrder
+  userId: SortOrder
+  weeklyXp: SortOrder
+}
+
+input UserXpCreateInput {
+  todayAsOf: DateTime
+  todayXp: Int
+  totalXp: Int
+  user: UserCreateNestedOneWithoutXpInput!
+  weeklyXp: Json
+}
+
+input UserXpCreateManyInput {
+  todayAsOf: DateTime
+  todayXp: Int
+  totalXp: Int
+  userId: String!
+  weeklyXp: Json
+}
+
+input UserXpCreateNestedOneWithoutUserInput {
+  connect: UserXpWhereUniqueInput
+  connectOrCreate: UserXpCreateOrConnectWithoutUserInput
+  create: UserXpCreateWithoutUserInput
+}
+
+input UserXpCreateOrConnectWithoutUserInput {
+  create: UserXpCreateWithoutUserInput!
+  where: UserXpWhereUniqueInput!
+}
+
+input UserXpCreateWithoutUserInput {
+  todayAsOf: DateTime
+  todayXp: Int
+  totalXp: Int
+  weeklyXp: Json
+}
+
+input UserXpMaxOrderByAggregateInput {
+  todayAsOf: SortOrder
+  todayXp: SortOrder
+  totalXp: SortOrder
+  userId: SortOrder
+}
+
+input UserXpMinOrderByAggregateInput {
+  todayAsOf: SortOrder
+  todayXp: SortOrder
+  totalXp: SortOrder
+  userId: SortOrder
+}
+
+input UserXpNullableScalarRelationFilter {
+  is: UserXpWhereInput
+  isNot: UserXpWhereInput
+}
+
+input UserXpOrderByWithAggregationInput {
+  _avg: UserXpAvgOrderByAggregateInput
+  _count: UserXpCountOrderByAggregateInput
+  _max: UserXpMaxOrderByAggregateInput
+  _min: UserXpMinOrderByAggregateInput
+  _sum: UserXpSumOrderByAggregateInput
+  todayAsOf: SortOrder
+  todayXp: SortOrder
+  totalXp: SortOrder
+  userId: SortOrder
+  weeklyXp: SortOrder
+}
+
+input UserXpOrderByWithRelationInput {
+  todayAsOf: SortOrder
+  todayXp: SortOrder
+  totalXp: SortOrder
+  user: UserOrderByWithRelationInput
+  userId: SortOrder
+  weeklyXp: SortOrder
+}
+
+enum UserXpScalarFieldEnum {
+  todayAsOf
+  todayXp
+  totalXp
+  userId
+  weeklyXp
+}
+
+input UserXpScalarWhereWithAggregatesInput {
+  AND: [UserXpScalarWhereWithAggregatesInput!]
+  NOT: [UserXpScalarWhereWithAggregatesInput!]
+  OR: [UserXpScalarWhereWithAggregatesInput!]
+  todayAsOf: DateTimeWithAggregatesFilter
+  todayXp: IntWithAggregatesFilter
+  totalXp: IntWithAggregatesFilter
+  userId: StringWithAggregatesFilter
+  weeklyXp: JsonWithAggregatesFilter
+}
+
+input UserXpSumOrderByAggregateInput {
+  todayXp: SortOrder
+  totalXp: SortOrder
+}
+
+input UserXpUpdateInput {
+  todayAsOf: DateTimeFieldUpdateOperationsInput
+  todayXp: IntFieldUpdateOperationsInput
+  totalXp: IntFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutXpNestedInput
+  weeklyXp: Json
+}
+
+input UserXpUpdateManyMutationInput {
+  todayAsOf: DateTimeFieldUpdateOperationsInput
+  todayXp: IntFieldUpdateOperationsInput
+  totalXp: IntFieldUpdateOperationsInput
+  weeklyXp: Json
+}
+
+input UserXpUpdateOneWithoutUserNestedInput {
+  connect: UserXpWhereUniqueInput
+  connectOrCreate: UserXpCreateOrConnectWithoutUserInput
+  create: UserXpCreateWithoutUserInput
+  delete: UserXpWhereInput
+  disconnect: UserXpWhereInput
+  update: UserXpUpdateToOneWithWhereWithoutUserInput
+  upsert: UserXpUpsertWithoutUserInput
+}
+
+input UserXpUpdateToOneWithWhereWithoutUserInput {
+  data: UserXpUpdateWithoutUserInput!
+  where: UserXpWhereInput
+}
+
+input UserXpUpdateWithoutUserInput {
+  todayAsOf: DateTimeFieldUpdateOperationsInput
+  todayXp: IntFieldUpdateOperationsInput
+  totalXp: IntFieldUpdateOperationsInput
+  weeklyXp: Json
+}
+
+input UserXpUpsertWithoutUserInput {
+  create: UserXpCreateWithoutUserInput!
+  update: UserXpUpdateWithoutUserInput!
+  where: UserXpWhereInput
+}
+
+input UserXpWhereInput {
+  AND: [UserXpWhereInput!]
+  NOT: [UserXpWhereInput!]
+  OR: [UserXpWhereInput!]
+  todayAsOf: DateTimeFilter
+  todayXp: IntFilter
+  totalXp: IntFilter
+  user: UserWhereInput
+  userId: StringFilter
+  weeklyXp: JsonFilter
+}
+
+input UserXpWhereUniqueInput {
+  AND: [UserXpWhereInput!]
+  NOT: [UserXpWhereInput!]
+  OR: [UserXpWhereInput!]
+  todayAsOf: DateTimeFilter
+  todayXp: IntFilter
+  totalXp: IntFilter
+  user: UserWhereInput
+  userId: String
+  weeklyXp: JsonFilter
 }
 
 input UuidFilter {
@@ -5178,4 +5815,246 @@ input UuidWithAggregatesFilter {
   mode: QueryMode
   not: NestedUuidWithAggregatesFilter
   notIn: [String!]
+}
+
+type XpEvent {
+  amount: Int!
+  createdAt: DateTime!
+  id: ID!
+  metadata: Json
+  reason: String!
+  user: User!
+  userId: String!
+}
+
+input XpEventAvgOrderByAggregateInput {
+  amount: SortOrder
+}
+
+input XpEventCountOrderByAggregateInput {
+  amount: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  metadata: SortOrder
+  reason: SortOrder
+  userId: SortOrder
+}
+
+input XpEventCreateInput {
+  amount: Int!
+  createdAt: DateTime
+  id: String
+  metadata: Json
+  reason: String!
+  user: UserCreateNestedOneWithoutXpEventsInput!
+}
+
+input XpEventCreateManyInput {
+  amount: Int!
+  createdAt: DateTime
+  id: String
+  metadata: Json
+  reason: String!
+  userId: String!
+}
+
+input XpEventCreateManyUserInput {
+  amount: Int!
+  createdAt: DateTime
+  id: String
+  metadata: Json
+  reason: String!
+}
+
+input XpEventCreateManyUserInputEnvelope {
+  data: [XpEventCreateManyUserInput!]!
+  skipDuplicates: Boolean
+}
+
+input XpEventCreateNestedManyWithoutUserInput {
+  connect: [XpEventWhereUniqueInput!]
+  connectOrCreate: [XpEventCreateOrConnectWithoutUserInput!]
+  create: [XpEventCreateWithoutUserInput!]
+  createMany: XpEventCreateManyUserInputEnvelope
+}
+
+input XpEventCreateOrConnectWithoutUserInput {
+  create: XpEventCreateWithoutUserInput!
+  where: XpEventWhereUniqueInput!
+}
+
+input XpEventCreateWithoutUserInput {
+  amount: Int!
+  createdAt: DateTime
+  id: String
+  metadata: Json
+  reason: String!
+}
+
+input XpEventListRelationFilter {
+  every: XpEventWhereInput
+  none: XpEventWhereInput
+  some: XpEventWhereInput
+}
+
+input XpEventMaxOrderByAggregateInput {
+  amount: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  reason: SortOrder
+  userId: SortOrder
+}
+
+input XpEventMinOrderByAggregateInput {
+  amount: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  reason: SortOrder
+  userId: SortOrder
+}
+
+input XpEventOrderByRelationAggregateInput {
+  _count: SortOrder
+}
+
+input XpEventOrderByWithAggregationInput {
+  _avg: XpEventAvgOrderByAggregateInput
+  _count: XpEventCountOrderByAggregateInput
+  _max: XpEventMaxOrderByAggregateInput
+  _min: XpEventMinOrderByAggregateInput
+  _sum: XpEventSumOrderByAggregateInput
+  amount: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  metadata: SortOrder
+  reason: SortOrder
+  userId: SortOrder
+}
+
+input XpEventOrderByWithRelationInput {
+  amount: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  metadata: SortOrder
+  reason: SortOrder
+  user: UserOrderByWithRelationInput
+  userId: SortOrder
+}
+
+enum XpEventScalarFieldEnum {
+  amount
+  createdAt
+  id
+  metadata
+  reason
+  userId
+}
+
+input XpEventScalarWhereInput {
+  AND: [XpEventScalarWhereInput!]
+  NOT: [XpEventScalarWhereInput!]
+  OR: [XpEventScalarWhereInput!]
+  amount: IntFilter
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  metadata: JsonNullableFilter
+  reason: StringFilter
+  userId: StringFilter
+}
+
+input XpEventScalarWhereWithAggregatesInput {
+  AND: [XpEventScalarWhereWithAggregatesInput!]
+  NOT: [XpEventScalarWhereWithAggregatesInput!]
+  OR: [XpEventScalarWhereWithAggregatesInput!]
+  amount: IntWithAggregatesFilter
+  createdAt: DateTimeWithAggregatesFilter
+  id: UuidWithAggregatesFilter
+  metadata: JsonNullableWithAggregatesFilter
+  reason: StringWithAggregatesFilter
+  userId: StringWithAggregatesFilter
+}
+
+input XpEventSumOrderByAggregateInput {
+  amount: SortOrder
+}
+
+input XpEventUpdateInput {
+  amount: IntFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  metadata: Json
+  reason: StringFieldUpdateOperationsInput
+  user: UserUpdateOneRequiredWithoutXpEventsNestedInput
+}
+
+input XpEventUpdateManyMutationInput {
+  amount: IntFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  metadata: Json
+  reason: StringFieldUpdateOperationsInput
+}
+
+input XpEventUpdateManyWithWhereWithoutUserInput {
+  data: XpEventUpdateManyMutationInput!
+  where: XpEventScalarWhereInput!
+}
+
+input XpEventUpdateManyWithoutUserNestedInput {
+  connect: [XpEventWhereUniqueInput!]
+  connectOrCreate: [XpEventCreateOrConnectWithoutUserInput!]
+  create: [XpEventCreateWithoutUserInput!]
+  createMany: XpEventCreateManyUserInputEnvelope
+  delete: [XpEventWhereUniqueInput!]
+  deleteMany: [XpEventScalarWhereInput!]
+  disconnect: [XpEventWhereUniqueInput!]
+  set: [XpEventWhereUniqueInput!]
+  update: [XpEventUpdateWithWhereUniqueWithoutUserInput!]
+  updateMany: [XpEventUpdateManyWithWhereWithoutUserInput!]
+  upsert: [XpEventUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input XpEventUpdateWithWhereUniqueWithoutUserInput {
+  data: XpEventUpdateWithoutUserInput!
+  where: XpEventWhereUniqueInput!
+}
+
+input XpEventUpdateWithoutUserInput {
+  amount: IntFieldUpdateOperationsInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  metadata: Json
+  reason: StringFieldUpdateOperationsInput
+}
+
+input XpEventUpsertWithWhereUniqueWithoutUserInput {
+  create: XpEventCreateWithoutUserInput!
+  update: XpEventUpdateWithoutUserInput!
+  where: XpEventWhereUniqueInput!
+}
+
+input XpEventWhereInput {
+  AND: [XpEventWhereInput!]
+  NOT: [XpEventWhereInput!]
+  OR: [XpEventWhereInput!]
+  amount: IntFilter
+  createdAt: DateTimeFilter
+  id: UuidFilter
+  metadata: JsonNullableFilter
+  reason: StringFilter
+  user: UserWhereInput
+  userId: StringFilter
+}
+
+input XpEventWhereUniqueInput {
+  AND: [XpEventWhereInput!]
+  NOT: [XpEventWhereInput!]
+  OR: [XpEventWhereInput!]
+  amount: IntFilter
+  createdAt: DateTimeFilter
+  id: String
+  metadata: JsonNullableFilter
+  reason: StringFilter
+  user: UserWhereInput
+  userId: StringFilter
 }

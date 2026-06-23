@@ -1,13 +1,10 @@
-import { getAuth, signOut } from "firebase/auth";
+import { useAuthContext } from "../contexts/AuthContext";
 
+/**
+ * Thin wrapper over the auth context so existing callers (e.g. ProfilePage's
+ * `const { logout } = useAuth()`) keep working, while new code can also read
+ * `user` / `login` / `loading` / `isAuthenticated`.
+ */
 export default function useAuth() {
-  const logout = async () => {
-    const auth = getAuth();
-    await signOut(auth);
-    // TODO: redirect to /auth/login once client-frontend auth is implemented
-    // For now reload the page — ProtectedRoute will handle blocking unauthenticated users
-    window.location.href = "/";
-  };
-
-  return { logout };
+  return useAuthContext();
 }

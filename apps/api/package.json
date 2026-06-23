@@ -18,6 +18,7 @@
     "create:user": "ts-node -r tsconfig-paths/register scripts/createLocalUser.ts",
     "refresh:token": "ts-node -r tsconfig-paths/register scripts/refreshLocalToken.ts",
     "db:seed:local-users": "ts-node -r tsconfig-paths/register scripts/seedLocalUsers.ts",
+    "db:seed:demo": "ts-node -r tsconfig-paths/register scripts/seedDemoContent.ts",
     "test": "jest",
     "test:integration": "jest --testPathPattern=integration",
     "type-check": "tsc -p tsconfig.json --noEmit"
