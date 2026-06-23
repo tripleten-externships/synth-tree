@@ -14,6 +14,8 @@
     --popover-foreground: 0 0% 0%;
     --primary: 212.9348 100% 63.9216%;
     --primary-foreground: 0 0% 100%;
+    --brand: 258 100% 60%;
+    --brand-foreground: 0 0% 100%;
     --secondary: 214.2857 24.1379% 94.3137%;
     --secondary-foreground: 0 0% 3.1373%;
     --muted: 0 0% 96.0784%;
@@ -78,6 +80,8 @@
     --popover-foreground: 0 0% 94.1176%;
     --primary: 212.9348 100% 63.9216%;
     --primary-foreground: 0 0% 100%;
+    --brand: 257.6687 100% 68.0392%;
+    --brand-foreground: 0 0% 100%;
     --secondary: 226.6667 9.6774% 18.2353%;
     --secondary-foreground: 0 0% 94.1176%;
     --muted: 226.6667 9.6774% 18.2353%;
