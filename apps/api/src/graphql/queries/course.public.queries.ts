@@ -7,6 +7,8 @@ builder.queryFields((t) => ({
   publicGetAllCourses: t.prismaField({
     type: ["Course"],
     args: {
+      // Kept for schema stability; the public catalog is always
+      // published-only (enforced below), so this arg is intentionally ignored.
       status: t.arg({ type: CourseStatus, required: false }),
       search: t.arg.string({ required: false }),
       page: t.arg.int({ required: false }),
@@ -14,13 +16,13 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, args, ctx) => {
 
-      const { status, search, page = 1, limit = 20 } = args;
+      const { search, page = 1, limit = 20 } = args;
 
       return ctx.prisma.course.findMany({
         ...query,
         where: {
           deletedAt: null,
-          ...(status ? { status } : {}),
+          status: "PUBLISHED",
           ...(search
             ? {
                 title: {
