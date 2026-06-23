@@ -1,14 +1,24 @@
-export default function ProtectedRoute({ children }: { children: any }) {
-  const isLoggedIn = true; // Change to false to test the protection
-  
-  if (!isLoggedIn) {
+import { Navigate } from "react-router-dom";
+import { useAuthContext } from "../contexts/AuthContext";
+
+export default function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { loading, isAuthenticated } = useAuthContext();
+
+  if (loading) {
     return (
-      <div className="p-8">
-        <h1>Please Log In</h1>
-        <p>You need to be logged in to see this page.</p>
+      <div className="flex min-h-screen items-center justify-center text-gray-500">
+        Loading…
       </div>
     );
   }
 
-  return children;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
 }
