@@ -8,6 +8,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CoursesList from "./pages/courses/CoursesList";
 import CourseBuilder from "./pages/courses/CourseBuilder";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (
@@ -36,6 +37,14 @@ function App() {
                       element={
                         <DashboardLayout>
                           <CourseBuilder />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/lessons/:nodeId/edit"
+                      element={
+                        <DashboardLayout>
+                          <LessonEditor />
                         </DashboardLayout>
                       }
                     />
