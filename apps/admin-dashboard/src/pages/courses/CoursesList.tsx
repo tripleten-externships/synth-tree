@@ -284,6 +284,8 @@ const CoursesList = () => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteTargetTitle, setDeleteTargetTitle] = useState<string>("");
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
     if (typeof window === "undefined") {
       return "grid";
@@ -322,9 +324,16 @@ const CoursesList = () => {
   });
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this course?")) {
-      deleteCourse({ variables: { id } });
-    }
+    const course = courses.find((c) => c.id === id);
+    if (!course) return;
+    setDeleteTargetId(id);
+    setDeleteTargetTitle(course.title);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTargetId) return;
+    deleteCourse({ variables: { id: deleteTargetId } });
+    setDeleteTargetId(null);
   };
 
   const handlePublish = (id: string) => {
@@ -522,6 +531,34 @@ const CoursesList = () => {
         onClose={() => setModalOpen(false)}
         onCreated={() => setModalOpen(false)}
       />
+
+      {/* ── Delete confirmation ── */}
+      <Dialog open={!!deleteTargetId} onOpenChange={() => setDeleteTargetId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete course</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 mt-2">
+            Delete course{" "}
+            <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
+            will lose access. This can be undone by an admin.
+          </p>
+          <DialogFooter className="mt-4">
+            <button
+              onClick={() => setDeleteTargetId(null)}
+              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              className="px-4 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
