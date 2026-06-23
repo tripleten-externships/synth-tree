@@ -12,6 +12,7 @@ import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
+import CatalogPage from "./pages/CatalogPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 // Shared shell for all authenticated routes.
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
       { path: "skill-trees", element: <SkillTreesPage /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "courses/:courseId", element: <CourseDetailPage /> },
+      { path: "catalog", element: <CatalogPage /> },
     ],
   },
   {
