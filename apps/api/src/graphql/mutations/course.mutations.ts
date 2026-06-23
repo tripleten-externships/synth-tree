@@ -146,11 +146,18 @@ builder.mutationFields((t) => ({
       // 2. Ownership / auth check
       await assertCourseOwnership(ctx, id);
 
-      // 3. Delete and return the deleted entity using the GraphQL selection (`query`)
-      const deleted = await ctx.prisma.course.delete({
+      // 3. Soft-delete: keep the row, set deletedAt. Queries filter deletedAt: null,
+      //    so it disappears from listings but can be restored by an admin.
+      const deleted = await ctx.prisma.course.update({
         ...query,
         where: { id },
+        data: { deletedAt: new Date() },
       });
+
+      logger.info(
+        { courseId: id, title: existing.title },
+        "Course soft-deleted",
+      );
 
       return deleted;
     },

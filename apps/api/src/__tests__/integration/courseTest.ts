@@ -2,11 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { getTestServer } from "./server";
-import {
-  makeAdminContext,
-  makeUserContext,
-  makeUnauthContext,
-} from "./context";
+import { makeAdminContext, makeUserContext, makeUnauthContext } from "./context";
 import {
   seedUsers,
   cleanCourses,
@@ -133,9 +129,7 @@ describe("Course CRUD", () => {
       expect(res.errors).toBeUndefined();
       expect(res.data.adminGetAllCourses.length).toBeGreaterThanOrEqual(1);
       expect(
-        res.data.adminGetAllCourses.every((c: any) =>
-          c.title.toLowerCase().includes("something"),
-        ),
+        res.data.adminGetAllCourses.every((c: any) => c.title.toLowerCase().includes("something")),
       ).toBe(true);
     });
   });
@@ -361,21 +355,78 @@ describe("Course CRUD", () => {
 
         expect(res.errors).toBeDefined();
       });
-    });
 
-    it("return an error for non-exist course", async () => {
-      const res = singleResult(
-        await server.executeOperation(
-          {
-            query: DELETE_COURSE,
-            variables: { id: "00000000-0000-0000-0000-000000000000" },
+      it("soft deletes the course — row remains in DB with deletedAt set", async () => {
+        const course = await prisma.course.create({
+          data: {
+            title: "Soft Delete Target",
+            status: "DRAFT",
+            authorId: ADMIN_USER_ID,
           },
-          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
-        ),
-      );
+        });
 
-      expect(res.errors).toBeDefined();
-      expect(res.errors[0].message).toMatch(/course not found/i);
+        const res = singleResult(
+          await server.executeOperation(
+            { query: DELETE_COURSE, variables: { id: course.id } },
+            { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+          ),
+        );
+
+        // mutation should succeed
+        expect(res.errors).toBeUndefined();
+        expect(res.data.deleteCourse.id).toBe(course.id);
+
+        // row should still exist in the database
+        const deleted = await prisma.course.findUnique({
+          where: { id: course.id },
+        });
+
+        expect(deleted).not.toBeNull(); // row still exists
+        expect(deleted!.deletedAt).not.toBeNull(); // deletedAt is set
+      });
+
+      it("does not return soft deleted course in adminGetAllCourses", async () => {
+        const course = await prisma.course.create({
+          data: {
+            title: "Hidden Course",
+            status: "DRAFT",
+            authorId: ADMIN_USER_ID,
+          },
+        });
+
+        // soft delete it
+        await server.executeOperation(
+          { query: DELETE_COURSE, variables: { id: course.id } },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        );
+
+        // should not appear in the list
+        const res = singleResult(
+          await server.executeOperation(
+            { query: GET_ALL_COURSES },
+            { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+          ),
+        );
+
+        expect(res.errors).toBeUndefined();
+        const ids = res.data.adminGetAllCourses.map((c: any) => c.id);
+        expect(ids).not.toContain(course.id);
+      });
+
+      it("return an error for non-exist course", async () => {
+        const res = singleResult(
+          await server.executeOperation(
+            {
+              query: DELETE_COURSE,
+              variables: { id: "00000000-0000-0000-0000-000000000000" },
+            },
+            { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+          ),
+        );
+
+        expect(res.errors).toBeDefined();
+        expect(res.errors[0].message).toMatch(/course not found/i);
+      });
     });
   });
 

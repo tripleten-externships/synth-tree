@@ -14,3 +14,5 @@ export {
   useSystemColorSchemeWatcher,
   useAutoColorMode,
 } from "./useColorMode";
+
+export { useDensity } from "./useDensity";

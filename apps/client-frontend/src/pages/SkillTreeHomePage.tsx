@@ -1,5 +1,6 @@
 import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
 import { useNavigate } from "react-router-dom";
+import RecommendedNextCarousel from "../components/RecommendedNextCarousel";
 import CourseCard from "../components/CourseCard";
 
 // Placeholder courses shown when the database has nothing published yet.
@@ -23,14 +24,14 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center text-center gap-6">
-      <h1 className="text-[32px] font-medium leading-none text-[#212121]">
-        Synth Tree
-      </h1>
+      <h1 className="text-[32px] font-medium leading-none text-[#212121]">Synth Tree</h1>
 
       <p className="max-w-3xl text-[32px] font-medium leading-none text-[#212121] mt-4">
-        Synth Tree is a collection of courses on organic chemistry and more,
-        organised in a clear study path with theory and quizzes inside.
+        Synth Tree is a collection of courses on organic chemistry and more, organised in a clear
+        study path with theory and quizzes inside.
       </p>
+
+      <RecommendedNextCarousel />
 
       <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
         {courses.map((course) => (
