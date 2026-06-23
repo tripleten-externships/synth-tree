@@ -7,6 +7,7 @@ import { ProtectedRoutes } from "./components/ProtectedRoutes";
 import DashboardLayout from "./layouts/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CoursesList from "./pages/courses/CoursesList";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (
@@ -33,6 +34,14 @@ function App() {
                       element={
                         <DashboardLayout>
                           <CoursesList />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/lessons/:nodeId/edit"
+                      element={
+                        <DashboardLayout>
+                          <LessonEditor />
                         </DashboardLayout>
                       }
                     />

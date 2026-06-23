@@ -13,6 +13,7 @@
     "db:migrate:dev": "pnpm --filter @synth-tree/api prisma migrate dev",
     "db:studio": "pnpm --filter @synth-tree/api prisma studio",
     "db:seed:local-users": "pnpm --filter @synth-tree/api db:seed:local-users",
+    "db:seed:lesson-editor": "pnpm --filter @synth-tree/api db:seed:lesson-editor",
     "create:user": "pnpm --filter @synth-tree/api create:user --",
     "refresh:token": "pnpm --filter @synth-tree/api refresh:token --",
     "dev": "pnpm db:start && pnpm --filter @synth-tree/theme build && pnpm --filter @synth-tree/ui build && pnpm --parallel --filter @synth-tree/admin-dashboard --filter @synth-tree/client-frontend --filter @synth-tree/api dev",
