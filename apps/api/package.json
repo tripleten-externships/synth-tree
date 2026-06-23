@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "prisma": "prisma",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "pnpm generate && tsc -p tsconfig.json",
     "generate": "prisma generate",

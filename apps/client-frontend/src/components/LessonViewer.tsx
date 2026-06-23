@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import { ContentType } from "@synth-tree/api-types";
 import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
+import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 
 interface LessonBlock {
   id: string;
@@ -26,6 +27,16 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   const { data, loading, error } = useQuery<LessonBlocksData>(LESSON_BLOCKS_QUERY, {
     variables: { nodeId },
   });
+
+  const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
+
+  // Mark this node as in-progress when the learner opens the lesson.
+  // The mutation is idempotent server-side, so revisits / re-renders are safe.
+  useEffect(() => {
+    startNodeProgress({ variables: { nodeId } }).catch(() => {
+      // Best-effort progress tracking — don't block the lesson on failure.
+    });
+  }, [nodeId, startNodeProgress]);
 
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
