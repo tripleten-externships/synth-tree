@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "prisma": "prisma",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "pnpm generate && tsc -p tsconfig.json",
     "generate": "prisma generate",
@@ -17,6 +18,7 @@
     "create:user": "ts-node -r tsconfig-paths/register scripts/createLocalUser.ts",
     "refresh:token": "ts-node -r tsconfig-paths/register scripts/refreshLocalToken.ts",
     "db:seed:local-users": "ts-node -r tsconfig-paths/register scripts/seedLocalUsers.ts",
+    "db:seed:demo": "ts-node -r tsconfig-paths/register scripts/seedDemoContent.ts",
     "test": "jest",
     "test:integration": "jest --testPathPattern=integration",
     "type-check": "tsc -p tsconfig.json --noEmit"

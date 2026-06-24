@@ -1,48 +1,66 @@
-// CourseDetailPage - shows the full details of a single course
-// This page loads when a user clicks a course card
-// The courseId comes from the URL e.g. /courses/123
-
-import { useParams } from "react-router-dom";
-
-// Shape of what a course looks like - matches the mock data in SkillTreeHomePage
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-}
-
-// MOCK DATA - placeholder only, replace when real database courses are available
-const mockCourses: Course[] = [
-  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
-  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
-  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
-];
+// CourseDetailPage — shows a single course and its skill-tree nodes.
+// Loads when a learner clicks a course card. courseId comes from the URL.
+import { Link, useParams } from "react-router-dom";
+import { usePublicCourseQuery } from "@synth-tree/api-types";
 
 export default function CourseDetailPage() {
-  // Grab the courseId from the URL
   const { courseId } = useParams();
+  const { data, loading, error } = usePublicCourseQuery({
+    variables: { id: courseId ?? "" },
+    skip: !courseId,
+  });
 
-  // Find the course that matches the ID in the URL
-  const course = mockCourses.find((c) => c.id === courseId);
+  if (loading) return <div className="p-8">Loading…</div>;
+  if (error) return <div className="p-8">Error: {error.message}</div>;
 
-  // If no course found show a simple message
+  const course = data?.publicCourse;
   if (!course) return <div className="p-8">Course not found.</div>;
 
   return (
-    <div className="flex flex-col gap-6 p-8 max-w-3xl mx-auto">
-      {/* Back link to go back to the course list */}
-      <a href="/" className="text-sm text-gray-500 hover:underline">← Back to courses</a>
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-8">
+      <Link to="/" className="text-sm text-gray-500 hover:underline">
+        ← Back to courses
+      </Link>
 
-      {/* Course title */}
-      <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">{course.title}</h1>
+        {course.description && (
+          <p className="mt-2 text-lg text-gray-600">{course.description}</p>
+        )}
+      </div>
 
-      {/* Course description */}
-      <p className="text-gray-600 text-lg">{course.description}</p>
-
-      {/* Start learning button */}
-      <button className="w-fit bg-black text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors">
-        Start Learning
-      </button>
+      {course.trees.map((tree) => {
+        const nodes = [...tree.nodes].sort(
+          (a, b) => a.step - b.step || a.orderInStep - b.orderInStep,
+        );
+        return (
+          <section key={tree.id} className="flex flex-col gap-3">
+            <h2 className="text-xl font-semibold text-gray-900">{tree.title}</h2>
+            {tree.description && (
+              <p className="text-sm text-gray-500">{tree.description}</p>
+            )}
+            <ol className="flex flex-col gap-2">
+              {nodes.map((node, i) => (
+                <li key={node.id}>
+                  <Link
+                    to={`/courses/${course.id}/nodes/${node.id}`}
+                    className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3 transition-shadow hover:shadow-md"
+                  >
+                    <span className="font-medium text-gray-900">
+                      {i + 1}. {node.title}
+                    </span>
+                    {node.quiz && (
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                        Quiz
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      })}
     </div>
   );
 }

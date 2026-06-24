@@ -190,3 +190,8 @@ export const ICON_OPTIONS: IconOption[] = [
   { id: "plus", label: "Plus", Icon: PlusIcon },
   { id: "help", label: "Help", Icon: HelpIcon },
 ];
+
+export function getIconLabel(id: IconId) {
+  const match = ICON_OPTIONS.find((opt) => opt.id === id);
+  return match?.label ?? id;
+}
