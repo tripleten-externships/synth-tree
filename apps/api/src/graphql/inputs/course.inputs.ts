@@ -7,6 +7,8 @@ export const CreateCourseInput = builder.inputType("CreateCourseInput", {
     description: t.string(), // optional
     // Optional override for the auto-created default SkillTree
     defaultTreeTitle: t.string(),
+    icon: t.string({ required: false }),
+color: t.string({ required: false }),
   }),
 });
 

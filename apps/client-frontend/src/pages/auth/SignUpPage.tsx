@@ -2,7 +2,9 @@ import { useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+import { useMutation } from "@apollo/client/react";
 import { auth } from "../../lib/firebase";
+import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -13,38 +15,6 @@ interface Step1Fields {
   name: string;
   email: string;
   password: string;
-}
-
-interface SyncUserPayload {
-  displayName: string;
-}
-
-async function syncCurrentUser(payload: SyncUserPayload): Promise<void> {
-  const user = auth.currentUser;
-  if (!user) throw new Error("syncCurrentUser: no authenticated user found.");
-
-  await updateProfile(user, { displayName: payload.displayName });
-  const idToken = await user.getIdToken(true);
-
-  const response = await fetch("/api/users/sync", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${idToken}`,
-    },
-    body: JSON.stringify({
-      uid: user.uid,
-      email: user.email,
-      displayName: payload.displayName,
-    }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `syncCurrentUser: server returned ${response.status}${text ? ` — ${text}` : ""}.`
-    );
-  }
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────
@@ -88,8 +58,6 @@ function ProgressBar({ step }: { step: Step }) {
 
 const STRENGTH_LABELS = ["Too short", "Weak", "Fair", "Good", "Strong"] as const;
 
-// Tailwind can't construct dynamic class names at runtime, so we use inline
-// styles only for the data-driven color values here.
 const STRENGTH_HEX = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"] as const;
 
 function PasswordStrengthBar({ id, password }: { id: string; password: string }) {
@@ -144,7 +112,13 @@ function Spinner() {
 
 // ─── Step 1 – Credentials ─────────────────────────────────────────────────────
 
-function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
+function Step1Credentials({
+  onSuccess,
+  syncUser,
+}: {
+  onSuccess: () => void;
+  syncUser: (variables: { variables: { name: string } }) => Promise<unknown>;
+}) {
   const [fields, setFields] = useState<Step1Fields>({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,7 +153,8 @@ function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
     try {
       await createUserWithEmailAndPassword(auth, fields.email.trim(), fields.password);
       firebaseUserCreated = true;
-      await syncCurrentUser({ displayName: fields.name.trim() });
+      await updateProfile(auth.currentUser!, { displayName: fields.name.trim() });
+      await syncUser({ variables: { name: fields.name.trim() } });
       onSuccess();
     } catch (err: unknown) {
       if (err instanceof FirebaseError) {
@@ -217,7 +192,6 @@ function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
 
   const passwordStrengthId = "password-strength-hint";
 
-  // Shared input class string
   const inputCls =
     "h-[42px] px-3 border border-slate-200 rounded-lg text-sm text-slate-900 " +
     "bg-white outline-none transition focus:border-blue-600 focus:ring-2 " +
@@ -269,7 +243,10 @@ function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Password */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="signup-password" className="text-[13px] font-semibold text-gray-700 flex items-center gap-1.5">
+          <label
+            htmlFor="signup-password"
+            className="text-[13px] font-semibold text-gray-700 flex items-center gap-1.5"
+          >
             Password
             <span className="font-normal text-slate-400 text-xs">(min. 10 characters)</span>
           </label>
@@ -291,13 +268,33 @@ function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
                   <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
                   <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
@@ -312,7 +309,10 @@ function Step1Credentials({ onSuccess }: { onSuccess: () => void }) {
       </div>
 
       {error && (
-        <p role="alert" className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 mt-4">
+        <p
+          role="alert"
+          className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 mt-4"
+        >
           {error}
           {syncError && (
             <>
@@ -379,6 +379,7 @@ const VALID_STEPS = new Set<number>(STEPS);
 
 export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [syncUser] = useMutation(SYNC_CURRENT_USER);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
@@ -394,7 +395,7 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-6 bg-slate-50 font-sans">
       <div className="w-full max-w-[420px] bg-white rounded-2xl px-9 pt-10 pb-9 shadow-[0_1px_3px_rgba(0,0,0,.06),0_8px_24px_rgba(0,0,0,.08)]">
         <ProgressBar step={step} />
-        {step === 1 && <Step1Credentials onSuccess={() => goToStep(2)} />}
+        {step === 1 && <Step1Credentials onSuccess={() => goToStep(2)} syncUser={syncUser} />}
         {step === 2 && <Step2Stub />}
         {step === 3 && <Step3Stub />}
       </div>
