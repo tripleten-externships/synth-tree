@@ -3,11 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
+    "module": "CommonJS",
     "esModuleInterop": true,
-     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@graphql/*": ["./src/graphql/*"],
