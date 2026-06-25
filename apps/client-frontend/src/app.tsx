@@ -17,6 +17,7 @@ import NodePage from "./pages/NodePage";
 import CatalogPage from "./pages/CatalogPage";
 import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import SignUpPage from "./pages/auth/SignUpPage";
 
 // Shared shell for all authenticated routes.
 function ProtectedMainLayout() {
@@ -52,7 +53,9 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFoundPage />,
   },
-]);
+  {path: "/auth/signup",
+    element: <SignUpPage />},
+],);
 
 export default function App() {
   return (
