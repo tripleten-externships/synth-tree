@@ -317,7 +317,7 @@ function Step1Credentials({
           {syncError && (
             <>
               {" "}
-              <Link to="/auth/signin" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/login" className="text-blue-600 font-semibold hover:underline">
                 Sign in here.
               </Link>
             </>
@@ -337,7 +337,7 @@ function Step1Credentials({
 
       <p className="text-center text-[13px] text-slate-400 mt-5">
         Already have an account?{" "}
-        <Link to="/auth/signin" className="text-blue-600 font-semibold hover:underline">
+        <Link to="/login" className="text-blue-600 font-semibold hover:underline">
           Sign in
         </Link>
       </p>

@@ -50,12 +50,14 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/auth/signup",
+    element: <SignUpPage />,
+  },
+  {
     path: "*",
     element: <NotFoundPage />,
   },
-  {path: "/auth/signup",
-    element: <SignUpPage />},
-],);
+]);
 
 export default function App() {
   return (
