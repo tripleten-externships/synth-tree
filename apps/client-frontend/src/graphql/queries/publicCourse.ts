@@ -10,7 +10,28 @@ export const PUBLIC_COURSE_QUERY = gql`
       trees {
         id
         title
-        description }
+        description
+        nodes {
+          id
+          title
+          step
+          orderInStep
+          quiz {
+            id
+            title
+            required
+            questions {
+              id
+              prompt
+              type
+              options {
+                id
+                text
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;

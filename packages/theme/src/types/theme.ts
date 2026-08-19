@@ -116,11 +116,15 @@ export interface Theme {
   breakpoints: Breakpoints;
 }
 
+export type Density = "compact" | "regular" | "comfy";
+
 export type ColorMode = "light" | "dark";
 
 export interface ThemeContextValue {
   theme: Theme;
   colorMode: ColorMode;
   setColorMode: (mode: ColorMode) => void;
+  density: Density;
+  setDensity: (density: Density) => void;
   toggleColorMode: () => void;
 }

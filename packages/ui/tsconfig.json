@@ -1,11 +1,13 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "lib": ["DOM", "DOM.Iterable", "ES6", "ES2020"],
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -22,13 +24,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "stories/**/*"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules",
-    "storybook-static"
-  ]
+  "include": ["src/**/*", "stories/**/*"],
+  "exclude": ["dist", "node_modules", "storybook-static"]
 }

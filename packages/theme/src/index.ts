@@ -68,6 +68,7 @@ export {
   useSystemColorScheme,
   useSystemColorSchemeWatcher,
   useAutoColorMode,
+  useDensity,
 } from "./hooks";
 
 // Export providers

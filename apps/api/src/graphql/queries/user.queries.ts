@@ -7,6 +7,21 @@ import { requireAdmin } from "@graphql/auth/requireAuth";
 // Pagination included use limit and offset. They make to prisma skip and take.
 
 builder.queryFields((t) => ({
+  currentUser: t.prismaField({
+    type: "User",
+    nullable: true,
+    resolve: async (query, _parent, _args, context) => {
+      const userId = context.auth.requireAuth();
+
+      return context.prisma.user.findUnique({
+        ...query,
+        where: {
+          id: userId,
+        },
+      });
+    },
+  }),
+
   allUsers: t.prismaField({
     type: ["User"],
     args: {

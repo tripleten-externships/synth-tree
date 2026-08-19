@@ -35,6 +35,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.63.0(react@19.1.1))
+      '@synth-tree/api-types':
+        specifier: workspace:*
+        version: link:../../packages/api-types
       '@synth-tree/config':
         specifier: workspace:*
         version: link:../../packages/config

@@ -76,6 +76,9 @@ model User {
   // Learning:
   nodeProgress UserNodeProgress[] // 1 row per (user,node)
   quizAttempts QuizAttempt[] // all attempts across quizzes
+  xp           UserXp?
+  streak       UserStreak?
+  xpEvents     XpEvent[]
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -327,4 +330,36 @@ model UserNodeProgress {
   @@unique([userId, nodeId]) // canonical progress row
   @@index([userId, status]) // "what's in progress/completed for this user?"
   @@index([nodeId, status]) // "how many users completed this node?"
+}
+
+model UserXp {
+  userId    String   @id
+  totalXp   Int      @default(0)
+  todayXp   Int      @default(0)
+  todayAsOf DateTime @default(now())
+  weeklyXp  Json     @default("{}")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStreak {
+  userId      String    @id
+  currentDays Int       @default(0)
+  longestDays Int       @default(0)
+  lastActive  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model XpEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String
+  amount    Int
+  reason    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

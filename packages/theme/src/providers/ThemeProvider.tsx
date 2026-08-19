@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import { theme as defaultTheme } from "../tokens";
-import { setCSSVariables, getSystemColorScheme } from "../utils/css-variables";
-import type { Theme, ColorMode, ThemeContextValue } from "../types";
+import { setCSSVariables, getSystemColorScheme, setDensityClass } from "../utils/css-variables";
+import type { Theme, ColorMode, Density, ThemeContextValue } from "../types";
 
 // Create theme context
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -10,6 +10,8 @@ interface ThemeProviderProps {
   children: ReactNode;
   theme?: Theme;
   defaultColorMode?: ColorMode;
+  defaultDensity?: Density;
+  densityStorageKey?: string;
   enableSystem?: boolean;
   storageKey?: string;
 }
@@ -20,8 +22,46 @@ export function ThemeProvider({
   theme = defaultTheme,
   defaultColorMode = "light",
   enableSystem = true,
+  defaultDensity = "regular",
+  densityStorageKey = "skilltree-theme-density",
   storageKey = "skilltree-theme-mode",
 }: ThemeProviderProps) {
+  const [density, setDensityState] = useState<Density>(() => {
+    // Initialize density from localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(densityStorageKey);
+        if (
+          stored &&
+          (stored === "compact" || stored === "regular" || stored === "comfy")
+        ) {
+          return stored as Density;
+        }
+      } catch (error) {
+        console.warn("Failed to read density from localStorage:", error);
+      }
+    }
+
+    return defaultDensity;
+  });
+
+  // Set density and persist to localStorage
+  const setDensity = (newDensity: Density) => {
+    setDensityState(newDensity);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(densityStorageKey, newDensity);
+      } catch (error) {
+        console.warn("Failed to save density to localStorage:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    setDensityClass(density);
+  }, [density]);
+  
   const [colorMode, setColorModeState] = useState<ColorMode>(() => {
     // Initialize color mode from localStorage or system preference
     if (typeof window !== "undefined") {
@@ -96,6 +136,8 @@ export function ThemeProvider({
     colorMode,
     setColorMode,
     toggleColorMode,
+    density,
+    setDensity,
   };
 
   return (

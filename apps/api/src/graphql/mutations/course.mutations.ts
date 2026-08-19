@@ -1,12 +1,10 @@
 import { builder } from "@graphql/builder";
 import { Prisma } from "@prisma/client";
-import {
-  CreateCourseInput,
-  UpdateCourseInput,
-} from "@graphql/inputs/course.inputs";
+import { CreateCourseInput, UpdateCourseInput } from "@graphql/inputs/course.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
-import logger from '@lib/logger'; // Structured logger for tracking course creation and admin actions
+import logger from "@lib/logger"; // Structured logger for tracking course creation and admin actions
+import { requireAdmin } from "@graphql/auth/requireAuth";
 
 builder.mutationFields((t) => ({
   // ===== Courses =====
@@ -38,7 +36,7 @@ builder.mutationFields((t) => ({
           },
         });
 
-        logger.info({ userId, courseId: course.id, title: course.title }, 'Course created'); // Audit log for course creation — useful for admin tracking and debugging
+        logger.info({ userId, courseId: course.id, title: course.title }, "Course created"); // Audit log for course creation — useful for admin tracking and debugging
 
         return tx.course.findUniqueOrThrow({
           ...query,
@@ -86,6 +84,48 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  publishCourse: t.prismaField({
+    type: "Course",
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    resolve: async (query, _root, { id }, ctx) => {
+      ctx.auth.requireAuth();
+      requireAdmin(ctx);
+
+      const updatedCourse = await ctx.prisma.course.update({
+        ...query,
+        where: { id },
+        data: {
+          status: "PUBLISHED",
+        },
+      });
+
+      return updatedCourse;
+    },
+  }),
+
+  unpublishCourse: t.prismaField({
+    type: "Course",
+    args: {
+      id: t.arg.id({ required: true }),
+    },
+    resolve: async (query, _root, { id }, ctx) => {
+      ctx.auth.requireAuth();
+      requireAdmin(ctx);
+
+      const updatedCourse = await ctx.prisma.course.update({
+        ...query,
+        where: { id },
+        data: {
+          status: "DRAFT",
+        },
+      });
+
+      return updatedCourse;
+    },
+  }),
+
   deleteCourse: t.prismaField({
     type: "Course",
     args: {
@@ -106,11 +146,18 @@ builder.mutationFields((t) => ({
       // 2. Ownership / auth check
       await assertCourseOwnership(ctx, id);
 
-      // 3. Delete and return the deleted entity using the GraphQL selection (`query`)
-      const deleted = await ctx.prisma.course.delete({
+      // 3. Soft-delete: keep the row, set deletedAt. Queries filter deletedAt: null,
+      //    so it disappears from listings but can be restored by an admin.
+      const deleted = await ctx.prisma.course.update({
         ...query,
         where: { id },
+        data: { deletedAt: new Date() },
       });
+
+      logger.info(
+        { courseId: id, title: existing.title },
+        "Course soft-deleted",
+      );
 
       return deleted;
     },

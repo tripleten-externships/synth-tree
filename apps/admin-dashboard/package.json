@@ -14,6 +14,7 @@
   "dependencies": {
     "@apollo/client": "^4.0.9",
     "@hookform/resolvers": "^5.2.2",
+    "@synth-tree/api-types": "workspace:*",
     "@synth-tree/config": "workspace:*",
     "@synth-tree/theme": "workspace:*",
     "@synth-tree/ui": "workspace:*",

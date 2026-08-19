@@ -145,10 +145,17 @@ export async function gradeQuizAttempt(
   let message: string;
 
   // Decide pass status and message
-  // - If any open-ended questions are present and not yet graded, mark as pending manual review (passed = null).
-  // - If there are no auto-gradable questions (only open questions), mark as pending manual review (passed = null)
-  // - Otherwise, pass only if all auto-gradable questions are answered and correct.
-  if (hasUngradedOpen || totalAutoGradableQuestions === 0) {
+  // - SYN-54: If the quiz has ONLY open questions (nothing to auto-grade
+  //   against), the attempt passes outright.
+  // - If there is a mix of auto-gradable and ungraded open questions, mark as
+  //   pending manual review (passed = null) when the auto-gradable answers are
+  //   all correct, otherwise not passed.
+  // - Otherwise (no open questions), pass only if all auto-gradable questions
+  //   are answered and correct.
+  if (totalAutoGradableQuestions === 0) {
+    passed = true;
+    message = "Passed";
+  } else if (hasUngradedOpen) {
     if (allAnswered && allAutoGradableCorrect) {
       passed = null;
       message = "Passed pending manual review of open question(s)";

@@ -7,6 +7,7 @@ import { ProtectedRoutes } from "./components/ProtectedRoutes";
 import DashboardLayout from "./layouts/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CoursesList from "./pages/courses/CoursesList";
+import CourseBuilder from "./pages/courses/CourseBuilder";
 
 function App() {
   return (
@@ -20,19 +21,21 @@ function App() {
               element={
                 <ProtectedRoutes>
                   <Routes>
-                    <Route
-                      path="/dashboard"
-                      element={<Navigate to="/courses" replace />}
-                    />
-                    <Route
-                      path="/"
-                      element={<Navigate to="/courses" replace />}
-                    />
+                    <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
+                    <Route path="/" element={<Navigate to="/courses" replace />} />
                     <Route
                       path="/courses"
                       element={
                         <DashboardLayout>
                           <CoursesList />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/courses/:courseId/edit"
+                      element={
+                        <DashboardLayout>
+                          <CourseBuilder />
                         </DashboardLayout>
                       }
                     />

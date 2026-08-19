@@ -102,6 +102,21 @@ Prerequisites → SkillNodePrerequisite maps “Node B requires Node A.”
 - **Key Fields:** `id`, `userId`, `nodeId`, `status`, optional `completedAt`, audit timestamps.
 - **Purpose:** Drives gating logic and tracking of learner status within a `SkillTree`.
 
+### UserXp
+
+- **Key Fields:** `userId`, `totalXp`, `todayXp`, `todayAsOf`, rolling `weeklyXp` JSON.
+- **Purpose:** Stores the current XP totals and daily/weekly XP counters for one learner.
+
+### UserStreak
+
+- **Key Fields:** `userId`, `currentDays`, `longestDays`, optional `lastActive`.
+- **Purpose:** Stores a learner's current and longest activity streak state.
+
+### XpEvent
+
+- **Key Fields:** `id`, `userId`, `amount`, `reason`, optional `metadata`, `createdAt`.
+- **Purpose:** Records append-only XP awards for learner history, auditability, and future analytics.
+
 ## Quiz & Grading Semantics (v1)
 
 Exactly one quiz per node (Quiz.nodeId @unique).
@@ -469,6 +484,9 @@ model UserNodeProgress {
 - **QuizAttempt (1) — (N) QuizAttemptAnswer** via `QuizAttemptAnswer.attemptId` (Cascade)
 - **SkillNode (N) — (N) SkillNode (prereqs)** via `SkillNodePrerequisite(nodeId, dependsOnNodeId)` (Composite PK)
 - **User (1) — (N) UserNodeProgress** via `UserNodeProgress.userId` (Cascade)
+- **User (1) — (0/1) UserXp** via `UserXp.userId` (Cascade)
+- **User (1) — (0/1) UserStreak** via `UserStreak.userId` (Cascade)
+- **User (1) — (N) XpEvent** via `XpEvent.userId` (Cascade)
 
 ---
 
@@ -495,6 +513,7 @@ model UserNodeProgress {
 - `QuizAttempt`: `@@index([quizId])`, `@@index([userId])`
 - `QuizAttemptAnswer`: `@@unique([attemptId, questionId])`, `@@index([questionId])`
 - `UserNodeProgress`: `@@unique([userId, nodeId])`, `@@index([userId, status])`, `@@index([nodeId, status])`
+- `XpEvent`: `@@index([userId, createdAt])`
 
 > **Rationale:**
 >

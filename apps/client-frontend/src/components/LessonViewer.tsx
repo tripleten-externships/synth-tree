@@ -1,21 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
-import { useQuery } from "@apollo/client/react";
-import { ContentType } from "@synth-tree/api-types";
-import { LESSON_BLOCKS_QUERY } from "../graphql/queries/lessonBlocks";
-
-interface LessonBlock {
-  id: string;
-  type: ContentType;
-  content: string;
-  caption?: string | null;
-  order: number;
-}
-
-interface LessonBlocksData {
-  lessonBlocks: LessonBlock[];
-}
+import { useMutation } from "@apollo/client/react";
+import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
+import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 
 interface LessonViewerProps {
   nodeId: string;
@@ -23,34 +11,43 @@ interface LessonViewerProps {
 }
 
 export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) => {
-  const { data, loading, error } = useQuery<LessonBlocksData>(LESSON_BLOCKS_QUERY, {
+  const { data, loading, error } = useLessonBlocksByNodeQuery({
     variables: { nodeId },
   });
 
+  const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
+
+  // Mark this node as in-progress when the learner opens the lesson.
+  // The mutation is idempotent server-side, so revisits / re-renders are safe.
+  useEffect(() => {
+    startNodeProgress({ variables: { nodeId } }).catch(() => {
+      // Best-effort progress tracking — don't block the lesson on failure.
+    });
+  }, [nodeId, startNodeProgress]);
+
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
-  if (!data) return <div>No lesson data found.</div>;
 
-  const blocks = [...data.lessonBlocks].sort((a, b) => a.order - b.order);
+  const blocks = [...(data?.lessonBlocksByNode ?? [])].sort(
+    (a, b) => a.order - b.order,
+  );
 
   const renderHTML = (html: string) => (
     <div
       className="leading-relaxed text-gray-800"
-      dangerouslySetInnerHTML={{
-        __html: DOMPurify.sanitize(html),
-      }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
     />
   );
 
-  const renderImage = (block: LessonBlock) => (
+  const renderImage = (url: string, caption?: string | null) => (
     <figure className="m-0 text-center">
       <img
-        src={block.content}
-        alt={block.caption || "Lesson image"}
+        src={url}
+        alt={caption || "Lesson image"}
         className="max-w-full h-auto rounded-lg shadow-md"
       />
-      {block.caption && (
-        <figcaption className="mt-3 text-sm text-gray-500 italic">{block.caption}</figcaption>
+      {caption && (
+        <figcaption className="mt-3 text-sm text-gray-500 italic">{caption}</figcaption>
       )}
     </figure>
   );
@@ -74,16 +71,16 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     </div>
   );
 
-  const renderBlock = (block: LessonBlock) => {
+  const renderBlock = (block: (typeof blocks)[number]) => {
     switch (block.type) {
-      case ContentType.Html:
-        return renderHTML(block.content);
-      case ContentType.Image:
-        return renderImage(block);
-      case ContentType.Video:
-        return renderVideo(block.content);
-      case ContentType.Embed:
-        return renderEmbed(block.content);
+      case "HTML":
+        return renderHTML(block.html ?? "");
+      case "IMAGE":
+        return renderImage(block.url ?? "", block.caption);
+      case "VIDEO":
+        return renderVideo(block.url ?? "");
+      case "EMBED":
+        return renderEmbed(block.url ?? "");
       default:
         return null;
     }

@@ -17,8 +17,8 @@ generates:
       withResultType: false
       withMutationOptionsType: false
       apolloReactHooksImportFrom: "@apollo/client/react"
+      enumsAsTypes: true
 documents:
   - "./src/**/*.{ts,tsx}"
   - "../admin-dashboard/src/**/*.{ts,tsx}"
   - "../client-frontend/src/**/*.{ts,tsx}"
-
