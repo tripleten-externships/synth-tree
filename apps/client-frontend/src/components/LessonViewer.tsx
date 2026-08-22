@@ -72,8 +72,13 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     "www.codepen.io",
   ]);
 
-  const renderEmbed = (embedHtml: string) => {
-    const sanitized = DOMPurify.sanitize(embedHtml, {
+  const renderEmbed = (embedContent: string) => {
+  let src = "";
+  let title = "Embedded content";
+  let allow: string | undefined;
+
+  if (embedContent.trim().startsWith("<")) {
+    const sanitized = DOMPurify.sanitize(embedContent, {
       ALLOWED_TAGS: ["iframe"],
       ALLOWED_ATTR: [
         "src",
@@ -91,34 +96,39 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
     if (!iframe) return null;
 
-    const src = iframe.getAttribute("src");
+    src = iframe.getAttribute("src") ?? "";
+    title = iframe.getAttribute("title") || "Embedded content";
+    allow = iframe.getAttribute("allow") || undefined;
+  } else {
+    src = embedContent;
+  }
 
-    if (!src) return null;
+  if (!src) return null;
 
-    let hostname: string;
+  let hostname: string;
 
-    try {
-      hostname = new URL(src).hostname;
-    } catch {
-      return null;
-    }
+  try {
+    hostname = new URL(src).hostname;
+  } catch {
+    return null;
+  }
 
-    if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
-      return null;
-    }
+  if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
+    return null;
+  }
 
-    return (
-      <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-        <iframe
-          src={src}
-          title={iframe.getAttribute("title") || "Embedded content"}
-          className="absolute top-0 left-0 w-full h-full border-0"
-          allow={iframe.getAttribute("allow") || undefined}
-          allowFullScreen
-        />
-      </div>
-    );
-  };
+  return (
+    <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
+      <iframe
+        src={src}
+        title={title}
+        className="absolute top-0 left-0 w-full h-full border-0"
+        allow={allow}
+        allowFullScreen
+      />
+    </div>
+  );
+};
 
   const renderBlock = (block: (typeof blocks)[number]) => {
     switch (block.type) {
@@ -129,7 +139,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
       case "VIDEO":
         return renderVideo(block.url ?? "");
       case "EMBED":
-        return renderEmbed(block.html ?? "");
+        return renderEmbed(block.html ?? block.url ?? "");
       default:
         return null;
     }
