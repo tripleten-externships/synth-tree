@@ -19,6 +19,6 @@ generates:
       apolloReactHooksImportFrom: "@apollo/client/react"
       enumsAsTypes: true
 documents:
-  - "./src/**/*.{ts,tsx}"
-  - "../admin-dashboard/src/**/*.{ts,tsx}"
-  - "../client-frontend/src/**/*.{ts,tsx}"
+  - "./src/**/*.{ts,tsx,graphql}"
+  - "../admin-dashboard/src/**/*.{ts,tsx,graphql}"
+  - "../client-frontend/src/**/*.{ts,tsx,graphql}"

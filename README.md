@@ -69,25 +69,25 @@ synth-tree/
 
 ## Common commands
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Start DB + parallel dev servers for api, admin-dashboard, client-frontend |
-| `pnpm build` | Build every workspace recursively |
-| `pnpm type-check` | Run `tsc --noEmit` in every workspace that defines a `type-check` script |
-| `pnpm lint` | Run ESLint in every workspace that defines a `lint` script |
-| `pnpm format` / `pnpm format:check` | Run / check Prettier |
-| `pnpm test` | Run tests across the monorepo |
-| `pnpm db:start` / `db:stop` | Local Postgres via Docker |
-| `pnpm db:migrate:dev` / `db:studio` / `db:validate` | Prisma helpers |
-| `pnpm storybook` | Run Storybook for `@synth-tree/ui` |
+| Command                                             | What it does                                                              |
+| --------------------------------------------------- | ------------------------------------------------------------------------- |
+| `pnpm dev`                                          | Start DB + parallel dev servers for api, admin-dashboard, client-frontend |
+| `pnpm build`                                        | Build every workspace recursively                                         |
+| `pnpm type-check`                                   | Run `tsc --noEmit` in every workspace that defines a `type-check` script  |
+| `pnpm lint`                                         | Run ESLint in every workspace that defines a `lint` script                |
+| `pnpm format` / `pnpm format:check`                 | Run / check Prettier                                                      |
+| `pnpm test`                                         | Run tests across the monorepo                                             |
+| `pnpm db:start` / `db:stop`                         | Local Postgres via Docker                                                 |
+| `pnpm db:migrate:dev` / `db:studio` / `db:validate` | Prisma helpers                                                            |
+| `pnpm storybook`                                    | Run Storybook for `@synth-tree/ui`                                        |
 
 ## Environments
 
-|  | Dev | Production |
-|---|---|---|
-| API | <https://api.dev.synth-tree.com> | <https://api.synth-tree.com> |
-| Admin app | <https://dev.synth-tree.com> | <https://app.synth-tree.com/auth/login> |
-| Storybook | <https://storybook.dev.synth-tree.com> | <https://storybook.synth-tree.com> |
+|           | Dev                                    | Production                              |
+| --------- | -------------------------------------- | --------------------------------------- |
+| API       | <https://api.dev.synth-tree.com>       | <https://api.synth-tree.com>            |
+| Admin app | <https://dev.synth-tree.com>           | <https://app.synth-tree.com/auth/login> |
+| Storybook | <https://storybook.dev.synth-tree.com> | <https://storybook.synth-tree.com>      |
 
 ## Where to read next
 

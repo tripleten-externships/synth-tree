@@ -36,16 +36,16 @@ async function start() {
       ApolloServerPluginDrainHttpServer({ httpServer }),
       apolloLoggingPlugin, // Enables structured logging for every GraphQL request + error
     ],
-      formatError: (formattedError) => { 
-        // In production, hide stack traces and internal details from clients
-        if (process.env.NODE_ENV === 'production') {
+    formatError: (formattedError) => {
+      // In production, hide stack traces and internal details from clients
+      if (process.env.NODE_ENV === "production") {
         return {
-        message: formattedError.message,
-        extensions: { code: formattedError.extensions?.code },
-      };
-  }
-  return formattedError; // Full error details in development
-},
+          message: formattedError.message,
+          extensions: { code: formattedError.extensions?.code },
+        };
+      }
+      return formattedError; // Full error details in development
+    },
   });
 
   await server.start();
@@ -58,7 +58,7 @@ async function start() {
       context: async ({ req }) => {
         return createGraphQLContext({ req, prisma });
       },
-    })
+    }),
   );
 
   const port = parseInt(process.env.PORT || "4000", 10);
