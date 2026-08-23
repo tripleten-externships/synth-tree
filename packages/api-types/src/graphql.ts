@@ -6566,6 +6566,13 @@ export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
 
+export type AdminCourseQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
+
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6689,6 +6696,43 @@ export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
 export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
+export const AdminCourseDocument = gql`
+    query AdminCourse($id: ID!) {
+  adminCourse(id: $id) {
+    id
+    title
+    description
+    status
+  }
+}
+    `;
+
+/**
+ * __useAdminCourseQuery__
+ *
+ * To run a query within a React component, call `useAdminCourseQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminCourseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminCourseQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminCourseQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables> & ({ variables: AdminCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+      }
+export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+        }
+export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
+export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
