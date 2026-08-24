@@ -36,7 +36,8 @@ export const learnerCourseTreeResolvers = {
       const userId = ctx.user?.id;
       if (!userId) return null;
 
-      return ctx.prisma.userNodeProgress.findUnique({   //Returns the learner's actual progress fro each node:NOT_STARTED,IN_PROGRESS, COMPLETED, completeAt timestamps essential for node state logic (locked, unlocked, completed).
+      return ctx.prisma.userNodeProgress.findUnique({
+        //Returns the learner's actual progress fro each node:NOT_STARTED,IN_PROGRESS, COMPLETED, completeAt timestamps essential for node state logic (locked, unlocked, completed).
         where: {
           userId_nodeId: {
             userId,
