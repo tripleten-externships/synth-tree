@@ -2,8 +2,6 @@ import { useParams } from "react-router-dom";
 import { useAdminCourseQuery, useUpdateCourseMutation } from "@synth-tree/api-types";
 import { useEffect, useState } from "react";
 
-import { Button } from "@synth-tree/ui";
-
 function CourseBuilder() {
   const { courseId } = useParams();
   const { data, loading, error } = useAdminCourseQuery({
@@ -49,48 +47,65 @@ function CourseBuilder() {
         )}
 
         {data?.adminCourse && (
-          <>
+          <div className="flex flex-col gap-4">
             <input
-              className="text-lg font-semibold"
+              className="w-full mt-4 text-xl font-bold py-2.5 px-3 rounded-sm border border-transparent focus:outline-none focus:ring focus:ring-primary/15"
               value={formData.title}
               onChange={(e) => handleChange("title", e.target.value)}
               onBlur={() => handleBlur("title")}
             />
             <textarea
-              className="text-sm text-muted-foreground"
+              rows={3}
+              className="w-full text-sm text-muted-foreground mt-2 py-2.5 rounded-sm border border-transparent focus:outline-none focus:ring focus:ring-primary/15"
               value={formData.description}
               onChange={(e) => handleChange("description", e.target.value)}
               onBlur={() => handleBlur("description")}
             />
-            <Button
-              variant={formData.status === "DRAFT" ? "default" : "outline"}
-              onClick={() => {
-                handleChange("status", "DRAFT");
-                updateCourse({
-                  variables: {
-                    id: courseId ?? "",
-                    input: { status: "DRAFT" },
-                  },
-                });
-              }}
-            >
-              Draft
-            </Button>
-            <Button
-              variant={formData.status === "PUBLISHED" ? "default" : "outline"}
-              onClick={() => {
-                handleChange("status", "PUBLISHED");
-                updateCourse({
-                  variables: {
-                    id: courseId ?? "",
-                    input: { status: "PUBLISHED" },
-                  },
-                });
-              }}
-            >
-              Published
-            </Button>
-          </>
+            <div className="h-px bg-border my-6" />
+            <div className="flex flex-col gap-4">
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Course settings
+              </h4>
+              <label className="mb-1.5 block text-foreground text-sm font-medium">Visibility</label>
+              <div className="flex gap-2">
+                <button
+                  className={`text-sm font-medium cursor-pointer text-muted-foreground border-0 bg-transparent flex-1 py-[7px] px-3.5 rounded-[9px] transition-all duration-[120ms]
+                  ${formData.status === "DRAFT" ? "bg-background text-foreground shadow-[0px_2px_3px_0px_rgba(0,0,0,0.16),0px_1px_2px_-1px_rgba(0,0,0,0.16)]" : "bg-transparent text-muted-foreground"}`}
+                  onClick={() => {
+                    handleChange("status", "DRAFT");
+                    updateCourse({
+                      variables: {
+                        id: courseId ?? "",
+                        input: { status: "DRAFT" },
+                      },
+                    });
+                  }}
+                >
+                  Draft
+                </button>
+                <button
+                  className={`text-sm font-medium cursor-pointer text-muted-foreground border-0 bg-transparent flex-1 py-[7px] px-3.5 rounded-[9px] transition-all duration-[120ms]
+                  ${formData.status === "PUBLISHED" ? "bg-background text-foreground shadow-[0px_2px_3px_0px_rgba(0,0,0,0.16),0px_1px_2px_-1px_rgba(0,0,0,0.16)]" : "bg-transparent text-muted-foreground"}`}
+                  onClick={() => {
+                    handleChange("status", "PUBLISHED");
+                    updateCourse({
+                      variables: {
+                        id: courseId ?? "",
+                        input: { status: "PUBLISHED" },
+                      },
+                    });
+                  }}
+                >
+                  Published
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {formData.status === "DRAFT"
+                  ? "Only admins can see this course."
+                  : "Visible to all learners."}
+              </p>
+            </div>
+          </div>
         )}
       </aside>
 
