@@ -40,7 +40,7 @@ function CourseBuilder() {
   return (
     <>
       {/* mobile tab buttons */}
-      <div className="flex gap-1 lg:hidden">
+      <div className="flex gap-1 lg:hidden pt-2">
         <button
           className={`text-sm font-medium cursor-pointer text-muted-foreground border-0 bg-transparent flex-1 py-[7px] px-3.5 rounded-[9px] transition-all duration-[120ms]
                   ${activeTab === "meta" ? "bg-background text-foreground shadow-[0px_2px_3px_0px_rgba(0,0,0,0.16),0px_1px_2px_-1px_rgba(0,0,0,0.16)]" : "bg-transparent text-muted-foreground"}`}
