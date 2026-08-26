@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useAdminCourseQuery, useUpdateCourseMutation } from "@synth-tree/api-types";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function CourseBuilder() {
   const { courseId } = useParams();
@@ -10,6 +10,8 @@ function CourseBuilder() {
     skip: !courseId,
   });
 
+  // Single object for all editable fields so we can reuse one generic
+  // handleChange/handleBlur pair instead of duplicating logic per field.
   const [formData, setFormData] = useState({ title: "", description: "", status: "" });
   const [activeTab, setActiveTab] = useState<"meta" | "tree" | "inspector">("meta");
   const [updateCourse] = useUpdateCourseMutation();
@@ -18,6 +20,9 @@ function CourseBuilder() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Sends only the single changed field, not the whole form — the
+  // updateCourse resolver treats omitted fields as "don't touch,"
+  // so this avoids accidentally overwriting other fields.
   const handleBlur = (field: string) => {
     updateCourse({
       variables: {
@@ -27,6 +32,9 @@ function CourseBuilder() {
     });
   };
 
+  // Query data loads asynchronously; seed local form state once it
+  // arrives so inputs are editable (can't bind inputs directly to
+  // query data, since there's no onChange path back to the server).
   useEffect(() => {
     if (data?.adminCourse) {
       setFormData({
@@ -65,6 +73,8 @@ function CourseBuilder() {
       </div>
 
       <div className="grid min-h-[calc(100vh-6rem)] grid-cols-1 gap-4 py-4 lg:grid-cols-[300px_1fr_320px]">
+        {/* Panes are shown/hidden by activeTab on mobile; lg:block forces
+    all three visible again once the 3-column desktop layout kicks in. */}
         <aside
           className={`rounded-lg border bg-card p-4 ${activeTab === "meta" ? "block" : "hidden"} lg:block`}
         >
@@ -144,6 +154,9 @@ function CourseBuilder() {
                     : "Visible to all learners."}
                 </p>
               </div>
+              {/* Difficulty and Estimated hours appear in the design mock but
+    aren't fields on the Course model — omitted from this ticket's
+    scope. See PR notes on SYN-64. */}
             </div>
           )}
         </aside>
