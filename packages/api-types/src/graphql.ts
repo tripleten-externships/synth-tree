@@ -6567,7 +6567,7 @@ export type UpdateCourseMutationVariables = Exact<{
 }>;
 
 
-export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', title: string, status: CourseStatus, description?: string | null } | null };
+export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, title: string, status: CourseStatus, description?: string | null } | null };
 
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6667,6 +6667,7 @@ export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typ
 export const UpdateCourseDocument = gql`
     mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
   updateCourse(id: $id, input: $input) {
+    id
     title
     status
     description

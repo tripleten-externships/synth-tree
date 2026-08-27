@@ -29,6 +29,8 @@ function CourseBuilder() {
         id: courseId ?? "",
         input: { [field]: formData[field as keyof typeof formData] },
       },
+    }).catch((err) => {
+      console.error("Failed to save:", err);
     });
   };
 
@@ -95,13 +97,21 @@ function CourseBuilder() {
                 <ChevronLeft className="h-4 w-4" />
                 All courses
               </Link>
+              <label htmlFor="course-title" className="sr-only">
+                Course title
+              </label>
               <input
+                id="course-title"
                 className="w-full mt-4 text-xl font-bold py-2.5 px-3 rounded-sm border border-transparent focus:outline-none focus:ring focus:ring-primary/15"
                 value={formData.title}
                 onChange={(e) => handleChange("title", e.target.value)}
                 onBlur={() => handleBlur("title")}
               />
+              <label htmlFor="course-description" className="sr-only">
+                Course description
+              </label>
               <textarea
+                id="course-description"
                 rows={3}
                 className="w-full text-sm text-muted-foreground mt-2 py-2.5 rounded-sm border border-transparent focus:outline-none focus:ring focus:ring-primary/15"
                 value={formData.description}
