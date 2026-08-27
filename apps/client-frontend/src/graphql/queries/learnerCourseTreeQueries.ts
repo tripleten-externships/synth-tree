@@ -24,4 +24,3 @@ query LearnerCourseTree($courseId: ID!) {
     }
   }
 }
-
