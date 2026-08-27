@@ -15,9 +15,10 @@ import ProfilePage from "./pages/ProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import NodePage from "./pages/NodePage";
 import CatalogPage from "./pages/CatalogPage";
-import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/auth/SignInPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/auth/SignUpPage";
+import { Toaster } from "@synth-tree/ui";
 
 // Shared shell for all authenticated routes.
 function ProtectedMainLayout() {
@@ -32,8 +33,8 @@ function ProtectedMainLayout() {
 
 const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/auth/login",
+    element: <SignInPage />,
   },
   {
     path: "/",
@@ -63,6 +64,7 @@ export default function App() {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <Toaster position="top-center" />
     </AuthProvider>
   );
 }
