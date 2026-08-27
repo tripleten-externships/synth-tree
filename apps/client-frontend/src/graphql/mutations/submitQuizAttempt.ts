@@ -9,6 +9,22 @@ export const SUBMIT_QUIZ_ATTEMPT = gql`
     submitQuizAttempt(quizId: $quizId, answers: $answers) {
       id
       passed
+      answers {
+        id
+        questionId
+        answer
+        isCorrect
+        question {
+          id
+          prompt
+          type
+          options {
+            id
+            text
+            isCorrect
+          }
+        }
+      }
     }
   }
 `;
