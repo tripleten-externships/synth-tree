@@ -73,62 +73,62 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   ]);
 
   const renderEmbed = (embedContent: string) => {
-  let src = "";
-  let title = "Embedded content";
-  let allow: string | undefined;
+    let src = "";
+    let title = "Embedded content";
+    let allow: string | undefined;
 
-  if (embedContent.trim().startsWith("<")) {
-    const sanitized = DOMPurify.sanitize(embedContent, {
-      ALLOWED_TAGS: ["iframe"],
-      ALLOWED_ATTR: [
-        "src",
-        "title",
-        "allow",
-        "allowfullscreen",
-        "frameborder",
-        "loading",
-        "referrerpolicy",
-      ],
-    });
+    if (embedContent.trim().startsWith("<")) {
+      const sanitized = DOMPurify.sanitize(embedContent, {
+        ALLOWED_TAGS: ["iframe"],
+        ALLOWED_ATTR: [
+          "src",
+          "title",
+          "allow",
+          "allowfullscreen",
+          "frameborder",
+          "loading",
+          "referrerpolicy",
+        ],
+      });
 
-    const doc = new DOMParser().parseFromString(sanitized, "text/html");
-    const iframe = doc.querySelector("iframe");
+      const doc = new DOMParser().parseFromString(sanitized, "text/html");
+      const iframe = doc.querySelector("iframe");
 
-    if (!iframe) return null;
+      if (!iframe) return null;
 
-    src = iframe.getAttribute("src") ?? "";
-    title = iframe.getAttribute("title") || "Embedded content";
-    allow = iframe.getAttribute("allow") || undefined;
-  } else {
-    src = embedContent;
-  }
+      src = iframe.getAttribute("src") ?? "";
+      title = iframe.getAttribute("title") || "Embedded content";
+      allow = iframe.getAttribute("allow") || undefined;
+    } else {
+      src = embedContent;
+    }
 
-  if (!src) return null;
+    if (!src) return null;
 
-  let hostname: string;
+    let hostname: string;
 
-  try {
-    hostname = new URL(src).hostname;
-  } catch {
-    return null;
-  }
+    try {
+      hostname = new URL(src).hostname;
+    } catch {
+      return null;
+    }
 
-  if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
-    return null;
-  }
+    if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
+      return null;
+    }
 
-  return (
-    <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-      <iframe
-        src={src}
-        title={title}
-        className="absolute top-0 left-0 w-full h-full border-0"
-        allow={allow}
-        allowFullScreen
-      />
-    </div>
-  );
-};
+    return (
+      <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
+        <iframe
+          src={src}
+          title={title}
+          className="absolute top-0 left-0 w-full h-full border-0"
+          allow={allow}
+          allowFullScreen
+        />
+      </div>
+    );
+  };
 
   const renderBlock = (block: (typeof blocks)[number]) => {
     switch (block.type) {
