@@ -1125,7 +1125,7 @@ type Mutation {
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
-  submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
+  submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
   syncCurrentUser(name: String, photoUrl: String): User
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
@@ -1604,6 +1604,12 @@ type Quiz {
   required: Boolean!
   title: String
   updatedAt: DateTime!
+}
+
+input QuizAnswerInput {
+  questionId: ID!
+  selectedOptionIds: [ID!]
+  text: String
 }
 
 type QuizAttempt {

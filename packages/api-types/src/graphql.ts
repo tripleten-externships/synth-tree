@@ -1284,7 +1284,7 @@ export type MutationStartNodeProgressArgs = {
 
 
 export type MutationSubmitQuizAttemptArgs = {
-  answers: Array<Scalars['String']['input']>;
+  answers: Array<QuizAnswerInput>;
   quizId: Scalars['ID']['input'];
 };
 
@@ -1985,6 +1985,12 @@ export type QuizQuestionsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<QuizQuestionWhereInput>;
+};
+
+export type QuizAnswerInput = {
+  questionId: Scalars['ID']['input'];
+  selectedOptionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  text?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QuizAttempt = {
@@ -6608,11 +6614,11 @@ export type StartNodeProgressMutation = { __typename?: 'Mutation', startNodeProg
 
 export type SubmitQuizAttemptMutationVariables = Exact<{
   quizId: Scalars['ID']['input'];
-  answers: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  answers: Array<QuizAnswerInput> | QuizAnswerInput;
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean, answers: Array<{ __typename?: 'QuizAttemptAnswer', questionId: string, isCorrect?: boolean | null }> } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -6878,10 +6884,14 @@ export function useStartNodeProgressMutation(baseOptions?: ApolloReactHooks.Muta
       }
 export type StartNodeProgressMutationHookResult = ReturnType<typeof useStartNodeProgressMutation>;
 export const SubmitQuizAttemptDocument = gql`
-    mutation SubmitQuizAttempt($quizId: ID!, $answers: [String!]!) {
+    mutation SubmitQuizAttempt($quizId: ID!, $answers: [QuizAnswerInput!]!) {
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    answers {
+      questionId
+      isCorrect
+    }
   }
 }
     `;
