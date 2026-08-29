@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
 
-type QuizOption = { id: string; text: string; isCorrect?: boolean };
+type QuizOption = {
+  id: string;
+  text: string;
+  isCorrect?: boolean;
+};
 
 type QuizQuestion = {
   id: string;
@@ -21,7 +25,10 @@ export type QuizForRunner = {
 type SubmittedAnswer = {
   id: string;
   questionId: string;
-  answer?: { selectedOptionIds?: string[]; text?: string } | null;
+  answer?: {
+    selectedOptionIds?: string[];
+    text?: string;
+  } | null;
   isCorrect?: boolean | null;
   question: QuizQuestion;
 };
@@ -32,14 +39,17 @@ type QuizAttemptResult = {
   answers: SubmittedAnswer[];
 };
 
-type SubmitResult = { submitQuizAttempt: QuizAttemptResult | null };
+type SubmitResult = {
+  submitQuizAttempt: QuizAttemptResult | null;
+};
 
 export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   const [choice, setChoice] = useState<Record<string, string[]>>({});
   const [text, setText] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
 
-  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
+  const [submit, { loading, error }] =
+    useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
 
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {
@@ -48,11 +58,16 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       if (multiple) {
         return {
           ...prev,
-          [qId]: cur.includes(optId) ? cur.filter((x) => x !== optId) : [...cur, optId],
+          [qId]: cur.includes(optId)
+            ? cur.filter((x) => x !== optId)
+            : [...cur, optId],
         };
       }
 
-      return { ...prev, [qId]: [optId] };
+      return {
+        ...prev,
+        [qId]: [optId],
+      };
     });
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -63,12 +78,22 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
         questionId: q.id,
         answer:
           q.type === "OPEN_QUESTION"
-            ? { text: text[q.id] ?? "" }
-            : { selectedOptionIds: choice[q.id] ?? [] },
+            ? {
+                text: text[q.id] ?? "",
+              }
+            : {
+                selectedOptionIds: choice[q.id] ?? [],
+              },
       }),
     );
 
-    const res = await submit({ variables: { quizId: quiz.id, answers } });
+    const res = await submit({
+      variables: {
+        quizId: quiz.id,
+        answers,
+      },
+    });
+
     setResult(res.data?.submitQuizAttempt ?? null);
   };
 
@@ -79,19 +104,33 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   };
 
   if (result) {
-    const incorrectAnswers = result.answers.filter((answer) => answer.isCorrect === false);
+    const incorrectAnswers = result.answers.filter(
+      (answer) => answer.isCorrect === false,
+    );
 
     return (
       <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 rounded-2xl bg-emerald-50 p-5">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+        <div
+          className={`mb-6 rounded-2xl p-5 ${
+            result.passed ? "bg-emerald-50" : "bg-red-50"
+          }`}
+        >
+          <p
+            className={`text-sm font-semibold uppercase tracking-wide ${
+              result.passed ? "text-emerald-700" : "text-red-700"
+            }`}
+          >
             Quiz submitted
           </p>
+
           <h2 className="mt-1 text-2xl font-bold text-gray-900">
             {result.passed ? "You passed!" : "Keep practicing"}
           </h2>
+
           {result.passed ? (
-            <p className="mt-2 text-sm text-emerald-800">Passed quiz complete.</p>
+            <p className="mt-2 text-sm text-emerald-800">
+              You have completed this quiz.
+            </p>
           ) : (
             <p className="mt-2 text-sm text-gray-700">
               Review the questions below, then retry when you are ready.
@@ -101,50 +140,78 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
 
         <div className="flex flex-col gap-4">
           {result.answers.map((answer, index) => {
-            const selectedOptionIds = answer.answer?.selectedOptionIds ?? [];
+            const selectedOptionIds =
+              answer.answer?.selectedOptionIds ?? [];
+
             const selectedOptions = answer.question.options.filter((option) =>
               selectedOptionIds.includes(option.id),
             );
-            const correctOptions = answer.question.options.filter((option) => option.isCorrect);
+
+            const correctOptions = answer.question.options.filter(
+              (option) => option.isCorrect,
+            );
+
             const isIncorrect = answer.isCorrect === false;
+            const isNotGraded =
+              answer.isCorrect === null ||
+              answer.isCorrect === undefined;
 
             return (
               <div
                 key={answer.id}
                 className={`rounded-2xl border p-4 ${
-                  isIncorrect ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"
+                  isIncorrect
+                    ? "border-red-200 bg-red-50"
+                    : isNotGraded
+                      ? "border-gray-200 bg-gray-50"
+                      : "border-emerald-200 bg-emerald-50"
                 }`}
               >
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <p className="font-medium text-gray-900">
                     {index + 1}. {answer.question.prompt}
                   </p>
+
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      isIncorrect ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"
+                      isIncorrect
+                        ? "bg-red-100 text-red-700"
+                        : isNotGraded
+                          ? "bg-gray-200 text-gray-700"
+                          : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
-                    {isIncorrect ? "Incorrect" : "Correct"}
+                    {isIncorrect
+                      ? "Incorrect"
+                      : isNotGraded
+                        ? "Not graded"
+                        : "Correct"}
                   </span>
                 </div>
 
                 {answer.question.type === "OPEN_QUESTION" ? (
                   <p className="text-sm text-gray-700">
-                    Your answer: {answer.answer?.text || "No answer provided"}
+                    Your answer:{" "}
+                    {answer.answer?.text || "No answer provided"}
                   </p>
                 ) : (
                   <div className="space-y-1 text-sm text-gray-700">
                     <p>
                       Your answer:{" "}
                       {selectedOptions.length > 0
-                        ? selectedOptions.map((option) => option.text).join(", ")
+                        ? selectedOptions
+                            .map((option) => option.text)
+                            .join(", ")
                         : "No answer selected"}
                     </p>
+
                     {isIncorrect && (
                       <p>
                         Correct answer:{" "}
                         {correctOptions.length > 0
-                          ? correctOptions.map((option) => option.text).join(", ")
+                          ? correctOptions
+                              .map((option) => option.text)
+                              .join(", ")
                           : "Not available"}
                       </p>
                     )}
@@ -186,10 +253,16 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
             <p className="mb-2 font-medium text-gray-800">
               {i + 1}. {q.prompt}
             </p>
+
             {q.type === "OPEN_QUESTION" ? (
               <textarea
                 value={text[q.id] ?? ""}
-                onChange={(e) => setText((p) => ({ ...p, [q.id]: e.target.value }))}
+                onChange={(e) =>
+                  setText((p) => ({
+                    ...p,
+                    [q.id]: e.target.value,
+                  }))
+                }
                 rows={3}
                 placeholder="Your answer…"
                 className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
@@ -200,13 +273,19 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                   const multiple = q.type === "MULTIPLE_CHOICE";
 
                   return (
-                    <label key={o.id} className="flex items-center gap-2 text-sm text-gray-700">
+                    <label
+                      key={o.id}
+                      className="flex items-center gap-2 text-sm text-gray-700"
+                    >
                       <input
                         type={multiple ? "checkbox" : "radio"}
                         name={q.id}
                         checked={(choice[q.id] ?? []).includes(o.id)}
-                        onChange={() => toggle(q.id, o.id, multiple)}
+                        onChange={() =>
+                          toggle(q.id, o.id, multiple)
+                        }
                       />
+
                       {o.text}
                     </label>
                   );
@@ -224,7 +303,12 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
           >
             {loading ? "Submitting…" : "Submit quiz"}
           </button>
-          {error && <span className="text-sm text-red-600">Could not submit.</span>}
+
+          {error && (
+            <span className="text-sm text-red-600">
+              Could not submit.
+            </span>
+          )}
         </div>
       </form>
     </section>
