@@ -9,8 +9,12 @@ builder.queryFields((t) => ({
     resolve: async (query, _parent, args, ctx) => {
       const userId = ctx.auth.requireAuth();
 
-      return ctx.prisma.course.findUnique({
-        where: { id: args.id },
+      return ctx.prisma.course.findFirst({
+        where: {
+          id: args.id,
+          status: "PUBLISHED",
+          deletedAt: null,
+         },
         include: {
           trees: {
             where: { deletedAt: null},

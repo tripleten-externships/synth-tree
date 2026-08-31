@@ -13,9 +13,6 @@ export const LEARNER_COURSE_QUERY = gql`
           title
           posX
           posY
-          isBoss
-          xpReward
-          lessonCount
           prerequisites { dependsOnNodeId }
           progressForViewer { status completedAt }
         }
