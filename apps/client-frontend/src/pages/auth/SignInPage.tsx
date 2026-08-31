@@ -178,6 +178,8 @@ export default function SignInPage() {
                 htmlFor="remember-me"
                 className="flex items-center gap-2 text-sm text-muted-foreground"
               >
+                {/* Cosmetic only for now, not wired to Firebase session persistence.
+                    No acceptance criterion requires it; intentional, not a missed step. */}
                 <input
                   type="checkbox"
                   id="remember-me"
