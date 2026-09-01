@@ -1284,7 +1284,7 @@ export type MutationStartNodeProgressArgs = {
 
 
 export type MutationSubmitQuizAttemptArgs = {
-  answers: Array<Scalars['String']['input']>;
+  answers: Array<QuizAnswerInput>;
   quizId: Scalars['ID']['input'];
 };
 
@@ -1766,6 +1766,7 @@ export type Query = {
   adminSkillTree?: Maybe<SkillTree>;
   adminSkillTrees?: Maybe<Array<SkillTree>>;
   allUsers?: Maybe<Array<User>>;
+  courseForLearner?: Maybe<Course>;
   courseProgress?: Maybe<CourseProgress>;
   currentUser?: Maybe<User>;
   lessonBlock?: Maybe<LessonBlocks>;
@@ -1865,6 +1866,11 @@ export type QueryAdminSkillTreesArgs = {
 export type QueryAllUsersArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryCourseForLearnerArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1985,6 +1991,12 @@ export type QuizQuestionsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<QuizQuestionWhereInput>;
+};
+
+export type QuizAnswerInput = {
+  questionId: Scalars['ID']['input'];
+  selectedOptionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  text?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QuizAttempt = {
@@ -2763,7 +2775,7 @@ export type QuizOption = {
   __typename?: 'QuizOption';
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
-  isCorrect: Scalars['Boolean']['output'];
+  isCorrect?: Maybe<Scalars['Boolean']['output']>;
   question: QuizQuestion;
   questionId: Scalars['String']['output'];
   text: Scalars['String']['output'];
@@ -3612,6 +3624,7 @@ export type SkillNode = {
   posX?: Maybe<Scalars['Int']['output']>;
   posY?: Maybe<Scalars['Int']['output']>;
   prerequisites: Array<SkillNodePrerequisite>;
+  progressForViewer?: Maybe<UserNodeProgress>;
   progresses: Array<UserNodeProgress>;
   quiz?: Maybe<Quiz>;
   requiredFor: Array<SkillNodePrerequisite>;
@@ -6623,11 +6636,11 @@ export type StartNodeProgressMutation = { __typename?: 'Mutation', startNodeProg
 
 export type SubmitQuizAttemptMutationVariables = Exact<{
   quizId: Scalars['ID']['input'];
-  answers: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  answers: Array<QuizAnswerInput> | QuizAnswerInput;
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -6636,6 +6649,13 @@ export type SyncCurrentUserMutationVariables = Exact<{
 
 
 export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
+
+export type LearnerCourseTreeQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null } | null }> }> } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -6964,10 +6984,26 @@ export function useStartNodeProgressMutation(baseOptions?: ApolloReactHooks.Muta
       }
 export type StartNodeProgressMutationHookResult = ReturnType<typeof useStartNodeProgressMutation>;
 export const SubmitQuizAttemptDocument = gql`
-    mutation SubmitQuizAttempt($quizId: ID!, $answers: [String!]!) {
+    mutation SubmitQuizAttempt($quizId: ID!, $answers: [QuizAnswerInput!]!) {
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    answers {
+      id
+      questionId
+      answer
+      isCorrect
+      question {
+        id
+        prompt
+        type
+        options {
+          id
+          text
+          isCorrect
+        }
+      }
+    }
   }
 }
     `;
@@ -7030,6 +7066,58 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const LearnerCourseTreeDocument = gql`
+    query LearnerCourseTree($courseId: ID!) {
+  courseForLearner(id: $courseId) {
+    id
+    title
+    description
+    trees {
+      id
+      nodes {
+        id
+        title
+        posX
+        posY
+        prerequisites {
+          dependsOnNodeId
+        }
+        progressForViewer {
+          status
+          completedAt
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useLearnerCourseTreeQuery__
+ *
+ * To run a query within a React component, call `useLearnerCourseTreeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLearnerCourseTreeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLearnerCourseTreeQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useLearnerCourseTreeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables> & ({ variables: LearnerCourseTreeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>(LearnerCourseTreeDocument, options);
+      }
+export function useLearnerCourseTreeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>(LearnerCourseTreeDocument, options);
+        }
+export type LearnerCourseTreeQueryHookResult = ReturnType<typeof useLearnerCourseTreeQuery>;
+export type LearnerCourseTreeLazyQueryHookResult = ReturnType<typeof useLearnerCourseTreeLazyQuery>;
 export const LessonBlocksByNodeDocument = gql`
     query LessonBlocksByNode($nodeId: ID!) {
   lessonBlocksByNode(nodeId: $nodeId) {
