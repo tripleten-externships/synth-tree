@@ -6561,10 +6561,25 @@ export type XpEventWhereUniqueInput = {
   userId?: InputMaybe<StringFilter>;
 };
 
+export type UpdateCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateCourseInput;
+}>;
+
+
+export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, title: string, status: CourseStatus, description?: string | null } | null };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
+
+export type AdminCourseQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
 
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6649,6 +6664,40 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const UpdateCourseDocument = gql`
+    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
+  updateCourse(id: $id, input: $input) {
+    id
+    title
+    status
+    description
+  }
+}
+    `;
+
+/**
+ * __useUpdateCourseMutation__
+ *
+ * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+      }
+export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {
@@ -6689,6 +6738,43 @@ export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
 export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
+export const AdminCourseDocument = gql`
+    query AdminCourse($id: ID!) {
+  adminCourse(id: $id) {
+    id
+    title
+    description
+    status
+  }
+}
+    `;
+
+/**
+ * __useAdminCourseQuery__
+ *
+ * To run a query within a React component, call `useAdminCourseQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminCourseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminCourseQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminCourseQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables> & ({ variables: AdminCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+      }
+export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+        }
+export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
+export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {

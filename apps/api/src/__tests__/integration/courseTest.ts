@@ -167,7 +167,10 @@ describe("Course CRUD", () => {
     });
 
     describe("updateCourse", () => {
-      it("allow the course owner to update their own course", async () => {
+      it("block a non-admin course owner from updating (editing is admin-only)", async () => {
+        // updateCourse now requires admin (requireAdmin), so even the course
+        // author cannot edit unless they are an admin. Course editing happens
+        // through the admin dashboard, where all editors are admins.
         const course = await prisma.course.create({
           data: {
             title: "Owner Course",
@@ -186,8 +189,7 @@ describe("Course CRUD", () => {
           ),
         );
 
-        expect(res.errors).toBeUndefined();
-        expect(res.data.updateCourse.title).toBe("Owner Updated");
+        expect(res.errors).toBeDefined();
       });
 
       it("allow admin to update any course", async () => {
