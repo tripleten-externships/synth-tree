@@ -2371,7 +2371,7 @@ input QuizNullableScalarRelationFilter {
 type QuizOption {
   createdAt: DateTime!
   id: ID!
-  isCorrect: Boolean!
+  isCorrect: Boolean
   question: QuizQuestion!
   questionId: String!
   text: String!
