@@ -11,4 +11,5 @@ import "./skillNode.owner.queries";
 import "./skillNode.queries";
 import "./skillTree.admin.queries";
 import "./skillTree.owner.queries";
+import "./skillTree.learner.queries";
 import "./user.queries";

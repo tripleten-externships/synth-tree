@@ -79,7 +79,33 @@ builder.prismaObject("User", {
 });
 builder.prismaObject("Course", CourseObject);
 builder.prismaObject("SkillTree", SkillTreeObject);
-builder.prismaObject("SkillNode", SkillNodeObject);
+builder.prismaObject("SkillNode", {
+  ...SkillNodeObject,
+  fields: (t) => ({
+    ...SkillNodeObject.fields(t),
+
+    // The authenticated viewer's progress row for this node, or null if they
+    // have no progress record yet. Lets the learner tree query surface per-node
+    // status (NOT_STARTED / IN_PROGRESS / COMPLETED) without a second round-trip.
+    progressForViewer: t.prismaField({
+      type: "UserNodeProgress",
+      nullable: true,
+      resolve: async (query, parent, _args, ctx) => {
+        const userId = ctx.auth.requireAuth();
+
+        return ctx.prisma.userNodeProgress.findUnique({
+          ...query,
+          where: {
+            userId_nodeId: {
+              userId,
+              nodeId: parent.id,
+            },
+          },
+        });
+      },
+    }),
+  }),
+});
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
