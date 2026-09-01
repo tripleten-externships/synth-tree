@@ -399,7 +399,7 @@ builder.mutationFields((t) => ({
           ...query,
           data: {
             quizId,
-            userId: ctx.user!.uid,
+            userId,
             passed: false,
             answers: {
               create: parsedAnswers.map(({ questionId, answer }) => ({

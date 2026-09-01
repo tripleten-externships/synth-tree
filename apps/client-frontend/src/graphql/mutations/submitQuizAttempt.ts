@@ -6,8 +6,20 @@ export const SUBMIT_QUIZ_ATTEMPT = gql`
       id
       passed
       answers {
+        id
         questionId
+        answer
         isCorrect
+        question {
+          id
+          prompt
+          type
+          options {
+            id
+            text
+            isCorrect
+          }
+        }
       }
     }
   }

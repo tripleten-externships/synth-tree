@@ -1766,6 +1766,7 @@ export type Query = {
   adminSkillTree?: Maybe<SkillTree>;
   adminSkillTrees?: Maybe<Array<SkillTree>>;
   allUsers?: Maybe<Array<User>>;
+  courseForLearner?: Maybe<Course>;
   courseProgress?: Maybe<CourseProgress>;
   currentUser?: Maybe<User>;
   lessonBlock?: Maybe<LessonBlocks>;
@@ -1865,6 +1866,11 @@ export type QueryAdminSkillTreesArgs = {
 export type QueryAllUsersArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryCourseForLearnerArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2769,7 +2775,7 @@ export type QuizOption = {
   __typename?: 'QuizOption';
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
-  isCorrect: Scalars['Boolean']['output'];
+  isCorrect?: Maybe<Scalars['Boolean']['output']>;
   question: QuizQuestion;
   questionId: Scalars['String']['output'];
   text: Scalars['String']['output'];
@@ -3618,6 +3624,7 @@ export type SkillNode = {
   posX?: Maybe<Scalars['Int']['output']>;
   posY?: Maybe<Scalars['Int']['output']>;
   prerequisites: Array<SkillNodePrerequisite>;
+  progressForViewer?: Maybe<UserNodeProgress>;
   progresses: Array<UserNodeProgress>;
   quiz?: Maybe<Quiz>;
   requiredFor: Array<SkillNodePrerequisite>;
@@ -6567,10 +6574,25 @@ export type XpEventWhereUniqueInput = {
   userId?: InputMaybe<StringFilter>;
 };
 
+export type UpdateCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateCourseInput;
+}>;
+
+
+export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, title: string, status: CourseStatus, description?: string | null } | null };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
+
+export type AdminCourseQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
 
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6618,7 +6640,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean, answers: Array<{ __typename?: 'QuizAttemptAnswer', questionId: string, isCorrect?: boolean | null }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -6627,6 +6649,13 @@ export type SyncCurrentUserMutationVariables = Exact<{
 
 
 export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
+
+export type LearnerCourseTreeQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null } | null }> }> } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -6655,6 +6684,40 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const UpdateCourseDocument = gql`
+    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
+  updateCourse(id: $id, input: $input) {
+    id
+    title
+    status
+    description
+  }
+}
+    `;
+
+/**
+ * __useUpdateCourseMutation__
+ *
+ * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+      }
+export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {
@@ -6695,6 +6758,43 @@ export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
 export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
+export const AdminCourseDocument = gql`
+    query AdminCourse($id: ID!) {
+  adminCourse(id: $id) {
+    id
+    title
+    description
+    status
+  }
+}
+    `;
+
+/**
+ * __useAdminCourseQuery__
+ *
+ * To run a query within a React component, call `useAdminCourseQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminCourseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminCourseQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminCourseQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables> & ({ variables: AdminCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+      }
+export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+        }
+export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
+export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -6889,8 +6989,20 @@ export const SubmitQuizAttemptDocument = gql`
     id
     passed
     answers {
+      id
       questionId
+      answer
       isCorrect
+      question {
+        id
+        prompt
+        type
+        options {
+          id
+          text
+          isCorrect
+        }
+      }
     }
   }
 }
@@ -6954,6 +7066,58 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const LearnerCourseTreeDocument = gql`
+    query LearnerCourseTree($courseId: ID!) {
+  courseForLearner(id: $courseId) {
+    id
+    title
+    description
+    trees {
+      id
+      nodes {
+        id
+        title
+        posX
+        posY
+        prerequisites {
+          dependsOnNodeId
+        }
+        progressForViewer {
+          status
+          completedAt
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useLearnerCourseTreeQuery__
+ *
+ * To run a query within a React component, call `useLearnerCourseTreeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLearnerCourseTreeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLearnerCourseTreeQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useLearnerCourseTreeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables> & ({ variables: LearnerCourseTreeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>(LearnerCourseTreeDocument, options);
+      }
+export function useLearnerCourseTreeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<LearnerCourseTreeQuery, LearnerCourseTreeQueryVariables>(LearnerCourseTreeDocument, options);
+        }
+export type LearnerCourseTreeQueryHookResult = ReturnType<typeof useLearnerCourseTreeQuery>;
+export type LearnerCourseTreeLazyQueryHookResult = ReturnType<typeof useLearnerCourseTreeLazyQuery>;
 export const LessonBlocksByNodeDocument = gql`
     query LessonBlocksByNode($nodeId: ID!) {
   lessonBlocksByNode(nodeId: $nodeId) {
