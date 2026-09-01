@@ -43,6 +43,7 @@ enum ContentType {
   VIDEO
   EMBED
   HTML
+  PAGE_BREAK // page boundary marker: splits a lesson into pages; carries no url/html
 }
 
 enum LessonStatus {

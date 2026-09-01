@@ -62,6 +62,7 @@ export type ContentType =
   | 'EMBED'
   | 'HTML'
   | 'IMAGE'
+  | 'PAGE_BREAK'
   | 'VIDEO';
 
 export type Course = {

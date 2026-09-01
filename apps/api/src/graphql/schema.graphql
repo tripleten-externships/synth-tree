@@ -38,6 +38,7 @@ enum ContentType {
   EMBED
   HTML
   IMAGE
+  PAGE_BREAK
   VIDEO
 }
 
