@@ -110,7 +110,39 @@ builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
 builder.prismaObject("QuizQuestion", QuizQuestionObject);
-builder.prismaObject("QuizOption", QuizOptionObject);
+builder.prismaObject("QuizOption", {
+  ...QuizOptionObject,
+  fields: (t) => ({
+    ...QuizOptionObject.fields(t),
+
+    // Answer-key guard. isCorrect is only revealed to admins, or to a learner
+    // who has already submitted an attempt for this option's quiz. Otherwise it
+    // resolves to null, so a hand-crafted query can't read correct answers
+    // before submitting. The results screen reads it post-submit (allowed).
+    isCorrect: t.boolean({
+      nullable: true,
+      resolve: async (parent, _args, ctx) => {
+        if (ctx.auth.isAdmin()) return parent.isCorrect;
+
+        const userId = ctx.auth.getUserId();
+        if (!userId) return null;
+
+        const question = await ctx.prisma.quizQuestion.findUnique({
+          where: { id: parent.questionId },
+          select: { quizId: true },
+        });
+        if (!question) return null;
+
+        const attempt = await ctx.prisma.quizAttempt.findFirst({
+          where: { quizId: question.quizId, userId },
+          select: { id: true },
+        });
+
+        return attempt ? parent.isCorrect : null;
+      },
+    }),
+  }),
+});
 builder.prismaObject("QuizAttempt", QuizAttemptObject);
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
 builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
