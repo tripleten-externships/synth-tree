@@ -16,6 +16,7 @@ import { UserNodeProgressObject } from "@graphql/__generated__/UserNodeProgress"
 import { UserXpObject } from "@graphql/__generated__/UserXp";
 import { UserStreakObject } from "@graphql/__generated__/UserStreak";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
+import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
 
 // We are not using the auto crud from pothos. Utilize the prisma models. Inputs types and other types will still need to be manually created.
 // Can break this file into multiple. Used one now for brevity.
@@ -93,7 +94,7 @@ builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
 builder.prismaObject("UserXp", UserXpObject);
 builder.prismaObject("UserStreak", UserStreakObject);
 builder.prismaObject("XpEvent", XpEventObject);
-
+builder.prismaObject("UserDailyQuest", UserDailyQuestObject);
 export type CourseProgressShape = {
   courseId: string;
   totalNodes: number;

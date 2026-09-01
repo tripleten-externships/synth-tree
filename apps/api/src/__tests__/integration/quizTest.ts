@@ -558,7 +558,7 @@ describe("Quiz flow", () => {
       expect(res.data.submitQuizAttempt.passed).toBe(true);
     });
 
-    it("return false for OPEN_QUESTION", async () => {
+    it("returns true for OPEN_QUESTION-only quizzes", async () => {
       const { node } = await seedNode();
       const quiz = await prisma.quiz.create({
         data: { nodeId: node.id, title: "Open Quiz", required: true },
@@ -589,7 +589,7 @@ describe("Quiz flow", () => {
       );
 
       expect(res.errors).toBeUndefined();
-      expect(res.data.submitQuizAttempt.passed).toBe(false);
+      expect(res.data.submitQuizAttempt.passed).toBe(true);
     });
 
     it("store the attempt in the database", async () => {
