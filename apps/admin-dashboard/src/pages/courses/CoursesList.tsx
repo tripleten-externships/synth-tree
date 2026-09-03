@@ -1,9 +1,6 @@
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import {
-  useAdminGetAllCoursesQuery,
-  AdminGetAllCoursesDocument,
-} from "@synth-tree/api-types";
+import { useAdminGetAllCoursesQuery, AdminGetAllCoursesDocument } from "@synth-tree/api-types";
 import type { AdminGetAllCoursesQuery, CourseStatus } from "@synth-tree/api-types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -156,10 +153,7 @@ const CourseCard = ({ course, onDelete, onPublish, onEdit, Icon }: CourseCardPro
     <div className="absolute top-4 right-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button
-            className="p-1 rounded hover:bg-gray-100"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <button className="p-1 rounded hover:bg-gray-100" onClick={(e) => e.stopPropagation()}>
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </button>
         </DropdownMenuTrigger>
@@ -213,15 +207,20 @@ type CreateCourseModalProps = {
 const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate();
 
-  const [createCourse, { loading }] = useMutation(CREATE_COURSE, {
-    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
-    onCompleted: () => {
-      setTitle("");
-      setDescription("");
-      onCreated();
+  const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } }>(
+    CREATE_COURSE,
+    {
+      refetchQueries: [{ query: AdminGetAllCoursesDocument }],
+      onCompleted: ({ createCourse }) => {
+        setTitle("");
+        setDescription("");
+        onCreated();
+        navigate(`/courses/${createCourse.id}/edit`);
+      },
     },
-  });
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,9 +361,7 @@ const CoursesList = () => {
   const allCourses: Course[] = data?.adminGetAllCourses ?? [];
 
   const courses =
-    statusFilter === "ALL"
-      ? allCourses
-      : allCourses.filter((c) => c.status === statusFilter);
+    statusFilter === "ALL" ? allCourses : allCourses.filter((c) => c.status === statusFilter);
 
   const isEmpty = !loading && !error && courses.length === 0;
 
@@ -500,7 +497,9 @@ const CoursesList = () => {
                     <tr key={course.id} className="border-t">
                       <td className="px-4 py-3 align-top">
                         <div className="font-medium text-gray-900">{course.title}</div>
-                        <div className="text-xs text-gray-500">by {course.author.name ?? "Unknown"}</div>
+                        <div className="text-xs text-gray-500">
+                          by {course.author.name ?? "Unknown"}
+                        </div>
                       </td>
                       <td className="px-4 py-3 align-top">
                         <StatusBadge status={course.status} />
@@ -511,9 +510,24 @@ const CoursesList = () => {
                       <td className="px-4 py-3 align-top">{relativeTime(course.updatedAt)}</td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => navigate(`/courses/${course.id}/edit`)} className="text-sm text-blue-600">Open</button>
-                          <button onClick={() => handlePublish(course.id)} className="text-sm text-gray-600">{course.status === "PUBLISHED" ? "Unpublish" : "Publish"}</button>
-                          <button onClick={() => handleDelete(course.id)} className="text-sm text-red-600">Delete</button>
+                          <button
+                            onClick={() => navigate(`/courses/${course.id}/edit`)}
+                            className="text-sm text-blue-600"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={() => handlePublish(course.id)}
+                            className="text-sm text-gray-600"
+                          >
+                            {course.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(course.id)}
+                            className="text-sm text-red-600"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -539,8 +553,7 @@ const CoursesList = () => {
             <DialogTitle>Delete course</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600 mt-2">
-            Delete course{" "}
-            <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
+            Delete course <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
             will lose access. This can be undone by an admin.
           </p>
           <DialogFooter className="mt-4">
