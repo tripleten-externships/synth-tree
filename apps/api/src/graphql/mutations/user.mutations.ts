@@ -63,6 +63,28 @@ builder.mutationFields((t) => ({
     },
   }),
 
+  // Save onboarding selections for the signed-in user (SYN-46, signup step 2).
+  // The User row already exists (created by syncCurrentUser in step 1), so this is a plain update.
+  updateOnboarding: t.prismaField({
+    type: "User",
+    args: {
+      // Required list; an empty array is valid and means the user skipped picking interests.
+      interests: t.arg({ type: ["String"], required: true }),
+    },
+    resolve: async (query, _parent, args, context) => {
+      const firebaseUid = context.auth.requireAuth();
+
+      const user = await context.prisma.user.update({
+        ...query,
+        where: { id: firebaseUid },
+        data: { interests: args.interests },
+      });
+
+      logger.info({ userId: user.id }, 'Onboarding interests saved');
+      return user;
+    },
+  }),
+
   deleteUser: t.prismaField({
     type: "User",
     args: {

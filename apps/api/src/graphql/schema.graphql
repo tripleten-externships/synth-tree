@@ -1130,6 +1130,7 @@ type Mutation {
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
+  updateOnboarding(interests: [String!]!): User
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
   updateQuizOption(id: ID!, isCorrect: Boolean, text: String): QuizOption
   updateQuizQuestion(id: ID!, order: Int, prompt: String): QuizQuestion
@@ -4487,6 +4488,14 @@ input StringNullableFilter {
   startsWith: String
 }
 
+input StringNullableListFilter {
+  equals: [String!]
+  has: String
+  hasEvery: [String!]
+  hasSome: [String!]
+  isEmpty: Boolean
+}
+
 input StringNullableWithAggregatesFilter {
   _count: NestedIntNullableFilter
   _max: NestedStringNullableFilter
@@ -4552,6 +4561,7 @@ type User {
   createdAt: DateTime!
   email: String!
   id: ID!
+  interests: [String!]!
   name: String
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   photoUrl: String
@@ -4568,6 +4578,7 @@ input UserCountOrderByAggregateInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   photoUrl: SortOrder
   role: SortOrder
@@ -4579,6 +4590,7 @@ input UserCreateInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4594,6 +4606,7 @@ input UserCreateManyInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   photoUrl: String
   role: Role
@@ -4670,6 +4683,7 @@ input UserCreateWithoutCoursesAuthoredInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4686,6 +4700,7 @@ input UserCreateWithoutNodeProgressInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
@@ -4701,6 +4716,7 @@ input UserCreateWithoutQuizAttemptsInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4716,6 +4732,7 @@ input UserCreateWithoutStreakInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4731,6 +4748,7 @@ input UserCreateWithoutXpEventsInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4746,6 +4764,7 @@ input UserCreateWithoutXpInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4754,6 +4773,10 @@ input UserCreateWithoutXpInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
   xpEvents: XpEventCreateNestedManyWithoutUserInput
+}
+
+input UserCreateinterestsInput {
+  set: [String!]!
 }
 
 input UserMaxOrderByAggregateInput {
@@ -5118,6 +5141,7 @@ input UserOrderByWithAggregationInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   photoUrl: SortOrder
   role: SortOrder
@@ -5129,6 +5153,7 @@ input UserOrderByWithRelationInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   nodeProgress: UserNodeProgressOrderByRelationAggregateInput
   photoUrl: SortOrder
@@ -5144,6 +5169,7 @@ enum UserScalarFieldEnum {
   createdAt
   email
   id
+  interests
   name
   photoUrl
   role
@@ -5162,6 +5188,7 @@ input UserScalarWhereWithAggregatesInput {
   createdAt: DateTimeWithAggregatesFilter
   email: StringWithAggregatesFilter
   id: StringWithAggregatesFilter
+  interests: StringNullableListFilter
   name: StringNullableWithAggregatesFilter
   photoUrl: StringNullableWithAggregatesFilter
   role: EnumRoleWithAggregatesFilter
@@ -5347,6 +5374,7 @@ input UserUpdateInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5362,6 +5390,7 @@ input UserUpdateManyMutationInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
@@ -5450,6 +5479,7 @@ input UserUpdateWithoutCoursesAuthoredInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5466,6 +5496,7 @@ input UserUpdateWithoutNodeProgressInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -5481,6 +5512,7 @@ input UserUpdateWithoutQuizAttemptsInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5496,6 +5528,7 @@ input UserUpdateWithoutStreakInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5511,6 +5544,7 @@ input UserUpdateWithoutXpEventsInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5526,6 +5560,7 @@ input UserUpdateWithoutXpInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5534,6 +5569,11 @@ input UserUpdateWithoutXpInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
+}
+
+input UserUpdateinterestsInput {
+  push: [String!]
+  set: [String!]
 }
 
 input UserUpsertWithoutCoursesAuthoredInput {
@@ -5580,6 +5620,7 @@ input UserWhereInput {
   createdAt: DateTimeFilter
   email: StringFilter
   id: StringFilter
+  interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter
@@ -5599,6 +5640,7 @@ input UserWhereUniqueInput {
   createdAt: DateTimeFilter
   email: String
   id: String
+  interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter
