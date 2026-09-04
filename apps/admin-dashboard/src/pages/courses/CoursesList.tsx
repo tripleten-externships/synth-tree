@@ -211,6 +211,9 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
+  // Manually typed since this file uses the raw gql + useMutation
+  // pattern (not a codegen-generated hook) — needed for onCompleted's
+  // data to be typed.
   const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } }>(
     CREATE_COURSE,
     {
@@ -219,6 +222,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
         setTitle("");
         setDescription("");
         onCreated();
+        // SYN-62: navigate to the new course's builder page on success
         navigate(`/courses/${createCourse.id}/edit`);
       },
     },
