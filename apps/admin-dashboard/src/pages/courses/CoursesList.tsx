@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -22,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
   Input,
   toast,
 } from "@synth-tree/ui";
@@ -232,7 +234,8 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Course</DialogTitle>
+          <DialogTitle>New Course</DialogTitle>
+          <DialogDescription>Set the basics — you can edit anytime</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
@@ -245,6 +248,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Organic Chemistry"
               required
+              className="focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:border-primary focus-visible:ring-offset-0"
             />
           </div>
           <div>
@@ -253,23 +257,16 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description of the course"
+              className="focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:border-primary focus-visible:ring-offset-0"
             />
           </div>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
-            >
+            <Button type="button" onClick={onClose} variant="outline">
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !title.trim()}
-              className="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={loading || !title.trim()} variant="default">
               {loading ? "Creating..." : "Create Course"}
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
