@@ -7,8 +7,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { AuthFeature } from "./features/auth";
 import DashboardLayout from "./layouts/DashboardLayout";
 import CourseBuilder from "./pages/courses/CourseBuilder";
-import LessonEditor from "./pages/lessons/LessonEditor";
 import CoursesList from "./pages/courses/CoursesList";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (

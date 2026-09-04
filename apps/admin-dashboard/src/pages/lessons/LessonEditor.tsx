@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
-import DOMPurify from 'dompurify';
-import { ChevronLeft, Eye, Check, Trash, Plus, Pen, AlignJustify, Image, PlaySquare, Code2, GripVertical} from 'lucide-react';
-import { Button, Input } from "@synth-tree/ui";
-import {DndContext,closestCenter,type DragEndEvent} from "@dnd-kit/core";
-import {SortableContext,verticalListSortingStrategy,useSortable,arrayMove} from "@dnd-kit/sortable";
+import {closestCenter,DndContext,type DragEndEvent} from "@dnd-kit/core";
+import {arrayMove,SortableContext,useSortable,verticalListSortingStrategy} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Button, Input } from "@synth-tree/ui";
+import DOMPurify from 'dompurify';
+import { AlignJustify, Check, ChevronLeft, Code2, Eye, GripVertical,Image, Pen, PlaySquare, Plus, Trash} from 'lucide-react';
+import { useEffect,useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 
