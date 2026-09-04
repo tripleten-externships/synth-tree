@@ -35,7 +35,7 @@ type SubmittedAnswer = {
 
 type QuizAttemptResult = {
   id: string;
-  passed: boolean;
+  passed: boolean | null;
   answers: SubmittedAnswer[];
 };
 
@@ -102,27 +102,40 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     const incorrectAnswers = result.answers.filter(
       (answer) => answer.isCorrect === false,
     );
+    const isPendingReview = result.passed === null;
 
     return (
       <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
         <div
           className={`mb-6 rounded-2xl p-5 ${
-            result.passed ? "bg-emerald-50" : "bg-red-50"
+            isPendingReview ? "bg-amber-50" : result.passed ? "bg-emerald-50" : "bg-red-50"
           }`}
         >
           <p
             className={`text-sm font-semibold uppercase tracking-wide ${
-              result.passed ? "text-emerald-700" : "text-red-700"
+              isPendingReview
+                ? "text-amber-700"
+                : result.passed
+                  ? "text-emerald-700"
+                  : "text-red-700"
             }`}
           >
             Quiz submitted
           </p>
 
           <h2 className="mt-1 text-2xl font-bold text-gray-900">
-            {result.passed ? "You passed!" : "Keep practicing"}
+            {isPendingReview
+              ? "Waiting for review"
+              : result.passed
+                ? "You passed!"
+                : "Keep practicing"}
           </h2>
 
-          {result.passed ? (
+          {isPendingReview ? (
+            <p className="mt-2 text-sm text-amber-800">
+              Your written answer was submitted and is waiting for manual review.
+            </p>
+          ) : result.passed ? (
             <p className="mt-2 text-sm text-emerald-800">
               You have completed this quiz.
             </p>

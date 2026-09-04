@@ -110,6 +110,10 @@ describe("gradeQuizAttempt", () => {
     expect(result.correctCount).toBe(0);
     expect(result.passed).toBe(true); // SYN-54: open-only quiz passes
     expect(result.message).toBe("Passed");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt3" },
+      data: { passed: true },
+    });
   });
   // MULTIPLE_CHOICE partially correct (includes incorrect option)
   it("fails when MULTIPLE_CHOICE answer is partially correct", async () => {
@@ -224,12 +228,51 @@ describe("gradeQuizAttempt", () => {
     mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
     const result = await gradeQuizAttempt(mockTx as any, "attempt7");
-    // SYN-33 grades only auto-gradable questions and ignores open ones (the
-    // prior "pending manual review" / passed=null path was removed). Whether
-    // manual review should return is tracked in SYN-122.
+    // Mixed quizzes with all auto-gradable answers correct should remain
+    // pending until the open question is manually reviewed.
     expect(result.correctCount).toBe(2);
-    expect(result.passed).toBe(true);
-    expect(result.message).toBe("Passed");
+    expect(result.passed).toBeNull();
+    expect(result.message).toBe("Passed pending manual review of open question(s)");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt7" },
+      data: { passed: null },
+    });
+  });
+
+  it("fails a mixed quiz when the open answer is omitted", async () => {
+    const mockQuiz = {
+      questions: [
+        {
+          type: "SINGLE_CHOICE",
+          options: [{ id: "opt1", isCorrect: true }],
+        },
+        {
+          type: "OPEN_QUESTION",
+          options: [],
+        },
+      ],
+    };
+    const mockAttempt = {
+      quizId: "quiz10",
+      answers: [
+        {
+          id: "answer10",
+          question: mockQuiz.questions[0],
+          answer: { selectedOptionIds: ["opt1"] },
+        },
+      ],
+    };
+    mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+    mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+    const result = await gradeQuizAttempt(mockTx as any, "attempt10");
+
+    expect(result.passed).toBe(false);
+    expect(result.message).toBe("Not passed: all questions must be answered");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt10" },
+      data: { passed: false },
+    });
   });
 });
 
@@ -283,11 +326,12 @@ it("handles a quiz with all types and an incorrect auto-gradable answer", async 
   mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
   const result = await gradeQuizAttempt(mockTx as any, "attempt8");
-  // A wrong auto-gradable answer fails the attempt; open questions are ignored
-  // (no manual-review state under SYN-33 — see SYN-122).
+  // A wrong auto-gradable answer fails even while the open answer is pending.
   expect(result.correctCount).toBe(1);
   expect(result.passed).toBe(false);
-  expect(result.message).toBe("Not passed");
+  expect(result.message).toBe(
+    "Not passed: some answers are incorrect; open question(s) pending review",
+  );
 });
 // Quiz with a skipped question (not all auto-gradable answered)
 it("handles a quiz where a question is skipped (no answer submitted)", async () => {
@@ -332,9 +376,7 @@ it("handles a quiz where a question is skipped (no answer submitted)", async () 
 // No answers submitted
 it("throws an error if no answers are found for the attempt", async () => {
   const mockQuiz = {
-    questions: [
-      { type: "SINGLE_CHOICE", options: [{ id: "opt1", isCorrect: true }] },
-    ],
+    questions: [{ type: "SINGLE_CHOICE", options: [{ id: "opt1", isCorrect: true }] }],
   };
   const mockAttempt = {
     quizId: "quizNoAnswers",
@@ -343,9 +385,9 @@ it("throws an error if no answers are found for the attempt", async () => {
   mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
   mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
-  await expect(
-    gradeQuizAttempt(mockTx as any, "attemptNoAnswers"),
-  ).rejects.toThrow("No answers found for this attempt");
+  await expect(gradeQuizAttempt(mockTx as any, "attemptNoAnswers")).rejects.toThrow(
+    "No answers found for this attempt",
+  );
 });
 // Empty quiz
 it("throws an error if the quiz has no questions", async () => {

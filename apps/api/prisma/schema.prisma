@@ -268,15 +268,15 @@ model QuizOption {
 
 // ================================================================
 // QuizAttempt
-// - v1 grading is boolean: passed/failed, no numeric score.
-// - Application logic determines "passed" by checking that all
-//   auto-gradable answers are correct (or true if none exist).
+// - Grading has three states: passed, failed, or pending manual review.
+// - Open-only quizzes pass automatically. Mixed quizzes stay pending
+//   when their choice answers pass but an open answer still needs review.
 // ================================================================
 model QuizAttempt {
   id      String   @id @default(uuid()) @db.Uuid
   quizId  String   @db.Uuid
   userId  String
-  passed  Boolean
+  passed  Boolean?
   takenAt DateTime @default(now())
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)

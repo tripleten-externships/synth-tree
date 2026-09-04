@@ -140,12 +140,34 @@ export async function gradeQuizAttempt(
 
   const allAnswered = autoGradableAnswers === totalAutoGradableQuestions;
 
+  const totalOpenQuestions = quiz.questions.filter(
+    (q) => q.type === QuestionType.OPEN_QUESTION,
+  ).length;
+
+  const openAnswers = attempt.answers.filter(
+    (a) => a.question.type === QuestionType.OPEN_QUESTION,
+  ).length;
+
+  const hasOpenQuestion = totalOpenQuestions > 0;
+  const allOpenQuestionsAnswered = openAnswers === totalOpenQuestions;
+
   let passed: boolean | null;
   let message: string;
 
   if (totalAutoGradableQuestions === 0) {
     passed = true;
     message = "Passed";
+  } else if (hasOpenQuestion) {
+    if (!allOpenQuestionsAnswered) {
+      passed = false;
+      message = "Not passed: all questions must be answered";
+    } else if (allAnswered && allAutoGradableCorrect) {
+      passed = null;
+      message = "Passed pending manual review of open question(s)";
+    } else {
+      passed = false;
+      message = "Not passed: some answers are incorrect; open question(s) pending review";
+    }
   } else {
     passed = allAnswered && allAutoGradableCorrect;
     message = passed ? "Passed" : "Not passed";
