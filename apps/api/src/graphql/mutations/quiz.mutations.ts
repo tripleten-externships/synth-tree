@@ -4,7 +4,8 @@ import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
-import logger from '@lib/logger'; // Structured logger used for tracking quiz-related events
+import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
+import { QuizAnswerInput } from "../inputs/quiz.inputs";
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -244,9 +245,7 @@ builder.mutationFields((t) => ({
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
       if (existing.type === PrismaQuestionType.OPEN_QUESTION) {
-        throw new GraphQLError(
-          "You cannot have Quiz Options for an open ended question",
-        );
+        throw new GraphQLError("You cannot have Quiz Options for an open ended question");
       }
 
       if (existing.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
@@ -301,15 +300,9 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.question.quiz.nodeId);
 
-      if (
-        existing.question.type === PrismaQuestionType.SINGLE_CHOICE &&
-        isCorrect
-      ) {
+      if (existing.question.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
         for (let i = 0; i < existing.question.options.length; i++) {
-          if (
-            existing.question.options[i].isCorrect &&
-            existing.question.options[i].id != id
-          ) {
+          if (existing.question.options[i].isCorrect && existing.question.options[i].id != id) {
             throw new GraphQLError(
               "You cannot have multiple correct answers in a single choice question",
             );
@@ -364,7 +357,10 @@ builder.mutationFields((t) => ({
     type: "QuizAttempt",
     args: {
       quizId: t.arg.id({ required: true }),
-      answers: t.arg.stringList({ required: true }),
+      answers: t.arg({
+        type: [QuizAnswerInput],
+        required: true,
+      }),
     },
     resolve: async (query, _root, { quizId, answers }, ctx) => {
       const userId = ctx.auth.requireAuth(); // Capture userId for logging and audit purposes
@@ -377,36 +373,56 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Quiz not found");
       }
 
-      const parsedAnswers = answers.map(
-        (a) =>
-          JSON.parse(a) as {
-            questionId: string;
-            answer: { selectedOptionIds?: string[]; text?: string };
-          },
-      );
-
-      const quizAttempt = await ctx.prisma.quizAttempt.create({
-        ...query,
-        data: {
-          quizId,
-          userId: ctx.user!.uid,
-          passed: false, //auto grader changes this later.
-          answers: {
-            create: parsedAnswers.map(({ questionId, answer }) => ({
-              questionId,
-              answer,
-            })),
+      const progress = await ctx.prisma.userNodeProgress.findUnique({
+        where: {
+          userId_nodeId: {
+            userId: userId,
+            nodeId: existing.nodeId,
           },
         },
       });
 
-      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+      if (!progress) {
+        throw new GraphQLError("No progress found for this quiz node");
+      }
 
-      logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
+      const parsedAnswers = answers.map((a) => ({
+        questionId: a.questionId,
+        answer:
+          a.text !== undefined && a.text !== null
+            ? { text: a.text }
+            : { selectedOptionIds: a.selectedOptionIds ?? [] },
+      }));
+
+      const result = await ctx.prisma.$transaction(async (tx) => {
+        const quizAttempt = await tx.quizAttempt.create({
+          ...query,
+          data: {
+            quizId,
+            userId,
+            passed: false,
+            answers: {
+              create: parsedAnswers.map(({ questionId, answer }) => ({
+                questionId,
+                answer,
+              })),
+            },
+          },
+        });
+
+        const summary = await gradeQuizAttempt(tx, quizAttempt.id);
+
+        return {
+          quizAttempt,
+          summary,
+        };
+      });
+
+      logger.info({ userId, quizId, passed: result.summary.passed }, "Quiz attempt submitted");
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
-        where: { id: quizAttempt.id },
+        where: { id: result.quizAttempt.id },
       });
     },
   }),
