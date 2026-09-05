@@ -1,10 +1,6 @@
-"""
-Batch payloads from prisma.
-"""
+"""Batch payloads from prisma."""
 type BatchPayload {
-  """
-  Prisma Batch Payload
-  """
+  """Prisma Batch Payload"""
   count: Int!
 }
 
@@ -55,14 +51,7 @@ type Course {
   id: ID!
   status: CourseStatus!
   title: String!
-  trees(
-    cursor: SkillTreeWhereUniqueInput
-    distinct: [SkillTreeScalarFieldEnum!]
-    orderBy: [SkillTreeOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: SkillTreeWhereInput
-  ): [SkillTree!]!
+  trees(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): [SkillTree!]!
   updatedAt: DateTime!
 }
 
@@ -760,10 +749,12 @@ input JsonWithAggregatesFilter {
 }
 
 type LeaderboardEntry {
-  userId: ID!
-  name: String!
-  score: Int!
-  rank: Int!
+  avatar: String
+  displayName: String
+  rank: Int
+  streak: Int
+  totalXp: Int
+  userId: String
 }
 
 type LessonBlocks {
@@ -1121,13 +1112,6 @@ enum LessonStatus {
   PUBLISHED
 }
 
-type LeaderboardEntry {
-  userId: ID!
-  name: String!
-  score: Int!
-  rank: Int!
-}
-
 type Mutation {
   completeNodeProgress(nodeId: ID!): UserNodeProgress
   createCourse(input: CreateCourseInput!): Course
@@ -1135,12 +1119,7 @@ type Mutation {
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
   createQuiz(nodeId: String!, required: Boolean!, title: String!): Quiz
   createQuizOption(isCorrect: Boolean, questionId: String!, text: String!): QuizOption
-  createQuizQuestion(
-    order: Int
-    prompt: String!
-    quizId: String!
-    type: QuestionType!
-  ): QuizQuestion
+  createQuizQuestion(order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
   createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
   createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
   createSkillTree(input: CreateSkillTreeInput!): SkillTree
@@ -1170,9 +1149,7 @@ type Mutation {
   updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
 
-"""
-Never fill this, its created for inputs that dont have fields
-"""
+"""Never fill this, its created for inputs that dont have fields"""
 scalar NEVER
 
 input NestedBoolFilter {
@@ -1603,7 +1580,7 @@ type Query {
   courseForLearner(id: ID!): Course
   courseProgress(courseId: ID!, userId: ID): CourseProgress
   currentUser: User
-  leaderboard: [LeaderboardEntry!]!
+  leaderboard(limit: Int = 100): [LeaderboardEntry!]
   lessonBlock(id: ID!): LessonBlocks
   lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
@@ -1633,27 +1610,13 @@ enum QuestionType {
 }
 
 type Quiz {
-  attempts(
-    cursor: QuizAttemptWhereUniqueInput
-    distinct: [QuizAttemptScalarFieldEnum!]
-    orderBy: [QuizAttemptOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizAttemptWhereInput
-  ): [QuizAttempt!]!
+  attempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   createdAt: DateTime!
   deletedAt: DateTime
   id: ID!
   node: SkillNode!
   nodeId: String!
-  questions(
-    cursor: QuizQuestionWhereUniqueInput
-    distinct: [QuizQuestionScalarFieldEnum!]
-    orderBy: [QuizQuestionOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizQuestionWhereInput
-  ): [QuizQuestion!]!
+  questions(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
   required: Boolean!
   title: String
   updatedAt: DateTime!
@@ -1666,14 +1629,7 @@ input QuizAnswerInput {
 }
 
 type QuizAttempt {
-  answers(
-    cursor: QuizAttemptAnswerWhereUniqueInput
-    distinct: [QuizAttemptAnswerScalarFieldEnum!]
-    orderBy: [QuizAttemptAnswerOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizAttemptAnswerWhereInput
-  ): [QuizAttemptAnswer!]!
+  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
   id: ID!
   passed: Boolean
   quiz: Quiz!
@@ -2695,24 +2651,10 @@ input QuizOrderByWithRelationInput {
 }
 
 type QuizQuestion {
-  answers(
-    cursor: QuizAttemptAnswerWhereUniqueInput
-    distinct: [QuizAttemptAnswerScalarFieldEnum!]
-    orderBy: [QuizAttemptAnswerOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizAttemptAnswerWhereInput
-  ): [QuizAttemptAnswer!]!
+  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
   createdAt: DateTime!
   id: ID!
-  options(
-    cursor: QuizOptionWhereUniqueInput
-    distinct: [QuizOptionScalarFieldEnum!]
-    orderBy: [QuizOptionOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizOptionWhereInput
-  ): [QuizOption!]!
+  options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
   order: Int!
   prompt: String!
   quiz: Quiz!
@@ -3277,43 +3219,15 @@ type SkillNode {
   createdAt: DateTime!
   deletedAt: DateTime
   id: ID!
-  lessons(
-    cursor: LessonBlocksWhereUniqueInput
-    distinct: [LessonBlocksScalarFieldEnum!]
-    orderBy: [LessonBlocksOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: LessonBlocksWhereInput
-  ): [LessonBlocks!]!
+  lessons(cursor: LessonBlocksWhereUniqueInput, distinct: [LessonBlocksScalarFieldEnum!], orderBy: [LessonBlocksOrderByWithRelationInput!], skip: Int, take: Int, where: LessonBlocksWhereInput): [LessonBlocks!]!
   orderInStep: Int!
   posX: Int
   posY: Int
-  prerequisites(
-    cursor: SkillNodePrerequisiteWhereUniqueInput
-    distinct: [SkillNodePrerequisiteScalarFieldEnum!]
-    orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: SkillNodePrerequisiteWhereInput
-  ): [SkillNodePrerequisite!]!
+  prerequisites(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
   progressForViewer: UserNodeProgress
-  progresses(
-    cursor: UserNodeProgressWhereUniqueInput
-    distinct: [UserNodeProgressScalarFieldEnum!]
-    orderBy: [UserNodeProgressOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: UserNodeProgressWhereInput
-  ): [UserNodeProgress!]!
+  progresses(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   quiz: Quiz
-  requiredFor(
-    cursor: SkillNodePrerequisiteWhereUniqueInput
-    distinct: [SkillNodePrerequisiteScalarFieldEnum!]
-    orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: SkillNodePrerequisiteWhereInput
-  ): [SkillNodePrerequisite!]!
+  requiredFor(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
   step: Int!
   title: String!
   tree: SkillTree!
@@ -4241,14 +4155,7 @@ type SkillTree {
   deletedAt: DateTime
   description: String
   id: ID!
-  nodes(
-    cursor: SkillNodeWhereUniqueInput
-    distinct: [SkillNodeScalarFieldEnum!]
-    orderBy: [SkillNodeOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: SkillNodeWhereInput
-  ): [SkillNode!]!
+  nodes(cursor: SkillNodeWhereUniqueInput, distinct: [SkillNodeScalarFieldEnum!], orderBy: [SkillNodeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodeWhereInput): [SkillNode!]!
   title: String!
   updatedAt: DateTime!
 }
@@ -4664,14 +4571,7 @@ input UpdateSkillTreeInput {
 }
 
 type User {
-  coursesAuthored(
-    cursor: CourseWhereUniqueInput
-    distinct: [CourseScalarFieldEnum!]
-    orderBy: [CourseOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: CourseWhereInput
-  ): [Course!]!
+  coursesAuthored(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
   createdAt: DateTime!
   dailyQuests(cursor: UserDailyQuestWhereUniqueInput, distinct: [UserDailyQuestScalarFieldEnum!], orderBy: [UserDailyQuestOrderByWithRelationInput!], skip: Int, take: Int, where: UserDailyQuestWhereInput): [UserDailyQuest!]!
   email: String!
@@ -4679,36 +4579,15 @@ type User {
   id: ID!
   interests: [String!]!
   name: String
-  nodeProgress(
-    cursor: UserNodeProgressWhereUniqueInput
-    distinct: [UserNodeProgressScalarFieldEnum!]
-    orderBy: [UserNodeProgressOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: UserNodeProgressWhereInput
-  ): [UserNodeProgress!]!
+  nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   photoUrl: String
-  quizAttempts(
-    cursor: QuizAttemptWhereUniqueInput
-    distinct: [QuizAttemptScalarFieldEnum!]
-    orderBy: [QuizAttemptOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: QuizAttemptWhereInput
-  ): [QuizAttempt!]!
+  quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
   updatedAt: DateTime!
   xp: UserXp
-  xpEvents(
-    cursor: XpEventWhereUniqueInput
-    distinct: [XpEventScalarFieldEnum!]
-    orderBy: [XpEventOrderByWithRelationInput!]
-    skip: Int
-    take: Int
-    where: XpEventWhereInput
-  ): [XpEvent!]!
+  xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
 }
 
 input UserCountOrderByAggregateInput {

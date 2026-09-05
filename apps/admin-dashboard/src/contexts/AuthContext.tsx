@@ -45,10 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   /**
    * Sign in with email and password
    */
-  const login = async (
-    email: string,
-    password: string
-  ): Promise<UserCredential> => {
+  const login = async (email: string, password: string): Promise<UserCredential> => {
     try {
       return await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
@@ -105,3 +102,7 @@ export const useAuthContext = (): AuthContextType => {
 };
 
 export default AuthContext;
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
