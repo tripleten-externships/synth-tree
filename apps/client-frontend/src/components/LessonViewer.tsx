@@ -4,6 +4,7 @@ import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
+import { COMPLETE_NODE } from "../graphql/mutations/completeNode";
 
 interface LessonViewerProps {
   nodeId: string;
@@ -16,6 +17,17 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
+  const [completeNode] = useMutation(COMPLETE_NODE);
+
+  async function handleNext() {
+    await completeNode({
+      variables: {
+        nodeId,
+      },
+    });
+
+    return onNext();
+  }
 
   // Mark this node as in-progress when the learner opens the lesson.
   // The mutation is idempotent server-side, so revisits / re-renders are safe.
@@ -94,7 +106,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
       <button
         className="mt-8 px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
-        onClick={onNext}
+        onClick={handleNext}
       >
         Next
       </button>

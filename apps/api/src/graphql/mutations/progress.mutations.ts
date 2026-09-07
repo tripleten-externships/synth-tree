@@ -50,4 +50,48 @@ builder.mutationFields((t) => ({
       });
     },
   }),
+
+  completeNode: t.prismaField({
+    type: "UserNodeProgress",
+    args: {
+      nodeId: t.arg.id({ required: true }),
+    },
+
+    resolve: async (query, _root, { nodeId }, ctx) => {
+      const userId = ctx.auth.requireAuth();
+
+      const nodeExists = await ctx.prisma.skillNode.findFirst({
+        where: {
+          id: nodeId,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (!nodeExists) {
+        throw new GraphQLError("Node not found");
+      }
+
+      return ctx.prisma.userNodeProgress.upsert({
+        ...query,
+        where: {
+          userId_nodeId: {
+            userId,
+            nodeId,
+          },
+        },
+        update: {
+          status: "COMPLETED",
+          completedAt: new Date(),
+        },
+        create: {
+          userId: userId,
+          nodeId: nodeId,
+          status: "COMPLETED",
+          completedAt: new Date(),
+        },
+      });
+    },
+  }),
+
 }));

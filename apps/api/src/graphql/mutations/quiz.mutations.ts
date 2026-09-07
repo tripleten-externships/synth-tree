@@ -92,8 +92,8 @@ builder.mutationFields((t) => ({
         where: { id },
       });
 
-      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting. 
-      
+      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting.
+
       const deleted = await ctx.prisma.quiz.update({
         ...query,
         where: { id },
@@ -371,6 +371,10 @@ builder.mutationFields((t) => ({
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
+        select: {
+          id: true,
+          nodeId: true,
+        },
       });
 
       if (!existing) {
@@ -401,6 +405,27 @@ builder.mutationFields((t) => ({
       });
 
       const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+
+      if (summary.passed === true) {
+        await ctx.prisma.userNodeProgress.upsert({
+          where: {
+            userId_nodeId: {
+              userId,
+              nodeId: existing.nodeId,
+            },
+          },
+          update: {
+            status: "COMPLETED",
+            completedAt: new Date(),
+          },
+          create: {
+            userId,
+            nodeId: existing.nodeId,
+            status:"COMPLETED",
+            completedAt: new Date(),
+          },
+        });
+      }
 
       logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
 
