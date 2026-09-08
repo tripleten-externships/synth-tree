@@ -1131,6 +1131,7 @@ export type LessonStatus =
 export type Mutation = {
   __typename?: 'Mutation';
   completeNode?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<UserNodeProgress>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -1167,6 +1168,11 @@ export type Mutation = {
 
 
 export type MutationCompleteNodeArgs = {
+  nodeId: Scalars['ID']['input'];
+};
+
+
+export type MutationCompleteNodeProgressArgs = {
   nodeId: Scalars['ID']['input'];
 };
 
@@ -1290,7 +1296,7 @@ export type MutationStartNodeProgressArgs = {
 
 
 export type MutationSubmitQuizAttemptArgs = {
-  answers: Array<Scalars['String']['input']>;
+  answers: Array<QuizAnswerInput>;
   quizId: Scalars['ID']['input'];
 };
 
@@ -1778,6 +1784,8 @@ export type Query = {
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
+  myDailyQuests?: Maybe<Array<UserDailyQuest>>;
+  myHearts?: Maybe<UserHearts>;
   myProgress?: Maybe<Array<UserNodeProgress>>;
   nodeProgress?: Maybe<UserNodeProgress>;
   publicCourse?: Maybe<Course>;
@@ -1999,11 +2007,17 @@ export type QuizQuestionsArgs = {
   where?: InputMaybe<QuizQuestionWhereInput>;
 };
 
+export type QuizAnswerInput = {
+  questionId: Scalars['ID']['input'];
+  selectedOptionIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  text?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type QuizAttempt = {
   __typename?: 'QuizAttempt';
   answers: Array<QuizAttemptAnswer>;
   id: Scalars['ID']['output'];
-  passed: Scalars['Boolean']['output'];
+  passed?: Maybe<Scalars['Boolean']['output']>;
   quiz: Quiz;
   quizId: Scalars['String']['output'];
   takenAt: Scalars['DateTime']['output'];
@@ -2323,7 +2337,7 @@ export type QuizAttemptCountOrderByAggregateInput = {
 export type QuizAttemptCreateInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
@@ -2331,7 +2345,7 @@ export type QuizAttemptCreateInput = {
 
 export type QuizAttemptCreateManyInput = {
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   quizId: Scalars['String']['input'];
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
   userId: Scalars['String']['input'];
@@ -2339,7 +2353,7 @@ export type QuizAttemptCreateManyInput = {
 
 export type QuizAttemptCreateManyQuizInput = {
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
   userId: Scalars['String']['input'];
 };
@@ -2351,7 +2365,7 @@ export type QuizAttemptCreateManyQuizInputEnvelope = {
 
 export type QuizAttemptCreateManyUserInput = {
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   quizId: Scalars['String']['input'];
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2398,7 +2412,7 @@ export type QuizAttemptCreateOrConnectWithoutUserInput = {
 
 export type QuizAttemptCreateWithoutAnswersInput = {
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
@@ -2407,7 +2421,7 @@ export type QuizAttemptCreateWithoutAnswersInput = {
 export type QuizAttemptCreateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
   user: UserCreateNestedOneWithoutQuizAttemptsInput;
 };
@@ -2415,7 +2429,7 @@ export type QuizAttemptCreateWithoutQuizInput = {
 export type QuizAttemptCreateWithoutUserInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutAttemptInput>;
   id?: InputMaybe<Scalars['String']['input']>;
-  passed: Scalars['Boolean']['input'];
+  passed?: InputMaybe<Scalars['Boolean']['input']>;
   quiz: QuizCreateNestedOneWithoutAttemptsInput;
   takenAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2485,7 +2499,7 @@ export type QuizAttemptScalarWhereInput = {
   NOT?: InputMaybe<Array<QuizAttemptScalarWhereInput>>;
   OR?: InputMaybe<Array<QuizAttemptScalarWhereInput>>;
   id?: InputMaybe<UuidFilter>;
-  passed?: InputMaybe<BoolFilter>;
+  passed?: InputMaybe<BoolNullableFilter>;
   quizId?: InputMaybe<UuidFilter>;
   takenAt?: InputMaybe<DateTimeFilter>;
   userId?: InputMaybe<StringFilter>;
@@ -2496,7 +2510,7 @@ export type QuizAttemptScalarWhereWithAggregatesInput = {
   NOT?: InputMaybe<Array<QuizAttemptScalarWhereWithAggregatesInput>>;
   OR?: InputMaybe<Array<QuizAttemptScalarWhereWithAggregatesInput>>;
   id?: InputMaybe<UuidWithAggregatesFilter>;
-  passed?: InputMaybe<BoolWithAggregatesFilter>;
+  passed?: InputMaybe<BoolNullableWithAggregatesFilter>;
   quizId?: InputMaybe<UuidWithAggregatesFilter>;
   takenAt?: InputMaybe<DateTimeWithAggregatesFilter>;
   userId?: InputMaybe<StringWithAggregatesFilter>;
@@ -2505,7 +2519,7 @@ export type QuizAttemptScalarWhereWithAggregatesInput = {
 export type QuizAttemptUpdateInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  passed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  passed?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   quiz?: InputMaybe<QuizUpdateOneRequiredWithoutAttemptsNestedInput>;
   takenAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   user?: InputMaybe<UserUpdateOneRequiredWithoutQuizAttemptsNestedInput>;
@@ -2513,7 +2527,7 @@ export type QuizAttemptUpdateInput = {
 
 export type QuizAttemptUpdateManyMutationInput = {
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  passed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  passed?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   takenAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
 
@@ -2580,7 +2594,7 @@ export type QuizAttemptUpdateWithWhereUniqueWithoutUserInput = {
 
 export type QuizAttemptUpdateWithoutAnswersInput = {
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  passed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  passed?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   quiz?: InputMaybe<QuizUpdateOneRequiredWithoutAttemptsNestedInput>;
   takenAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   user?: InputMaybe<UserUpdateOneRequiredWithoutQuizAttemptsNestedInput>;
@@ -2589,7 +2603,7 @@ export type QuizAttemptUpdateWithoutAnswersInput = {
 export type QuizAttemptUpdateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  passed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  passed?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   takenAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   user?: InputMaybe<UserUpdateOneRequiredWithoutQuizAttemptsNestedInput>;
 };
@@ -2597,7 +2611,7 @@ export type QuizAttemptUpdateWithoutQuizInput = {
 export type QuizAttemptUpdateWithoutUserInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
-  passed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  passed?: InputMaybe<NullableBoolFieldUpdateOperationsInput>;
   quiz?: InputMaybe<QuizUpdateOneRequiredWithoutAttemptsNestedInput>;
   takenAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
@@ -2626,7 +2640,7 @@ export type QuizAttemptWhereInput = {
   OR?: InputMaybe<Array<QuizAttemptWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   id?: InputMaybe<UuidFilter>;
-  passed?: InputMaybe<BoolFilter>;
+  passed?: InputMaybe<BoolNullableFilter>;
   quiz?: InputMaybe<QuizWhereInput>;
   quizId?: InputMaybe<UuidFilter>;
   takenAt?: InputMaybe<DateTimeFilter>;
@@ -2640,7 +2654,7 @@ export type QuizAttemptWhereUniqueInput = {
   OR?: InputMaybe<Array<QuizAttemptWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
-  passed?: InputMaybe<BoolFilter>;
+  passed?: InputMaybe<BoolNullableFilter>;
   quiz?: InputMaybe<QuizWhereInput>;
   quizId?: InputMaybe<UuidFilter>;
   takenAt?: InputMaybe<DateTimeFilter>;
@@ -2775,7 +2789,7 @@ export type QuizOption = {
   __typename?: 'QuizOption';
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
-  isCorrect: Scalars['Boolean']['output'];
+  isCorrect?: Maybe<Scalars['Boolean']['output']>;
   question: QuizQuestion;
   questionId: Scalars['String']['output'];
   text: Scalars['String']['output'];
@@ -5013,7 +5027,9 @@ export type User = {
   __typename?: 'User';
   coursesAuthored: Array<Course>;
   createdAt: Scalars['DateTime']['output'];
+  dailyQuests: Array<UserDailyQuest>;
   email: Scalars['String']['output'];
+  hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
@@ -5035,6 +5051,16 @@ export type UserCoursesAuthoredArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<CourseWhereInput>;
+};
+
+
+export type UserDailyQuestsArgs = {
+  cursor?: InputMaybe<UserDailyQuestWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserDailyQuestScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserDailyQuestOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserDailyQuestWhereInput>;
 };
 
 
@@ -5085,7 +5111,9 @@ export type UserCountOrderByAggregateInput = {
 export type UserCreateInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5112,6 +5140,18 @@ export type UserCreateNestedOneWithoutCoursesAuthoredInput = {
   connect?: InputMaybe<UserWhereUniqueInput>;
   connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutCoursesAuthoredInput>;
   create?: InputMaybe<UserCreateWithoutCoursesAuthoredInput>;
+};
+
+export type UserCreateNestedOneWithoutDailyQuestsInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutDailyQuestsInput>;
+  create?: InputMaybe<UserCreateWithoutDailyQuestsInput>;
+};
+
+export type UserCreateNestedOneWithoutHeartsInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutHeartsInput>;
+  create?: InputMaybe<UserCreateWithoutHeartsInput>;
 };
 
 export type UserCreateNestedOneWithoutNodeProgressInput = {
@@ -5149,6 +5189,16 @@ export type UserCreateOrConnectWithoutCoursesAuthoredInput = {
   where: UserWhereUniqueInput;
 };
 
+export type UserCreateOrConnectWithoutDailyQuestsInput = {
+  create: UserCreateWithoutDailyQuestsInput;
+  where: UserWhereUniqueInput;
+};
+
+export type UserCreateOrConnectWithoutHeartsInput = {
+  create: UserCreateWithoutHeartsInput;
+  where: UserWhereUniqueInput;
+};
+
 export type UserCreateOrConnectWithoutNodeProgressInput = {
   create: UserCreateWithoutNodeProgressInput;
   where: UserWhereUniqueInput;
@@ -5176,6 +5226,42 @@ export type UserCreateOrConnectWithoutXpInput = {
 
 export type UserCreateWithoutCoursesAuthoredInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
+  email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
+  role?: InputMaybe<Role>;
+  streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
+  xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserCreateWithoutDailyQuestsInput = {
+  coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
+  role?: InputMaybe<Role>;
+  streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
+  xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserCreateWithoutHeartsInput = {
+  coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
@@ -5192,7 +5278,9 @@ export type UserCreateWithoutCoursesAuthoredInput = {
 export type UserCreateWithoutNodeProgressInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5207,7 +5295,9 @@ export type UserCreateWithoutNodeProgressInput = {
 export type UserCreateWithoutQuizAttemptsInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5222,7 +5312,9 @@ export type UserCreateWithoutQuizAttemptsInput = {
 export type UserCreateWithoutStreakInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5237,7 +5329,9 @@ export type UserCreateWithoutStreakInput = {
 export type UserCreateWithoutXpEventsInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5252,7 +5346,9 @@ export type UserCreateWithoutXpEventsInput = {
 export type UserCreateWithoutXpInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5262,6 +5358,415 @@ export type UserCreateWithoutXpInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserDailyQuest = {
+  __typename?: 'UserDailyQuest';
+  completed: Scalars['Boolean']['output'];
+  current: Scalars['Int']['output'];
+  date: Scalars['DateTime']['output'];
+  goal: Scalars['Int']['output'];
+  questKey: Scalars['String']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type UserDailyQuestAvgOrderByAggregateInput = {
+  current?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestCountOrderByAggregateInput = {
+  completed?: InputMaybe<SortOrder>;
+  current?: InputMaybe<SortOrder>;
+  date?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+  questKey?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestCreateInput = {
+  completed?: InputMaybe<Scalars['Boolean']['input']>;
+  current?: InputMaybe<Scalars['Int']['input']>;
+  date: Scalars['DateTime']['input'];
+  goal: Scalars['Int']['input'];
+  questKey: Scalars['String']['input'];
+  user: UserCreateNestedOneWithoutDailyQuestsInput;
+};
+
+export type UserDailyQuestCreateManyInput = {
+  completed?: InputMaybe<Scalars['Boolean']['input']>;
+  current?: InputMaybe<Scalars['Int']['input']>;
+  date: Scalars['DateTime']['input'];
+  goal: Scalars['Int']['input'];
+  questKey: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+export type UserDailyQuestCreateManyUserInput = {
+  completed?: InputMaybe<Scalars['Boolean']['input']>;
+  current?: InputMaybe<Scalars['Int']['input']>;
+  date: Scalars['DateTime']['input'];
+  goal: Scalars['Int']['input'];
+  questKey: Scalars['String']['input'];
+};
+
+export type UserDailyQuestCreateManyUserInputEnvelope = {
+  data: Array<UserDailyQuestCreateManyUserInput>;
+  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type UserDailyQuestCreateNestedManyWithoutUserInput = {
+  connect?: InputMaybe<Array<UserDailyQuestWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserDailyQuestCreateOrConnectWithoutUserInput>>;
+  create?: InputMaybe<Array<UserDailyQuestCreateWithoutUserInput>>;
+  createMany?: InputMaybe<UserDailyQuestCreateManyUserInputEnvelope>;
+};
+
+export type UserDailyQuestCreateOrConnectWithoutUserInput = {
+  create: UserDailyQuestCreateWithoutUserInput;
+  where: UserDailyQuestWhereUniqueInput;
+};
+
+export type UserDailyQuestCreateWithoutUserInput = {
+  completed?: InputMaybe<Scalars['Boolean']['input']>;
+  current?: InputMaybe<Scalars['Int']['input']>;
+  date: Scalars['DateTime']['input'];
+  goal: Scalars['Int']['input'];
+  questKey: Scalars['String']['input'];
+};
+
+export type UserDailyQuestListRelationFilter = {
+  every?: InputMaybe<UserDailyQuestWhereInput>;
+  none?: InputMaybe<UserDailyQuestWhereInput>;
+  some?: InputMaybe<UserDailyQuestWhereInput>;
+};
+
+export type UserDailyQuestMaxOrderByAggregateInput = {
+  completed?: InputMaybe<SortOrder>;
+  current?: InputMaybe<SortOrder>;
+  date?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+  questKey?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestMinOrderByAggregateInput = {
+  completed?: InputMaybe<SortOrder>;
+  current?: InputMaybe<SortOrder>;
+  date?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+  questKey?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestOrderByRelationAggregateInput = {
+  _count?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestOrderByWithAggregationInput = {
+  _avg?: InputMaybe<UserDailyQuestAvgOrderByAggregateInput>;
+  _count?: InputMaybe<UserDailyQuestCountOrderByAggregateInput>;
+  _max?: InputMaybe<UserDailyQuestMaxOrderByAggregateInput>;
+  _min?: InputMaybe<UserDailyQuestMinOrderByAggregateInput>;
+  _sum?: InputMaybe<UserDailyQuestSumOrderByAggregateInput>;
+  completed?: InputMaybe<SortOrder>;
+  current?: InputMaybe<SortOrder>;
+  date?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+  questKey?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestOrderByWithRelationInput = {
+  completed?: InputMaybe<SortOrder>;
+  current?: InputMaybe<SortOrder>;
+  date?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+  questKey?: InputMaybe<SortOrder>;
+  user?: InputMaybe<UserOrderByWithRelationInput>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestScalarFieldEnum =
+  | 'completed'
+  | 'current'
+  | 'date'
+  | 'goal'
+  | 'questKey'
+  | 'userId';
+
+export type UserDailyQuestScalarWhereInput = {
+  AND?: InputMaybe<Array<UserDailyQuestScalarWhereInput>>;
+  NOT?: InputMaybe<Array<UserDailyQuestScalarWhereInput>>;
+  OR?: InputMaybe<Array<UserDailyQuestScalarWhereInput>>;
+  completed?: InputMaybe<BoolFilter>;
+  current?: InputMaybe<IntFilter>;
+  date?: InputMaybe<DateTimeFilter>;
+  goal?: InputMaybe<IntFilter>;
+  questKey?: InputMaybe<StringFilter>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserDailyQuestScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<UserDailyQuestScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<UserDailyQuestScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<UserDailyQuestScalarWhereWithAggregatesInput>>;
+  completed?: InputMaybe<BoolWithAggregatesFilter>;
+  current?: InputMaybe<IntWithAggregatesFilter>;
+  date?: InputMaybe<DateTimeWithAggregatesFilter>;
+  goal?: InputMaybe<IntWithAggregatesFilter>;
+  questKey?: InputMaybe<StringWithAggregatesFilter>;
+  userId?: InputMaybe<StringWithAggregatesFilter>;
+};
+
+export type UserDailyQuestSumOrderByAggregateInput = {
+  current?: InputMaybe<SortOrder>;
+  goal?: InputMaybe<SortOrder>;
+};
+
+export type UserDailyQuestUpdateInput = {
+  completed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  current?: InputMaybe<IntFieldUpdateOperationsInput>;
+  date?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  goal?: InputMaybe<IntFieldUpdateOperationsInput>;
+  questKey?: InputMaybe<StringFieldUpdateOperationsInput>;
+  user?: InputMaybe<UserUpdateOneRequiredWithoutDailyQuestsNestedInput>;
+};
+
+export type UserDailyQuestUpdateManyMutationInput = {
+  completed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  current?: InputMaybe<IntFieldUpdateOperationsInput>;
+  date?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  goal?: InputMaybe<IntFieldUpdateOperationsInput>;
+  questKey?: InputMaybe<StringFieldUpdateOperationsInput>;
+};
+
+export type UserDailyQuestUpdateManyWithWhereWithoutUserInput = {
+  data: UserDailyQuestUpdateManyMutationInput;
+  where: UserDailyQuestScalarWhereInput;
+};
+
+export type UserDailyQuestUpdateManyWithoutUserNestedInput = {
+  connect?: InputMaybe<Array<UserDailyQuestWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserDailyQuestCreateOrConnectWithoutUserInput>>;
+  create?: InputMaybe<Array<UserDailyQuestCreateWithoutUserInput>>;
+  createMany?: InputMaybe<UserDailyQuestCreateManyUserInputEnvelope>;
+  delete?: InputMaybe<Array<UserDailyQuestWhereUniqueInput>>;
+  deleteMany?: InputMaybe<Array<UserDailyQuestScalarWhereInput>>;
+  disconnect?: InputMaybe<Array<UserDailyQuestWhereUniqueInput>>;
+  set?: InputMaybe<Array<UserDailyQuestWhereUniqueInput>>;
+  update?: InputMaybe<Array<UserDailyQuestUpdateWithWhereUniqueWithoutUserInput>>;
+  updateMany?: InputMaybe<Array<UserDailyQuestUpdateManyWithWhereWithoutUserInput>>;
+  upsert?: InputMaybe<Array<UserDailyQuestUpsertWithWhereUniqueWithoutUserInput>>;
+};
+
+export type UserDailyQuestUpdateWithWhereUniqueWithoutUserInput = {
+  data: UserDailyQuestUpdateWithoutUserInput;
+  where: UserDailyQuestWhereUniqueInput;
+};
+
+export type UserDailyQuestUpdateWithoutUserInput = {
+  completed?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  current?: InputMaybe<IntFieldUpdateOperationsInput>;
+  date?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  goal?: InputMaybe<IntFieldUpdateOperationsInput>;
+  questKey?: InputMaybe<StringFieldUpdateOperationsInput>;
+};
+
+export type UserDailyQuestUpsertWithWhereUniqueWithoutUserInput = {
+  create: UserDailyQuestCreateWithoutUserInput;
+  update: UserDailyQuestUpdateWithoutUserInput;
+  where: UserDailyQuestWhereUniqueInput;
+};
+
+export type UserDailyQuestUserIdQuestKeyDateCompoundUniqueInput = {
+  date: Scalars['DateTime']['input'];
+  questKey: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+export type UserDailyQuestWhereInput = {
+  AND?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  NOT?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  OR?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  completed?: InputMaybe<BoolFilter>;
+  current?: InputMaybe<IntFilter>;
+  date?: InputMaybe<DateTimeFilter>;
+  goal?: InputMaybe<IntFilter>;
+  questKey?: InputMaybe<StringFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserDailyQuestWhereUniqueInput = {
+  AND?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  NOT?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  OR?: InputMaybe<Array<UserDailyQuestWhereInput>>;
+  completed?: InputMaybe<BoolFilter>;
+  current?: InputMaybe<IntFilter>;
+  date?: InputMaybe<DateTimeFilter>;
+  goal?: InputMaybe<IntFilter>;
+  questKey?: InputMaybe<StringFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+  userId_questKey_date?: InputMaybe<UserDailyQuestUserIdQuestKeyDateCompoundUniqueInput>;
+};
+
+export type UserHearts = {
+  __typename?: 'UserHearts';
+  currentHearts: Scalars['Int']['output'];
+  lastRefilledAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['ID']['output'];
+};
+
+export type UserHeartsAvgOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsCountOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsCreateInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+  user: UserCreateNestedOneWithoutHeartsInput;
+};
+
+export type UserHeartsCreateManyInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+export type UserHeartsCreateNestedOneWithoutUserInput = {
+  connect?: InputMaybe<UserHeartsWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserHeartsCreateOrConnectWithoutUserInput>;
+  create?: InputMaybe<UserHeartsCreateWithoutUserInput>;
+};
+
+export type UserHeartsCreateOrConnectWithoutUserInput = {
+  create: UserHeartsCreateWithoutUserInput;
+  where: UserHeartsWhereUniqueInput;
+};
+
+export type UserHeartsCreateWithoutUserInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type UserHeartsMaxOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsMinOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsNullableScalarRelationFilter = {
+  is?: InputMaybe<UserHeartsWhereInput>;
+  isNot?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsOrderByWithAggregationInput = {
+  _avg?: InputMaybe<UserHeartsAvgOrderByAggregateInput>;
+  _count?: InputMaybe<UserHeartsCountOrderByAggregateInput>;
+  _max?: InputMaybe<UserHeartsMaxOrderByAggregateInput>;
+  _min?: InputMaybe<UserHeartsMinOrderByAggregateInput>;
+  _sum?: InputMaybe<UserHeartsSumOrderByAggregateInput>;
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsOrderByWithRelationInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  user?: InputMaybe<UserOrderByWithRelationInput>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsScalarFieldEnum =
+  | 'currentHearts'
+  | 'lastRefilledAt'
+  | 'userId';
+
+export type UserHeartsScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  currentHearts?: InputMaybe<IntWithAggregatesFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+  userId?: InputMaybe<StringWithAggregatesFilter>;
+};
+
+export type UserHeartsSumOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsUpdateInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  user?: InputMaybe<UserUpdateOneRequiredWithoutHeartsNestedInput>;
+};
+
+export type UserHeartsUpdateManyMutationInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserHeartsUpdateOneWithoutUserNestedInput = {
+  connect?: InputMaybe<UserHeartsWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserHeartsCreateOrConnectWithoutUserInput>;
+  create?: InputMaybe<UserHeartsCreateWithoutUserInput>;
+  delete?: InputMaybe<UserHeartsWhereInput>;
+  disconnect?: InputMaybe<UserHeartsWhereInput>;
+  update?: InputMaybe<UserHeartsUpdateToOneWithWhereWithoutUserInput>;
+  upsert?: InputMaybe<UserHeartsUpsertWithoutUserInput>;
+};
+
+export type UserHeartsUpdateToOneWithWhereWithoutUserInput = {
+  data: UserHeartsUpdateWithoutUserInput;
+  where?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsUpdateWithoutUserInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserHeartsUpsertWithoutUserInput = {
+  create: UserHeartsCreateWithoutUserInput;
+  update: UserHeartsUpdateWithoutUserInput;
+  where?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsWhereInput = {
+  AND?: InputMaybe<Array<UserHeartsWhereInput>>;
+  NOT?: InputMaybe<Array<UserHeartsWhereInput>>;
+  OR?: InputMaybe<Array<UserHeartsWhereInput>>;
+  currentHearts?: InputMaybe<IntFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserHeartsWhereUniqueInput = {
+  AND?: InputMaybe<Array<UserHeartsWhereInput>>;
+  NOT?: InputMaybe<Array<UserHeartsWhereInput>>;
+  OR?: InputMaybe<Array<UserHeartsWhereInput>>;
+  currentHearts?: InputMaybe<IntFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserMaxOrderByAggregateInput = {
@@ -5635,7 +6140,9 @@ export type UserOrderByWithAggregationInput = {
 export type UserOrderByWithRelationInput = {
   coursesAuthored?: InputMaybe<CourseOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
+  dailyQuests?: InputMaybe<UserDailyQuestOrderByRelationAggregateInput>;
   email?: InputMaybe<SortOrder>;
+  hearts?: InputMaybe<UserHeartsOrderByWithRelationInput>;
   id?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
@@ -5852,7 +6359,9 @@ export type UserStreakWhereUniqueInput = {
 export type UserUpdateInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -5881,6 +6390,22 @@ export type UserUpdateOneRequiredWithoutCoursesAuthoredNestedInput = {
   create?: InputMaybe<UserCreateWithoutCoursesAuthoredInput>;
   update?: InputMaybe<UserUpdateToOneWithWhereWithoutCoursesAuthoredInput>;
   upsert?: InputMaybe<UserUpsertWithoutCoursesAuthoredInput>;
+};
+
+export type UserUpdateOneRequiredWithoutDailyQuestsNestedInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutDailyQuestsInput>;
+  create?: InputMaybe<UserCreateWithoutDailyQuestsInput>;
+  update?: InputMaybe<UserUpdateToOneWithWhereWithoutDailyQuestsInput>;
+  upsert?: InputMaybe<UserUpsertWithoutDailyQuestsInput>;
+};
+
+export type UserUpdateOneRequiredWithoutHeartsNestedInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutHeartsInput>;
+  create?: InputMaybe<UserCreateWithoutHeartsInput>;
+  update?: InputMaybe<UserUpdateToOneWithWhereWithoutHeartsInput>;
+  upsert?: InputMaybe<UserUpsertWithoutHeartsInput>;
 };
 
 export type UserUpdateOneRequiredWithoutNodeProgressNestedInput = {
@@ -5928,6 +6453,16 @@ export type UserUpdateToOneWithWhereWithoutCoursesAuthoredInput = {
   where?: InputMaybe<UserWhereInput>;
 };
 
+export type UserUpdateToOneWithWhereWithoutDailyQuestsInput = {
+  data: UserUpdateWithoutDailyQuestsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+export type UserUpdateToOneWithWhereWithoutHeartsInput = {
+  data: UserUpdateWithoutHeartsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
 export type UserUpdateToOneWithWhereWithoutNodeProgressInput = {
   data: UserUpdateWithoutNodeProgressInput;
   where?: InputMaybe<UserWhereInput>;
@@ -5955,6 +6490,42 @@ export type UserUpdateToOneWithWhereWithoutXpInput = {
 
 export type UserUpdateWithoutCoursesAuthoredInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
+  email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
+  photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
+  role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
+  xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
+};
+
+export type UserUpdateWithoutDailyQuestsInput = {
+  coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
+  photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
+  role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
+  xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
+};
+
+export type UserUpdateWithoutHeartsInput = {
+  coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -5971,7 +6542,9 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
 export type UserUpdateWithoutNodeProgressInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -5986,7 +6559,9 @@ export type UserUpdateWithoutNodeProgressInput = {
 export type UserUpdateWithoutQuizAttemptsInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6001,7 +6576,9 @@ export type UserUpdateWithoutQuizAttemptsInput = {
 export type UserUpdateWithoutStreakInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6016,7 +6593,9 @@ export type UserUpdateWithoutStreakInput = {
 export type UserUpdateWithoutXpEventsInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6031,7 +6610,9 @@ export type UserUpdateWithoutXpEventsInput = {
 export type UserUpdateWithoutXpInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6046,6 +6627,18 @@ export type UserUpdateWithoutXpInput = {
 export type UserUpsertWithoutCoursesAuthoredInput = {
   create: UserCreateWithoutCoursesAuthoredInput;
   update: UserUpdateWithoutCoursesAuthoredInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+export type UserUpsertWithoutDailyQuestsInput = {
+  create: UserCreateWithoutDailyQuestsInput;
+  update: UserUpdateWithoutDailyQuestsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+export type UserUpsertWithoutHeartsInput = {
+  create: UserCreateWithoutHeartsInput;
+  update: UserUpdateWithoutHeartsInput;
   where?: InputMaybe<UserWhereInput>;
 };
 
@@ -6085,7 +6678,9 @@ export type UserWhereInput = {
   OR?: InputMaybe<Array<UserWhereInput>>;
   coursesAuthored?: InputMaybe<CourseListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
+  dailyQuests?: InputMaybe<UserDailyQuestListRelationFilter>;
   email?: InputMaybe<StringFilter>;
+  hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<StringFilter>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
@@ -6104,7 +6699,9 @@ export type UserWhereUniqueInput = {
   OR?: InputMaybe<Array<UserWhereInput>>;
   coursesAuthored?: InputMaybe<CourseListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
+  dailyQuests?: InputMaybe<UserDailyQuestListRelationFilter>;
   email?: InputMaybe<Scalars['String']['input']>;
+  hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
@@ -6574,10 +7171,25 @@ export type XpEventWhereUniqueInput = {
   userId?: InputMaybe<StringFilter>;
 };
 
+export type UpdateCourseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateCourseInput;
+}>;
+
+
+export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, title: string, status: CourseStatus, description?: string | null } | null };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type AdminGetAllCoursesQuery = { __typename?: 'Query', adminGetAllCourses?: Array<{ __typename?: 'Course', id: string, title: string, status: CourseStatus, updatedAt: any, author: { __typename?: 'User', id: string, name?: string | null } }> | null };
+
+export type AdminCourseQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
 
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6628,11 +7240,11 @@ export type StartNodeProgressMutation = { __typename?: 'Mutation', startNodeProg
 
 export type SubmitQuizAttemptMutationVariables = Exact<{
   quizId: Scalars['ID']['input'];
-  answers: Array<Scalars['String']['input']> | Scalars['String']['input'];
+  answers: Array<QuizAnswerInput> | QuizAnswerInput;
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed: boolean } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -6676,6 +7288,40 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const UpdateCourseDocument = gql`
+    mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
+  updateCourse(id: $id, input: $input) {
+    id
+    title
+    status
+    description
+  }
+}
+    `;
+
+/**
+ * __useUpdateCourseMutation__
+ *
+ * To run a mutation, you first call `useUpdateCourseMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCourseMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCourseMutation, { data, loading, error }] = useUpdateCourseMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateCourseMutation, UpdateCourseMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
+      }
+export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {
@@ -6716,6 +7362,43 @@ export function useAdminGetAllCoursesLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type AdminGetAllCoursesQueryHookResult = ReturnType<typeof useAdminGetAllCoursesQuery>;
 export type AdminGetAllCoursesLazyQueryHookResult = ReturnType<typeof useAdminGetAllCoursesLazyQuery>;
+export const AdminCourseDocument = gql`
+    query AdminCourse($id: ID!) {
+  adminCourse(id: $id) {
+    id
+    title
+    description
+    status
+  }
+}
+    `;
+
+/**
+ * __useAdminCourseQuery__
+ *
+ * To run a query within a React component, call `useAdminCourseQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminCourseQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminCourseQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminCourseQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables> & ({ variables: AdminCourseQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+      }
+export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminCourseQuery, AdminCourseQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminCourseQuery, AdminCourseQueryVariables>(AdminCourseDocument, options);
+        }
+export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
+export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -6936,10 +7619,26 @@ export function useStartNodeProgressMutation(baseOptions?: ApolloReactHooks.Muta
       }
 export type StartNodeProgressMutationHookResult = ReturnType<typeof useStartNodeProgressMutation>;
 export const SubmitQuizAttemptDocument = gql`
-    mutation SubmitQuizAttempt($quizId: ID!, $answers: [String!]!) {
+    mutation SubmitQuizAttempt($quizId: ID!, $answers: [QuizAnswerInput!]!) {
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    answers {
+      id
+      questionId
+      answer
+      isCorrect
+      question {
+        id
+        prompt
+        type
+        options {
+          id
+          text
+          isCorrect
+        }
+      }
+    }
   }
 }
     `;

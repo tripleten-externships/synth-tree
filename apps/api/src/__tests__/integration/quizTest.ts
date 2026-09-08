@@ -67,7 +67,7 @@ const CREATE_OPTION = `
 `;
 
 const SUBMIT_ATTEMPT = `
-  mutation SubmitQuizAttempt($quizId: ID!, $answers: [String!]!) {
+  mutation SubmitQuizAttempt($quizId: ID!, $answers: [QuizAnswerInput!]!) {
     submitQuizAttempt(quizId: $quizId, answers: $answers) {
       id
       passed
@@ -232,7 +232,8 @@ describe("Quiz flow", () => {
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: ["not valid json {{{"] },
+            // Missing required questionId — invalid QuizAnswerInput.
+            variables: { quizId: quiz.id, answers: [{ selectedOptionIds: [] }] },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
@@ -460,16 +461,19 @@ describe("Quiz flow", () => {
         data: { questionId: question.id, text: "B", isCorrect: false },
       });
 
-      const answer = JSON.stringify({
-        questionId: question.id,
-        answer: { selectedOptionIds: [correctOption.id] },
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
+
+      const answers = [
+        { questionId: question.id, selectedOptionIds: [correctOption.id] },
+      ];
 
       const res = singleResult(
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: [answer] },
+            variables: { quizId: quiz.id, answers },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
@@ -498,16 +502,19 @@ describe("Quiz flow", () => {
         data: { questionId: question.id, text: "B", isCorrect: false },
       });
 
-      const answer = JSON.stringify({
-        questionId: question.id,
-        answer: { selectedOptionIds: [wrongOption.id] },
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
+
+      const answers = [
+        { questionId: question.id, selectedOptionIds: [wrongOption.id] },
+      ];
 
       const res = singleResult(
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: [answer] },
+            variables: { quizId: quiz.id, answers },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
@@ -539,16 +546,19 @@ describe("Quiz flow", () => {
         data: { questionId: question.id, text: "4", isCorrect: false },
       });
 
-      const answer = JSON.stringify({
-        questionId: question.id,
-        answer: { selectedOptionIds: [opt2.id, opt3.id] },
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
+
+      const answers = [
+        { questionId: question.id, selectedOptionIds: [opt2.id, opt3.id] },
+      ];
 
       const res = singleResult(
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: [answer] },
+            variables: { quizId: quiz.id, answers },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
@@ -558,7 +568,10 @@ describe("Quiz flow", () => {
       expect(res.data.submitQuizAttempt.passed).toBe(true);
     });
 
-    it("return false for OPEN_QUESTION", async () => {
+    // Per the SYN-33 spec, a quiz with no auto-gradable questions (open-only)
+    // auto-passes. Whether that is the desired product behavior is tracked in
+    // SYN-122; this test asserts the currently-specified behavior.
+    it("auto-passes an OPEN_QUESTION-only quiz (nothing to auto-grade)", async () => {
       const { node } = await seedNode();
       const quiz = await prisma.quiz.create({
         data: { nodeId: node.id, title: "Open Quiz", required: true },
@@ -571,25 +584,96 @@ describe("Quiz flow", () => {
         },
       });
 
-      const answer = JSON.stringify({
-        questionId: question.id,
-        answer: {
-          text: "......",
-        },
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
+
+      const answers = [{ questionId: question.id, text: "......" }];
 
       const res = singleResult(
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: [answer] },
+            variables: { quizId: quiz.id, answers },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
       );
 
       expect(res.errors).toBeUndefined();
-      expect(res.data.submitQuizAttempt.passed).toBe(false);
+      expect(res.data.submitQuizAttempt.passed).toBe(true);
+    });
+
+    it("keeps a mixed quiz pending while its open question needs review", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Mixed Quiz", required: true },
+      });
+      const choiceQuestion = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "SINGLE_CHOICE",
+          prompt: "Choose the correct answer",
+        },
+      });
+      const correctOption = await prisma.quizOption.create({
+        data: { questionId: choiceQuestion.id, text: "Correct", isCorrect: true },
+      });
+      const openQuestion = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "OPEN_QUESTION",
+          prompt: "Explain your answer",
+        },
+      });
+
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
+      });
+
+      const answers = [
+        { questionId: choiceQuestion.id, selectedOptionIds: [correctOption.id] },
+        { questionId: openQuestion.id, text: "My explanation" },
+      ];
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: { quizId: quiz.id, answers },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.passed).toBeNull();
+
+      const stored = await prisma.quizAttempt.findUnique({
+        where: { id: res.data.submitQuizAttempt.id },
+      });
+      expect(stored!.passed).toBeNull();
+
+      const resWithoutOpenAnswer = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: {
+              quizId: quiz.id,
+              answers: [
+                {
+                  questionId: choiceQuestion.id,
+                  selectedOptionIds: [correctOption.id],
+                },
+              ],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(resWithoutOpenAnswer.errors).toBeUndefined();
+      expect(resWithoutOpenAnswer.data.submitQuizAttempt.passed).toBe(false);
     });
 
     it("store the attempt in the database", async () => {
@@ -604,16 +688,19 @@ describe("Quiz flow", () => {
         data: { questionId: question.id, text: "2", isCorrect: true },
       });
 
-      const answer = JSON.stringify({
-        questionId: question.id,
-        answer: { selectedOptionIds: [correct.id] },
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
+
+      const answers = [
+        { questionId: question.id, selectedOptionIds: [correct.id] },
+      ];
 
       const res = singleResult(
         await server.executeOperation(
           {
             query: SUBMIT_ATTEMPT,
-            variables: { quizId: quiz.id, answers: [answer] },
+            variables: { quizId: quiz.id, answers },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
         ),
@@ -631,10 +718,7 @@ describe("Quiz flow", () => {
     });
 
     it("reject submission for a non-exist quiz", async () => {
-      const answer = JSON.stringify({
-        questionId: "some-id",
-        answer: { selectedOptionIds: [] },
-      });
+      const answers = [{ questionId: "some-id", selectedOptionIds: [] }];
 
       const res = singleResult(
         await server.executeOperation(
@@ -642,7 +726,7 @@ describe("Quiz flow", () => {
             query: SUBMIT_ATTEMPT,
             variables: {
               quizId: "00000000-0000-0000-0000-000000000000",
-              answers: [answer],
+              answers,
             },
           },
           { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },

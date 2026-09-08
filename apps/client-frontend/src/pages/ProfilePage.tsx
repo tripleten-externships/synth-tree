@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // IMPORTANT: your project uses the React-specific Apollo entrypoint
 import { useMutation } from "@apollo/client/react";
 import { SYNC_CURRENT_USER } from "../graphql/queries/currentUser";
@@ -24,6 +25,7 @@ interface User {
 
 export default function ProfilePage() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   // ------------------------------------------------------------
   // 1) Apollo mutation used for BOTH loading and saving the user
   //    Your backend does not have GET_CURRENT_USER, so this is
@@ -92,8 +94,9 @@ export default function ProfilePage() {
   const handleSave = () => {
     const currentUser = auth.currentUser;
     if (!currentUser) {
-      // No Firebase session — redirect to login
-      window.location.href = "http://localhost:5173/auth/login";
+      // No Firebase session — send them to login via the router (origin-agnostic,
+      // so it works in any deployed environment, not just local dev).
+      navigate("/auth/login", { replace: true });
       return;
     }
     syncUser({ variables: { name, photoUrl } });
