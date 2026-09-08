@@ -81,9 +81,10 @@ builds:
 
 - `AWS_ACCESS_KEY_ID_DEV` / `AWS_SECRET_ACCESS_KEY_DEV`
 - `AWS_ACCESS_KEY_ID_PROD` / `AWS_SECRET_ACCESS_KEY_PROD`
-- `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`,
-  `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`
-
-> All six Firebase values are required — the shared Firebase init throws if any
-> are missing, which renders a blank page. (This is what caused the earlier
-> white screen: only three of the six were provided at build time.)
+- **Required:** `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`
+  — the auth-critical values. The shared Firebase init throws if any are
+  missing (which renders a blank page).
+- **Optional:** `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`,
+  `FIREBASE_APP_ID` — the apps use Firebase **Auth only**, so these are unused
+  and fall back to inert defaults when unset. Set them only if a Cloud Storage /
+  Messaging / Analytics SDK is ever added.

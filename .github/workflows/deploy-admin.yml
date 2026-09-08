@@ -90,9 +90,13 @@ jobs:
         env:
           VITE_API_URL: ${{ inputs.environment == 'prod' && 'https://api.synth-tree.com/graphql' || 'https://api.dev.synth-tree.com/graphql' }}
           VITE_ENVIRONMENT: ${{ inputs.environment }}
+          # Auth-critical — required (build throws without these).
           VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          # Optional — the apps use Auth only; these fall back to inert defaults
+          # if the secrets are unset. Set them if a Storage/Messaging/Analytics
+          # SDK is ever added.
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
