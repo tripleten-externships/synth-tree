@@ -1,8 +1,14 @@
 import { useState } from "react";
 import { Navigate, useNavigate, Link } from "react-router-dom";
+import {
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { Button, Input, toast } from "@synth-tree/ui";
 
 import { useAuthContext } from "../../contexts/AuthContext";
+import { auth } from "../../lib/firebase";
 
 function hexPoints(cx: number, cy: number, r: number) {
   return Array.from({ length: 6 }, (_, i) => {
@@ -65,7 +71,7 @@ function BrandMark() {
 }
 
 export default function SignInPage() {
-  const { login, isAuthenticated } = useAuthContext();
+  const { login, isAuthenticated, loading } = useAuthContext();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -74,16 +80,26 @@ export default function SignInPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Wait for the initial auth state before deciding to redirect, otherwise an
+  // already-signed-in user briefly sees the form before being sent home.
+  if (loading) return null;
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
+      // Honor "Remember me": local persistence survives browser restarts,
+      // session persistence is cleared when the tab/browser closes.
+      await setPersistence(
+        auth,
+        rememberMe ? browserLocalPersistence : browserSessionPersistence,
+      );
       await login(email, password);
       navigate("/", { replace: true });
-    } catch {
-      toast("Sign in failed", {
+    } catch (err) {
+      console.error("Sign-in failed", err);
+      toast.error("Sign in failed", {
         description: "Check your email and password and try again.",
       });
     } finally {
@@ -178,8 +194,8 @@ export default function SignInPage() {
                 htmlFor="remember-me"
                 className="flex items-center gap-2 text-sm text-muted-foreground"
               >
-                {/* Cosmetic only for now, not wired to Firebase session persistence.
-                    No acceptance criterion requires it; intentional, not a missed step. */}
+                {/* Wired to Firebase session persistence in onSubmit:
+                    checked => local (survives restart), unchecked => session-only. */}
                 <input
                   type="checkbox"
                   id="remember-me"
