@@ -568,6 +568,49 @@ describe("Quiz flow", () => {
       expect(res.data.submitQuizAttempt.passed).toBe(true);
     });
 
+    // SYN-36: passing a quiz marks the node COMPLETED.
+    it("marks the node COMPLETED when the quiz passes", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Pass Quiz", required: true },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: { quizId: quiz.id, type: "SINGLE_CHOICE", prompt: "1+1?" },
+      });
+      const correct = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "2", isCorrect: true },
+      });
+      await prisma.quizOption.create({
+        data: { questionId: question.id, text: "3", isCorrect: false },
+      });
+
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
+      });
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: {
+              quizId: quiz.id,
+              answers: [{ questionId: question.id, selectedOptionIds: [correct.id] }],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.passed).toBe(true);
+
+      const progress = await prisma.userNodeProgress.findUnique({
+        where: { userId_nodeId: { userId: REGULAR_USER_ID, nodeId: node.id } },
+      });
+      expect(progress?.status).toBe("COMPLETED");
+      expect(progress?.completedAt).not.toBeNull();
+    });
+
     // Per the SYN-33 spec, a quiz with no auto-gradable questions (open-only)
     // auto-passes. Whether that is the desired product behavior is tracked in
     // SYN-122; this test asserts the currently-specified behavior.

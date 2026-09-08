@@ -4,7 +4,7 @@ import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
-import { COMPLETE_NODE } from "../graphql/mutations/completeNode";
+import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
 
 interface LessonViewerProps {
   nodeId: string;
@@ -17,14 +17,16 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
-  const [completeNode] = useMutation(COMPLETE_NODE);
+  const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS);
 
   async function handleNext() {
-    await completeNode({
-      variables: {
-        nodeId,
-      },
-    });
+    // Best-effort completion. If the node has a required quiz the learner hasn't
+    // passed, the server rejects completion — don't block navigation on that.
+    try {
+      await completeNodeProgress({ variables: { nodeId } });
+    } catch {
+      // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
+    }
 
     return onNext();
   }

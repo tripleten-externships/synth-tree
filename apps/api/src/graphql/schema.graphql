@@ -1103,7 +1103,6 @@ enum LessonStatus {
 }
 
 type Mutation {
-  completeNode(nodeId: ID!): UserNodeProgress
   completeNodeProgress(nodeId: ID!): UserNodeProgress
   createCourse(input: CreateCourseInput!): Course
   createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode

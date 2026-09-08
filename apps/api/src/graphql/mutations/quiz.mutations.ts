@@ -5,6 +5,7 @@ import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
+import { completeNodeForUser } from "src/services/progress";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput } from "../inputs/quiz.inputs";
 
@@ -428,26 +429,12 @@ builder.mutationFields((t) => ({
         await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
       }
 
-      // SYN-36: passing the quiz marks the node complete.
+      // SYN-36: passing the quiz marks the node complete. Route it through the
+      // shared completion helper so it's idempotent and feeds the daily-quest
+      // hook, consistent with completeNodeProgress. (The required-quiz gate is
+      // satisfied here because the passing attempt was just persisted.)
       if (summary.passed === true) {
-        await ctx.prisma.userNodeProgress.upsert({
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId: existing.nodeId,
-            },
-          },
-          update: {
-            status: "COMPLETED",
-            completedAt: new Date(),
-          },
-          create: {
-            userId,
-            nodeId: existing.nodeId,
-            status: "COMPLETED",
-            completedAt: new Date(),
-          },
-        });
+        await completeNodeForUser(ctx.prisma, userId, existing.nodeId);
       }
 
       logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");

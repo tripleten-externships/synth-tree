@@ -1130,7 +1130,6 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNode?: Maybe<UserNodeProgress>;
   completeNodeProgress?: Maybe<UserNodeProgress>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
@@ -1164,11 +1163,6 @@ export type Mutation = {
   updateQuizQuestion?: Maybe<QuizQuestion>;
   updateSkillNode?: Maybe<SkillNode>;
   updateSkillTree?: Maybe<SkillTree>;
-};
-
-
-export type MutationCompleteNodeArgs = {
-  nodeId: Scalars['ID']['input'];
 };
 
 
@@ -7224,12 +7218,12 @@ export type CreateCourseMutationVariables = Exact<{
 
 export type CreateCourseMutation = { __typename?: 'Mutation', createCourse?: { __typename?: 'Course', id: string, title: string } | null };
 
-export type CompleteNodeMutationVariables = Exact<{
+export type CompleteNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
 }>;
 
 
-export type CompleteNodeMutation = { __typename?: 'Mutation', completeNode?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7556,9 +7550,9 @@ export function useCreateCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<CreateCourseMutation, CreateCourseMutationVariables>(CreateCourseDocument, options);
       }
 export type CreateCourseMutationHookResult = ReturnType<typeof useCreateCourseMutation>;
-export const CompleteNodeDocument = gql`
-    mutation CompleteNode($nodeId: ID!) {
-  completeNode(nodeId: $nodeId) {
+export const CompleteNodeProgressDocument = gql`
+    mutation CompleteNodeProgress($nodeId: ID!) {
+  completeNodeProgress(nodeId: $nodeId) {
     id
     status
   }
@@ -7566,27 +7560,27 @@ export const CompleteNodeDocument = gql`
     `;
 
 /**
- * __useCompleteNodeMutation__
+ * __useCompleteNodeProgressMutation__
  *
- * To run a mutation, you first call `useCompleteNodeMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCompleteNodeMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCompleteNodeProgressMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCompleteNodeProgressMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [completeNodeMutation, { data, loading, error }] = useCompleteNodeMutation({
+ * const [completeNodeProgressMutation, { data, loading, error }] = useCompleteNodeProgressMutation({
  *   variables: {
  *      nodeId: // value for 'nodeId'
  *   },
  * });
  */
-export function useCompleteNodeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CompleteNodeMutation, CompleteNodeMutationVariables>) {
+export function useCompleteNodeProgressMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CompleteNodeProgressMutation, CompleteNodeProgressMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useMutation<CompleteNodeMutation, CompleteNodeMutationVariables>(CompleteNodeDocument, options);
+        return ApolloReactHooks.useMutation<CompleteNodeProgressMutation, CompleteNodeProgressMutationVariables>(CompleteNodeProgressDocument, options);
       }
-export type CompleteNodeMutationHookResult = ReturnType<typeof useCompleteNodeMutation>;
+export type CompleteNodeProgressMutationHookResult = ReturnType<typeof useCompleteNodeProgressMutation>;
 export const StartNodeProgressDocument = gql`
     mutation StartNodeProgress($nodeId: ID!) {
   startNodeProgress(nodeId: $nodeId) {
