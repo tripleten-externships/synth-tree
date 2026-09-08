@@ -2,6 +2,7 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 
+import { AdminStack } from "../lib/admin-stack";
 import { ApiStack } from "../lib/api-stack";
 import { ENVIRONMENTS, getConfig, type Environment } from "../lib/config";
 import { DatabaseStack } from "../lib/database-stack";
@@ -93,11 +94,19 @@ const apiStack = new ApiStack(app, `${config.name}-Api`, {
 apiStack.addDependency(networkStack);
 apiStack.addDependency(databaseStack);
 
-// ─── Frontend ──────────────────────────────────────────────────────────────
-// S3 + CloudFront for the React apps. Independent.
+// ─── Frontend (client-frontend) ──────────────────────────────────────────────
+// S3 + CloudFront for the learner-facing client app. Independent.
 new FrontendStack(app, `${config.name}-Frontend`, {
   ...commonProps,
-  description: `Frontend infrastructure for Synth Tree ${config.name} environment`,
+  description: `Client frontend infrastructure for Synth Tree ${config.name} environment`,
+  config,
+});
+
+// ─── Admin (admin-dashboard) ─────────────────────────────────────────────────
+// S3 + CloudFront for the admin dashboard, on its own subdomain. Independent.
+new AdminStack(app, `${config.name}-Admin`, {
+  ...commonProps,
+  description: `Admin dashboard infrastructure for Synth Tree ${config.name} environment`,
   config,
 });
 

@@ -4,51 +4,41 @@ import { EnvironmentConfig } from "./config";
 import { StaticSite } from "./constructs/static-site";
 
 /**
- * Props for FrontendStack
+ * Props for AdminStack
  */
-export interface FrontendStackProps extends cdk.StackProps {
+export interface AdminStackProps extends cdk.StackProps {
   config: EnvironmentConfig;
 }
 
 /**
- * Frontend Stack
+ * Admin Stack
  *
- * Hosts the **client-frontend** (learner-facing) React app. The admin
- * dashboard is a separate site — see AdminStack. This stack keeps the
- * `frontend` siteName (and therefore its existing bucket / distribution /
- * exports) so it can be repointed to the client app without recreating any
- * AWS resources.
+ * Hosts the **admin-dashboard** React app on its own subdomain, kept as a
+ * SEPARATE static site from FrontendStack so no admin code ever ships in the
+ * client (learner) bundle.
  *
- * Creates the infrastructure for the React frontend application:
- * - S3 bucket for static website files
- * - CloudFront distribution with HTTPS
- * - SSL certificate via ACM
- * - Route53 DNS record
- * - Security headers
- * - Optimized caching policies (long TTL for assets, short TTL for HTML)
- * - SPA routing support (404 → index.html)
- *
- * This stack is independent and can be deployed separately.
- * It uses the reusable StaticSite construct for all infrastructure.
+ * Mirrors FrontendStack but with `siteName: "admin"` and `config.adminDomain`,
+ * so it gets its own S3 bucket, CloudFront distribution, ACM certificate,
+ * Route53 record, and CloudFormation exports (`<env>-admin-*`).
  *
  * Domains:
- * - Dev: dev.synth-tree.com
- * - Prod: app.synth-tree.com
+ * - Dev: admin.dev.synth-tree.com
+ * - Prod: admin.synth-tree.com
  *
  * Build Output:
- * - Frontend app is built with Vite
- * - Build directory: apps/client-frontend/dist/
+ * - Admin app is built with Vite
+ * - Build directory: apps/admin-dashboard/dist/
  * - Deploy with: aws s3 sync dist/ s3://bucket-name/
  * - Invalidate CloudFront: aws cloudfront create-invalidation --distribution-id XXX --paths "/*"
  */
-export class FrontendStack extends cdk.Stack {
+export class AdminStack extends cdk.Stack {
   /**
-   * The CloudFront distribution serving the frontend
+   * The CloudFront distribution serving the admin dashboard
    */
   public readonly distribution: cdk.aws_cloudfront.IDistribution;
 
   /**
-   * The S3 bucket containing the frontend files
+   * The S3 bucket containing the admin dashboard files
    */
   public readonly bucket: cdk.aws_s3.IBucket;
 
@@ -57,7 +47,7 @@ export class FrontendStack extends cdk.Stack {
    */
   public readonly websiteUrl: string;
 
-  constructor(scope: Construct, id: string, props: FrontendStackProps) {
+  constructor(scope: Construct, id: string, props: AdminStackProps) {
     super(scope, id, props);
 
     const { config } = props;
@@ -70,12 +60,12 @@ export class FrontendStack extends cdk.Stack {
      * Create the static site using the reusable construct
      * This includes S3, CloudFront, SSL certificate, and DNS
      */
-    const staticSite = new StaticSite(this, "FrontendSite", {
+    const staticSite = new StaticSite(this, "AdminSite", {
       environmentName: config.name,
-      domainName: config.domain,
+      domainName: config.adminDomain,
       hostedZoneName: config.hostedZoneName,
       priceClass: config.cloudfront.priceClass,
-      siteName: "frontend",
+      siteName: "admin",
       enableSpaRouting: true, // Enable SPA routing for React app
       defaultTtl: config.cloudfront.defaultTtl,
       maxTtl: config.cloudfront.maxTtl,
@@ -91,7 +81,7 @@ export class FrontendStack extends cdk.Stack {
     // Additional Tags
     // ========================================
 
-    cdk.Tags.of(this).add("Stack", "Frontend");
-    cdk.Tags.of(this).add("Application", "ClientFrontend");
+    cdk.Tags.of(this).add("Stack", "Admin");
+    cdk.Tags.of(this).add("Application", "AdminDashboard");
   }
 }

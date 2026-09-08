@@ -1,16 +1,16 @@
 name: Deploy Infrastructure
 
+# Reusable + manual only. Auto-deploys run through deploy-orchestrator.yml
+# (push to development -> dev, push to main -> prod). Manual runs from the
+# Actions tab are gated to code owners by the require-codeowner action.
+
 on:
-  pull_request:
-    paths:
-      - "apps/infra/**"
-      - ".github/workflows/deploy-infrastructure.yml"
-  push:
-    branches:
-      - main
-    paths:
-      - "apps/infra/**"
-      - ".github/workflows/deploy-infrastructure.yml"
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy (dev or prod)"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       environment:
@@ -23,11 +23,10 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
   id-token: write
 
 concurrency:
-  group: deploy-infrastructure-${{ github.event.inputs.environment || 'auto' }}
+  group: deploy-infrastructure-${{ inputs.environment }}
   cancel-in-progress: false
 
 env:
@@ -36,17 +35,15 @@ env:
   PNPM_VERSION: "10"
 
 jobs:
-  deploy-dev:
-    name: Deploy to Dev
+  deploy:
+    name: Deploy (${{ inputs.environment }})
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'push' && 
-      github.ref == 'refs/heads/main' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
-    environment: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Restrict manual runs to code owners
+        uses: ./.github/actions/require-codeowner
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -77,8 +74,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-access-key-id: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_KEY_ID_PROD || secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ inputs.environment == 'prod' && secrets.AWS_SECRET_ACCESS_KEY_PROD || secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Check CDK bootstrap
@@ -93,7 +90,7 @@ jobs:
 
       - name: Ensure database credentials secret exists
         run: |
-          SECRET_ID="synth-tree-dev/database/credentials"
+          SECRET_ID="synth-tree-${{ inputs.environment }}/database/credentials"
           if aws secretsmanager describe-secret --secret-id "$SECRET_ID" --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
             echo "✅ Secret $SECRET_ID already exists — leaving it untouched."
           else
@@ -108,197 +105,34 @@ jobs:
             aws secretsmanager create-secret \
               --name "$SECRET_ID" \
               --region ${{ env.AWS_REGION }} \
-              --description "Database credentials for synth-tree-dev environment" \
+              --description "Database credentials for synth-tree-${{ inputs.environment }} environment" \
               --secret-string "$SECRET_STRING"
             echo "✅ Created $SECRET_ID."
           fi
 
-      - name: Build and deploy to dev
+      - name: Build and deploy
         working-directory: apps/infra
         run: |
           pnpm build
           npx cdk deploy \
-            --context environment=dev \
+            --context environment=${{ inputs.environment }} \
             --all \
             --require-approval never \
             --concurrency 3 \
             --progress events
 
       - name: Save deployment outputs
-        id: outputs
         run: |
           aws cloudformation describe-stacks \
             --region ${{ env.AWS_REGION }} \
-            --query 'Stacks[?starts_with(StackName, `synth-tree-dev-`)].{Name:StackName, Outputs:Outputs}' \
-            > deployment-outputs-dev.json
-
+            --query 'Stacks[?starts_with(StackName, `synth-tree-${{ inputs.environment }}-`)].{Name:StackName, Outputs:Outputs}' \
+            > deployment-outputs-${{ inputs.environment }}.json
           echo "Deployment outputs saved"
-          cat deployment-outputs-dev.json
+          cat deployment-outputs-${{ inputs.environment }}.json
 
       - name: Upload deployment outputs
         uses: actions/upload-artifact@v4
         with:
-          name: dev-deployment-outputs
-          path: deployment-outputs-dev.json
+          name: ${{ inputs.environment }}-deployment-outputs
+          path: apps/infra/deployment-outputs-${{ inputs.environment }}.json
           retention-days: 30
-
-  deploy-prod:
-    name: Deploy to Prod
-    runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
-    needs: deploy-dev
-    environment: prod
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Check CDK bootstrap
-        working-directory: apps/infra
-        run: |
-          echo "Checking CDK bootstrap status..."
-          if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
-            echo "⚠️ CDK not bootstrapped. Run: npx cdk bootstrap"
-            exit 1
-          fi
-          echo "✅ CDK bootstrap verified"
-
-      - name: Ensure database credentials secret exists
-        run: |
-          SECRET_ID="synth-tree-prod/database/credentials"
-          if aws secretsmanager describe-secret --secret-id "$SECRET_ID" --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
-            echo "✅ Secret $SECRET_ID already exists — leaving it untouched."
-          else
-            echo "Secret $SECRET_ID not found — creating with a generated password."
-            PASSWORD=$(aws secretsmanager get-random-password \
-              --region ${{ env.AWS_REGION }} \
-              --password-length 32 \
-              --exclude-characters '"@/\' \
-              --require-each-included-type \
-              --query RandomPassword --output text)
-            SECRET_STRING=$(PASSWORD="$PASSWORD" node -e 'process.stdout.write(JSON.stringify({ username: "postgres", password: process.env.PASSWORD }))')
-            aws secretsmanager create-secret \
-              --name "$SECRET_ID" \
-              --region ${{ env.AWS_REGION }} \
-              --description "Database credentials for synth-tree-prod environment" \
-              --secret-string "$SECRET_STRING"
-            echo "✅ Created $SECRET_ID."
-          fi
-
-      - name: Build and deploy to prod
-        working-directory: apps/infra
-        run: |
-          pnpm build
-          npx cdk deploy \
-            --context environment=prod \
-            --all \
-            --require-approval never \
-            --concurrency 3 \
-            --progress events
-
-      - name: Save deployment outputs
-        id: outputs
-        run: |
-          aws cloudformation describe-stacks \
-            --region ${{ env.AWS_REGION }} \
-            --query 'Stacks[?starts_with(StackName, `synth-tree-prod-`)].{Name:StackName, Outputs:Outputs}' \
-            > deployment-outputs-prod.json
-
-          echo "Deployment outputs saved"
-          cat deployment-outputs-prod.json
-
-      - name: Upload deployment outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: prod-deployment-outputs
-          path: deployment-outputs-prod.json
-          retention-days: 90
-
-  drift-detection:
-    name: Drift Detection
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    strategy:
-      matrix:
-        environment: [dev, prod]
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ matrix.environment == 'dev' && secrets.AWS_ACCESS_KEY_ID_DEV || secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ matrix.environment == 'dev' && secrets.AWS_SECRET_ACCESS_KEY_DEV || secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Detect stack drift
-        run: |
-          PREFIX="synth-tree-${{ matrix.environment }}"
-          STACKS="$PREFIX-Network $PREFIX-Database $PREFIX-Api $PREFIX-Frontend $PREFIX-Storybook"
-
-          for stack in $STACKS; do
-            echo "Checking drift for $stack..."
-
-            if ! aws cloudformation describe-stacks --stack-name "$stack" > /dev/null 2>&1; then
-              echo "⚠️ Stack $stack does not exist - skipping"
-              continue
-            fi
-
-            DRIFT_ID=$(aws cloudformation detect-stack-drift \
-              --stack-name "$stack" \
-              --query StackDriftDetectionId \
-              --output text)
-
-            # Poll until drift detection finishes (up to ~3 minutes).
-            for i in $(seq 1 18); do
-              DETECTION_STATUS=$(aws cloudformation describe-stack-drift-detection-status \
-                --stack-drift-detection-id "$DRIFT_ID" \
-                --query DetectionStatus --output text)
-              if [ "$DETECTION_STATUS" != "DETECTION_IN_PROGRESS" ]; then
-                break
-              fi
-              sleep 10
-            done
-
-            STATUS=$(aws cloudformation describe-stack-drift-detection-status \
-              --stack-drift-detection-id "$DRIFT_ID" \
-              --query StackDriftStatus --output text)
-
-            if [ "$STATUS" != "IN_SYNC" ]; then
-              echo "::warning::Drift detected in $stack - Status: $STATUS"
-            else
-              echo "✅ $stack is in sync"
-            fi
-          done

@@ -91,11 +91,36 @@ synth-tree/
 
 ## Environments
 
-|           | Dev                                    | Production                              |
-| --------- | -------------------------------------- | --------------------------------------- |
-| API       | <https://api.dev.synth-tree.com>       | <https://api.synth-tree.com>            |
-| Admin app | <https://dev.synth-tree.com>           | <https://app.synth-tree.com/auth/login> |
-| Storybook | <https://storybook.dev.synth-tree.com> | <https://storybook.synth-tree.com>      |
+|            | Dev                                      | Production                             |
+| ---------- | ---------------------------------------- | -------------------------------------- |
+| Client app | <https://dev.synth-tree.com>             | <https://app.synth-tree.com>           |
+| Admin app  | <https://admin.dev.synth-tree.com>       | <https://admin.synth-tree.com>         |
+| API        | <https://api.dev.synth-tree.com/graphql> | <https://api.synth-tree.com/graphql>   |
+| Storybook  | <https://storybook.dev.synth-tree.com>   | <https://storybook.synth-tree.com>     |
+
+The **client-frontend** (learner app) is served at the bare env domain and the
+**admin-dashboard** at the `admin.` subdomain. `dev` is deployed from the
+`development` branch, `prod` from `main` — see **Branching & deployment** below.
+
+## Branching & deployment
+
+Two long-lived branches, each wired to exactly one environment:
+
+| Branch        | Auto-deploys to | How code lands on it                       |
+| ------------- | --------------- | ------------------------------------------ |
+| `development` | **dev**         | merge feature branches → `development`     |
+| `main`        | **prod**        | merge `development` → `main` (release)     |
+
+- **`development` is the default branch.** Open every feature PR against
+  `development` (never `main`). Merging to `development` auto-deploys to the dev
+  environment via [`deploy-orchestrator.yml`](.github/workflows/deploy-orchestrator.yml).
+- **Releases** are a `development` → `main` merge. Merging to `main` auto-deploys
+  to prod. Use a **merge commit** (not squash/rebase) for the release PR so the
+  orchestrator's first-parent diff sees everything the release brings in.
+- Never commit directly to `development` or `main`, and never delete either.
+- The per-service `deploy-*.yml` workflows are **manual-only** (run from the
+  Actions tab) and restricted to code owners; the orchestrator is what runs them
+  automatically on a push. See [`.github/workflows/README.md`](.github/workflows/README.md).
 
 ## Where to read next
 
