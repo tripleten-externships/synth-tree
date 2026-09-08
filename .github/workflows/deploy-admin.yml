@@ -1,5 +1,8 @@
-name: Deploy Storybook
+name: Deploy Admin Dashboard
 
+# Deploys apps/admin-dashboard to S3 + CloudFront:
+#   dev  -> admin.dev.synth-tree.com
+#   prod -> admin.synth-tree.com
 # Reusable + manual only. Auto-deploys run through deploy-orchestrator.yml
 # (push to development -> dev, push to main -> prod). Manual runs from the
 # Actions tab are gated to code owners by the require-codeowner action.
@@ -26,7 +29,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: deploy-storybook-${{ inputs.environment }}
+  group: deploy-admin-${{ inputs.environment }}
   cancel-in-progress: false
 
 env:
@@ -82,17 +85,26 @@ jobs:
         working-directory: packages/ui
         run: pnpm build
 
-      - name: Build Storybook
-        working-directory: packages/ui
+      - name: Build admin dashboard
+        working-directory: apps/admin-dashboard
+        env:
+          VITE_API_URL: ${{ inputs.environment == 'prod' && 'https://api.synth-tree.com/graphql' || 'https://api.dev.synth-tree.com/graphql' }}
+          VITE_ENVIRONMENT: ${{ inputs.environment }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
-          echo "Building Storybook for ${{ inputs.environment }}..."
-          pnpm build-storybook
-          if [ ! -d "storybook-static" ] || [ -z "$(ls -A storybook-static)" ]; then
-            echo "❌ Build failed - storybook-static directory is empty"
+          echo "Building admin dashboard for ${{ inputs.environment }}..."
+          pnpm build
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed - dist directory is empty"
             exit 1
           fi
-          echo "✅ Storybook build completed successfully"
-          ls -lah storybook-static/
+          echo "✅ Build completed successfully"
+          ls -lah dist/
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -105,15 +117,15 @@ jobs:
         id: infra
         run: |
           BUCKET=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-storybook-BucketName'].Value" \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-admin-BucketName'].Value" \
             --output text)
           DIST_ID=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-storybook-DistributionId'].Value" \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-admin-DistributionId'].Value" \
             --output text)
 
           if [ -z "$BUCKET" ] || [ "$BUCKET" = "None" ] || \
              [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
-            echo "::error::Could not resolve storybook exports for ${{ inputs.environment }}. Has the infra been deployed?"
+            echo "::error::Could not resolve admin exports for ${{ inputs.environment }}. Has the ${{ inputs.environment }} Admin stack been deployed?"
             exit 1
           fi
 
@@ -123,15 +135,19 @@ jobs:
           echo "CloudFront Distribution: $DIST_ID"
 
       - name: Sync to S3
-        working-directory: packages/ui
+        working-directory: apps/admin-dashboard
         env:
           BUCKET: ${{ steps.infra.outputs.bucket }}
         run: |
-          echo "Syncing Storybook to S3..."
-          # Storybook handles cache-busting via filenames
-          aws s3 sync storybook-static/ s3://$BUCKET/ \
+          echo "Syncing static assets to S3..."
+          aws s3 sync dist/ s3://$BUCKET/ \
             --delete \
-            --cache-control "public,max-age=31536000,immutable"
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" \
+            --exclude "*.map"
+          aws s3 cp dist/index.html s3://$BUCKET/index.html \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --content-type "text/html"
           echo "✅ Files synced to S3"
 
       - name: Invalidate CloudFront cache
@@ -164,11 +180,3 @@ jobs:
           else
             echo "⚠️ Verification returned status: $STATUS"
           fi
-
-      - name: Upload build artifacts
-        if: inputs.environment == 'prod'
-        uses: actions/upload-artifact@v4
-        with:
-          name: prod-storybook-build
-          path: packages/ui/storybook-static
-          retention-days: 30
