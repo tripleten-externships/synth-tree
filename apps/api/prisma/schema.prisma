@@ -79,7 +79,8 @@ model User {
   xp           UserXp?
   streak       UserStreak?
   xpEvents     XpEvent[]
-    hearts       UserHearts?
+  hearts       UserHearts?
+  dailyQuests  UserDailyQuest[]
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -352,13 +353,26 @@ model UserStreak {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
 model UserHearts {
   userId         String   @id
   currentHearts  Int      @default(5)
   lastRefilledAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserDailyQuest {
+  userId    String
+  questKey  String
+  date      DateTime
+  goal      Int
+  current   Int      @default(0)
+  completed Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questKey, date])
+  @@index([userId, date])
 }
 
 model XpEvent {
