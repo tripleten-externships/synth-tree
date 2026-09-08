@@ -7,18 +7,14 @@ export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b bg-background">
       <nav
         className="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6"
         aria-label="Main navigation"
       >
         {/* LEFT: Logo */}
         <div className="flex items-center">
-          <img
-            src={SynthTreeLogo}
-            alt="Synth Tree logo"
-            className="h-6 w-auto"
-          />
+          <img src={SynthTreeLogo} alt="Synth Tree logo" className="h-6 w-auto" />
         </div>
 
         {/* CENTER: Desktop navigation */}
@@ -31,7 +27,7 @@ export default function Navbar() {
           {/* Logout icon (desktop only) */}
           <button
             aria-label="Logout"
-            className="hidden md:inline-flex rounded-md p-2 hover:bg-gray-100"
+            className="hidden md:inline-flex rounded-md p-2 hover:bg-accent"
           >
             <img src={Frame} alt="Logout" className="h-5 w-5" />
           </button>
@@ -39,22 +35,22 @@ export default function Navbar() {
           {/* Mobile hamburger (mobile only) */}
           <button
             type="button"
-            className="inline-flex flex-col items-center justify-center gap-1 rounded-md p-2 hover:bg-gray-100 md:hidden"
+            className="inline-flex flex-col items-center justify-center gap-1 rounded-md p-2 hover:bg-accent md:hidden"
             aria-label="Toggle main menu"
             aria-expanded={isMobileOpen}
             onClick={() => setIsMobileOpen((open) => !open)}
           >
             <span className="sr-only">Toggle navigation</span>
-            <span className="block h-0.5 w-5 bg-gray-900 rounded-full" />
-            <span className="block h-0.5 w-5 bg-gray-900 rounded-full" />
-            <span className="block h-0.5 w-5 bg-gray-900 rounded-full" />
+            <span className="block h-0.5 w-5 bg-foreground rounded-full" />
+            <span className="block h-0.5 w-5 bg-foreground rounded-full" />
+            <span className="block h-0.5 w-5 bg-foreground rounded-full" />
           </button>
         </div>
       </nav>
 
       {/* MOBILE MENU PANEL */}
       {isMobileOpen && (
-        <div className="border-t bg-white md:hidden">
+        <div className="border-t bg-background md:hidden">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
             <Navigation />
           </div>
