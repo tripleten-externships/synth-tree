@@ -60,16 +60,75 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     </div>
   );
 
-  const renderEmbed = (url: string) => (
-    <div className="relative pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-      <iframe
-        src={url}
-        title="Embedded content"
-        className="absolute top-0 left-0 w-full h-full border-0"
-        allowFullScreen
-      />
-    </div>
-  );
+  const ALLOWED_EMBED_HOSTS = new Set([
+    "youtube.com",
+    "www.youtube.com",
+    "www.youtube-nocookie.com",
+    "youtube-nocookie.com",
+    "vimeo.com",
+    "www.vimeo.com",
+    "player.vimeo.com",
+    "codepen.io",
+    "www.codepen.io",
+  ]);
+
+  const renderEmbed = (embedContent: string) => {
+    let src = "";
+    let title = "Embedded content";
+    let allow: string | undefined;
+
+    if (embedContent.trim().startsWith("<")) {
+      const sanitized = DOMPurify.sanitize(embedContent, {
+        ALLOWED_TAGS: ["iframe"],
+        ALLOWED_ATTR: [
+          "src",
+          "title",
+          "allow",
+          "allowfullscreen",
+          "frameborder",
+          "loading",
+          "referrerpolicy",
+        ],
+      });
+
+      const doc = new DOMParser().parseFromString(sanitized, "text/html");
+      const iframe = doc.querySelector("iframe");
+
+      if (!iframe) return null;
+
+      src = iframe.getAttribute("src") ?? "";
+      title = iframe.getAttribute("title") || "Embedded content";
+      allow = iframe.getAttribute("allow") || undefined;
+    } else {
+      src = embedContent;
+    }
+
+    if (!src) return null;
+
+    let hostname: string;
+
+    try {
+      hostname = new URL(src).hostname;
+    } catch {
+      return null;
+    }
+
+    if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
+      return null;
+    }
+
+    return (
+      <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
+        <iframe
+          src={src}
+          title={title}
+          className="absolute top-0 left-0 w-full h-full border-0"
+          allow={allow}
+          allowFullScreen
+        />
+      </div>
+    );
+  };
 
   const renderBlock = (block: (typeof blocks)[number]) => {
     switch (block.type) {
@@ -80,7 +139,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
       case "VIDEO":
         return renderVideo(block.url ?? "");
       case "EMBED":
-        return renderEmbed(block.url ?? "");
+        return renderEmbed(block.html ?? block.url ?? "");
       default:
         return null;
     }

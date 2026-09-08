@@ -1126,7 +1126,7 @@ type Mutation {
   publishLessonBlock(id: ID!): LessonBlocks
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
-  submitQuizAttempt(answers: [String!]!, quizId: ID!): QuizAttempt
+  submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
   syncCurrentUser(name: String, photoUrl: String): User
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
@@ -1566,6 +1566,7 @@ type Query {
   adminSkillTree(id: ID!): SkillTree
   adminSkillTrees(courseId: ID, limit: Int, page: Int, search: String): [SkillTree!]
   allUsers(limit: Int = 25, offset: Int = 0): [User!]
+  courseForLearner(id: ID!): Course
   courseProgress(courseId: ID!, userId: ID): CourseProgress
   currentUser: User
   lessonBlock(id: ID!): LessonBlocks
@@ -1606,6 +1607,12 @@ type Quiz {
   required: Boolean!
   title: String
   updatedAt: DateTime!
+}
+
+input QuizAnswerInput {
+  questionId: ID!
+  selectedOptionIds: [ID!]
+  text: String
 }
 
 type QuizAttempt {
@@ -2373,7 +2380,7 @@ input QuizNullableScalarRelationFilter {
 type QuizOption {
   createdAt: DateTime!
   id: ID!
-  isCorrect: Boolean!
+  isCorrect: Boolean
   question: QuizQuestion!
   questionId: String!
   text: String!
@@ -3204,6 +3211,7 @@ type SkillNode {
   posX: Int
   posY: Int
   prerequisites(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  progressForViewer: UserNodeProgress
   progresses(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   quiz: Quiz
   requiredFor(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!

@@ -6,6 +6,7 @@ import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
+import { QuizAnswerInput } from "../inputs/quiz.inputs";
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -357,7 +358,10 @@ builder.mutationFields((t) => ({
     type: "QuizAttempt",
     args: {
       quizId: t.arg.id({ required: true }),
-      answers: t.arg.stringList({ required: true }),
+      answers: t.arg({
+        type: [QuizAnswerInput],
+        required: true,
+      }),
     },
     resolve: async (query, _root, { quizId, answers }, ctx) => {
       const userId = ctx.auth.requireAuth(); // Capture userId for logging and audit purposes
@@ -370,31 +374,52 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Quiz not found");
       }
 
-      const parsedAnswers = answers.map(
-        (a) =>
-          JSON.parse(a) as {
-            questionId: string;
-            answer: { selectedOptionIds?: string[]; text?: string };
-          },
-      );
-
-      const quizAttempt = await ctx.prisma.quizAttempt.create({
-        ...query,
-        data: {
-          quizId,
-          userId: ctx.user!.uid,
-          passed: false, //auto grader changes this later.
-          answers: {
-            create: parsedAnswers.map(({ questionId, answer }) => ({
-              questionId,
-              answer,
-            })),
+      const progress = await ctx.prisma.userNodeProgress.findUnique({
+        where: {
+          userId_nodeId: {
+            userId: userId,
+            nodeId: existing.nodeId,
           },
         },
       });
 
-      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+      if (!progress) {
+        throw new GraphQLError("No progress found for this quiz node");
+      }
 
+      const parsedAnswers = answers.map((a) => ({
+        questionId: a.questionId,
+        answer:
+          a.text !== undefined && a.text !== null
+            ? { text: a.text }
+            : { selectedOptionIds: a.selectedOptionIds ?? [] },
+      }));
+
+      const result = await ctx.prisma.$transaction(async (tx) => {
+        const quizAttempt = await tx.quizAttempt.create({
+          ...query,
+          data: {
+            quizId,
+            userId,
+            passed: false,
+            answers: {
+              create: parsedAnswers.map(({ questionId, answer }) => ({
+                questionId,
+                answer,
+              })),
+            },
+          },
+        });
+
+        const summary = await gradeQuizAttempt(tx, quizAttempt.id);
+
+        return {
+          quizAttempt,
+          summary,
+        };
+      });
+
+      const { summary } = result;
       if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
         await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
       }
@@ -403,7 +428,7 @@ builder.mutationFields((t) => ({
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
-        where: { id: quizAttempt.id },
+        where: { id: result.quizAttempt.id },
       });
     },
   }),

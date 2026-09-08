@@ -224,11 +224,12 @@ describe("gradeQuizAttempt", () => {
     mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
     const result = await gradeQuizAttempt(mockTx as any, "attempt7");
-    expect(result.correctCount).toBe(2); // Only auto-gradable questions
-    expect(result.passed).toBe(null); // Pending manual review
-    expect(result.message).toBe(
-      "Passed pending manual review of open question(s)",
-    );
+    // SYN-33 grades only auto-gradable questions and ignores open ones (the
+    // prior "pending manual review" / passed=null path was removed). Whether
+    // manual review should return is tracked in SYN-122.
+    expect(result.correctCount).toBe(2);
+    expect(result.passed).toBe(true);
+    expect(result.message).toBe("Passed");
   });
 });
 
@@ -282,11 +283,11 @@ it("handles a quiz with all types and an incorrect auto-gradable answer", async 
   mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
   const result = await gradeQuizAttempt(mockTx as any, "attempt8");
-  expect(result.correctCount).toBe(1); // Only one auto-gradable correct
-  expect(result.passed).toBe(false); // Still pending manual review
-  expect(result.message).toBe(
-    "Not passed: some answers are incorrect; open question(s) pending review",
-  );
+  // A wrong auto-gradable answer fails the attempt; open questions are ignored
+  // (no manual-review state under SYN-33 — see SYN-122).
+  expect(result.correctCount).toBe(1);
+  expect(result.passed).toBe(false);
+  expect(result.message).toBe("Not passed");
 });
 // Quiz with a skipped question (not all auto-gradable answered)
 it("handles a quiz where a question is skipped (no answer submitted)", async () => {

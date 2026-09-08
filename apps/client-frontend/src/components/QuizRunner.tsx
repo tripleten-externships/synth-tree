@@ -73,19 +73,14 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const answers = quiz.questions.map((q) =>
-      JSON.stringify({
-        questionId: q.id,
-        answer:
-          q.type === "OPEN_QUESTION"
-            ? {
-                text: text[q.id] ?? "",
-              }
-            : {
-                selectedOptionIds: choice[q.id] ?? [],
-              },
-      }),
-    );
+    // Structured answers for the typed QuizAnswerInput (SYN-33); the results
+    // card is driven by the returned attempt (SYN-58).
+    const answers = quiz.questions.map((q) => ({
+      questionId: q.id,
+      ...(q.type === "OPEN_QUESTION"
+        ? { text: text[q.id] ?? "" }
+        : { selectedOptionIds: choice[q.id] ?? [] }),
+    }));
 
     const res = await submit({
       variables: {

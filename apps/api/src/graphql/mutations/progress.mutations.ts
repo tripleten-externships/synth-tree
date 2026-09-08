@@ -70,6 +70,17 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Node not found");
       }
 
+      const existing = await ctx.prisma.userNodeProgress.findUnique({
+        where: {
+          userId_nodeId: {
+            userId,
+            nodeId,
+          },
+        },
+        select: { status: true },
+      });
+      const alreadyCompleted = existing?.status === "COMPLETED";
+
       const progress = await ctx.prisma.userNodeProgress.upsert({
         ...query,
         where: {
@@ -78,10 +89,14 @@ builder.mutationFields((t) => ({
             nodeId,
           },
         },
-        update: {
-          status: "COMPLETED",
-          completedAt: new Date(),
-        },
+        // Preserve the original completedAt when the node is already complete
+        // so repeat calls stay idempotent.
+        update: alreadyCompleted
+          ? {}
+          : {
+              status: "COMPLETED",
+              completedAt: new Date(),
+            },
         create: {
           userId,
           nodeId,
@@ -90,7 +105,11 @@ builder.mutationFields((t) => ({
         },
       });
 
-      await incrementDailyQuestProgress(ctx.prisma, userId, "LESSON_COMPLETED");
+      // Only count the lesson toward daily quests on the first completion,
+      // otherwise repeated calls on the same node would inflate progress.
+      if (!alreadyCompleted) {
+        await incrementDailyQuestProgress(ctx.prisma, userId, "LESSON_COMPLETED");
+      }
 
       return progress;
     },

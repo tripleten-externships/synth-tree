@@ -72,31 +72,33 @@ export async function incrementDailyQuestProgress(
   const matchingQuests = DAILY_QUESTS.filter((quest) => quest.eventType === eventType);
 
   for (const quest of matchingQuests) {
-    const existing = await tx.userDailyQuest.findUnique({
+    // Atomic increment on incomplete rows only. Using a DB-side increment
+    // (rather than read-modify-write) avoids the lost-update race where two
+    // concurrent events both read the same `current` and one bump is dropped.
+    await tx.userDailyQuest.updateMany({
       where: {
-        userId_questKey_date: {
-          userId,
-          questKey: quest.key,
-          date,
-        },
+        userId,
+        questKey: quest.key,
+        date,
+        completed: false,
+      },
+      data: {
+        current: { increment: amount },
       },
     });
 
-    if (!existing || existing.completed) continue;
-
-    const nextCurrent = Math.min(existing.current + amount, existing.goal);
-
-    await tx.userDailyQuest.update({
+    // Clamp any overshoot back to the goal and flip `completed` once reached.
+    await tx.userDailyQuest.updateMany({
       where: {
-        userId_questKey_date: {
-          userId,
-          questKey: quest.key,
-          date,
-        },
+        userId,
+        questKey: quest.key,
+        date,
+        completed: false,
+        current: { gte: quest.goal },
       },
       data: {
-        current: nextCurrent,
-        completed: nextCurrent >= existing.goal,
+        current: quest.goal,
+        completed: true,
       },
     });
   }

@@ -1,0 +1,22 @@
+import { gql } from "@apollo/client";
+
+export const LEARNER_COURSE_QUERY = gql`
+  query LearnerCourseTree($courseId: ID!) {
+    courseForLearner(id: $courseId) {
+      id
+      title
+      description
+      trees {
+        id
+        nodes {
+          id
+          title
+          posX
+          posY
+          prerequisites { dependsOnNodeId }
+          progressForViewer { status completedAt }
+        }
+      }
+    }
+  }
+`;
