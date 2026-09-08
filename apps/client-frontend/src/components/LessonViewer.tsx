@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
+import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
 
 interface LessonViewerProps {
   nodeId: string;
@@ -31,6 +32,13 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     return onNext();
   }
 
+  // Which lesson page is visible. Reset when the node changes so navigating
+  // node-to-node never lands on a stale (possibly out-of-range) page index.
+  const [currentPage, setCurrentPage] = useState(0);
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [nodeId]);
+
   // Mark this node as in-progress when the learner opens the lesson.
   // The mutation is idempotent server-side, so revisits / re-renders are safe.
   useEffect(() => {
@@ -42,9 +50,13 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
 
-  const blocks = [...(data?.lessonBlocksByNode ?? [])].sort(
-    (a, b) => a.order - b.order,
-  );
+  // A "page" is the run of blocks between PAGE_BREAK markers. No breaks -> one
+  // page (renders exactly like before). pageIndex is clamped so a shorter
+  // refetch can never leave us pointing past the last page.
+  const pages = splitLessonPages(data?.lessonBlocksByNode ?? []);
+  const pageIndex = Math.min(currentPage, pages.length - 1);
+  const currentBlocks = pages[pageIndex];
+  const isLastPage = pageIndex === pages.length - 1;
 
   const renderHTML = (html: string) => (
     <div
@@ -60,9 +72,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
         alt={caption || "Lesson image"}
         className="max-w-full h-auto rounded-lg shadow-md"
       />
-      {caption && (
-        <figcaption className="mt-3 text-sm text-gray-500 italic">{caption}</figcaption>
-      )}
+      {caption && <figcaption className="mt-3 text-sm text-gray-500 italic">{caption}</figcaption>}
     </figure>
   );
 
@@ -144,7 +154,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     );
   };
 
-  const renderBlock = (block: (typeof blocks)[number]) => {
+  const renderBlock = (block: LessonBlock) => {
     switch (block.type) {
       case "HTML":
         return renderHTML(block.html ?? "");
@@ -161,16 +171,52 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
   return (
     <div className="flex flex-col gap-8">
-      {blocks.map((block) => (
+      {/* Page progress: one segment per page, filled up to the current page. */}
+      <div>
+        <div className="flex gap-2" aria-label="Lesson progress">
+          {pages.map((_, i) => (
+            <div
+              key={i}
+              className={`h-2 flex-1 rounded-full ${
+                i <= pageIndex ? "bg-[#667eea]" : "bg-gray-200"
+              }`}
+            />
+          ))}
+        </div>
+        <p className="mt-2 text-sm text-gray-500">
+          Page {pageIndex + 1} of {pages.length}
+        </p>
+      </div>
+
+      {currentBlocks.map((block) => (
         <div key={block.id}>{renderBlock(block)}</div>
       ))}
 
-      <button
-        className="mt-8 px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
-        onClick={handleNext}
-      >
-        Next
-      </button>
+      <div className="mt-8 flex items-center justify-between">
+        <button
+          type="button"
+          className="px-6 py-3 font-semibold text-[#667eea] rounded-lg cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={() => setCurrentPage(Math.max(0, pageIndex - 1))}
+          disabled={pageIndex === 0}
+        >
+          Back
+        </button>
+
+        <button
+          type="button"
+          className="px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+          onClick={() => {
+            if (isLastPage) {
+              // Finishing the lesson: complete the node (best-effort) then advance.
+              handleNext();
+            } else {
+              setCurrentPage(pageIndex + 1);
+            }
+          }}
+        >
+          {isLastPage ? "Next" : "Next Page"}
+        </button>
+      </div>
     </div>
   );
 };

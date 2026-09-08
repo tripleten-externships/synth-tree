@@ -38,6 +38,7 @@ enum ContentType {
   EMBED
   HTML
   IMAGE
+  PAGE_BREAK
   VIDEO
 }
 
@@ -1131,6 +1132,7 @@ type Mutation {
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
+  updateOnboarding(interests: [String!]!): User
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
   updateQuizOption(id: ID!, isCorrect: Boolean, text: String): QuizOption
   updateQuizQuestion(id: ID!, order: Int, prompt: String): QuizQuestion
@@ -4490,6 +4492,14 @@ input StringNullableFilter {
   startsWith: String
 }
 
+input StringNullableListFilter {
+  equals: [String!]
+  has: String
+  hasEvery: [String!]
+  hasSome: [String!]
+  isEmpty: Boolean
+}
+
 input StringNullableWithAggregatesFilter {
   _count: NestedIntNullableFilter
   _max: NestedStringNullableFilter
@@ -4557,6 +4567,7 @@ type User {
   email: String!
   hearts: UserHearts
   id: ID!
+  interests: [String!]!
   name: String
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
   photoUrl: String
@@ -4573,6 +4584,7 @@ input UserCountOrderByAggregateInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   photoUrl: SortOrder
   role: SortOrder
@@ -4586,6 +4598,7 @@ input UserCreateInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4601,6 +4614,7 @@ input UserCreateManyInput {
   createdAt: DateTime
   email: String!
   id: String!
+  interests: [String!]
   name: String
   photoUrl: String
   role: Role
@@ -4701,6 +4715,7 @@ input UserCreateWithoutCoursesAuthoredInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4718,6 +4733,7 @@ input UserCreateWithoutDailyQuestsInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4735,6 +4751,7 @@ input UserCreateWithoutHeartsInput {
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4753,6 +4770,7 @@ input UserCreateWithoutNodeProgressInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
@@ -4770,6 +4788,7 @@ input UserCreateWithoutQuizAttemptsInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4787,6 +4806,7 @@ input UserCreateWithoutStreakInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4804,6 +4824,7 @@ input UserCreateWithoutXpEventsInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4821,6 +4842,7 @@ input UserCreateWithoutXpInput {
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
+  interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
   photoUrl: String
@@ -4829,6 +4851,10 @@ input UserCreateWithoutXpInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
   xpEvents: XpEventCreateNestedManyWithoutUserInput
+}
+
+input UserCreateinterestsInput {
+  set: [String!]!
 }
 
 type UserDailyQuest {
@@ -5602,6 +5628,7 @@ input UserOrderByWithAggregationInput {
   createdAt: SortOrder
   email: SortOrder
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   photoUrl: SortOrder
   role: SortOrder
@@ -5615,6 +5642,7 @@ input UserOrderByWithRelationInput {
   email: SortOrder
   hearts: UserHeartsOrderByWithRelationInput
   id: SortOrder
+  interests: SortOrder
   name: SortOrder
   nodeProgress: UserNodeProgressOrderByRelationAggregateInput
   photoUrl: SortOrder
@@ -5630,6 +5658,7 @@ enum UserScalarFieldEnum {
   createdAt
   email
   id
+  interests
   name
   photoUrl
   role
@@ -5648,6 +5677,7 @@ input UserScalarWhereWithAggregatesInput {
   createdAt: DateTimeWithAggregatesFilter
   email: StringWithAggregatesFilter
   id: StringWithAggregatesFilter
+  interests: StringNullableListFilter
   name: StringNullableWithAggregatesFilter
   photoUrl: StringNullableWithAggregatesFilter
   role: EnumRoleWithAggregatesFilter
@@ -5835,6 +5865,7 @@ input UserUpdateInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5850,6 +5881,7 @@ input UserUpdateManyMutationInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
@@ -5966,6 +5998,7 @@ input UserUpdateWithoutCoursesAuthoredInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -5983,6 +6016,7 @@ input UserUpdateWithoutDailyQuestsInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6000,6 +6034,7 @@ input UserUpdateWithoutHeartsInput {
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6018,6 +6053,7 @@ input UserUpdateWithoutNodeProgressInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
@@ -6035,6 +6071,7 @@ input UserUpdateWithoutQuizAttemptsInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6052,6 +6089,7 @@ input UserUpdateWithoutStreakInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6069,6 +6107,7 @@ input UserUpdateWithoutXpEventsInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6086,6 +6125,7 @@ input UserUpdateWithoutXpInput {
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
+  interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
   photoUrl: NullableStringFieldUpdateOperationsInput
@@ -6094,6 +6134,11 @@ input UserUpdateWithoutXpInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
+}
+
+input UserUpdateinterestsInput {
+  push: [String!]
+  set: [String!]
 }
 
 input UserUpsertWithoutCoursesAuthoredInput {
@@ -6154,6 +6199,7 @@ input UserWhereInput {
   email: StringFilter
   hearts: UserHeartsWhereInput
   id: StringFilter
+  interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter
@@ -6175,6 +6221,7 @@ input UserWhereUniqueInput {
   email: String
   hearts: UserHeartsWhereInput
   id: String
+  interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
   photoUrl: StringNullableFilter

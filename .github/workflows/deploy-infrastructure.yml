@@ -91,6 +91,28 @@ jobs:
           fi
           echo "✅ CDK bootstrap verified"
 
+      - name: Ensure database credentials secret exists
+        run: |
+          SECRET_ID="synth-tree-dev/database/credentials"
+          if aws secretsmanager describe-secret --secret-id "$SECRET_ID" --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
+            echo "✅ Secret $SECRET_ID already exists — leaving it untouched."
+          else
+            echo "Secret $SECRET_ID not found — creating with a generated password."
+            PASSWORD=$(aws secretsmanager get-random-password \
+              --region ${{ env.AWS_REGION }} \
+              --password-length 32 \
+              --exclude-characters '"@/\' \
+              --require-each-included-type \
+              --query RandomPassword --output text)
+            SECRET_STRING=$(PASSWORD="$PASSWORD" node -e 'process.stdout.write(JSON.stringify({ username: "postgres", password: process.env.PASSWORD }))')
+            aws secretsmanager create-secret \
+              --name "$SECRET_ID" \
+              --region ${{ env.AWS_REGION }} \
+              --description "Database credentials for synth-tree-dev environment" \
+              --secret-string "$SECRET_STRING"
+            echo "✅ Created $SECRET_ID."
+          fi
+
       - name: Build and deploy to dev
         working-directory: apps/infra
         run: |
@@ -174,6 +196,28 @@ jobs:
             exit 1
           fi
           echo "✅ CDK bootstrap verified"
+
+      - name: Ensure database credentials secret exists
+        run: |
+          SECRET_ID="synth-tree-prod/database/credentials"
+          if aws secretsmanager describe-secret --secret-id "$SECRET_ID" --region ${{ env.AWS_REGION }} > /dev/null 2>&1; then
+            echo "✅ Secret $SECRET_ID already exists — leaving it untouched."
+          else
+            echo "Secret $SECRET_ID not found — creating with a generated password."
+            PASSWORD=$(aws secretsmanager get-random-password \
+              --region ${{ env.AWS_REGION }} \
+              --password-length 32 \
+              --exclude-characters '"@/\' \
+              --require-each-included-type \
+              --query RandomPassword --output text)
+            SECRET_STRING=$(PASSWORD="$PASSWORD" node -e 'process.stdout.write(JSON.stringify({ username: "postgres", password: process.env.PASSWORD }))')
+            aws secretsmanager create-secret \
+              --name "$SECRET_ID" \
+              --region ${{ env.AWS_REGION }} \
+              --description "Database credentials for synth-tree-prod environment" \
+              --secret-string "$SECRET_STRING"
+            echo "✅ Created $SECRET_ID."
+          fi
 
       - name: Build and deploy to prod
         working-directory: apps/infra
