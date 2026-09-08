@@ -4,6 +4,7 @@ import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
+import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput } from "../inputs/quiz.inputs";
 
@@ -93,8 +94,8 @@ builder.mutationFields((t) => ({
         where: { id },
       });
 
-      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting. 
-      
+      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting.
+
       const deleted = await ctx.prisma.quiz.update({
         ...query,
         where: { id },
@@ -418,7 +419,12 @@ builder.mutationFields((t) => ({
         };
       });
 
-      logger.info({ userId, quizId, passed: result.summary.passed }, "Quiz attempt submitted");
+      const { summary } = result;
+      if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
+        await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
+      }
+
+      logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
