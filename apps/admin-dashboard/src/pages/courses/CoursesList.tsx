@@ -211,31 +211,55 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+  };
+
   // Manually typed since this file uses the raw gql + useMutation
   // pattern (not a codegen-generated hook) — needed for onCompleted's
   // data to be typed.
-  const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } }>(
+  const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } | null }>(
     CREATE_COURSE,
     {
       refetchQueries: [{ query: AdminGetAllCoursesDocument }],
-      onCompleted: ({ createCourse }) => {
-        setTitle("");
-        setDescription("");
+      onCompleted: (data) => {
+        const created = data.createCourse;
+        if (!created) return;
+        resetForm();
         onCreated();
         // SYN-62: navigate to the new course's builder page on success
-        navigate(`/courses/${createCourse.id}/edit`);
+        navigate(`/courses/${created.id}/edit`);
+      },
+      onError: (err) => {
+        // Surface the failure and keep the modal open so the user can retry.
+        toast.error("Couldn't create course", { description: err.message });
       },
     },
   );
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    createCourse({ variables: { input: { title, description } } });
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
+    const trimmedDescription = description.trim();
+    createCourse({
+      variables: {
+        input: {
+          title: trimmedTitle,
+          ...(trimmedDescription ? { description: trimmedDescription } : {}),
+        },
+      },
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) handleClose(); }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Course</DialogTitle>
@@ -265,7 +289,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
             />
           </div>
           <DialogFooter>
-            <Button type="button" onClick={onClose} variant="outline">
+            <Button type="button" onClick={handleClose} variant="outline">
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !title.trim()} variant="default">
