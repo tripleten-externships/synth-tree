@@ -56,6 +56,8 @@ describe("Daily quests", () => {
 
   afterEach(async () => {
     await prisma.userDailyQuest.deleteMany({});
+    await prisma.quizAttempt.deleteMany({});
+    await prisma.quiz.deleteMany({});
     await prisma.userNodeProgress.deleteMany({});
     await prisma.skillNode.deleteMany({});
     await prisma.skillTree.deleteMany({});
@@ -129,5 +131,55 @@ describe("Daily quests", () => {
 
     expect(lessonQuest?.current).toBe(2);
     expect(lessonQuest?.completed).toBe(true);
+  });
+
+  it("blocks completing a node whose required quiz has not been passed", async () => {
+    const { node } = await seedNode();
+    await prisma.quiz.create({
+      data: { nodeId: node.id, title: "Gate Quiz", required: true },
+    });
+    const ctx = makeUserContext(prisma, REGULAR_USER_ID);
+
+    const res = singleResult(
+      await server.executeOperation(
+        { query: COMPLETE_NODE, variables: { nodeId: node.id } },
+        { contextValue: ctx },
+      ),
+    );
+
+    expect(res.errors?.[0]?.message).toMatch(/required quiz/i);
+    expect(res.data?.completeNodeProgress ?? null).toBeNull();
+
+    // Node must not be marked complete and the lesson quest must not advance.
+    const progress = await prisma.userNodeProgress.findUnique({
+      where: { userId_nodeId: { userId: REGULAR_USER_ID, nodeId: node.id } },
+    });
+    expect(progress?.status ?? null).not.toBe("COMPLETED");
+
+    const lessonQuest = await prisma.userDailyQuest.findFirst({
+      where: { userId: REGULAR_USER_ID, questKey: "complete_2_lessons" },
+    });
+    expect(lessonQuest?.current ?? 0).toBe(0);
+  });
+
+  it("allows completing a node once its required quiz has a passed attempt", async () => {
+    const { node } = await seedNode();
+    const quiz = await prisma.quiz.create({
+      data: { nodeId: node.id, title: "Gate Quiz", required: true },
+    });
+    await prisma.quizAttempt.create({
+      data: { quizId: quiz.id, userId: REGULAR_USER_ID, passed: true },
+    });
+    const ctx = makeUserContext(prisma, REGULAR_USER_ID);
+
+    const res = singleResult(
+      await server.executeOperation(
+        { query: COMPLETE_NODE, variables: { nodeId: node.id } },
+        { contextValue: ctx },
+      ),
+    );
+
+    expect(res.errors).toBeUndefined();
+    expect(res.data.completeNodeProgress.status).toBe("COMPLETED");
   });
 });

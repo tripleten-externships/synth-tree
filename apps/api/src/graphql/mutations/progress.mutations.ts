@@ -81,6 +81,39 @@ builder.mutationFields((t) => ({
       });
       const alreadyCompleted = existing?.status === "COMPLETED";
 
+      // Gate completion on a passed required quiz. A node can have at most one
+      // quiz (nodeId is unique); if that quiz is `required`, the learner must
+      // have a passing attempt before the node can be marked complete. Only
+      // enforced on the transition into COMPLETED so repeat calls stay
+      // idempotent.
+      if (!alreadyCompleted) {
+        const requiredQuiz = await ctx.prisma.quiz.findFirst({
+          where: {
+            nodeId,
+            required: true,
+            deletedAt: null,
+          },
+          select: { id: true },
+        });
+
+        if (requiredQuiz) {
+          const passedAttempt = await ctx.prisma.quizAttempt.findFirst({
+            where: {
+              quizId: requiredQuiz.id,
+              userId,
+              passed: true,
+            },
+            select: { id: true },
+          });
+
+          if (!passedAttempt) {
+            throw new GraphQLError(
+              "Cannot complete node: its required quiz has not been passed",
+            );
+          }
+        }
+      }
+
       const progress = await ctx.prisma.userNodeProgress.upsert({
         ...query,
         where: {
