@@ -23,7 +23,7 @@ export const DAILY_QUESTS = [
 
 export type DailyQuestEventType = (typeof DAILY_QUESTS)[number]["eventType"];
 
-function startOfToday(date = new Date()) {
+export function startOfToday(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
@@ -69,9 +69,7 @@ export async function incrementDailyQuestProgress(
 
   await ensureDailyQuests(tx, userId, date);
 
-  const matchingQuests = DAILY_QUESTS.filter(
-    (quest) => quest.eventType === eventType,
-  );
+  const matchingQuests = DAILY_QUESTS.filter((quest) => quest.eventType === eventType);
 
   for (const quest of matchingQuests) {
     const existing = await tx.userDailyQuest.findUnique({

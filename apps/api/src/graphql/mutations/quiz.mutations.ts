@@ -5,7 +5,7 @@ import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
-import logger from '@lib/logger'; // Structured logger used for tracking quiz-related events
+import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -245,9 +245,7 @@ builder.mutationFields((t) => ({
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
       if (existing.type === PrismaQuestionType.OPEN_QUESTION) {
-        throw new GraphQLError(
-          "You cannot have Quiz Options for an open ended question",
-        );
+        throw new GraphQLError("You cannot have Quiz Options for an open ended question");
       }
 
       if (existing.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
@@ -302,15 +300,9 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.question.quiz.nodeId);
 
-      if (
-        existing.question.type === PrismaQuestionType.SINGLE_CHOICE &&
-        isCorrect
-      ) {
+      if (existing.question.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
         for (let i = 0; i < existing.question.options.length; i++) {
-          if (
-            existing.question.options[i].isCorrect &&
-            existing.question.options[i].id != id
-          ) {
+          if (existing.question.options[i].isCorrect && existing.question.options[i].id != id) {
             throw new GraphQLError(
               "You cannot have multiple correct answers in a single choice question",
             );
@@ -401,18 +393,18 @@ builder.mutationFields((t) => ({
         },
       });
 
-     const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
+      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
 
-if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
-  await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
-}
+      if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
+        await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
+      }
 
-logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted');
+      logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");
 
-return ctx.prisma.quizAttempt.findUniqueOrThrow({
-  ...query,
-  where: { id: quizAttempt.id },
-});
+      return ctx.prisma.quizAttempt.findUniqueOrThrow({
+        ...query,
+        where: { id: quizAttempt.id },
+      });
     },
   }),
 }));
