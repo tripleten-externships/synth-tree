@@ -41,6 +41,10 @@ jobs:
   deploy:
     name: Deploy (${{ inputs.environment }})
     runs-on: ubuntu-latest
+    # Binds the GitHub Environment named dev/prod so its environment-scoped
+    # secrets (AWS keys) resolve. This is NOT an approval gate on its own —
+    # keep the environment free of required reviewers for no-approval deploys.
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
