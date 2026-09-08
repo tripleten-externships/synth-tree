@@ -604,6 +604,78 @@ describe("Quiz flow", () => {
       expect(res.data.submitQuizAttempt.passed).toBe(true);
     });
 
+    it("keeps a mixed quiz pending while its open question needs review", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Mixed Quiz", required: true },
+      });
+      const choiceQuestion = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "SINGLE_CHOICE",
+          prompt: "Choose the correct answer",
+        },
+      });
+      const correctOption = await prisma.quizOption.create({
+        data: { questionId: choiceQuestion.id, text: "Correct", isCorrect: true },
+      });
+      const openQuestion = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "OPEN_QUESTION",
+          prompt: "Explain your answer",
+        },
+      });
+
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
+      });
+
+      const answers = [
+        { questionId: choiceQuestion.id, selectedOptionIds: [correctOption.id] },
+        { questionId: openQuestion.id, text: "My explanation" },
+      ];
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: { quizId: quiz.id, answers },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.passed).toBeNull();
+
+      const stored = await prisma.quizAttempt.findUnique({
+        where: { id: res.data.submitQuizAttempt.id },
+      });
+      expect(stored!.passed).toBeNull();
+
+      const resWithoutOpenAnswer = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: {
+              quizId: quiz.id,
+              answers: [
+                {
+                  questionId: choiceQuestion.id,
+                  selectedOptionIds: [correctOption.id],
+                },
+              ],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(resWithoutOpenAnswer.errors).toBeUndefined();
+      expect(resWithoutOpenAnswer.data.submitQuizAttempt.passed).toBe(false);
+    });
+
     it("store the attempt in the database", async () => {
       const { node } = await seedNode();
       const quiz = await prisma.quiz.create({
