@@ -46,8 +46,13 @@ export async function getOrRefillHearts(tx: Prisma.TransactionClient, userId: st
   const existing = await tx.userHearts.findUnique({ where: { userId } });
 
   if (!existing) {
-    return tx.userHearts.create({
-      data: { userId, currentHearts: MAX_HEARTS, lastRefilledAt: new Date() },
+    // upsert (rather than create) so two concurrent first reads for the same
+    // new user can't collide on the userId primary key — the loser no-ops and
+    // returns the existing row instead of throwing a unique-constraint error.
+    return tx.userHearts.upsert({
+      where: { userId },
+      create: { userId, currentHearts: MAX_HEARTS, lastRefilledAt: new Date() },
+      update: {},
     });
   }
 
@@ -77,11 +82,24 @@ export async function getOrRefillHearts(tx: Prisma.TransactionClient, userId: st
  */
 export async function decrementHeartOnFailure(tx: Prisma.TransactionClient, userId: string) {
   const current = await getOrRefillHearts(tx, userId);
-  const newHearts = Math.max(0, current.currentHearts - 1);
+
+  // Nothing to spend; leave the row (and its refill clock) untouched.
+  if (current.currentHearts <= 0) {
+    return current;
+  }
+
+  // A full account accrues nothing, so `lastRefilledAt` on a full row is stale
+  // and does not represent a running timer. When we drop below max we must
+  // (re)start the clock from now — otherwise the next read would see a large
+  // elapsed time and immediately refill the heart we just spent.
+  const wasFull = current.currentHearts >= MAX_HEARTS;
 
   return tx.userHearts.update({
     where: { userId },
-    data: { currentHearts: newHearts },
+    data: {
+      currentHearts: current.currentHearts - 1,
+      ...(wasFull ? { lastRefilledAt: new Date() } : {}),
+    },
   });
 }
 
