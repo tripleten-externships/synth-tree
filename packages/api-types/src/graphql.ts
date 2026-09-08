@@ -1779,6 +1779,7 @@ export type Query = {
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
   myDailyQuests?: Maybe<Array<UserDailyQuest>>;
+  myHearts?: Maybe<UserHearts>;
   myProgress?: Maybe<Array<UserNodeProgress>>;
   nodeProgress?: Maybe<UserNodeProgress>;
   publicCourse?: Maybe<Course>;
@@ -5022,6 +5023,7 @@ export type User = {
   createdAt: Scalars['DateTime']['output'];
   dailyQuests: Array<UserDailyQuest>;
   email: Scalars['String']['output'];
+  hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
@@ -5105,6 +5107,7 @@ export type UserCreateInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5137,6 +5140,12 @@ export type UserCreateNestedOneWithoutDailyQuestsInput = {
   connect?: InputMaybe<UserWhereUniqueInput>;
   connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutDailyQuestsInput>;
   create?: InputMaybe<UserCreateWithoutDailyQuestsInput>;
+};
+
+export type UserCreateNestedOneWithoutHeartsInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutHeartsInput>;
+  create?: InputMaybe<UserCreateWithoutHeartsInput>;
 };
 
 export type UserCreateNestedOneWithoutNodeProgressInput = {
@@ -5179,6 +5188,11 @@ export type UserCreateOrConnectWithoutDailyQuestsInput = {
   where: UserWhereUniqueInput;
 };
 
+export type UserCreateOrConnectWithoutHeartsInput = {
+  create: UserCreateWithoutHeartsInput;
+  where: UserWhereUniqueInput;
+};
+
 export type UserCreateOrConnectWithoutNodeProgressInput = {
   create: UserCreateWithoutNodeProgressInput;
   where: UserWhereUniqueInput;
@@ -5208,6 +5222,7 @@ export type UserCreateWithoutCoursesAuthoredInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5223,6 +5238,24 @@ export type UserCreateWithoutCoursesAuthoredInput = {
 export type UserCreateWithoutDailyQuestsInput = {
   coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
+  id: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
+  role?: InputMaybe<Role>;
+  streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
+  xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserCreateWithoutHeartsInput = {
+  coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
@@ -5241,6 +5274,7 @@ export type UserCreateWithoutNodeProgressInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5257,6 +5291,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5273,6 +5308,7 @@ export type UserCreateWithoutStreakInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5289,6 +5325,7 @@ export type UserCreateWithoutXpEventsInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5305,6 +5342,7 @@ export type UserCreateWithoutXpInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
@@ -5567,6 +5605,162 @@ export type UserDailyQuestWhereUniqueInput = {
   user?: InputMaybe<UserWhereInput>;
   userId?: InputMaybe<StringFilter>;
   userId_questKey_date?: InputMaybe<UserDailyQuestUserIdQuestKeyDateCompoundUniqueInput>;
+};
+
+export type UserHearts = {
+  __typename?: 'UserHearts';
+  currentHearts: Scalars['Int']['output'];
+  lastRefilledAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['ID']['output'];
+};
+
+export type UserHeartsAvgOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsCountOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsCreateInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+  user: UserCreateNestedOneWithoutHeartsInput;
+};
+
+export type UserHeartsCreateManyInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+export type UserHeartsCreateNestedOneWithoutUserInput = {
+  connect?: InputMaybe<UserHeartsWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserHeartsCreateOrConnectWithoutUserInput>;
+  create?: InputMaybe<UserHeartsCreateWithoutUserInput>;
+};
+
+export type UserHeartsCreateOrConnectWithoutUserInput = {
+  create: UserHeartsCreateWithoutUserInput;
+  where: UserHeartsWhereUniqueInput;
+};
+
+export type UserHeartsCreateWithoutUserInput = {
+  currentHearts?: InputMaybe<Scalars['Int']['input']>;
+  lastRefilledAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type UserHeartsMaxOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsMinOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsNullableScalarRelationFilter = {
+  is?: InputMaybe<UserHeartsWhereInput>;
+  isNot?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsOrderByWithAggregationInput = {
+  _avg?: InputMaybe<UserHeartsAvgOrderByAggregateInput>;
+  _count?: InputMaybe<UserHeartsCountOrderByAggregateInput>;
+  _max?: InputMaybe<UserHeartsMaxOrderByAggregateInput>;
+  _min?: InputMaybe<UserHeartsMinOrderByAggregateInput>;
+  _sum?: InputMaybe<UserHeartsSumOrderByAggregateInput>;
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsOrderByWithRelationInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+  lastRefilledAt?: InputMaybe<SortOrder>;
+  user?: InputMaybe<UserOrderByWithRelationInput>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsScalarFieldEnum =
+  | 'currentHearts'
+  | 'lastRefilledAt'
+  | 'userId';
+
+export type UserHeartsScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<UserHeartsScalarWhereWithAggregatesInput>>;
+  currentHearts?: InputMaybe<IntWithAggregatesFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+  userId?: InputMaybe<StringWithAggregatesFilter>;
+};
+
+export type UserHeartsSumOrderByAggregateInput = {
+  currentHearts?: InputMaybe<SortOrder>;
+};
+
+export type UserHeartsUpdateInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  user?: InputMaybe<UserUpdateOneRequiredWithoutHeartsNestedInput>;
+};
+
+export type UserHeartsUpdateManyMutationInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserHeartsUpdateOneWithoutUserNestedInput = {
+  connect?: InputMaybe<UserHeartsWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserHeartsCreateOrConnectWithoutUserInput>;
+  create?: InputMaybe<UserHeartsCreateWithoutUserInput>;
+  delete?: InputMaybe<UserHeartsWhereInput>;
+  disconnect?: InputMaybe<UserHeartsWhereInput>;
+  update?: InputMaybe<UserHeartsUpdateToOneWithWhereWithoutUserInput>;
+  upsert?: InputMaybe<UserHeartsUpsertWithoutUserInput>;
+};
+
+export type UserHeartsUpdateToOneWithWhereWithoutUserInput = {
+  data: UserHeartsUpdateWithoutUserInput;
+  where?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsUpdateWithoutUserInput = {
+  currentHearts?: InputMaybe<IntFieldUpdateOperationsInput>;
+  lastRefilledAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserHeartsUpsertWithoutUserInput = {
+  create: UserHeartsCreateWithoutUserInput;
+  update: UserHeartsUpdateWithoutUserInput;
+  where?: InputMaybe<UserHeartsWhereInput>;
+};
+
+export type UserHeartsWhereInput = {
+  AND?: InputMaybe<Array<UserHeartsWhereInput>>;
+  NOT?: InputMaybe<Array<UserHeartsWhereInput>>;
+  OR?: InputMaybe<Array<UserHeartsWhereInput>>;
+  currentHearts?: InputMaybe<IntFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserHeartsWhereUniqueInput = {
+  AND?: InputMaybe<Array<UserHeartsWhereInput>>;
+  NOT?: InputMaybe<Array<UserHeartsWhereInput>>;
+  OR?: InputMaybe<Array<UserHeartsWhereInput>>;
+  currentHearts?: InputMaybe<IntFilter>;
+  lastRefilledAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type UserMaxOrderByAggregateInput = {
@@ -5942,6 +6136,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: InputMaybe<SortOrder>;
   dailyQuests?: InputMaybe<UserDailyQuestOrderByRelationAggregateInput>;
   email?: InputMaybe<SortOrder>;
+  hearts?: InputMaybe<UserHeartsOrderByWithRelationInput>;
   id?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
@@ -6160,6 +6355,7 @@ export type UserUpdateInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6196,6 +6392,14 @@ export type UserUpdateOneRequiredWithoutDailyQuestsNestedInput = {
   create?: InputMaybe<UserCreateWithoutDailyQuestsInput>;
   update?: InputMaybe<UserUpdateToOneWithWhereWithoutDailyQuestsInput>;
   upsert?: InputMaybe<UserUpsertWithoutDailyQuestsInput>;
+};
+
+export type UserUpdateOneRequiredWithoutHeartsNestedInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutHeartsInput>;
+  create?: InputMaybe<UserCreateWithoutHeartsInput>;
+  update?: InputMaybe<UserUpdateToOneWithWhereWithoutHeartsInput>;
+  upsert?: InputMaybe<UserUpsertWithoutHeartsInput>;
 };
 
 export type UserUpdateOneRequiredWithoutNodeProgressNestedInput = {
@@ -6248,6 +6452,11 @@ export type UserUpdateToOneWithWhereWithoutDailyQuestsInput = {
   where?: InputMaybe<UserWhereInput>;
 };
 
+export type UserUpdateToOneWithWhereWithoutHeartsInput = {
+  data: UserUpdateWithoutHeartsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
 export type UserUpdateToOneWithWhereWithoutNodeProgressInput = {
   data: UserUpdateWithoutNodeProgressInput;
   where?: InputMaybe<UserWhereInput>;
@@ -6277,6 +6486,7 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6292,6 +6502,24 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
 export type UserUpdateWithoutDailyQuestsInput = {
   coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
+  photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
+  role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
+  xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
+};
+
+export type UserUpdateWithoutHeartsInput = {
+  coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6310,6 +6538,7 @@ export type UserUpdateWithoutNodeProgressInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6326,6 +6555,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6342,6 +6572,7 @@ export type UserUpdateWithoutStreakInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6358,6 +6589,7 @@ export type UserUpdateWithoutXpEventsInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6374,6 +6606,7 @@ export type UserUpdateWithoutXpInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
@@ -6394,6 +6627,12 @@ export type UserUpsertWithoutCoursesAuthoredInput = {
 export type UserUpsertWithoutDailyQuestsInput = {
   create: UserCreateWithoutDailyQuestsInput;
   update: UserUpdateWithoutDailyQuestsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
+export type UserUpsertWithoutHeartsInput = {
+  create: UserCreateWithoutHeartsInput;
+  update: UserUpdateWithoutHeartsInput;
   where?: InputMaybe<UserWhereInput>;
 };
 
@@ -6435,6 +6674,7 @@ export type UserWhereInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   dailyQuests?: InputMaybe<UserDailyQuestListRelationFilter>;
   email?: InputMaybe<StringFilter>;
+  hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<StringFilter>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
@@ -6455,6 +6695,7 @@ export type UserWhereUniqueInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   dailyQuests?: InputMaybe<UserDailyQuestListRelationFilter>;
   email?: InputMaybe<Scalars['String']['input']>;
+  hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
