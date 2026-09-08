@@ -1618,7 +1618,7 @@ input QuizAnswerInput {
 type QuizAttempt {
   answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
   id: ID!
-  passed: Boolean!
+  passed: Boolean
   quiz: Quiz!
   quizId: String!
   takenAt: DateTime!
@@ -1928,7 +1928,7 @@ input QuizAttemptCountOrderByAggregateInput {
 input QuizAttemptCreateInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
   id: String
-  passed: Boolean!
+  passed: Boolean
   quiz: QuizCreateNestedOneWithoutAttemptsInput!
   takenAt: DateTime
   user: UserCreateNestedOneWithoutQuizAttemptsInput!
@@ -1936,7 +1936,7 @@ input QuizAttemptCreateInput {
 
 input QuizAttemptCreateManyInput {
   id: String
-  passed: Boolean!
+  passed: Boolean
   quizId: String!
   takenAt: DateTime
   userId: String!
@@ -1944,7 +1944,7 @@ input QuizAttemptCreateManyInput {
 
 input QuizAttemptCreateManyQuizInput {
   id: String
-  passed: Boolean!
+  passed: Boolean
   takenAt: DateTime
   userId: String!
 }
@@ -1956,7 +1956,7 @@ input QuizAttemptCreateManyQuizInputEnvelope {
 
 input QuizAttemptCreateManyUserInput {
   id: String
-  passed: Boolean!
+  passed: Boolean
   quizId: String!
   takenAt: DateTime
 }
@@ -2003,7 +2003,7 @@ input QuizAttemptCreateOrConnectWithoutUserInput {
 
 input QuizAttemptCreateWithoutAnswersInput {
   id: String
-  passed: Boolean!
+  passed: Boolean
   quiz: QuizCreateNestedOneWithoutAttemptsInput!
   takenAt: DateTime
   user: UserCreateNestedOneWithoutQuizAttemptsInput!
@@ -2012,7 +2012,7 @@ input QuizAttemptCreateWithoutAnswersInput {
 input QuizAttemptCreateWithoutQuizInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
   id: String
-  passed: Boolean!
+  passed: Boolean
   takenAt: DateTime
   user: UserCreateNestedOneWithoutQuizAttemptsInput!
 }
@@ -2020,7 +2020,7 @@ input QuizAttemptCreateWithoutQuizInput {
 input QuizAttemptCreateWithoutUserInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutAttemptInput
   id: String
-  passed: Boolean!
+  passed: Boolean
   quiz: QuizCreateNestedOneWithoutAttemptsInput!
   takenAt: DateTime
 }
@@ -2091,7 +2091,7 @@ input QuizAttemptScalarWhereInput {
   NOT: [QuizAttemptScalarWhereInput!]
   OR: [QuizAttemptScalarWhereInput!]
   id: UuidFilter
-  passed: BoolFilter
+  passed: BoolNullableFilter
   quizId: UuidFilter
   takenAt: DateTimeFilter
   userId: StringFilter
@@ -2102,7 +2102,7 @@ input QuizAttemptScalarWhereWithAggregatesInput {
   NOT: [QuizAttemptScalarWhereWithAggregatesInput!]
   OR: [QuizAttemptScalarWhereWithAggregatesInput!]
   id: UuidWithAggregatesFilter
-  passed: BoolWithAggregatesFilter
+  passed: BoolNullableWithAggregatesFilter
   quizId: UuidWithAggregatesFilter
   takenAt: DateTimeWithAggregatesFilter
   userId: StringWithAggregatesFilter
@@ -2111,7 +2111,7 @@ input QuizAttemptScalarWhereWithAggregatesInput {
 input QuizAttemptUpdateInput {
   answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
   id: StringFieldUpdateOperationsInput
-  passed: BoolFieldUpdateOperationsInput
+  passed: NullableBoolFieldUpdateOperationsInput
   quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
   takenAt: DateTimeFieldUpdateOperationsInput
   user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
@@ -2119,7 +2119,7 @@ input QuizAttemptUpdateInput {
 
 input QuizAttemptUpdateManyMutationInput {
   id: StringFieldUpdateOperationsInput
-  passed: BoolFieldUpdateOperationsInput
+  passed: NullableBoolFieldUpdateOperationsInput
   takenAt: DateTimeFieldUpdateOperationsInput
 }
 
@@ -2186,7 +2186,7 @@ input QuizAttemptUpdateWithWhereUniqueWithoutUserInput {
 
 input QuizAttemptUpdateWithoutAnswersInput {
   id: StringFieldUpdateOperationsInput
-  passed: BoolFieldUpdateOperationsInput
+  passed: NullableBoolFieldUpdateOperationsInput
   quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
   takenAt: DateTimeFieldUpdateOperationsInput
   user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
@@ -2195,7 +2195,7 @@ input QuizAttemptUpdateWithoutAnswersInput {
 input QuizAttemptUpdateWithoutQuizInput {
   answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
   id: StringFieldUpdateOperationsInput
-  passed: BoolFieldUpdateOperationsInput
+  passed: NullableBoolFieldUpdateOperationsInput
   takenAt: DateTimeFieldUpdateOperationsInput
   user: UserUpdateOneRequiredWithoutQuizAttemptsNestedInput
 }
@@ -2203,7 +2203,7 @@ input QuizAttemptUpdateWithoutQuizInput {
 input QuizAttemptUpdateWithoutUserInput {
   answers: QuizAttemptAnswerUpdateManyWithoutAttemptNestedInput
   id: StringFieldUpdateOperationsInput
-  passed: BoolFieldUpdateOperationsInput
+  passed: NullableBoolFieldUpdateOperationsInput
   quiz: QuizUpdateOneRequiredWithoutAttemptsNestedInput
   takenAt: DateTimeFieldUpdateOperationsInput
 }
@@ -2232,7 +2232,7 @@ input QuizAttemptWhereInput {
   OR: [QuizAttemptWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   id: UuidFilter
-  passed: BoolFilter
+  passed: BoolNullableFilter
   quiz: QuizWhereInput
   quizId: UuidFilter
   takenAt: DateTimeFilter
@@ -2246,7 +2246,7 @@ input QuizAttemptWhereUniqueInput {
   OR: [QuizAttemptWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   id: String
-  passed: BoolFilter
+  passed: BoolNullableFilter
   quiz: QuizWhereInput
   quizId: UuidFilter
   takenAt: DateTimeFilter
