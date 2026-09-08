@@ -76,5 +76,36 @@ describe("updateOnboarding (signup step 2 - interests)", () => {
     );
     expect(res.errors).toBeUndefined();
     expect(res.data.updateOnboarding.interests).toEqual([]);
+
+    const row = await prisma.user.findUnique({ where: { id: SECOND_REGULAR_USER_ID } });
+    expect(row?.interests).toEqual([]);
+  });
+
+  it("rejects interests that are not in the known subject list", async () => {
+    const res = singleResult(
+      await server.executeOperation(
+        { query: UPDATE_ONBOARDING, variables: { interests: ["Physics", "Underwater Basket Weaving"] } },
+        { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+      ),
+    );
+    expect(res.errors?.[0]?.message).toMatch(/Unknown interest/i);
+
+    // Nothing persisted from the rejected call.
+    const row = await prisma.user.findUnique({ where: { id: REGULAR_USER_ID } });
+    expect(row?.interests).not.toContain("Underwater Basket Weaving");
+  });
+
+  it("dedupes repeated interests before persisting", async () => {
+    const res = singleResult(
+      await server.executeOperation(
+        { query: UPDATE_ONBOARDING, variables: { interests: ["Physics", "Physics", "Biology"] } },
+        { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+      ),
+    );
+    expect(res.errors).toBeUndefined();
+    expect(res.data.updateOnboarding.interests).toEqual(["Physics", "Biology"]);
+
+    const row = await prisma.user.findUnique({ where: { id: REGULAR_USER_ID } });
+    expect(row?.interests).toEqual(["Physics", "Biology"]);
   });
 });

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
@@ -363,21 +363,29 @@ function Step2Interests({
   onNext,
   onBack,
   saveInterests,
+  interests,
+  setInterests,
 }: {
   onNext: () => void;
   onBack: () => void;
   saveInterests: (opts: { variables: { interests: string[] } }) => Promise<unknown>;
+  // Selection is owned by the page so navigating Back to step 2 preserves it
+  // instead of resetting to empty (which would overwrite saved interests with []).
+  interests: string[];
+  setInterests: Dispatch<SetStateAction<string[]>>;
 }) {
-  const [interests, setInterests] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const toggle = useCallback((subject: string) => {
-    setError(null);
-    setInterests((prev) =>
-      prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject]
-    );
-  }, []);
+  const toggle = useCallback(
+    (subject: string) => {
+      setError(null);
+      setInterests((prev) =>
+        prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject],
+      );
+    },
+    [setInterests],
+  );
 
   const handleContinue = async () => {
     if (loading) return;
@@ -482,6 +490,8 @@ export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [syncUser] = useMutation(SYNC_CURRENT_USER);
   const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
+  // Owned here (not in Step2Interests) so the selection survives step navigation.
+  const [interests, setInterests] = useState<string[]>([]);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
@@ -503,6 +513,8 @@ export default function SignUpPage() {
             onNext={() => goToStep(3)}
             onBack={() => goToStep(1)}
             saveInterests={updateOnboarding}
+            interests={interests}
+            setInterests={setInterests}
           />
         )}
         {step === 3 && <Step3Stub />}

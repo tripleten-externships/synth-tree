@@ -5,6 +5,19 @@ import { Role as RoleEnum } from "@graphql/__generated__/inputs";
 import { requireAdmin } from "@graphql/auth/requireAuth";
 import logger from '@lib/logger'; // Structured logger for tracking user sync and account events
 
+// Canonical onboarding subjects. Must stay in sync with SUBJECTS in the client
+// SignUpPage (apps/client-frontend/src/pages/auth/SignUpPage.tsx).
+const ALLOWED_INTERESTS = new Set<string>([
+  "Chemistry",
+  "Physics",
+  "Biology",
+  "Mathematics",
+  "Computer science",
+  "Statistics",
+  "Earth science",
+  "Astronomy",
+]);
+
 // Sync current User.
 // A token will be sent in the headers of the Apollo Client from the frontend when a User signs up through the firebase sdk
 // This function creates a user in our postgres database and hence makes it an official prisma model.
@@ -74,10 +87,21 @@ builder.mutationFields((t) => ({
     resolve: async (query, _parent, args, context) => {
       const firebaseUid = context.auth.requireAuth();
 
+      // Validate against the known subject list rather than persisting arbitrary
+      // client input. Dedupe, and reject anything off-list — this also caps the
+      // array size and rejects oversized/junk strings.
+      // NOTE: keep in sync with SUBJECTS in the client SignUpPage (ideally a
+      // shared constant later).
+      const uniqueInterests = Array.from(new Set(args.interests));
+      const invalid = uniqueInterests.filter((s) => !ALLOWED_INTERESTS.has(s));
+      if (invalid.length > 0) {
+        throw new GraphQLError(`Unknown interest(s): ${invalid.join(", ")}`);
+      }
+
       const user = await context.prisma.user.update({
         ...query,
         where: { id: firebaseUid },
-        data: { interests: args.interests },
+        data: { interests: uniqueInterests },
       });
 
       logger.info({ userId: user.id }, 'Onboarding interests saved');
