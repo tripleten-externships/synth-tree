@@ -23,6 +23,8 @@ jobs:
     strategy:
       matrix:
         environment: [dev, prod]
+    # Bind the dev/prod GitHub Environment so its scoped AWS secrets resolve.
+    environment: ${{ matrix.environment }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

@@ -67,12 +67,22 @@ Run **Deploy Orchestrator** from the Actions tab, pick the environment, and
 optionally toggle `deploy_all` to redeploy every service (e.g. to push a feature
 branch to dev). Without `deploy_all` it deploys only what the last commit changed.
 
-## No prod approval gate
+## Environments & prod approval
 
-There is no in-workflow approval step. If you want a manual gate on prod, add
-required reviewers to a `prod` GitHub Environment in repo settings — the
-workflows do **not** bind one, so by default prod deploys proceed automatically
-on a merge to `main`.
+Each deploy job binds the GitHub **Environment** named `dev` or `prod`
+(`environment: ${{ inputs.environment }}`). That binding exists only so the
+environment-scoped AWS secrets resolve — it is **not** an approval gate by
+itself. AWS keys live as environment secrets:
+
+- `dev` environment: `AWS_ACCESS_KEY_ID_DEV` / `AWS_SECRET_ACCESS_KEY_DEV`
+- `prod` environment: `AWS_ACCESS_KEY_ID_PROD` / `AWS_SECRET_ACCESS_KEY_PROD`
+
+(Alternatively define these at repo level — either resolves.)
+
+There is no in-workflow approval step. To keep prod deploys automatic on a merge
+to `main`, the `prod` Environment must have **no required reviewers / wait
+timer** (Settings → Environments → `prod`). Add required reviewers there only if
+you later want a manual prod gate.
 
 ## Required repository secrets
 
