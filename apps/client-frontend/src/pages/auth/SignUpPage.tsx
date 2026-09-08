@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
 import { auth } from "../../lib/firebase";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
+import { UPDATE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -345,18 +346,122 @@ function Step1Credentials({
   );
 }
 
-// ─── Step 2 stub ──────────────────────────────────────────────────────────────
+// ─── Step 2 – Interests ───────────────────────────────────────────────────────
 
-function Step2Stub() {
+const SUBJECTS = [
+  "Chemistry",
+  "Physics",
+  "Biology",
+  "Mathematics",
+  "Computer science",
+  "Statistics",
+  "Earth science",
+  "Astronomy",
+] as const;
+
+function Step2Interests({
+  onNext,
+  onBack,
+  saveInterests,
+  interests,
+  setInterests,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  saveInterests: (opts: { variables: { interests: string[] } }) => Promise<unknown>;
+  // Selection is owned by the page so navigating Back to step 2 preserves it
+  // instead of resetting to empty (which would overwrite saved interests with []).
+  interests: string[];
+  setInterests: Dispatch<SetStateAction<string[]>>;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const toggle = useCallback(
+    (subject: string) => {
+      setError(null);
+      setInterests((prev) =>
+        prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject],
+      );
+    },
+    [setInterests],
+  );
+
+  const handleContinue = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // An empty array is valid — it's the "skip" path, recorded as no interests.
+      await saveInterests({ variables: { interests } });
+      onNext();
+    } catch {
+      setError("We couldn't save your choices. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">
-        🛠
-      </span>
-      <h2 className="text-xl font-bold text-slate-900 tracking-tight m-0">Profile setup</h2>
-      <p className="text-sm text-slate-500 leading-relaxed m-0 max-w-[300px]">
-        This step is coming soon (SYN-23). Your account was created successfully.
+    <div>
+      <h1 className="text-[22px] font-bold text-slate-900 tracking-tight mb-1">
+        What are you here for?
+      </h1>
+      <p className="text-[13px] text-slate-400 font-medium mb-6">
+        Pick a few interests — we'll tune your home feed.
       </p>
+
+      <div className="grid grid-cols-2 gap-2 mb-6" role="group" aria-label="Interests">
+        {SUBJECTS.map((subject) => {
+          const selected = interests.includes(subject);
+          return (
+            <button
+              key={subject}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => toggle(subject)}
+              className={[
+                "border-2 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 text-left transition",
+                selected
+                  ? "border-blue-600 bg-blue-50"
+                  : "border-slate-200 bg-white hover:border-slate-300",
+              ].join(" ")}
+            >
+              {subject}
+            </button>
+          );
+        })}
+      </div>
+
+      {error && (
+        <p
+          role="alert"
+          className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 mb-4"
+        >
+          {error}
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="flex-1 h-11 rounded-[10px] border border-slate-200 text-slate-700 text-[15px] font-semibold hover:bg-slate-50 active:scale-[0.98] disabled:opacity-45 transition"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={loading}
+          className="flex-[2] h-11 rounded-[10px] bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition"
+        >
+          {loading && <Spinner />}
+          {loading && <span className="sr-only" role="status">Saving…</span>}
+          {loading ? null : "Continue"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -384,6 +489,9 @@ const VALID_STEPS = new Set<number>(STEPS);
 export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [syncUser] = useMutation(SYNC_CURRENT_USER);
+  const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
+  // Owned here (not in Step2Interests) so the selection survives step navigation.
+  const [interests, setInterests] = useState<string[]>([]);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
@@ -400,7 +508,15 @@ export default function SignUpPage() {
       <div className="w-full max-w-[420px] bg-white rounded-2xl px-9 pt-10 pb-9 shadow-[0_1px_3px_rgba(0,0,0,.06),0_8px_24px_rgba(0,0,0,.08)]">
         <ProgressBar step={step} />
         {step === 1 && <Step1Credentials onSuccess={() => goToStep(2)} syncUser={syncUser} />}
-        {step === 2 && <Step2Stub />}
+        {step === 2 && (
+          <Step2Interests
+            onNext={() => goToStep(3)}
+            onBack={() => goToStep(1)}
+            saveInterests={updateOnboarding}
+            interests={interests}
+            setInterests={setInterests}
+          />
+        )}
         {step === 3 && <Step3Stub />}
       </div>
     </div>

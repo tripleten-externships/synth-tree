@@ -1159,6 +1159,7 @@ export type Mutation = {
   unpublishCourse?: Maybe<Course>;
   updateCourse?: Maybe<Course>;
   updateLessonBlock?: Maybe<LessonBlocks>;
+  updateOnboarding?: Maybe<User>;
   updateQuiz?: Maybe<Quiz>;
   updateQuizOption?: Maybe<QuizOption>;
   updateQuizQuestion?: Maybe<QuizQuestion>;
@@ -1315,6 +1316,11 @@ export type MutationUpdateCourseArgs = {
 
 export type MutationUpdateLessonBlockArgs = {
   input: LessonBlocksUpdateInput;
+};
+
+
+export type MutationUpdateOnboardingArgs = {
+  interests: Array<Scalars['String']['input']>;
 };
 
 
@@ -4959,6 +4965,14 @@ export type StringNullableFilter = {
   startsWith?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type StringNullableListFilter = {
+  equals?: InputMaybe<Array<Scalars['String']['input']>>;
+  has?: InputMaybe<Scalars['String']['input']>;
+  hasEvery?: InputMaybe<Array<Scalars['String']['input']>>;
+  hasSome?: InputMaybe<Array<Scalars['String']['input']>>;
+  isEmpty?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type StringNullableWithAggregatesFilter = {
   _count?: InputMaybe<NestedIntNullableFilter>;
   _max?: InputMaybe<NestedStringNullableFilter>;
@@ -5026,6 +5040,7 @@ export type User = {
   email: Scalars['String']['output'];
   hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
+  interests: Array<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
   photoUrl?: Maybe<Scalars['String']['output']>;
@@ -5097,6 +5112,7 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   email?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  interests?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
@@ -5110,6 +5126,7 @@ export type UserCreateInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5125,6 +5142,7 @@ export type UserCreateManyInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<Role>;
@@ -5225,6 +5243,7 @@ export type UserCreateWithoutCoursesAuthoredInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5242,6 +5261,7 @@ export type UserCreateWithoutDailyQuestsInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5259,6 +5279,7 @@ export type UserCreateWithoutHeartsInput = {
   dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
   email: Scalars['String']['input'];
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5277,6 +5298,7 @@ export type UserCreateWithoutNodeProgressInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
@@ -5294,6 +5316,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5311,6 +5334,7 @@ export type UserCreateWithoutStreakInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5328,6 +5352,7 @@ export type UserCreateWithoutXpEventsInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5345,6 +5370,7 @@ export type UserCreateWithoutXpInput = {
   email: Scalars['String']['input'];
   hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
   id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -5353,6 +5379,10 @@ export type UserCreateWithoutXpInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserCreateinterestsInput = {
+  set: Array<Scalars['String']['input']>;
 };
 
 export type UserDailyQuest = {
@@ -6126,6 +6156,7 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: InputMaybe<SortOrder>;
   email?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  interests?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
@@ -6139,6 +6170,7 @@ export type UserOrderByWithRelationInput = {
   email?: InputMaybe<SortOrder>;
   hearts?: InputMaybe<UserHeartsOrderByWithRelationInput>;
   id?: InputMaybe<SortOrder>;
+  interests?: InputMaybe<SortOrder>;
   name?: InputMaybe<SortOrder>;
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
   photoUrl?: InputMaybe<SortOrder>;
@@ -6154,6 +6186,7 @@ export type UserScalarFieldEnum =
   | 'createdAt'
   | 'email'
   | 'id'
+  | 'interests'
   | 'name'
   | 'photoUrl'
   | 'role'
@@ -6171,6 +6204,7 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: InputMaybe<DateTimeWithAggregatesFilter>;
   email?: InputMaybe<StringWithAggregatesFilter>;
   id?: InputMaybe<StringWithAggregatesFilter>;
+  interests?: InputMaybe<StringNullableListFilter>;
   name?: InputMaybe<StringNullableWithAggregatesFilter>;
   photoUrl?: InputMaybe<StringNullableWithAggregatesFilter>;
   role?: InputMaybe<EnumRoleWithAggregatesFilter>;
@@ -6358,6 +6392,7 @@ export type UserUpdateInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6373,6 +6408,7 @@ export type UserUpdateManyMutationInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
@@ -6489,6 +6525,7 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6506,6 +6543,7 @@ export type UserUpdateWithoutDailyQuestsInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6523,6 +6561,7 @@ export type UserUpdateWithoutHeartsInput = {
   dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6541,6 +6580,7 @@ export type UserUpdateWithoutNodeProgressInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
@@ -6558,6 +6598,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6575,6 +6616,7 @@ export type UserUpdateWithoutStreakInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6592,6 +6634,7 @@ export type UserUpdateWithoutXpEventsInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6609,6 +6652,7 @@ export type UserUpdateWithoutXpInput = {
   email?: InputMaybe<StringFieldUpdateOperationsInput>;
   hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
@@ -6617,6 +6661,11 @@ export type UserUpdateWithoutXpInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
+};
+
+export type UserUpdateinterestsInput = {
+  push?: InputMaybe<Array<Scalars['String']['input']>>;
+  set?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type UserUpsertWithoutCoursesAuthoredInput = {
@@ -6677,6 +6726,7 @@ export type UserWhereInput = {
   email?: InputMaybe<StringFilter>;
   hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<StringFilter>;
+  interests?: InputMaybe<StringNullableListFilter>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
@@ -6698,6 +6748,7 @@ export type UserWhereUniqueInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   hearts?: InputMaybe<UserHeartsWhereInput>;
   id?: InputMaybe<Scalars['String']['input']>;
+  interests?: InputMaybe<StringNullableListFilter>;
   name?: InputMaybe<StringNullableFilter>;
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
@@ -7234,6 +7285,13 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 
 export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
+export type UpdateOnboardingMutationVariables = Exact<{
+  interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type UpdateOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, interests: Array<string> } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -7623,6 +7681,37 @@ export function useSubmitQuizAttemptMutation(baseOptions?: ApolloReactHooks.Muta
         return ApolloReactHooks.useMutation<SubmitQuizAttemptMutation, SubmitQuizAttemptMutationVariables>(SubmitQuizAttemptDocument, options);
       }
 export type SubmitQuizAttemptMutationHookResult = ReturnType<typeof useSubmitQuizAttemptMutation>;
+export const UpdateOnboardingDocument = gql`
+    mutation UpdateOnboarding($interests: [String!]!) {
+  updateOnboarding(interests: $interests) {
+    id
+    interests
+  }
+}
+    `;
+
+/**
+ * __useUpdateOnboardingMutation__
+ *
+ * To run a mutation, you first call `useUpdateOnboardingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateOnboardingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateOnboardingMutation, { data, loading, error }] = useUpdateOnboardingMutation({
+ *   variables: {
+ *      interests: // value for 'interests'
+ *   },
+ * });
+ */
+export function useUpdateOnboardingMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateOnboardingMutation, UpdateOnboardingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateOnboardingMutation, UpdateOnboardingMutationVariables>(UpdateOnboardingDocument, options);
+      }
+export type UpdateOnboardingMutationHookResult = ReturnType<typeof useUpdateOnboardingMutation>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl) {
