@@ -230,20 +230,23 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
           })}
         </div>
 
-        {!result.passed && incorrectAnswers.length > 0 && (
+        {result.passed === false && incorrectAnswers.length > 0 && (
           <p className="mt-4 text-sm text-gray-600">
             {incorrectAnswers.length} question
             {incorrectAnswers.length === 1 ? " was" : "s were"} incorrect.
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-6 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Retry
-        </button>
+        {/* No retry while an attempt is awaiting manual review. */}
+        {!isPendingReview && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-6 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        )}
       </section>
     );
   }

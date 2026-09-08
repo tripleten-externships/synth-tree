@@ -333,6 +333,43 @@ it("handles a quiz with all types and an incorrect auto-gradable answer", async 
     "Not passed: some answers are incorrect; open question(s) pending review",
   );
 });
+// Mixed quiz where the open answer is present but an auto-gradable question
+// was skipped: that's incomplete, not incorrect — the message must say so.
+it("reports incomplete (not incorrect) when an auto question is skipped but the open answer is present", async () => {
+  const mockQuiz = {
+    questions: [
+      {
+        type: "SINGLE_CHOICE",
+        options: [
+          { id: "opt1", isCorrect: true },
+          { id: "opt2", isCorrect: false },
+        ],
+      },
+      {
+        type: "OPEN_QUESTION",
+        options: [],
+      },
+    ],
+  };
+  const mockAttempt = {
+    quizId: "quiz8b",
+    answers: [
+      // SINGLE_CHOICE is skipped (no answer submitted)
+      {
+        id: "answer8b-open",
+        question: mockQuiz.questions[1],
+        answer: { text: "Open answer" },
+        isCorrect: null,
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attempt8b");
+  expect(result.passed).toBe(false);
+  expect(result.message).toBe("Not passed: all questions must be answered");
+});
 // Quiz with a skipped question (not all auto-gradable answered)
 it("handles a quiz where a question is skipped (no answer submitted)", async () => {
   const mockQuiz = {

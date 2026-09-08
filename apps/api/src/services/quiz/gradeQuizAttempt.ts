@@ -164,6 +164,12 @@ export async function gradeQuizAttempt(
     } else if (allAnswered && allAutoGradableCorrect) {
       passed = null;
       message = "Passed pending manual review of open question(s)";
+    } else if (!allAnswered) {
+      // Auto-gradable answers given were all correct, but at least one
+      // auto-gradable question was left unanswered — that's incomplete, not
+      // incorrect.
+      passed = false;
+      message = "Not passed: all questions must be answered";
     } else {
       passed = false;
       message = "Not passed: some answers are incorrect; open question(s) pending review";
