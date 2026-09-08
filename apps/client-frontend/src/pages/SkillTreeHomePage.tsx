@@ -2,6 +2,32 @@ import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
 import { useNavigate } from "react-router-dom";
 import RecommendedNextCarousel from "../components/RecommendedNextCarousel";
 import CourseCard from "../components/CourseCard";
+import { MY_PROGRESS_QUERY } from "../graphql/queries/myProgress";
+import { useQuery } from "@apollo/client/react";
+import ContinueCard from "../components/ContinueCard.tsx";
+
+type ProgressItem = {
+  id: string;
+  status: string;
+  updatedAt: string;
+  node: {
+    id: string;
+    title: string;
+    tree: {
+      id: string;
+      title: string;
+      course: {
+        id: string;
+        title: string;
+      };
+    };
+  };
+};
+
+type MyProgressData = {
+  myProgress: ProgressItem[];
+};
+
 
 // Placeholder courses shown when the database has nothing published yet.
 // Once seed/admin-created courses exist, the API result wins automatically.
@@ -13,6 +39,10 @@ const placeholderCourses = [
 
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
+  // const { data: progressData } = useQuery(MY_PROGRESS_QUERY);
+  const { data: progressData } = useQuery<MyProgressData>(MY_PROGRESS_QUERY, {
+  fetchPolicy: "network-only",
+});
   // navigate() lets us send the user to a different page when they click something
   const navigate = useNavigate();
 
@@ -21,6 +51,9 @@ export default function Home() {
 
   const apiCourses = data?.publicGetAllCourses ?? [];
   const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
+  const inProgressLesson = progressData?.myProgress?.find(
+  (progress) => progress.status === "IN_PROGRESS",
+);
 
   return (
     <div className="flex flex-col items-center text-center gap-6">
@@ -31,7 +64,29 @@ export default function Home() {
         study path with theory and quizzes inside.
       </p>
 
-      <RecommendedNextCarousel />
+
+<div className="mt-10 w-full max-w-5xl">
+  {inProgressLesson ? (
+    <ContinueCard
+      courseTitle={inProgressLesson.node.tree.course.title}
+      lessonTitle={inProgressLesson.node.title}
+      onResume={() =>
+        navigate(
+          `/courses/${inProgressLesson.node.tree.course.id}/nodes/${inProgressLesson.node.id}`,
+        )
+      }
+    />
+  ) : (
+    <button
+      type="button"
+      onClick={() => navigate("/catalog")}
+      className="w-full rounded-3xl border-2 border-dashed border-gray-300 bg-white p-10 text-center text-gray-500 shadow-sm transition hover:shadow-lg"
+    >
+      Browse catalog
+    </button>
+  )}
+</div>
+      <RecommendedNextCarousel/>
 
       <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
         {courses.map((course) => (
@@ -48,12 +103,7 @@ export default function Home() {
           The dashed border style matches the design mock for this card.
           TODO: the design shows a circle icon above the text — we don't have that asset yet.
           Once we find or receive the correct SVG file, add it here as an <img> above the <p>. */}
-      <div
-        className="mt-10 w-full max-w-3xl rounded-3xl border-2 border-dashed border-gray-300 bg-white p-10 shadow-sm cursor-pointer transition-shadow hover:shadow-lg text-center"
-        onClick={() => navigate("/catalog")}
-      >
-        <p className="text-gray-500">Browse catalog</p>
-      </div>
+
     </div>
   );
 }
