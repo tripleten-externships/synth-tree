@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
-import { incrementDailyQuestProgress } from "src/services/dailyQuests";
+import { completeNodeForUser } from "src/services/progress";
 
 builder.mutationFields((t) => ({
   startNodeProgress: t.prismaField({
@@ -58,63 +58,11 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, { nodeId }, ctx) => {
       const userId = ctx.auth.requireAuth();
 
-      const nodeExists = await ctx.prisma.skillNode.findFirst({
-        where: {
-          id: nodeId,
-          deletedAt: null,
-        },
-        select: { id: true },
-      });
+      // Shared completion policy: existence check + required-quiz gate +
+      // idempotency + LESSON_COMPLETED daily-quest increment.
+      await completeNodeForUser(ctx.prisma, userId, nodeId);
 
-      if (!nodeExists) {
-        throw new GraphQLError("Node not found");
-      }
-
-      const existing = await ctx.prisma.userNodeProgress.findUnique({
-        where: {
-          userId_nodeId: {
-            userId,
-            nodeId,
-          },
-        },
-        select: { status: true },
-      });
-      const alreadyCompleted = existing?.status === "COMPLETED";
-
-      // Gate completion on a passed required quiz. A node can have at most one
-      // quiz (nodeId is unique); if that quiz is `required`, the learner must
-      // have a passing attempt before the node can be marked complete. Only
-      // enforced on the transition into COMPLETED so repeat calls stay
-      // idempotent.
-      if (!alreadyCompleted) {
-        const requiredQuiz = await ctx.prisma.quiz.findFirst({
-          where: {
-            nodeId,
-            required: true,
-            deletedAt: null,
-          },
-          select: { id: true },
-        });
-
-        if (requiredQuiz) {
-          const passedAttempt = await ctx.prisma.quizAttempt.findFirst({
-            where: {
-              quizId: requiredQuiz.id,
-              userId,
-              passed: true,
-            },
-            select: { id: true },
-          });
-
-          if (!passedAttempt) {
-            throw new GraphQLError(
-              "Cannot complete node: its required quiz has not been passed",
-            );
-          }
-        }
-      }
-
-      const progress = await ctx.prisma.userNodeProgress.upsert({
+      return ctx.prisma.userNodeProgress.findUniqueOrThrow({
         ...query,
         where: {
           userId_nodeId: {
@@ -122,29 +70,7 @@ builder.mutationFields((t) => ({
             nodeId,
           },
         },
-        // Preserve the original completedAt when the node is already complete
-        // so repeat calls stay idempotent.
-        update: alreadyCompleted
-          ? {}
-          : {
-              status: "COMPLETED",
-              completedAt: new Date(),
-            },
-        create: {
-          userId,
-          nodeId,
-          status: "COMPLETED",
-          completedAt: new Date(),
-        },
       });
-
-      // Only count the lesson toward daily quests on the first completion,
-      // otherwise repeated calls on the same node would inflate progress.
-      if (!alreadyCompleted) {
-        await incrementDailyQuestProgress(ctx.prisma, userId, "LESSON_COMPLETED");
-      }
-
-      return progress;
     },
   }),
 }));

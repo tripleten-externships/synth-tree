@@ -4,6 +4,7 @@ import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
+import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
 import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
 
 interface LessonViewerProps {
@@ -17,6 +18,19 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
+  const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS);
+
+  async function handleNext() {
+    // Best-effort completion. If the node has a required quiz the learner hasn't
+    // passed, the server rejects completion — don't block navigation on that.
+    try {
+      await completeNodeProgress({ variables: { nodeId } });
+    } catch {
+      // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
+    }
+
+    return onNext();
+  }
 
   // Which lesson page is visible. Reset when the node changes so navigating
   // node-to-node never lands on a stale (possibly out-of-range) page index.
@@ -193,7 +207,8 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
           className="px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
           onClick={() => {
             if (isLastPage) {
-              onNext();
+              // Finishing the lesson: complete the node (best-effort) then advance.
+              handleNext();
             } else {
               setCurrentPage(pageIndex + 1);
             }
