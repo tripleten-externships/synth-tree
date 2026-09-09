@@ -105,25 +105,25 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     const isPendingReview = result.passed === null;
 
     return (
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
         <div
           className={`mb-6 rounded-2xl p-5 ${
-            isPendingReview ? "bg-amber-50" : result.passed ? "bg-emerald-50" : "bg-red-50"
+            isPendingReview ? "bg-[hsl(var(--warning)/0.1)]" : result.passed ? "bg-[hsl(var(--success)/0.1)]" : "bg-[hsl(var(--destructive)/0.1)]"
           }`}
         >
           <p
             className={`text-sm font-semibold uppercase tracking-wide ${
               isPendingReview
-                ? "text-amber-700"
+                ? "text-warning"
                 : result.passed
-                  ? "text-emerald-700"
-                  : "text-red-700"
+                  ? "text-success"
+                  : "text-destructive"
             }`}
           >
             Quiz submitted
           </p>
 
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">
+          <h2 className="mt-1 text-2xl font-bold text-foreground">
             {isPendingReview
               ? "Waiting for review"
               : result.passed
@@ -132,15 +132,15 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
           </h2>
 
           {isPendingReview ? (
-            <p className="mt-2 text-sm text-amber-800">
+            <p className="mt-2 text-sm text-warning">
               Your written answer was submitted and is waiting for manual review.
             </p>
           ) : result.passed ? (
-            <p className="mt-2 text-sm text-emerald-800">
+            <p className="mt-2 text-sm text-success">
               You have completed this quiz.
             </p>
           ) : (
-            <p className="mt-2 text-sm text-gray-700">
+            <p className="mt-2 text-sm text-foreground">
               Review the questions below, then retry when you are ready.
             </p>
           )}
@@ -169,24 +169,24 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                 key={answer.id}
                 className={`rounded-2xl border p-4 ${
                   isIncorrect
-                    ? "border-red-200 bg-red-50"
+                    ? "border-[hsl(var(--destructive)/0.3)] bg-[hsl(var(--destructive)/0.1)]"
                     : isNotGraded
-                      ? "border-gray-200 bg-gray-50"
-                      : "border-emerald-200 bg-emerald-50"
+                      ? "border-border bg-muted"
+                      : "border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.1)]"
                 }`}
               >
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-foreground">
                     {index + 1}. {answer.question.prompt}
                   </p>
 
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       isIncorrect
-                        ? "bg-red-100 text-red-700"
+                        ? "bg-[hsl(var(--destructive)/0.15)] text-destructive"
                         : isNotGraded
-                          ? "bg-gray-200 text-gray-700"
-                          : "bg-emerald-100 text-emerald-700"
+                          ? "bg-muted text-foreground"
+                          : "bg-[hsl(var(--success)/0.18)] text-success"
                     }`}
                   >
                     {isIncorrect
@@ -198,12 +198,12 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                 </div>
 
                 {answer.question.type === "OPEN_QUESTION" ? (
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-foreground">
                     Your answer:{" "}
                     {answer.answer?.text || "No answer provided"}
                   </p>
                 ) : (
-                  <div className="space-y-1 text-sm text-gray-700">
+                  <div className="space-y-1 text-sm text-foreground">
                     <p>
                       Your answer:{" "}
                       {selectedOptions.length > 0
@@ -231,7 +231,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
         </div>
 
         {result.passed === false && incorrectAnswers.length > 0 && (
-          <p className="mt-4 text-sm text-gray-600">
+          <p className="mt-4 text-sm text-muted-foreground">
             {incorrectAnswers.length} question
             {incorrectAnswers.length === 1 ? " was" : "s were"} incorrect.
           </p>
@@ -242,7 +242,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
           <button
             type="button"
             onClick={onRetry}
-            className="mt-6 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="mt-6 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
           >
             Retry
           </button>
@@ -252,8 +252,8 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   }
 
   return (
-    <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold text-gray-900">
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <h2 className="mb-4 text-xl font-semibold text-foreground">
         {quiz.title ?? "Quiz"}
         {quiz.required ? " · required" : ""}
       </h2>
@@ -261,7 +261,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
         {quiz.questions.map((q, i) => (
           <div key={q.id}>
-            <p className="mb-2 font-medium text-gray-800">
+            <p className="mb-2 font-medium text-foreground">
               {i + 1}. {q.prompt}
             </p>
 
@@ -276,7 +276,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                 }
                 rows={3}
                 placeholder="Your answer…"
-                className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none"
               />
             ) : (
               <div className="flex flex-col gap-2">
@@ -286,7 +286,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                   return (
                     <label
                       key={o.id}
-                      className="flex items-center gap-2 text-sm text-gray-700"
+                      className="flex items-center gap-2 text-sm text-foreground"
                     >
                       <input
                         type={multiple ? "checkbox" : "radio"}
@@ -310,13 +310,13 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Submitting…" : "Submit quiz"}
           </button>
 
           {error && (
-            <span className="text-sm text-red-600">
+            <span className="text-sm text-destructive">
               Could not submit.
             </span>
           )}

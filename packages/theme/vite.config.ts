@@ -32,7 +32,7 @@ export default defineConfig({
         index: resolve(__dirname, "src/index.ts"),
         "tailwind/index": resolve(__dirname, "src/tailwind/index.ts"),
       },
-      name: "SkillTreeTheme",
+      name: "SynthTreeTheme",
       formats: ["es", "cjs"],
     },
     rollupOptions: {
