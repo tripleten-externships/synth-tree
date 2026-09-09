@@ -23,37 +23,45 @@ export default function Home() {
   const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
 
   return (
-    <div className="flex flex-col items-center text-center gap-6">
-      <h1 className="text-[32px] font-medium leading-none text-[#212121]">Synth Tree</h1>
+    <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-10 px-4 py-10 text-center sm:py-14">
+      <header className="flex max-w-2xl flex-col items-center gap-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Welcome to Synth<span className="text-primary">Tree</span>
+        </h1>
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+          A collection of courses on organic chemistry and more, organised into a clear
+          study path with theory and quizzes built in.
+        </p>
+      </header>
 
-      <p className="max-w-3xl text-[32px] font-medium leading-none text-[#212121] mt-4">
-        Synth Tree is a collection of courses on organic chemistry and more, organised in a clear
-        study path with theory and quizzes inside.
-      </p>
+      <section className="w-full">
+        <RecommendedNextCarousel />
+      </section>
 
-      <RecommendedNextCarousel />
+      <section className="w-full">
+        <h2 className="mb-4 text-left text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Courses
+        </h2>
+        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {courses.map((course) => (
+            <CourseCard
+              key={course.id}
+              id={course.id}
+              title={course.title}
+              description={course.description ?? ""}
+            />
+          ))}
+        </div>
+      </section>
 
-      <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
-        {courses.map((course) => (
-          <CourseCard
-            key={course.id}
-            id={course.id}
-            title={course.title}
-            description={course.description ?? ""}
-          />
-        ))}
-      </div>
-
-      {/* "Browse catalog" card — clicking it takes the user to the full course catalog page.
-          The dashed border style matches the design mock for this card.
-          TODO: the design shows a circle icon above the text — we don't have that asset yet.
-          Once we find or receive the correct SVG file, add it here as an <img> above the <p>. */}
-      <div
-        className="mt-10 w-full max-w-3xl rounded-3xl border-2 border-dashed border-gray-300 bg-white p-10 shadow-sm cursor-pointer transition-shadow hover:shadow-lg text-center"
+      {/* "Browse catalog" card — takes the user to the full course catalog page. */}
+      <button
+        type="button"
         onClick={() => navigate("/catalog")}
+        className="w-full max-w-3xl rounded-3xl border-2 border-dashed border-border bg-card p-8 text-card-foreground shadow-sm transition-colors hover:border-primary hover:bg-accent hover:text-accent-foreground"
       >
-        <p className="text-gray-500">Browse catalog</p>
-      </div>
+        <span className="text-sm font-medium">Browse the full catalog →</span>
+      </button>
     </div>
   );
 }

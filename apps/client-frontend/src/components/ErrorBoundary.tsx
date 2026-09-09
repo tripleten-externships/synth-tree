@@ -1,7 +1,5 @@
 import React, { Component } from "react";
 
-import synthTreeImg from "../assets/synth-tree.svg";
-
 interface Props {
   children?: React.ReactNode;
 }
@@ -30,11 +28,9 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex items-center justify-center flex-col min-h-screen gap-11 text-center bg-gray-400">
           <div className="bg-white flex flex-col items-center p-5 rounded-3xl w-4/5 md:w-1/2">
-            <img
-              className="w-14 sm:max-w-xs mb-5"
-              src={synthTreeImg}
-              alt="Synth Tree Logo"
-            />
+            <span className="mb-5 text-2xl font-semibold tracking-tight text-gray-900">
+              Synth<span className="text-primary">Tree</span>
+            </span>
             <h1 className="text-4xl">It seems something went wrong...</h1>
 
             <h2 className="text-xl mb-10 mt-10 2xl:mt-0 text-gray-400">

@@ -47,7 +47,7 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
   return (
     // Clicking anywhere on the card takes the user to the course detail page
     <Card
-      className="cursor-pointer hover:shadow-lg transition-shadow border border-gray-200 rounded-3xl bg-white"
+      className="cursor-pointer hover:shadow-lg transition-shadow border border-border rounded-3xl bg-card"
       onClick={() => navigate(`/courses/${id}`)}
     >
       <CardContent className="p-8">
@@ -57,7 +57,7 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             is added as a direct dependency here (to match the admin dashboard's approach). */}
         {icon && (
           <div
-            className="w-16 h-16 bg-blue-500 flex items-center justify-center text-white mb-4"
+            className="w-16 h-16 bg-primary flex items-center justify-center text-primary-foreground mb-4"
             style={{ clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)" }}
           >
             {icon}
@@ -65,10 +65,10 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
         )}
 
         {/* Course title shown in bold */}
-        <CardTitle className="mb-2 text-lg font-semibold text-gray-900">{title}</CardTitle>
+        <CardTitle className="mb-2 text-lg font-semibold text-card-foreground">{title}</CardTitle>
 
         {/* Course description shown in smaller gray text below the title */}
-        <CardDescription className="text-sm text-gray-600">{description}</CardDescription>
+        <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
 
         {/* Stats row — only shown if at least one of chapters, hours, or learners is passed.
             != null checks if a value is not null or undefined. Since all three props are optional,
@@ -77,7 +77,7 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             shows "8.4k learners". The dot separator " · " only renders if both chapters and
             hours are present, so we never get a floating dot if one is missing. */}
         {(chapters != null || hours != null || learners != null) && (
-          <div className="flex justify-between text-sm text-gray-500 mb-2">
+          <div className="flex justify-between text-sm text-muted-foreground mb-2">
             <span>
               {chapters != null && `${chapters} chapters`}
               {chapters != null && hours != null && " · "}
@@ -92,13 +92,13 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
             using an inline style, so progress={42} makes it fill 42% of the track. */}
         {progress != null && (
           <div>
-            <div className="w-full h-1.5 bg-gray-200 rounded-full mb-1">
+            <div className="w-full h-1.5 bg-muted rounded-full mb-1">
               <div
-                className="h-1.5 bg-blue-500 rounded-full"
+                className="h-1.5 bg-primary rounded-full"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-gray-500">{progress}% complete</p>
+            <p className="text-sm text-muted-foreground">{progress}% complete</p>
           </div>
         )}
       </CardContent>
