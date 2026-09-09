@@ -18,6 +18,9 @@ const GET_LESSON_TITLE = gql`
       title
       tree {
         courseId
+        course {
+          title
+        }
       }
     }
   }
@@ -83,6 +86,9 @@ type GetLessonTitleResponse = {
     title: string;
     tree: {
       courseId: string;
+      course: {
+        title: string;
+      };
     };
   } | null;
 };
@@ -154,13 +160,6 @@ function LessonEditor(){
   const [deleteLessonBlock] = useMutation(
     DELETE_LESSON_BLOCK
   );
-
-  // const htmlToText = (html: string) => {
-  //   const element = document.createElement("div");
-  //   element.innerHTML = DOMPurify.sanitize(html);
-
-  //   return element.textContent ?? "";
-  // };
 
   const clicked = () => {
     setOpenBlockId(null);
@@ -398,7 +397,9 @@ function LessonEditor(){
           </Button>
         </div>
       </div>
-      <p className="mb-1">Organic Chemistry · Chapter 5: Hybridization</p>
+      <p className="mb-1">
+        {titleData?.adminSkillNode?.tree.course.title} · {titleData?.adminSkillNode?.title}
+      </p>
       <Input value={title} onChange={(e) => setTitle(e.target.value)} type="text" aria-label="Lesson title"/>
       <div className="flex flex-col justify-center align-center">
         <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter} >
