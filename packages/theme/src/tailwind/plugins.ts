@@ -1,7 +1,7 @@
 import plugin from "tailwindcss/plugin";
 
 // Custom Tailwind plugins for financial advisor theme
-export const skilltreeThemePlugin = plugin(function ({
+export const synthTreeThemePlugin = plugin(function ({
   addUtilities,
   addComponents,
   theme,
@@ -145,7 +145,7 @@ export const accessibilityPlugin = plugin(function ({ addUtilities }) {
 
 // Export all plugins
 export const customPlugins = [
-  skilltreeThemePlugin,
+  synthTreeThemePlugin,
   animationPlugin,
   accessibilityPlugin,
 ];

@@ -41,7 +41,7 @@ export default defineConfig({
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
-          "@synth-tree/theme": "SkillTreeTheme",
+          "@synth-tree/theme": "SynthTreeTheme",
         },
       },
     },

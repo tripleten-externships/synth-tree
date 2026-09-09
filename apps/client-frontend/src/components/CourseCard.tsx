@@ -36,7 +36,7 @@ function formatLearners(count: number): string {
 }
 
 // CourseCard — displays a single course as a clickable card
-// Used in SkillTreeHomePage and CourseCatalog to show each course in the grid
+// Used in HomePage and CourseCatalog to show each course in the grid
 // Destructuring pulls each prop out of the props object so we can use them by name below.
 // The optional props (icon, chapters, hours, learners, progress) won't be passed by every
 // caller — when they're left out, they'll just be undefined and we skip rendering that section.
