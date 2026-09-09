@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import {closestCenter,DndContext,type DragEndEvent} from "@dnd-kit/core";
 import {arrayMove,SortableContext,useSortable,verticalListSortingStrategy} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Button, Input } from "@synth-tree/ui";
+import { Button, Input, toast } from "@synth-tree/ui";
 import DOMPurify from 'dompurify';
 import { AlignJustify, Check, ChevronLeft, Code2, Eye, GripVertical,Image, Pen, PlaySquare, Plus, Trash} from 'lucide-react';
 import { useEffect,useState } from 'react';
@@ -155,12 +155,12 @@ function LessonEditor(){
     DELETE_LESSON_BLOCK
   );
 
-  const htmlToText = (html: string) => {
-    const element = document.createElement("div");
-    element.innerHTML = DOMPurify.sanitize(html);
+  // const htmlToText = (html: string) => {
+  //   const element = document.createElement("div");
+  //   element.innerHTML = DOMPurify.sanitize(html);
 
-    return element.textContent ?? "";
-  };
+  //   return element.textContent ?? "";
+  // };
 
   const clicked = () => {
     setOpenBlockId(null);
@@ -243,40 +243,51 @@ function LessonEditor(){
     const textToSave = { ...blockText };
     const blockIdsToDelete = [...deletedBlockIds];
 
-    await Promise.all([
-      saveLessonTitle({
-        variables: {
-          updateSkillNodeId: nodeId,
-          input: {
-            title: title,
-          },
-        }
-      }),
-      ...blocksToSave.map((block) =>
-        updateLessonBlock({
+    try {
+      await Promise.all([
+        saveLessonTitle({
           variables: {
+            updateSkillNodeId: nodeId,
             input: {
-              id: {
-                set: block.id,
-              },
-              order: { set: block.order },
-              ...(block.type === "HTML"
-                ? { html: { set: DOMPurify.sanitize(textToSave[block.id] ?? "") } }
-                : {}),
-            }
-          }
-        }),
-      ),
-      ...blockIdsToDelete.map((blockId) =>
-        deleteLessonBlock({
-          variables: {
-            id: blockId,
+              title: title,
+            },
           },
         }),
-      ),
-    ]);
+        ...blocksToSave.map((block) =>
+          updateLessonBlock({
+            variables: {
+              input: {
+                id: {
+                  set: block.id,
+                },
+                order: { set: block.order },
+                ...(block.type === "HTML"
+                  ? { html: { set: DOMPurify.sanitize(textToSave[block.id] ?? "") } }
+                  : {}),
+              },
+            }
+          }),
+        ),
+        ...blockIdsToDelete.map((blockId) =>
+          deleteLessonBlock({
+            variables: {
+              id: blockId,
+            },
+          }),
+        ),
+      ]);
 
-    setDeletedBlockIds([]);
+      setDeletedBlockIds([]);
+      toast("Lesson saved", {
+        description: "Your lesson changes were saved successfully.",
+      });
+    } catch (error) {
+      toast("Unable to save lesson", {
+        description: error instanceof Error
+          ? error.message
+          : "Please try again.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -295,7 +306,7 @@ function LessonEditor(){
     blockData.lessonBlocksByNode
       .filter((block) => block.type === "HTML")
       .forEach((block) => {
-        startingText[block.id] = htmlToText(block.html ?? "");
+        startingText[block.id] = block.html ?? "";
       });
 
     setBlockText(startingText);
@@ -407,15 +418,19 @@ function LessonEditor(){
                       >
                         <Trash className="h-4 w-4"/>
                       </Button>
-                      <textarea
-                        value={blockText[block.id] ?? ""}
-                        onChange={(e) =>
+                      <div
+                        contentEditable
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(blockText[block.id] ?? ""),
+                        }}
+                        onBlur={(e) => {
                           handleBlockChange(
                             block.id,
-                            e.target.value
-                          )
-                        }
-                      ></textarea>
+                            e.currentTarget.innerHTML
+                          );
+                        }}
+                      >
+                      </div>
                       <div className="flex justify-center relative">
                         <Button
                           onClick={() => handleAddButtonClick(block.id)}
@@ -465,9 +480,9 @@ function LessonEditor(){
                               onClick={clicked}
                               leftIcon={<Code2 />}
                               className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add embeded block"
+                              aria-label="Add Embedded block"
                             >
-                              Embeded
+                              Embedded
                             </Button>
                           </div>
                         )}
