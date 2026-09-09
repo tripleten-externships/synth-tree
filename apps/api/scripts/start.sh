@@ -32,6 +32,17 @@ echo "Running database migrations..."
 # is present in the production image and we can call it directly without npx.
 ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma
 
-echo "Starting application..."
 export TS_NODE_PROJECT=./tsconfig.runtime.json
+
+# Seed the baseline admin + learner accounts in NON-production environments
+# only (dev). Idempotent, and non-fatal so a seeding hiccup never blocks the
+# API from starting. Prod sets NODE_ENV=production and is skipped here; the
+# seed script also refuses to run under NODE_ENV=production as a second guard.
+if [ "${NODE_ENV:-}" != "production" ]; then
+  echo "Seeding dev users (idempotent, dev only)..."
+  node -r tsconfig-paths/register dist/scripts/seedDevUsers.js \
+    || echo "⚠️  Dev user seed failed (non-fatal); continuing startup."
+fi
+
+echo "Starting application..."
 exec node -r tsconfig-paths/register dist/index.js
