@@ -42,6 +42,12 @@ if [ "${NODE_ENV:-}" != "production" ]; then
   echo "Seeding dev users (idempotent, dev only)..."
   node -r tsconfig-paths/register dist/scripts/seedDevUsers.js \
     || echo "⚠️  Dev user seed failed (non-fatal); continuing startup."
+else
+  # Production: ensure the single owner admin account exists (Google login,
+  # no password). Idempotent and non-fatal.
+  echo "Seeding prod admin (idempotent, prod only)..."
+  node -r tsconfig-paths/register dist/scripts/seedProdAdmin.js \
+    || echo "⚠️  Prod admin seed failed (non-fatal); continuing startup."
 fi
 
 echo "Starting application..."
