@@ -1110,7 +1110,7 @@ type Mutation {
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
   createQuiz(nodeId: String!, required: Boolean!, title: String!): Quiz
   createQuizOption(isCorrect: Boolean, questionId: String!, text: String!): QuizOption
-  createQuizQuestion(order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
+  createQuizQuestion(canonicalAnswer: String, order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
   createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
   createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
   createSkillTree(input: CreateSkillTreeInput!): SkillTree
@@ -1135,7 +1135,7 @@ type Mutation {
   updateOnboarding(interests: [String!]!): User
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
   updateQuizOption(id: ID!, isCorrect: Boolean, text: String): QuizOption
-  updateQuizQuestion(id: ID!, order: Int, prompt: String): QuizQuestion
+  updateQuizQuestion(canonicalAnswer: String, id: ID!, order: Int, prompt: String): QuizQuestion
   updateSkillNode(id: ID!, input: UpdateSkillNodeInput!): SkillNode
   updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
@@ -1594,6 +1594,7 @@ enum QueryMode {
 }
 
 enum QuestionType {
+  FILL
   MULTIPLE_CHOICE
   OPEN_QUESTION
   SINGLE_CHOICE
@@ -2642,6 +2643,7 @@ input QuizOrderByWithRelationInput {
 
 type QuizQuestion {
   answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  canonicalAnswer: String
   createdAt: DateTime!
   id: ID!
   options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
@@ -2658,6 +2660,7 @@ input QuizQuestionAvgOrderByAggregateInput {
 }
 
 input QuizQuestionCountOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   order: SortOrder
@@ -2669,6 +2672,7 @@ input QuizQuestionCountOrderByAggregateInput {
 
 input QuizQuestionCreateInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
@@ -2680,6 +2684,7 @@ input QuizQuestionCreateInput {
 }
 
 input QuizQuestionCreateManyInput {
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   order: Int
@@ -2690,6 +2695,7 @@ input QuizQuestionCreateManyInput {
 }
 
 input QuizQuestionCreateManyQuizInput {
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   order: Int
@@ -2738,6 +2744,7 @@ input QuizQuestionCreateOrConnectWithoutQuizInput {
 }
 
 input QuizQuestionCreateWithoutAnswersInput {
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
@@ -2750,6 +2757,7 @@ input QuizQuestionCreateWithoutAnswersInput {
 
 input QuizQuestionCreateWithoutOptionsInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   order: Int
@@ -2761,6 +2769,7 @@ input QuizQuestionCreateWithoutOptionsInput {
 
 input QuizQuestionCreateWithoutQuizInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
@@ -2777,6 +2786,7 @@ input QuizQuestionListRelationFilter {
 }
 
 input QuizQuestionMaxOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   order: SortOrder
@@ -2787,6 +2797,7 @@ input QuizQuestionMaxOrderByAggregateInput {
 }
 
 input QuizQuestionMinOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   order: SortOrder
@@ -2806,6 +2817,7 @@ input QuizQuestionOrderByWithAggregationInput {
   _max: QuizQuestionMaxOrderByAggregateInput
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   order: SortOrder
@@ -2817,6 +2829,7 @@ input QuizQuestionOrderByWithAggregationInput {
 
 input QuizQuestionOrderByWithRelationInput {
   answers: QuizAttemptAnswerOrderByRelationAggregateInput
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
@@ -2829,6 +2842,7 @@ input QuizQuestionOrderByWithRelationInput {
 }
 
 enum QuizQuestionScalarFieldEnum {
+  canonicalAnswer
   createdAt
   id
   order
@@ -2847,6 +2861,7 @@ input QuizQuestionScalarWhereInput {
   AND: [QuizQuestionScalarWhereInput!]
   NOT: [QuizQuestionScalarWhereInput!]
   OR: [QuizQuestionScalarWhereInput!]
+  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
   id: UuidFilter
   order: IntFilter
@@ -2860,6 +2875,7 @@ input QuizQuestionScalarWhereWithAggregatesInput {
   AND: [QuizQuestionScalarWhereWithAggregatesInput!]
   NOT: [QuizQuestionScalarWhereWithAggregatesInput!]
   OR: [QuizQuestionScalarWhereWithAggregatesInput!]
+  canonicalAnswer: StringNullableWithAggregatesFilter
   createdAt: DateTimeWithAggregatesFilter
   id: UuidWithAggregatesFilter
   order: IntWithAggregatesFilter
@@ -2875,6 +2891,7 @@ input QuizQuestionSumOrderByAggregateInput {
 
 input QuizQuestionUpdateInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
@@ -2886,6 +2903,7 @@ input QuizQuestionUpdateInput {
 }
 
 input QuizQuestionUpdateManyMutationInput {
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   order: IntFieldUpdateOperationsInput
@@ -2945,6 +2963,7 @@ input QuizQuestionUpdateWithWhereUniqueWithoutQuizInput {
 }
 
 input QuizQuestionUpdateWithoutAnswersInput {
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
@@ -2957,6 +2976,7 @@ input QuizQuestionUpdateWithoutAnswersInput {
 
 input QuizQuestionUpdateWithoutOptionsInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   order: IntFieldUpdateOperationsInput
@@ -2968,6 +2988,7 @@ input QuizQuestionUpdateWithoutOptionsInput {
 
 input QuizQuestionUpdateWithoutQuizInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
@@ -3000,6 +3021,7 @@ input QuizQuestionWhereInput {
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
+  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
@@ -3016,6 +3038,7 @@ input QuizQuestionWhereUniqueInput {
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
+  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
   id: String
   options: QuizOptionListRelationFilter

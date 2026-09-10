@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
 
 type QuizOption = {
@@ -11,8 +12,10 @@ type QuizOption = {
 type QuizQuestion = {
   id: string;
   prompt: string;
-  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION
+  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION | FILL
   options: QuizOption[];
+  // FILL only; revealed post-submit by the server's answer-key guard.
+  canonicalAnswer?: string | null;
 };
 
 export type QuizForRunner = {
@@ -48,8 +51,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   const [text, setText] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
 
-  const [submit, { loading, error }] =
-    useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
+  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
 
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {
@@ -58,9 +60,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       if (multiple) {
         return {
           ...prev,
-          [qId]: cur.includes(optId)
-            ? cur.filter((x) => x !== optId)
-            : [...cur, optId],
+          [qId]: cur.includes(optId) ? cur.filter((x) => x !== optId) : [...cur, optId],
         };
       }
 
@@ -77,7 +77,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     // card is driven by the returned attempt (SYN-58).
     const answers = quiz.questions.map((q) => ({
       questionId: q.id,
-      ...(q.type === "OPEN_QUESTION"
+      ...(["OPEN_QUESTION", "FILL"].includes(q.type)
         ? { text: text[q.id] ?? "" }
         : { selectedOptionIds: choice[q.id] ?? [] }),
     }));
@@ -99,25 +99,23 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   };
 
   if (result) {
-    const incorrectAnswers = result.answers.filter(
-      (answer) => answer.isCorrect === false,
-    );
+    const incorrectAnswers = result.answers.filter((answer) => answer.isCorrect === false);
     const isPendingReview = result.passed === null;
 
     return (
       <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
         <div
           className={`mb-6 rounded-2xl p-5 ${
-            isPendingReview ? "bg-[hsl(var(--warning)/0.1)]" : result.passed ? "bg-[hsl(var(--success)/0.1)]" : "bg-[hsl(var(--destructive)/0.1)]"
+            isPendingReview
+              ? "bg-[hsl(var(--warning)/0.1)]"
+              : result.passed
+                ? "bg-[hsl(var(--success)/0.1)]"
+                : "bg-[hsl(var(--destructive)/0.1)]"
           }`}
         >
           <p
             className={`text-sm font-semibold uppercase tracking-wide ${
-              isPendingReview
-                ? "text-warning"
-                : result.passed
-                  ? "text-success"
-                  : "text-destructive"
+              isPendingReview ? "text-warning" : result.passed ? "text-success" : "text-destructive"
             }`}
           >
             Quiz submitted
@@ -136,9 +134,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
               Your written answer was submitted and is waiting for manual review.
             </p>
           ) : result.passed ? (
-            <p className="mt-2 text-sm text-success">
-              You have completed this quiz.
-            </p>
+            <p className="mt-2 text-sm text-success">You have completed this quiz.</p>
           ) : (
             <p className="mt-2 text-sm text-foreground">
               Review the questions below, then retry when you are ready.
@@ -148,21 +144,16 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
 
         <div className="flex flex-col gap-4">
           {result.answers.map((answer, index) => {
-            const selectedOptionIds =
-              answer.answer?.selectedOptionIds ?? [];
+            const selectedOptionIds = answer.answer?.selectedOptionIds ?? [];
 
             const selectedOptions = answer.question.options.filter((option) =>
               selectedOptionIds.includes(option.id),
             );
 
-            const correctOptions = answer.question.options.filter(
-              (option) => option.isCorrect,
-            );
+            const correctOptions = answer.question.options.filter((option) => option.isCorrect);
 
             const isIncorrect = answer.isCorrect === false;
-            const isNotGraded =
-              answer.isCorrect === null ||
-              answer.isCorrect === undefined;
+            const isNotGraded = answer.isCorrect === null || answer.isCorrect === undefined;
 
             return (
               <div
@@ -189,27 +180,26 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                           : "bg-[hsl(var(--success)/0.18)] text-success"
                     }`}
                   >
-                    {isIncorrect
-                      ? "Incorrect"
-                      : isNotGraded
-                        ? "Not graded"
-                        : "Correct"}
+                    {isIncorrect ? "Incorrect" : isNotGraded ? "Not graded" : "Correct"}
                   </span>
                 </div>
 
-                {answer.question.type === "OPEN_QUESTION" ? (
-                  <p className="text-sm text-foreground">
-                    Your answer:{" "}
-                    {answer.answer?.text || "No answer provided"}
-                  </p>
+                {["OPEN_QUESTION", "FILL"].includes(answer.question.type) ? (
+                  <div className="space-y-1 text-sm text-foreground">
+                    <p>Your answer: {answer.answer?.text || "No answer provided"}</p>
+
+                    {answer.question.type === "FILL" && isIncorrect && (
+                      <p>
+                        Correct answer: {answer.question.canonicalAnswer?.trim() || "Not available"}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-1 text-sm text-foreground">
                     <p>
                       Your answer:{" "}
                       {selectedOptions.length > 0
-                        ? selectedOptions
-                            .map((option) => option.text)
-                            .join(", ")
+                        ? selectedOptions.map((option) => option.text).join(", ")
                         : "No answer selected"}
                     </p>
 
@@ -217,9 +207,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                       <p>
                         Correct answer:{" "}
                         {correctOptions.length > 0
-                          ? correctOptions
-                              .map((option) => option.text)
-                              .join(", ")
+                          ? correctOptions.map((option) => option.text).join(", ")
                           : "Not available"}
                       </p>
                     )}
@@ -278,23 +266,30 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                 placeholder="Your answer…"
                 className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none"
               />
+            ) : q.type === "FILL" ? (
+              <Input
+                type="text"
+                value={text[q.id] ?? ""}
+                onChange={(e) =>
+                  setText((p) => ({
+                    ...p,
+                    [q.id]: e.target.value,
+                  }))
+                }
+                placeholder="Your answer…"
+              />
             ) : (
               <div className="flex flex-col gap-2">
                 {q.options.map((o) => {
                   const multiple = q.type === "MULTIPLE_CHOICE";
 
                   return (
-                    <label
-                      key={o.id}
-                      className="flex items-center gap-2 text-sm text-foreground"
-                    >
+                    <label key={o.id} className="flex items-center gap-2 text-sm text-foreground">
                       <input
                         type={multiple ? "checkbox" : "radio"}
                         name={q.id}
                         checked={(choice[q.id] ?? []).includes(o.id)}
-                        onChange={() =>
-                          toggle(q.id, o.id, multiple)
-                        }
+                        onChange={() => toggle(q.id, o.id, multiple)}
                       />
 
                       {o.text}
@@ -315,11 +310,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
             {loading ? "Submitting…" : "Submit quiz"}
           </button>
 
-          {error && (
-            <span className="text-sm text-destructive">
-              Could not submit.
-            </span>
-          )}
+          {error && <span className="text-sm text-destructive">Could not submit.</span>}
         </div>
       </form>
     </section>

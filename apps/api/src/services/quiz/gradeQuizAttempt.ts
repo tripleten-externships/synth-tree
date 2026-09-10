@@ -5,6 +5,7 @@ enum QuestionType {
   SINGLE_CHOICE = "SINGLE_CHOICE",
   MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
   OPEN_QUESTION = "OPEN_QUESTION",
+  FILL = "FILL",
 }
 
 type SelectedAnswer = { selectedOptionIds: string[] };
@@ -20,6 +21,23 @@ function isSelectedAnswer(answer: any): answer is SelectedAnswer {
     "selectedOptionIds" in answer &&
     Array.isArray((answer as any).selectedOptionIds)
   );
+}
+
+// Type guard for OpenAnswer (free text; used by OPEN_QUESTION and FILL)
+function isOpenAnswer(answer: any): answer is OpenAnswer {
+  return (
+    answer &&
+    typeof answer === "object" &&
+    !Array.isArray(answer) &&
+    "text" in answer &&
+    typeof (answer as any).text === "string"
+  );
+}
+
+// Normalizes a FILL answer for comparison: trim surrounding whitespace and
+// lowercase, so "sp" matches a canonical answer of "SP " (SYN-53 acceptance).
+function normalizeFillAnswer(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 export interface GradingSummary {
@@ -94,6 +112,29 @@ export async function gradeQuizAttempt(
         where: { id: answer.id },
         data: { isCorrect: null },
       });
+
+      continue;
+    }
+
+    // FILL is auto-gradable: compare the learner's free text against the
+    // question's canonical answer, trimmed and case-insensitive.
+    if (question.type === QuestionType.FILL) {
+      const submitted = isOpenAnswer(answerJson) ? answerJson.text : "";
+
+      const isCorrect =
+        !!question.canonicalAnswer &&
+        normalizeFillAnswer(submitted) === normalizeFillAnswer(question.canonicalAnswer);
+
+      await tx.quizAttemptAnswer.update({
+        where: { id: answer.id },
+        data: { isCorrect },
+      });
+
+      if (isCorrect) {
+        correctCount++;
+      } else {
+        allAutoGradableCorrect = false;
+      }
 
       continue;
     }

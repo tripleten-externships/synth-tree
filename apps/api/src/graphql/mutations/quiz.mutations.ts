@@ -122,10 +122,20 @@ builder.mutationFields((t) => ({
         required: true,
       }),
       prompt: t.arg.string({ required: true }), //actual question
+      canonicalAnswer: t.arg.string(), // required for FILL; rejected for other types
       order: t.arg.int(),
     },
-    resolve: async (query, _root, { quizId, type, prompt, order }, ctx) => {
+    resolve: async (query, _root, { quizId, type, prompt, canonicalAnswer, order }, ctx) => {
       ctx.auth.requireAuth();
+
+      // canonicalAnswer is the graded answer key for FILL questions only.
+      if (type === "FILL") {
+        if (!canonicalAnswer || canonicalAnswer.trim() === "") {
+          throw new GraphQLError("A FILL question requires a canonicalAnswer");
+        }
+      } else if (canonicalAnswer !== undefined && canonicalAnswer !== null) {
+        throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+      }
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
@@ -146,6 +156,7 @@ builder.mutationFields((t) => ({
           quizId: quizId,
           type: type,
           prompt: prompt,
+          ...(type === "FILL" && { canonicalAnswer }),
           ...(order !== undefined && order !== null && { order }),
         },
       });
@@ -159,9 +170,10 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.id({ required: true }),
       prompt: t.arg.string(),
+      canonicalAnswer: t.arg.string(), // only valid for FILL questions
       order: t.arg.int(),
     },
-    resolve: async (query, _root, { id, prompt, order }, ctx) => {
+    resolve: async (query, _root, { id, prompt, canonicalAnswer, order }, ctx) => {
       ctx.auth.requireAuth();
 
       const existing = await ctx.prisma.quizQuestion.findUnique({
@@ -177,11 +189,20 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
+      if (
+        canonicalAnswer !== undefined &&
+        canonicalAnswer !== null &&
+        existing.type !== PrismaQuestionType.FILL
+      ) {
+        throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+      }
+
       const quizQuestion = await ctx.prisma.quizQuestion.update({
         ...query,
         where: { id },
         data: {
           ...(prompt !== undefined && prompt !== null && { prompt }),
+          ...(canonicalAnswer !== undefined && canonicalAnswer !== null && { canonicalAnswer }),
           ...(order !== undefined && order !== null && { order }),
         },
       });
@@ -246,8 +267,13 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
-      if (existing.type === PrismaQuestionType.OPEN_QUESTION) {
-        throw new GraphQLError("You cannot have Quiz Options for an open ended question");
+      if (
+        existing.type === PrismaQuestionType.OPEN_QUESTION ||
+        existing.type === PrismaQuestionType.FILL
+      ) {
+        throw new GraphQLError(
+          "You cannot have Quiz Options for an open ended or fill-in-the-blank question",
+        );
       }
 
       if (existing.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
