@@ -7225,6 +7225,14 @@ export type UpdateCourseMutationVariables = Exact<{
 
 export type UpdateCourseMutation = { __typename?: 'Mutation', updateCourse?: { __typename?: 'Course', id: string, title: string, status: CourseStatus, description?: string | null } | null };
 
+export type UpdateSkillNodeMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateSkillNodeInput;
+}>;
+
+
+export type UpdateSkillNodeMutation = { __typename?: 'Mutation', updateSkillNode?: { __typename?: 'SkillNode', id: string, posX?: number | null, posY?: number | null } | null };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -7235,7 +7243,7 @@ export type AdminCourseQueryVariables = Exact<{
 }>;
 
 
-export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
+export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null }> }> } | null };
 
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7375,6 +7383,39 @@ export function useUpdateCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<UpdateCourseMutation, UpdateCourseMutationVariables>(UpdateCourseDocument, options);
       }
 export type UpdateCourseMutationHookResult = ReturnType<typeof useUpdateCourseMutation>;
+export const UpdateSkillNodeDocument = gql`
+    mutation UpdateSkillNode($id: ID!, $input: UpdateSkillNodeInput!) {
+  updateSkillNode(id: $id, input: $input) {
+    id
+    posX
+    posY
+  }
+}
+    `;
+
+/**
+ * __useUpdateSkillNodeMutation__
+ *
+ * To run a mutation, you first call `useUpdateSkillNodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateSkillNodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateSkillNodeMutation, { data, loading, error }] = useUpdateSkillNodeMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateSkillNodeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateSkillNodeMutation, UpdateSkillNodeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateSkillNodeMutation, UpdateSkillNodeMutationVariables>(UpdateSkillNodeDocument, options);
+      }
+export type UpdateSkillNodeMutationHookResult = ReturnType<typeof useUpdateSkillNodeMutation>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {
@@ -7422,6 +7463,16 @@ export const AdminCourseDocument = gql`
     title
     description
     status
+    trees {
+      id
+      title
+      nodes {
+        id
+        title
+        posX
+        posY
+      }
+    }
   }
 }
     `;
