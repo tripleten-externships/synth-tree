@@ -1,7 +1,9 @@
-import { useParams, Link } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
 import { useAdminCourseQuery, useUpdateCourseMutation } from "@synth-tree/api-types";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
+import { SkillNodeCanvas } from "../../components/course-builder/SkillNodeCanvas";
 
 function CourseBuilder() {
   const { courseId } = useParams();
@@ -172,10 +174,13 @@ function CourseBuilder() {
         </aside>
 
         <section
-          className={`rounded-lg border bg-card p-4 ${activeTab === "tree" ? "block" : "hidden"} lg:block`}
+          className={`flex flex-col rounded-lg border bg-card p-4 ${activeTab === "tree" ? "block" : "hidden"} lg:flex`}
         >
-          <h2 className="text-lg font-semibold">Tree Canvas</h2>
-          <p className="text-sm text-muted-foreground">Empty tree canvas.</p>
+          <h2 className="mb-3 text-lg font-semibold">Tree Canvas</h2>
+          {/* First tree only for now; a tree switcher is out of SYN-66's scope. */}
+          <div className="flex-1">
+            <SkillNodeCanvas nodes={data?.adminCourse?.trees?.[0]?.nodes ?? []} />
+          </div>
         </section>
 
         <aside
