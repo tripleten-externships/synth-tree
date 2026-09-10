@@ -2,11 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { getTestServer } from "./server";
-import {
-  makeAdminContext,
-  makeUserContext,
-  makeUnauthContext,
-} from "./context";
+import { makeAdminContext, makeUserContext, makeUnauthContext } from "./context";
 import {
   seedUsers,
   cleanCourses,
@@ -465,9 +461,7 @@ describe("Quiz flow", () => {
         data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
 
-      const answers = [
-        { questionId: question.id, selectedOptionIds: [correctOption.id] },
-      ];
+      const answers = [{ questionId: question.id, selectedOptionIds: [correctOption.id] }];
 
       const res = singleResult(
         await server.executeOperation(
@@ -506,9 +500,7 @@ describe("Quiz flow", () => {
         data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
 
-      const answers = [
-        { questionId: question.id, selectedOptionIds: [wrongOption.id] },
-      ];
+      const answers = [{ questionId: question.id, selectedOptionIds: [wrongOption.id] }];
 
       const res = singleResult(
         await server.executeOperation(
@@ -550,9 +542,7 @@ describe("Quiz flow", () => {
         data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
 
-      const answers = [
-        { questionId: question.id, selectedOptionIds: [opt2.id, opt3.id] },
-      ];
+      const answers = [{ questionId: question.id, selectedOptionIds: [opt2.id, opt3.id] }];
 
       const res = singleResult(
         await server.executeOperation(
@@ -735,9 +725,7 @@ describe("Quiz flow", () => {
         data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
       });
 
-      const answers = [
-        { questionId: question.id, selectedOptionIds: [correct.id] },
-      ];
+      const answers = [{ questionId: question.id, selectedOptionIds: [correct.id] }];
 
       const res = singleResult(
         await server.executeOperation(
@@ -797,6 +785,168 @@ describe("Quiz flow", () => {
       );
 
       expect(res.errors).toBeDefined();
+    });
+  });
+
+  describe("FILL questions", () => {
+    const CREATE_FILL_QUESTION = `
+      mutation CreateFillQuestion($quizId: String!, $prompt: String!, $canonicalAnswer: String) {
+        createQuizQuestion(quizId: $quizId, type: FILL, prompt: $prompt, canonicalAnswer: $canonicalAnswer) {
+          id
+          type
+          canonicalAnswer
+        }
+      }
+    `;
+
+    const GET_QUIZ = `
+      query Quiz($id: ID!) {
+        quiz(id: $id) {
+          id
+          questions {
+            id
+            type
+            canonicalAnswer
+          }
+        }
+      }
+    `;
+
+    async function seedFillQuiz() {
+      const { course, node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Fill Quiz", required: true },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "FILL",
+          prompt: "A triple-bonded carbon is ___-hybridized.",
+          canonicalAnswer: "SP ",
+        },
+      });
+      await prisma.userNodeProgress.create({
+        data: {
+          userId: REGULAR_USER_ID,
+          nodeId: node.id,
+          status: "IN_PROGRESS",
+        },
+      });
+      return { course, node, quiz, question };
+    }
+
+    // SYN-53 acceptance: "sp" is graded equal to canonical "SP ".
+    it("passes when the FILL answer matches ignoring case and whitespace", async () => {
+      const { quiz, question } = await seedFillQuiz();
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: {
+              quizId: quiz.id,
+              answers: [{ questionId: question.id, text: "sp" }],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.passed).toBe(true);
+    });
+
+    it("fails when the FILL answer does not match", async () => {
+      const { quiz, question } = await seedFillQuiz();
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_ATTEMPT,
+            variables: {
+              quizId: quiz.id,
+              answers: [{ questionId: question.id, text: "sp3" }],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.passed).toBe(false);
+    });
+
+    it("hides canonicalAnswer from a learner until they submit, then reveals it", async () => {
+      const { course, quiz, question } = await seedFillQuiz();
+      // A learner only receives a quiz via the `quiz` query on a published course.
+      await prisma.course.update({
+        where: { id: course.id },
+        data: { status: "PUBLISHED" },
+      });
+
+      const before = singleResult(
+        await server.executeOperation(
+          { query: GET_QUIZ, variables: { id: quiz.id } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+      expect(before.errors).toBeUndefined();
+      expect(before.data.quiz.questions[0].canonicalAnswer).toBeNull();
+
+      await server.executeOperation(
+        {
+          query: SUBMIT_ATTEMPT,
+          variables: {
+            quizId: quiz.id,
+            answers: [{ questionId: question.id, text: "sp" }],
+          },
+        },
+        { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+      );
+
+      const after = singleResult(
+        await server.executeOperation(
+          { query: GET_QUIZ, variables: { id: quiz.id } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+      expect(after.errors).toBeUndefined();
+      expect(after.data.quiz.questions[0].canonicalAnswer).toBe("SP ");
+    });
+
+    it("creates a FILL question with a canonicalAnswer and rejects a missing one", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Author Quiz", required: true },
+      });
+
+      const ok = singleResult(
+        await server.executeOperation(
+          {
+            query: CREATE_FILL_QUESTION,
+            variables: {
+              quizId: quiz.id,
+              prompt: "A triple-bonded carbon is ___-hybridized.",
+              canonicalAnswer: "sp",
+            },
+          },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        ),
+      );
+      expect(ok.errors).toBeUndefined();
+      expect(ok.data.createQuizQuestion.type).toBe("FILL");
+      expect(ok.data.createQuizQuestion.canonicalAnswer).toBe("sp");
+
+      const missing = singleResult(
+        await server.executeOperation(
+          {
+            query: CREATE_FILL_QUESTION,
+            variables: { quizId: quiz.id, prompt: "missing answer?" },
+          },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        ),
+      );
+      expect(missing.errors).toBeDefined();
     });
   });
 });

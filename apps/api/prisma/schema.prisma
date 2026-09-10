@@ -36,6 +36,7 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   OPEN_QUESTION
+  FILL
 }
 
 enum ContentType {
@@ -237,13 +238,17 @@ model Quiz {
 // - Keep ordering stable for rendering.
 // ================================================================
 model QuizQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  quizId    String       @db.Uuid
-  type      QuestionType
-  prompt    String
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id              String       @id @default(uuid()) @db.Uuid
+  quizId          String       @db.Uuid
+  type            QuestionType
+  prompt          String
+  // Expected answer for FILL questions; null for other types. Graded
+  // case-insensitively and whitespace-trimmed. Hidden from learners until
+  // they submit an attempt (see QuizQuestion object guard in models.all.ts).
+  canonicalAnswer String?      @db.Text
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION

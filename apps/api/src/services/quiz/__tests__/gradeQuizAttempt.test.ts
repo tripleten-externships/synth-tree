@@ -447,3 +447,104 @@ it("throws an error if the quiz attempt is not found", async () => {
     "Quiz attempt not found",
   );
 });
+
+// FILL is auto-graded: trimmed + case-insensitive comparison (SYN-53).
+// Acceptance: "sp" matches a canonical answer of "SP ".
+it("grades a FILL question correctly ignoring case and surrounding whitespace", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "SP ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFill",
+    answers: [
+      {
+        id: "answerFill",
+        question: mockQuiz.questions[0],
+        answer: { text: "sp" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFill");
+
+  expect(result.correctCount).toBe(1);
+  expect(result.passed).toBe(true);
+  expect(result.message).toBe("Passed");
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFill" },
+    data: { isCorrect: true },
+  });
+});
+
+// FILL with a wrong answer fails and is marked incorrect.
+it("marks a FILL question incorrect when the text does not match", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "SP ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFillWrong",
+    answers: [
+      {
+        id: "answerFillWrong",
+        question: mockQuiz.questions[0],
+        answer: { text: "sp3" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFillWrong");
+
+  expect(result.correctCount).toBe(0);
+  expect(result.passed).toBe(false);
+  expect(result.message).toBe("Not passed");
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFillWrong" },
+    data: { isCorrect: false },
+  });
+});
+
+// FILL mixes with choice questions and is counted as auto-gradable.
+it("grades a mixed FILL + SINGLE_CHOICE quiz", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [
+      { type: "FILL", canonicalAnswer: "SP ", options: [] },
+      {
+        type: "SINGLE_CHOICE",
+        options: [
+          { id: "opt1", isCorrect: true },
+          { id: "opt2", isCorrect: false },
+        ],
+      },
+    ],
+  };
+  const mockAttempt = {
+    quizId: "quizMixedFill",
+    answers: [
+      {
+        id: "answerMixedFill",
+        question: mockQuiz.questions[0],
+        answer: { text: "SP" },
+      },
+      {
+        id: "answerMixedChoice",
+        question: mockQuiz.questions[1],
+        answer: { selectedOptionIds: ["opt1"] },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptMixedFill");
+
+  expect(result.correctCount).toBe(2);
+  expect(result.passed).toBe(true);
+  expect(result.message).toBe("Passed");
+});
