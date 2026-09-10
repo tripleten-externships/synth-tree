@@ -40,6 +40,7 @@ jobs:
               - 'packages/api-types/**'
             frontend:
               - 'apps/admin-dashboard/**'
+              - 'apps/client-frontend/**'
               - 'packages/**'
             ui:
               - 'packages/ui/**'
@@ -81,13 +82,13 @@ jobs:
       - name: Run ESLint
         run: |
           echo "Running ESLint..."
-          pnpm run lint || true
+          pnpm run lint
           echo "✅ Linting complete"
 
       - name: Run TypeScript type check
         run: |
           echo "Running TypeScript type check..."
-          pnpm run type-check || pnpm exec tsc --noEmit || true
+          pnpm run type-check
           echo "✅ Type check complete"
 
   test-api:
@@ -95,6 +96,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.api == 'true'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: synthtree
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d synthtree"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/synthtree?schema=public
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,11 +132,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Apply database migrations
+        working-directory: apps/api
+        run: pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma
+
       - name: Run API tests
         working-directory: apps/api
         run: |
           echo "Running API tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          pnpm test
 
   build-api:
     name: Build API
@@ -203,6 +227,19 @@ jobs:
           fi
 
           echo "✅ Frontend build successful"
+
+      - name: Build client frontend
+        working-directory: apps/client-frontend
+        run: |
+          echo "Building client frontend..."
+          pnpm build
+
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Client frontend build failed"
+            exit 1
+          fi
+
+          echo "✅ Client frontend build successful"
 
       - name: Check bundle size
         working-directory: apps/admin-dashboard
