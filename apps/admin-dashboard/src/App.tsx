@@ -8,6 +8,7 @@ import { AuthFeature } from "./features/auth";
 import DashboardLayout from "./layouts/DashboardLayout";
 import CourseBuilder from "./pages/courses/CourseBuilder";
 import CoursesList from "./pages/courses/CoursesList";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (
@@ -39,6 +40,11 @@ function App() {
                         </DashboardLayout>
                       }
                     />
+                    <Route path="/lessons/:nodeId/edit" element={
+                      <DashboardLayout>
+                        <LessonEditor />
+                      </DashboardLayout>
+                    }/>
                   </Routes>
                 </ProtectedRoutes>
               }

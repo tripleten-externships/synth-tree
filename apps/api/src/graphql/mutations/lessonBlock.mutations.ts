@@ -30,9 +30,28 @@ builder.mutationFields((t) => ({
       context.auth.requireAuth();
       requireAdmin(context);
 
+      const rawId = args.input.id;
+
+      const blockId = typeof rawId === "string"
+        ? rawId
+        : typeof rawId === "object" && rawId !== null && "set" in rawId && typeof rawId.set === "string"
+        ? rawId.set
+        : undefined;
+
+      const { id: _id, ...updateInput } = args.input;
+      const data = Object.fromEntries(
+        Object.entries(updateInput).map(([field, value]) => {
+          if (value && typeof value === "object" && "set" in value) {
+            return [field, value.set];
+          }
+
+          return [field, value];
+        }),
+      );
+
       return await context.prisma.lessonBlocks.update({
-        where: { id: args.input.id },
-        data: args.input,
+        where: { id: blockId! },
+        data,
       });
     },
   }),
