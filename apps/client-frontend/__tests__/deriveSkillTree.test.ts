@@ -1,4 +1,4 @@
-import { deriveSkillTree, type RawSkillNode } from "../deriveSkillTree";
+import { deriveSkillTree, type RawSkillNode } from "../src/lib/deriveSkillTree";
 
 function node(overrides: Partial<RawSkillNode>): RawSkillNode {
   return {

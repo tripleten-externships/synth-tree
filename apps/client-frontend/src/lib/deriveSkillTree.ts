@@ -87,7 +87,7 @@ export function deriveSkillTree(rawNodes: RawSkillNode[]): DerivedSkillTree {
         id: `${fromNode.id}->${toNode.id}`,
         from: fromNode,
         to: toNode,
-        solid: fromNode.status === "completed" && toNode.status === "unlocked",
+        solid: fromNode.status === "completed",
       });
     }
   }

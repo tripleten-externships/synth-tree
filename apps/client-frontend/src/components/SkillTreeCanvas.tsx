@@ -60,7 +60,9 @@ export default function SkillTreeCanvas({
           }}
         >
           <Hex
-            icon={node.icon as never}
+  // `as never` cast tied to the SYN-28 icon-field TODO in deriveSkillTree.ts —
+  // remove once SkillNode has a real icon field and this becomes type-safe.
+  icon={node.icon as never}
             status={node.status}
             size={HEX_SIZE}
             onClick={onNodeClick ? () => onNodeClick(node.id) : undefined}
