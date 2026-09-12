@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
+import { awardXp } from "../../services/xp";
 
 builder.mutationFields((t) => ({
   startNodeProgress: t.prismaField({
@@ -65,14 +66,17 @@ builder.mutationFields((t) => ({
           id: nodeId,
           deletedAt: null,
         },
-        select: { id: true },
+        select: {
+          id: true,
+          xpReward: true,
+        },
       });
 
       if (!nodeExists) {
         throw new GraphQLError("Node not found");
       }
 
-      return ctx.prisma.userNodeProgress.upsert({
+      const progress = await ctx.prisma.userNodeProgress.upsert({
         ...query,
         where: {
           userId_nodeId: {
@@ -91,6 +95,16 @@ builder.mutationFields((t) => ({
           completedAt: new Date(),
         },
       });
+
+      await awardXp(
+        ctx.prisma,
+        userId,
+        nodeExists.xpReward ?? 50,
+        "node_completion",
+        { nodeId },
+      );
+
+      return progress;
     },
   }),
 

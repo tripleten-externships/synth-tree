@@ -5,6 +5,7 @@ import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import logger from '@lib/logger'; // Structured logger used for tracking quiz-related events
+import { awardXp } from "../../services/xp";
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -425,6 +426,13 @@ builder.mutationFields((t) => ({
             completedAt: new Date(),
           },
         });
+        await awardXp(
+          ctx.prisma,
+          userId,
+          100,
+          "quiz_pass",
+          { quizId },
+        );
       }
 
       logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
