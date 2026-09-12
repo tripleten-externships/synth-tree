@@ -205,7 +205,14 @@ export function Login() {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Card>
-        <CardHeader>Logo Goes Here</CardHeader>
+        <CardHeader>
+          <span className="text-2xl font-semibold tracking-tight text-foreground">
+            Synth<span className="text-primary">Tree</span>
+            <span className="ml-1.5 align-middle text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Admin
+            </span>
+          </span>
+        </CardHeader>
         <CardContent className="space-y-6">
           {!showVerificationCode ? (
             <>

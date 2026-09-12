@@ -7,7 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MainLayout from "./layouts/MainLayout";
 
-import SkillTreeHome from "./pages/SkillTreeHomePage";
+import Home from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
@@ -15,9 +15,10 @@ import ProfilePage from "./pages/ProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import NodePage from "./pages/NodePage";
 import CatalogPage from "./pages/CatalogPage";
-import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/auth/SignInPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUpPage from "./pages/auth/SignUpPage";
+import { Toaster } from "@synth-tree/ui";
 
 // Shared shell for all authenticated routes.
 function ProtectedMainLayout() {
@@ -32,14 +33,14 @@ function ProtectedMainLayout() {
 
 const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <LoginPage />,
+    path: "/auth/login",
+    element: <SignInPage />,
   },
   {
     path: "/",
     element: <ProtectedMainLayout />,
     children: [
-      { index: true, element: <SkillTreeHome /> },
+      { index: true, element: <Home /> },
       { path: "dashboard", element: <DashboardPage /> },
       { path: "lessons", element: <LessonsPage /> },
       { path: "skill-trees", element: <SkillTreesPage /> },
@@ -63,6 +64,7 @@ export default function App() {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <Toaster position="top-center" />
     </AuthProvider>
   );
 }

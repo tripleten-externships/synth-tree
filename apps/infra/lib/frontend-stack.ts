@@ -13,6 +13,12 @@ export interface FrontendStackProps extends cdk.StackProps {
 /**
  * Frontend Stack
  *
+ * Hosts the **client-frontend** (learner-facing) React app. The admin
+ * dashboard is a separate site — see AdminStack. This stack keeps the
+ * `frontend` siteName (and therefore its existing bucket / distribution /
+ * exports) so it can be repointed to the client app without recreating any
+ * AWS resources.
+ *
  * Creates the infrastructure for the React frontend application:
  * - S3 bucket for static website files
  * - CloudFront distribution with HTTPS
@@ -31,7 +37,7 @@ export interface FrontendStackProps extends cdk.StackProps {
  *
  * Build Output:
  * - Frontend app is built with Vite
- * - Build directory: apps/admin-dashboard/dist/
+ * - Build directory: apps/client-frontend/dist/
  * - Deploy with: aws s3 sync dist/ s3://bucket-name/
  * - Invalidate CloudFront: aws cloudfront create-invalidation --distribution-id XXX --paths "/*"
  */
@@ -86,6 +92,6 @@ export class FrontendStack extends cdk.Stack {
     // ========================================
 
     cdk.Tags.of(this).add("Stack", "Frontend");
-    cdk.Tags.of(this).add("Application", "AdminDashboard");
+    cdk.Tags.of(this).add("Application", "ClientFrontend");
   }
 }

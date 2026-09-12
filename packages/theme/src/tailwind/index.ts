@@ -1,7 +1,7 @@
 export { tailwindConfig, createTailwindConfig } from "./config";
 export {
   customPlugins,
-  skilltreeThemePlugin,
+  synthTreeThemePlugin,
   animationPlugin,
   accessibilityPlugin,
 } from "./plugins";

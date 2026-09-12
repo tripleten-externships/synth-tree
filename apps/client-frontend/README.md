@@ -2,6 +2,11 @@
 
 React 19 + Vite 7 + TS + Tailwind. Uses `@synth-tree/ui` and `@synth-tree/theme`.
 
+**Deployed at** `dev.synth-tree.com` (dev) and `app.synth-tree.com` (prod), the
+learner-facing app, deployed by
+[`deploy-frontend.yml`](../../.github/workflows/deploy-frontend.yml). Locally it
+runs at <http://localhost:5174>.
+
 ## Scripts
 
 - `pnpm dev --filter ./apps/client-frontend` — start dev server (http://localhost:5174)

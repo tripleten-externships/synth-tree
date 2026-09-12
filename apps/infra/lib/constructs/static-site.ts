@@ -148,6 +148,7 @@ export class StaticSite extends Construct {
       bucketName: `${environmentName}-${siteName}-synth-tree-io`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true, // Deny any non-TLS (http) request to the bucket
       versioned: true,
       lifecycleRules: [
         {

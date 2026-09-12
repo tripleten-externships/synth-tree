@@ -25,12 +25,12 @@ export default function NodePage() {
     <div className="mx-auto flex max-w-3xl flex-col gap-8 p-8">
       <Link
         to={`/courses/${course.id}`}
-        className="text-sm text-gray-500 hover:underline"
+        className="text-sm text-muted-foreground hover:underline"
       >
         ← Back to {course.title}
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900">{node.title}</h1>
+      <h1 className="text-2xl font-bold text-foreground">{node.title}</h1>
 
       {/* Lesson content. Opening this marks the node in progress (SYN-31). */}
       <LessonViewer nodeId={node.id} onNext={() => navigate(`/courses/${course.id}`)} />

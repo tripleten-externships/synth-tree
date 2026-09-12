@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
+import { completeNodeForUser } from "src/services/progress";
 
 builder.mutationFields((t) => ({
   startNodeProgress: t.prismaField({
@@ -11,7 +12,6 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, { nodeId }, ctx) => {
       const userId = ctx.auth.requireAuth();
 
-      // validate node exists and is not deleted
       const nodeExists = await ctx.prisma.skillNode.findFirst({
         where: {
           id: nodeId,
@@ -24,7 +24,6 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Node not found");
       }
 
-      // idempotent behavior
       const existingProgress =
         await ctx.prisma.userNodeProgress.findUnique({
           ...query,
@@ -46,6 +45,30 @@ builder.mutationFields((t) => ({
           userId,
           nodeId,
           status: "IN_PROGRESS",
+        },
+      });
+    },
+  }),
+
+  completeNodeProgress: t.prismaField({
+    type: "UserNodeProgress",
+    args: {
+      nodeId: t.arg.id({ required: true }),
+    },
+    resolve: async (query, _root, { nodeId }, ctx) => {
+      const userId = ctx.auth.requireAuth();
+
+      // Shared completion policy: existence check + required-quiz gate +
+      // idempotency + LESSON_COMPLETED daily-quest increment.
+      await completeNodeForUser(ctx.prisma, userId, nodeId);
+
+      return ctx.prisma.userNodeProgress.findUniqueOrThrow({
+        ...query,
+        where: {
+          userId_nodeId: {
+            userId,
+            nodeId,
+          },
         },
       });
     },

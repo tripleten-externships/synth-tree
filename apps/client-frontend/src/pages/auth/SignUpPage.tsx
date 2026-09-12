@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
 import { auth } from "../../lib/firebase";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
+import { UPDATE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,7 +45,7 @@ function ProgressBar({ step }: { step: Step }) {
             <div
               className={[
                 "h-full rounded-full transition-all duration-400",
-                isDone ? "w-full bg-blue-300" : isActive ? "w-full bg-blue-600" : "w-0",
+                isDone ? "w-full bg-[hsl(var(--primary)/0.5)]" : isActive ? "w-full bg-primary" : "w-0",
               ].join(" ")}
             />
           </div>
@@ -79,7 +80,7 @@ function PasswordStrengthBar({ id, password }: { id: string; password: string })
           <div
             key={n}
             className="flex-1 h-0.5 rounded-full transition-colors duration-300"
-            style={{ background: n <= score ? color : "#e4e4e7" }}
+            style={{ background: n <= score ? color : "hsl(var(--muted))" }}
           />
         ))}
       </div>
@@ -133,7 +134,7 @@ function Step1Credentials({
       setError(null);
       setSyncError(false);
     },
-    []
+    [],
   );
 
   const handleEmailBlur = useCallback(() => {
@@ -178,12 +179,10 @@ function Step1Credentials({
         setSyncError(true);
         setError(
           "Your account was created but we couldn't finish setting it up. " +
-            "Please try signing in — we'll complete setup automatically."
+            "Please try signing in — we'll complete setup automatically.",
         );
       } else {
-        setError(
-          err instanceof Error ? err.message : "Something went wrong. Please try again."
-        );
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -193,23 +192,21 @@ function Step1Credentials({
   const passwordStrengthId = "password-strength-hint";
 
   const inputCls =
-    "h-[42px] px-3 border border-slate-200 rounded-lg text-sm text-slate-900 " +
-    "bg-white outline-none transition focus:border-blue-600 focus:ring-2 " +
-    "focus:ring-blue-600/10 placeholder:text-slate-300 w-full box-border";
+    "h-[42px] px-3 border border-border rounded-lg text-sm text-foreground " +
+    "bg-card outline-none transition focus:border-primary focus:ring-2 " +
+    "focus:ring-ring/10 placeholder:text-muted-foreground w-full box-border";
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      <h1 className="text-[22px] font-bold text-slate-900 tracking-tight mb-1">
+      <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
         Create your account
       </h1>
-      <p className="text-[13px] text-slate-400 font-medium mb-7">
-        Step 1 of 3 — Your credentials
-      </p>
+      <p className="text-[13px] text-muted-foreground font-medium mb-7">Step 1 of 3 — Your credentials</p>
 
       <div className="flex flex-col gap-[18px] mb-2">
         {/* Name */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="signup-name" className="text-[13px] font-semibold text-gray-700">
+          <label htmlFor="signup-name" className="text-[13px] font-semibold text-foreground">
             Full name
           </label>
           <input
@@ -226,7 +223,7 @@ function Step1Credentials({
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="signup-email" className="text-[13px] font-semibold text-gray-700">
+          <label htmlFor="signup-email" className="text-[13px] font-semibold text-foreground">
             Email address
           </label>
           <input
@@ -245,10 +242,10 @@ function Step1Credentials({
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="signup-password"
-            className="text-[13px] font-semibold text-gray-700 flex items-center gap-1.5"
+            className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"
           >
             Password
-            <span className="font-normal text-slate-400 text-xs">(min. 10 characters)</span>
+            <span className="font-normal text-muted-foreground text-xs">(min. 10 characters)</span>
           </label>
           <div className="relative">
             <input
@@ -264,7 +261,7 @@ function Step1Credentials({
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 flex items-center"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground flex items-center"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -311,13 +308,13 @@ function Step1Credentials({
       {error && (
         <p
           role="alert"
-          className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5 mt-4"
+          className="text-[13px] text-destructive bg-[hsl(var(--destructive)/0.1)] border border-[hsl(var(--destructive)/0.3)] rounded-lg px-3 py-2.5 mt-4"
         >
           {error}
           {syncError && (
             <>
               {" "}
-              <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/auth/login" className="text-primary font-semibold hover:underline">
                 Sign in here.
               </Link>
             </>
@@ -328,16 +325,20 @@ function Step1Credentials({
       <button
         type="submit"
         disabled={!isValid || loading}
-        className="mt-6 w-full h-11 rounded-[10px] bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition"
+        className="mt-6 w-full h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
       >
         {loading && <Spinner />}
-        {loading && <span className="sr-only" role="status">Creating account…</span>}
+        {loading && (
+          <span className="sr-only" role="status">
+            Creating account…
+          </span>
+        )}
         {loading ? null : "Continue"}
       </button>
 
-      <p className="text-center text-[13px] text-slate-400 mt-5">
+      <p className="text-center text-[13px] text-muted-foreground mt-5">
         Already have an account?{" "}
-        <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+        <Link to="/auth/login" className="text-primary font-semibold hover:underline">
           Sign in
         </Link>
       </p>
@@ -345,16 +346,122 @@ function Step1Credentials({
   );
 }
 
-// ─── Step 2 stub ──────────────────────────────────────────────────────────────
+// ─── Step 2 – Interests ───────────────────────────────────────────────────────
 
-function Step2Stub() {
+const SUBJECTS = [
+  "Chemistry",
+  "Physics",
+  "Biology",
+  "Mathematics",
+  "Computer science",
+  "Statistics",
+  "Earth science",
+  "Astronomy",
+] as const;
+
+function Step2Interests({
+  onNext,
+  onBack,
+  saveInterests,
+  interests,
+  setInterests,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  saveInterests: (opts: { variables: { interests: string[] } }) => Promise<unknown>;
+  // Selection is owned by the page so navigating Back to step 2 preserves it
+  // instead of resetting to empty (which would overwrite saved interests with []).
+  interests: string[];
+  setInterests: Dispatch<SetStateAction<string[]>>;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const toggle = useCallback(
+    (subject: string) => {
+      setError(null);
+      setInterests((prev) =>
+        prev.includes(subject) ? prev.filter((s) => s !== subject) : [...prev, subject],
+      );
+    },
+    [setInterests],
+  );
+
+  const handleContinue = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // An empty array is valid — it's the "skip" path, recorded as no interests.
+      await saveInterests({ variables: { interests } });
+      onNext();
+    } catch {
+      setError("We couldn't save your choices. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">🛠</span>
-      <h2 className="text-xl font-bold text-slate-900 tracking-tight m-0">Profile setup</h2>
-      <p className="text-sm text-slate-500 leading-relaxed m-0 max-w-[300px]">
-        This step is coming soon (SYN-23). Your account was created successfully.
+    <div>
+      <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
+        What are you here for?
+      </h1>
+      <p className="text-[13px] text-muted-foreground font-medium mb-6">
+        Pick a few interests — we'll tune your home feed.
       </p>
+
+      <div className="grid grid-cols-2 gap-2 mb-6" role="group" aria-label="Interests">
+        {SUBJECTS.map((subject) => {
+          const selected = interests.includes(subject);
+          return (
+            <button
+              key={subject}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => toggle(subject)}
+              className={[
+                "border-2 rounded-xl px-3.5 py-2.5 text-sm text-foreground text-left transition",
+                selected
+                  ? "border-primary bg-accent"
+                  : "border-border bg-card hover:border-border",
+              ].join(" ")}
+            >
+              {subject}
+            </button>
+          );
+        })}
+      </div>
+
+      {error && (
+        <p
+          role="alert"
+          className="text-[13px] text-destructive bg-[hsl(var(--destructive)/0.1)] border border-[hsl(var(--destructive)/0.3)] rounded-lg px-3 py-2.5 mb-4"
+        >
+          {error}
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={loading}
+          className="flex-1 h-11 rounded-[10px] border border-border text-muted-foreground text-[15px] font-semibold hover:bg-accent active:scale-[0.98] disabled:opacity-45 transition"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={loading}
+          className="flex-[2] h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
+        >
+          {loading && <Spinner />}
+          {loading && <span className="sr-only" role="status">Saving…</span>}
+          {loading ? null : "Continue"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -364,9 +471,11 @@ function Step2Stub() {
 function Step3Stub() {
   return (
     <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">⚙️</span>
-      <h2 className="text-xl font-bold text-slate-900 tracking-tight m-0">Preferences</h2>
-      <p className="text-sm text-slate-500 leading-relaxed m-0 max-w-[300px]">
+      <span className="text-4xl leading-none" aria-hidden="true">
+        ⚙️
+      </span>
+      <h2 className="text-xl font-bold text-foreground tracking-tight m-0">Preferences</h2>
+      <p className="text-sm text-muted-foreground leading-relaxed m-0 max-w-[300px]">
         This step is coming soon (SYN-24).
       </p>
     </div>
@@ -380,6 +489,9 @@ const VALID_STEPS = new Set<number>(STEPS);
 export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [syncUser] = useMutation(SYNC_CURRENT_USER);
+  const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
+  // Owned here (not in Step2Interests) so the selection survives step navigation.
+  const [interests, setInterests] = useState<string[]>([]);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
@@ -388,15 +500,23 @@ export default function SignUpPage() {
     (next: Step) => {
       setSearchParams({ step: String(next) }, { replace: false });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-6 bg-slate-50 font-sans">
-      <div className="w-full max-w-[420px] bg-white rounded-2xl px-9 pt-10 pb-9 shadow-[0_1px_3px_rgba(0,0,0,.06),0_8px_24px_rgba(0,0,0,.08)]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-6 bg-muted font-sans">
+      <div className="w-full max-w-[420px] bg-card rounded-2xl px-9 pt-10 pb-9 shadow-[0_1px_3px_rgba(0,0,0,.06),0_8px_24px_rgba(0,0,0,.08)]">
         <ProgressBar step={step} />
         {step === 1 && <Step1Credentials onSuccess={() => goToStep(2)} syncUser={syncUser} />}
-        {step === 2 && <Step2Stub />}
+        {step === 2 && (
+          <Step2Interests
+            onNext={() => goToStep(3)}
+            onBack={() => goToStep(1)}
+            saveInterests={updateOnboarding}
+            interests={interests}
+            setInterests={setInterests}
+          />
+        )}
         {step === 3 && <Step3Stub />}
       </div>
     </div>

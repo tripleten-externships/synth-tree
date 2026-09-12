@@ -23,8 +23,8 @@ export function ThemeProvider({
   defaultColorMode = "light",
   enableSystem = true,
   defaultDensity = "regular",
-  densityStorageKey = "skilltree-theme-density",
-  storageKey = "skilltree-theme-mode",
+  densityStorageKey = "synthtree-theme-density",
+  storageKey = "synthtree-theme-mode",
 }: ThemeProviderProps) {
   const [density, setDensityState] = useState<Density>(() => {
     // Initialize density from localStorage

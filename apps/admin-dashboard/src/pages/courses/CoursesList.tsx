@@ -1,9 +1,6 @@
 import { useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import {
-  useAdminGetAllCoursesQuery,
-  AdminGetAllCoursesDocument,
-} from "@synth-tree/api-types";
+import { useAdminGetAllCoursesQuery, AdminGetAllCoursesDocument } from "@synth-tree/api-types";
 import type { AdminGetAllCoursesQuery, CourseStatus } from "@synth-tree/api-types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
   Input,
   toast,
 } from "@synth-tree/ui";
@@ -156,10 +155,7 @@ const CourseCard = ({ course, onDelete, onPublish, onEdit, Icon }: CourseCardPro
     <div className="absolute top-4 right-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button
-            className="p-1 rounded hover:bg-gray-100"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <button className="p-1 rounded hover:bg-gray-100" onClick={(e) => e.stopPropagation()}>
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </button>
         </DropdownMenuTrigger>
@@ -213,27 +209,61 @@ type CreateCourseModalProps = {
 const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate();
 
-  const [createCourse, { loading }] = useMutation(CREATE_COURSE, {
-    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
-    onCompleted: () => {
-      setTitle("");
-      setDescription("");
-      onCreated();
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+  };
+
+  // Manually typed since this file uses the raw gql + useMutation
+  // pattern (not a codegen-generated hook) — needed for onCompleted's
+  // data to be typed.
+  const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } | null }>(
+    CREATE_COURSE,
+    {
+      refetchQueries: [{ query: AdminGetAllCoursesDocument }],
+      onCompleted: (data) => {
+        const created = data.createCourse;
+        if (!created) return;
+        resetForm();
+        onCreated();
+        // SYN-62: navigate to the new course's builder page on success
+        navigate(`/courses/${created.id}/edit`);
+      },
+      onError: (err) => {
+        // Surface the failure and keep the modal open so the user can retry.
+        toast.error("Couldn't create course", { description: err.message });
+      },
     },
-  });
+  );
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
-    createCourse({ variables: { input: { title, description } } });
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
+    const trimmedDescription = description.trim();
+    createCourse({
+      variables: {
+        input: {
+          title: trimmedTitle,
+          ...(trimmedDescription ? { description: trimmedDescription } : {}),
+        },
+      },
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) handleClose(); }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Course</DialogTitle>
+          <DialogTitle>New Course</DialogTitle>
+          <DialogDescription>Set the basics — you can edit anytime</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
@@ -246,6 +276,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Organic Chemistry"
               required
+              className="focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:border-primary focus-visible:ring-offset-0"
             />
           </div>
           <div>
@@ -254,23 +285,16 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short description of the course"
+              className="focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:border-primary focus-visible:ring-offset-0"
             />
           </div>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
-            >
+            <Button type="button" onClick={handleClose} variant="outline">
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading || !title.trim()}
-              className="px-4 py-2 text-sm rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={loading || !title.trim()} variant="default">
               {loading ? "Creating..." : "Create Course"}
-            </button>
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -362,9 +386,7 @@ const CoursesList = () => {
   const allCourses: Course[] = data?.adminGetAllCourses ?? [];
 
   const courses =
-    statusFilter === "ALL"
-      ? allCourses
-      : allCourses.filter((c) => c.status === statusFilter);
+    statusFilter === "ALL" ? allCourses : allCourses.filter((c) => c.status === statusFilter);
 
   const isEmpty = !loading && !error && courses.length === 0;
 
@@ -500,7 +522,9 @@ const CoursesList = () => {
                     <tr key={course.id} className="border-t">
                       <td className="px-4 py-3 align-top">
                         <div className="font-medium text-gray-900">{course.title}</div>
-                        <div className="text-xs text-gray-500">by {course.author.name ?? "Unknown"}</div>
+                        <div className="text-xs text-gray-500">
+                          by {course.author.name ?? "Unknown"}
+                        </div>
                       </td>
                       <td className="px-4 py-3 align-top">
                         <StatusBadge status={course.status} />
@@ -511,9 +535,24 @@ const CoursesList = () => {
                       <td className="px-4 py-3 align-top">{relativeTime(course.updatedAt)}</td>
                       <td className="px-4 py-3 align-top">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => navigate(`/courses/${course.id}/edit`)} className="text-sm text-blue-600">Open</button>
-                          <button onClick={() => handlePublish(course.id)} className="text-sm text-gray-600">{course.status === "PUBLISHED" ? "Unpublish" : "Publish"}</button>
-                          <button onClick={() => handleDelete(course.id)} className="text-sm text-red-600">Delete</button>
+                          <button
+                            onClick={() => navigate(`/courses/${course.id}/edit`)}
+                            className="text-sm text-blue-600"
+                          >
+                            Open
+                          </button>
+                          <button
+                            onClick={() => handlePublish(course.id)}
+                            className="text-sm text-gray-600"
+                          >
+                            {course.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(course.id)}
+                            className="text-sm text-red-600"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -539,8 +578,7 @@ const CoursesList = () => {
             <DialogTitle>Delete course</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600 mt-2">
-            Delete course{" "}
-            <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
+            Delete course <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
             will lose access. This can be undone by an admin.
           </p>
           <DialogFooter className="mt-4">
