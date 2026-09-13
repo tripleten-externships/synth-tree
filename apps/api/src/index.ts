@@ -21,6 +21,14 @@ async function start() {
     res.status(200).json({ status: "ok" });
   });
 
+  app.get("/", (_req: Request, res: Response) => {
+    res.status(200).json({
+      status: "ok",
+      health: "/health",
+      graphql: "/graphql",
+    });
+  });
+
   // Enable CORS and JSON parsing
   app.use(cors());
   app.use(express.json());
@@ -36,29 +44,29 @@ async function start() {
       ApolloServerPluginDrainHttpServer({ httpServer }),
       apolloLoggingPlugin, // Enables structured logging for every GraphQL request + error
     ],
-      formatError: (formattedError) => { 
-        // In production, hide stack traces and internal details from clients
-        if (process.env.NODE_ENV === 'production') {
+    formatError: (formattedError) => {
+      // In production, hide stack traces and internal details from clients
+      if (process.env.NODE_ENV === "production") {
         return {
-        message: formattedError.message,
-        extensions: { code: formattedError.extensions?.code },
-      };
-  }
-  return formattedError; // Full error details in development
-},
+          message: formattedError.message,
+          extensions: { code: formattedError.extensions?.code },
+        };
+      }
+      return formattedError; // Full error details in development
+    },
   });
 
   await server.start();
 
   app.use(
-    "/",
+    "/graphql",
     cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
         return createGraphQLContext({ req, prisma });
       },
-    })
+    }),
   );
 
   const port = parseInt(process.env.PORT || "4000", 10);

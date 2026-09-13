@@ -748,6 +748,15 @@ input JsonWithAggregatesFilter {
   string_starts_with: String
 }
 
+type LeaderboardEntry {
+  avatar: String
+  displayName: String
+  rank: Int
+  streak: Int
+  totalXp: Int
+  userId: String
+}
+
 type LessonBlocks {
   caption: String
   createdAt: DateTime!
@@ -1571,6 +1580,7 @@ type Query {
   courseForLearner(id: ID!): Course
   courseProgress(courseId: ID!, userId: ID): CourseProgress
   currentUser: User
+  leaderboard(limit: Int = 100): [LeaderboardEntry!]
   lessonBlock(id: ID!): LessonBlocks
   lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
