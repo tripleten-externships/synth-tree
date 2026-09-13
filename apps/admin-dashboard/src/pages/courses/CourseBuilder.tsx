@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import { useAdminCourseQuery, useUpdateCourseMutation } from "@synth-tree/api-types";
 import { useEffect, useState } from "react";
+import SkillTreeCourse from "../courses/SkillTreeCourse";
 
 function CourseBuilder() {
   const { courseId } = useParams();
@@ -175,7 +176,7 @@ function CourseBuilder() {
           className={`rounded-lg border bg-card p-4 ${activeTab === "tree" ? "block" : "hidden"} lg:block`}
         >
           <h2 className="text-lg font-semibold">Tree Canvas</h2>
-          <p className="text-sm text-muted-foreground">Empty tree canvas.</p>
+          <SkillTreeCourse/>
         </section>
 
         <aside
