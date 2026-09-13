@@ -1,13 +1,15 @@
 import { builder } from "../builder";
 
-export const LeaderboardEntryRef = builder.objectRef<{
+export type LeaderboardEntry = {
   userId: string;
   displayName: string;
   avatar: string | null;
   totalXp: number;
   streak: number;
   rank: number;
-}>("LeaderboardEntry");
+};
+
+export const LeaderboardEntryRef = builder.objectRef<LeaderboardEntry>("LeaderboardEntry");
 
 LeaderboardEntryRef.implement({
   fields: (t) => ({

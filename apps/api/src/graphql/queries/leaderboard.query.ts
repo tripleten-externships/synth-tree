@@ -1,6 +1,6 @@
 import { builder } from "@graphql/builder";
 import { prisma } from "@lib/prisma";
-import { LeaderboardEntryRef } from "@graphql/types/leaderboardEntry";
+import { LeaderboardEntry, LeaderboardEntryRef } from "@graphql/types/leaderboardEntry";
 
 // Wrapper type: contains the list + the current user's global rank
 export const LeaderboardPayloadRef = builder.objectRef<{
@@ -45,7 +45,7 @@ builder.queryField("leaderboard", (t) =>
       });
 
       // 2. Get current user's Firebase UID
-      const currentUserUid = ctx.currentUser.uid;
+      const currentUserUid = ctx.auth.requireAuth();
 
       // 3. Fetch current user's XP record
       const currentUserXp = await prisma.userXp.findUnique({

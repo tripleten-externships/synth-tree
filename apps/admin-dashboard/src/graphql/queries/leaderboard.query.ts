@@ -1,13 +1,21 @@
-import { builder } from "@graphql/builder";
+import { gql } from "@apollo/client";
 
-builder.queryField("leaderboard", (t) =>
-  t.field({
-    type: ["LeaderboardEntry"], // whatever your model is named
-    args: {
-      limit: t.arg.int({ defaultValue: 100 }),
-    },
-    resolve: async (_root, { limit }, ctx) => {
-      return ctx.db.leaderboard.getTop(limit); // or your real data source
-    },
-  }),
-);
+/**
+ * GraphQL query used by the admin dashboard to fetch leaderboard data.
+ * This replaces the incorrect backend imports Ko mentioned.
+ */
+export const ADMIN_LEADERBOARD_QUERY = gql`
+  query AdminLeaderboard($limit: Int = 100) {
+    leaderboard(limit: $limit) {
+      currentUserRank
+      entries {
+        userId
+        displayName
+        avatar
+        totalXp
+        streak
+        rank
+      }
+    }
+  }
+`;
