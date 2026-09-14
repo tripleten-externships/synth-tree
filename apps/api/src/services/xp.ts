@@ -8,11 +8,34 @@ export async function awardXp(
   metadata?: Prisma.InputJsonValue,
 ) {
   return prisma.$transaction(async (tx) => {
-    await tx.xpEvent.create({
+    const rewardKey =
+      metadata && typeof metadata === "object" && !Array.isArray(metadata)
+        ? (metadata as Record<string, unknown>).nodeId ??
+          (metadata as Record<string, unknown>).quizId
+        : undefined;
+
+    if (typeof rewardKey !== "string") {
+      throw new Error("XP reward requires a nodeId or quizId");
+    }
+
+    const existingEvent = await tx.xpEvent.findFirst({
+      where: {
+        userId,
+        reason,
+        rewardKey,
+      },
+    });
+
+    if (existingEvent) {
+      return existingEvent;
+    }
+
+    const xpEvent = await tx.xpEvent.create({
       data: {
         userId,
         amount,
         reason,
+        rewardKey,
         metadata,
       },
     });
@@ -34,7 +57,8 @@ export async function awardXp(
 
     const now = new Date();
 
-    const isNewDay = userXp.todayAsOf.toDateString() !== now.toDateString();
+    const isNewDay =
+      userXp.todayAsOf.toDateString() !== now.toDateString();
 
     await tx.userXp.update({
       where: {
@@ -46,14 +70,12 @@ export async function awardXp(
       },
     });
 
-    const today = new Date();
-
-    const dayOfWeek = today.getDay();
+    const dayOfWeek = now.getDay();
 
     const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
-    const weekStart = new Date(today);
-    weekStart.setDate(today.getDate() - daysSinceMonday);
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - daysSinceMonday);
 
     const weekKey = weekStart.toISOString().slice(0, 10);
 
@@ -74,5 +96,7 @@ export async function awardXp(
         weeklyXp: newWeeklyXp,
       },
     });
+
+    return xpEvent;
   });
 }

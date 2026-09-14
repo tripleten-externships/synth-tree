@@ -76,6 +76,20 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Node not found");
       }
 
+      const existingProgress = await ctx.prisma.userNodeProgress.findUnique({
+        ...query,
+        where: {
+          userId_nodeId: {
+            userId,
+            nodeId,
+          },
+        },
+      });
+
+      if (existingProgress?.status === "COMPLETED") {
+        return existingProgress;
+      }
+
       const progress = await ctx.prisma.userNodeProgress.upsert({
         ...query,
         where: {

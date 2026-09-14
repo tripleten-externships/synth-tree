@@ -375,6 +375,11 @@ builder.mutationFields((t) => ({
         select: {
           id: true,
           nodeId: true,
+          node: {
+            select: {
+              xpReward:true
+            },
+          },
         },
       });
 
@@ -408,6 +413,18 @@ builder.mutationFields((t) => ({
       const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
 
       if (summary.passed === true) {
+        const existingProgress = await ctx.prisma.userNodeProgress.findUnique({
+          where: {
+            userId_nodeId: {
+              userId,
+              nodeId: existing.nodeId,
+            },
+          },
+        });
+
+        if (existingProgress?.status === "COMPLETED") {
+
+        } else {
         await ctx.prisma.userNodeProgress.upsert({
           where: {
             userId_nodeId: {
@@ -426,14 +443,16 @@ builder.mutationFields((t) => ({
             completedAt: new Date(),
           },
         });
+
         await awardXp(
           ctx.prisma,
           userId,
-          100,
+          existing.node.xpReward ?? 50,
           "quiz_pass",
           { quizId },
         );
       }
+    }
 
       logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
 
