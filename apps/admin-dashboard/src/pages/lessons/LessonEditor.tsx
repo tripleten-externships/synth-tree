@@ -27,7 +27,7 @@ const GET_LESSON_TITLE = gql`
 `;
 
 const GET_LESSON_BLOCK = gql`
-  query lessonBlocksByNode($nodeId: ID!) {
+  query AdminLessonBlocksByNode($nodeId: ID!) {
     lessonBlocksByNode(nodeId: $nodeId) {
       id
       nodeId
@@ -74,6 +74,15 @@ const DELETE_LESSON_BLOCK = gql`
   mutation DeleteLessonBlock($id: ID!) {
     deleteLessonBlock(id: $id) {
       id
+    }
+  }
+`;
+
+const REORDER_LESSON_BLOCKS = gql`
+  mutation ReorderLessonBlocks($nodeId: ID!, $orderedBlockIds: [ID!]!) {
+    reorderLessonBlocks(nodeId: $nodeId, orderedBlockIds: $orderedBlockIds) {
+      id
+      order
     }
   }
 `;
@@ -125,6 +134,89 @@ function SortableLessonBlock({block, children} : {block: GetLessonBlocksResponse
   );
 }
 
+// Sentinel key for the "insert before the first block" / empty-state add control.
+const START_ADD_CONTROL_KEY = "__start__";
+
+function AddBlockMenu({
+  controlKey,
+  openBlockId,
+  onToggle,
+  onAddText,
+}: {
+  controlKey: string;
+  openBlockId: string | null;
+  onToggle: (key: string) => void;
+  onAddText: () => void;
+}) {
+  const comingSoonClass =
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-muted-foreground opacity-50";
+
+  return (
+    <div className="flex justify-center relative">
+      <Button
+        onClick={() => onToggle(controlKey)}
+        size="icon"
+        variant="outline"
+        className="h-8 w-8 rounded-full border border-border bg-muted text-muted-foreground opacity-40 hover:opacity-100"
+        aria-label="Add block"
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+
+      {openBlockId === controlKey && (
+        <div className="absolute top-8 z-10 flex gap-1 rounded-[14px] border bg-popover p-1.5 shadow-md">
+          <Button
+            onClick={onAddText}
+            leftIcon={<AlignJustify />}
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
+            aria-label="Add Text block"
+          >
+            Text
+          </Button>
+          {/* v1 is text-only. The remaining block types are not implemented yet,
+              so they are rendered visibly disabled instead of looking functional. */}
+          <Button
+            disabled
+            title="Coming soon"
+            leftIcon={<Pen />}
+            className={comingSoonClass}
+            aria-label="Add heading block (coming soon)"
+          >
+            Heading
+          </Button>
+          <Button
+            disabled
+            title="Coming soon"
+            leftIcon={<Image />}
+            className={comingSoonClass}
+            aria-label="Add image block (coming soon)"
+          >
+            Image
+          </Button>
+          <Button
+            disabled
+            title="Coming soon"
+            leftIcon={<PlaySquare />}
+            className={comingSoonClass}
+            aria-label="Add video block (coming soon)"
+          >
+            Video
+          </Button>
+          <Button
+            disabled
+            title="Coming soon"
+            leftIcon={<Code2 />}
+            className={comingSoonClass}
+            aria-label="Add embedded block (coming soon)"
+          >
+            Embedded
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LessonEditor(){
   const { nodeId } = useParams();
   const [title, setTitle] = useState("");
@@ -132,6 +224,7 @@ function LessonEditor(){
   const [openBlockId, setOpenBlockId] = useState<string | null>(null);
   const [lessonBlocks, setLessonBlocks] = useState<GetLessonBlocksResponse["lessonBlocksByNode"]>([]);
   const [deletedBlockIds, setDeletedBlockIds] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: titleData, loading: titleLoading, error: titleError } = useQuery<GetLessonTitleResponse>(GET_LESSON_TITLE, {
     variables: {
@@ -139,7 +232,7 @@ function LessonEditor(){
     },
   });
 
-  const { data: blockData, loading: blockLoading, error: blockError } = useQuery<GetLessonBlocksResponse>(GET_LESSON_BLOCK, {
+  const { data: blockData, loading: blockLoading, error: blockError, refetch: refetchLessonBlocks } = useQuery<GetLessonBlocksResponse>(GET_LESSON_BLOCK, {
     variables: {
       nodeId,
     },
@@ -161,9 +254,9 @@ function LessonEditor(){
     DELETE_LESSON_BLOCK
   );
 
-  const clicked = () => {
-    setOpenBlockId(null);
-  };
+  const [reorderLessonBlocks] = useMutation(
+    REORDER_LESSON_BLOCKS
+  );
 
   const handleAddButtonClick = (blockId: string) => {
     setOpenBlockId((currentBlockId) =>
@@ -171,40 +264,31 @@ function LessonEditor(){
     );
   }
 
-  const handleAddTextBlock = async (afterBlockId: string) => {
+  // Adding a block is a local-only edit: it inserts a temporary block into
+  // state and defers the actual DB write to Save, so it is consistent with how
+  // title/content/delete edits are handled. A newly added block that the user
+  // abandons is never persisted. Pass `null` to insert before the first block
+  // (also used for the empty-state affordance).
+  const handleAddTextBlock = (afterBlockId: string | null) => {
     setOpenBlockId(null);
 
     if (!nodeId) {
       return;
     }
 
-    const clickedBlockIndex = lessonBlocks.findIndex(
-      (block) => block.id === afterBlockId,
-    );
-    const insertionIndex = clickedBlockIndex >= 0
-      ? clickedBlockIndex + 1
-      : lessonBlocks.length;
+    const afterIndex = afterBlockId
+      ? lessonBlocks.findIndex((block) => block.id === afterBlockId)
+      : -1;
+    const insertionIndex = afterIndex >= 0 ? afterIndex + 1 : 0;
 
-    const { data } = await createLessonBlock({
-      variables: {
-        input: {
-          node: {
-            connect: {
-              id: nodeId,
-            },
-          },
-          order: insertionIndex,
-          type: "HTML",
-          html: "",
-        },
-      },
-    });
-
-    const newBlock = data?.createLessonBlock;
-
-    if (!newBlock) {
-      return;
-    }
+    const newBlock: GetLessonBlocksResponse["lessonBlocksByNode"][number] = {
+      id: `temp-${crypto.randomUUID()}`,
+      nodeId,
+      order: insertionIndex,
+      caption: null,
+      type: "HTML",
+      html: "",
+    };
 
     const reorderedBlocks = [
       ...lessonBlocks.slice(0, insertionIndex),
@@ -215,21 +299,6 @@ function LessonEditor(){
       order: index,
     }));
 
-    await Promise.all(
-      reorderedBlocks
-        .filter((block) => block.id !== newBlock.id)
-        .map((block) =>
-          updateLessonBlock({
-            variables: {
-              input: {
-                id: { set: block.id },
-                order: { set: block.order },
-              },
-            },
-          }),
-        ),
-    );
-
     setLessonBlocks(reorderedBlocks);
     setBlockText((previousText) => ({
       ...previousText,
@@ -238,43 +307,102 @@ function LessonEditor(){
   };
 
   const handleSave = async () => {
+    if (!nodeId) {
+      return;
+    }
+
     const blocksToSave = [...lessonBlocks];
     const textToSave = { ...blockText };
     const blockIdsToDelete = [...deletedBlockIds];
 
+    setIsSaving(true);
+
     try {
-      await Promise.all([
-        saveLessonTitle({
+      // 1. Persist the lesson title.
+      await saveLessonTitle({
+        variables: {
+          updateSkillNodeId: nodeId,
+          input: {
+            title: title,
+          },
+        },
+      });
+
+      // 2. Create any newly added (temporary) blocks, mapping temp id -> real id.
+      const tempIdToRealId = new Map<string, string>();
+
+      for (const block of blocksToSave) {
+        if (!block.id.startsWith("temp-")) {
+          continue;
+        }
+
+        const { data } = await createLessonBlock({
           variables: {
-            updateSkillNodeId: nodeId,
             input: {
-              title: title,
+              node: {
+                connect: {
+                  id: nodeId,
+                },
+              },
+              order: block.order,
+              type: "HTML",
+              html: DOMPurify.sanitize(textToSave[block.id] ?? ""),
             },
           },
-        }),
-        ...blocksToSave.map((block) =>
-          updateLessonBlock({
-            variables: {
-              input: {
-                id: {
-                  set: block.id,
+        });
+
+        const createdBlock = data?.createLessonBlock;
+
+        if (!createdBlock) {
+          throw new Error("Failed to create a new block.");
+        }
+
+        tempIdToRealId.set(block.id, createdBlock.id);
+      }
+
+      // 3. Persist content edits for existing HTML blocks.
+      await Promise.all(
+        blocksToSave
+          .filter((block) => !block.id.startsWith("temp-") && block.type === "HTML")
+          .map((block) =>
+            updateLessonBlock({
+              variables: {
+                input: {
+                  id: { set: block.id },
+                  html: { set: DOMPurify.sanitize(textToSave[block.id] ?? "") },
                 },
-                order: { set: block.order },
-                ...(block.type === "HTML"
-                  ? { html: { set: DOMPurify.sanitize(textToSave[block.id] ?? "") } }
-                  : {}),
               },
-            }
-          }),
-        ),
-        ...blockIdsToDelete.map((blockId) =>
+            }),
+          ),
+      );
+
+      // 4. Delete removed blocks.
+      await Promise.all(
+        blockIdsToDelete.map((blockId) =>
           deleteLessonBlock({
             variables: {
               id: blockId,
             },
           }),
         ),
-      ]);
+      );
+
+      // 5. Persist the final ordering atomically in a single mutation.
+      const orderedBlockIds = blocksToSave.map(
+        (block) => tempIdToRealId.get(block.id) ?? block.id,
+      );
+
+      if (orderedBlockIds.length > 0) {
+        await reorderLessonBlocks({
+          variables: {
+            nodeId,
+            orderedBlockIds,
+          },
+        });
+      }
+
+      // 6. Re-sync local state with the server (real ids + persisted order).
+      await refetchLessonBlocks();
 
       setDeletedBlockIds([]);
       toast("Lesson saved", {
@@ -286,6 +414,8 @@ function LessonEditor(){
           ? error.message
           : "Please try again.",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -389,11 +519,11 @@ function LessonEditor(){
           </Link>
         </Button>
         <div className="flex gap-2">
-          <Button className="rounded-xl" variant="outline" leftIcon={<Eye />}>
+          <Button className="rounded-xl" variant="outline" leftIcon={<Eye />} disabled title="Preview coming soon">
             Preview
           </Button>
-          <Button onClick={handleSave} className="text-primary-foreground bg-primary rounded-xl hover:brightness-[0.96]" leftIcon={<Check />}>
-            Save lesson
+          <Button onClick={handleSave} disabled={isSaving} loading={isSaving} className="text-primary-foreground bg-primary rounded-xl hover:brightness-[0.96]" leftIcon={<Check />}>
+            {isSaving ? "Saving…" : "Save lesson"}
           </Button>
         </div>
       </div>
@@ -402,13 +532,28 @@ function LessonEditor(){
       </p>
       <Input value={title} onChange={(e) => setTitle(e.target.value)} type="text" aria-label="Lesson title"/>
       <div className="flex flex-col justify-center align-center">
-        <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter} >
-          <SortableContext items={lessonBlocks.filter((block) => block.type === "HTML").map((block) => block.id)} strategy={verticalListSortingStrategy}
-          >
-            {lessonBlocks
-                .filter((block) => {
-                  return block.type === "HTML"
-                }).map((block) => {
+        {(() => {
+          const htmlBlocks = lessonBlocks.filter((block) => block.type === "HTML");
+
+          return (
+            <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter} >
+              <SortableContext items={htmlBlocks.map((block) => block.id)} strategy={verticalListSortingStrategy}
+              >
+                {htmlBlocks.length === 0 && (
+                  <p className="mt-4 mb-2 text-center text-sm text-muted-foreground">
+                    This lesson has no content yet. Add your first block below.
+                  </p>
+                )}
+
+                {/* Insert point before the first block, and the empty-state add affordance. */}
+                <AddBlockMenu
+                  controlKey={START_ADD_CONTROL_KEY}
+                  openBlockId={openBlockId}
+                  onToggle={handleAddButtonClick}
+                  onAddText={() => handleAddTextBlock(null)}
+                />
+
+                {htmlBlocks.map((block) => {
                   return (
                     <SortableLessonBlock  block={block} key={block.id} >
                       <Button
@@ -432,69 +577,18 @@ function LessonEditor(){
                         }}
                       >
                       </div>
-                      <div className="flex justify-center relative">
-                        <Button
-                          onClick={() => handleAddButtonClick(block.id)}
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-full border border-border bg-muted text-muted-foreground opacity-40 hover:opacity-100"
-                          aria-label="Add block"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-
-                        {openBlockId === block.id && (
-                          <div className="absolute top-8 z-10 flex gap-1 rounded-[14px] border bg-popover p-1.5 shadow-md">
-                            <Button
-                              onClick={clicked}
-                              leftIcon={<Pen />}
-                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add heading block"
-                            >
-                              Heading
-                            </Button>
-                            <Button
-                              onClick={() => handleAddTextBlock(block.id)}
-                              leftIcon={<AlignJustify />}
-                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add Text block"
-                            >
-                              Text
-                            </Button>
-                            <Button
-                              onClick={clicked}
-                              leftIcon={<Image />}
-                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add image block"
-                            >
-                              Image
-                            </Button>
-                            <Button
-                              onClick={clicked}
-                              leftIcon={<PlaySquare />}
-                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add video block"
-                            >
-                              Video
-                            </Button>
-                            <Button
-                              onClick={clicked}
-                              leftIcon={<Code2 />}
-                              className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
-                              aria-label="Add Embedded block"
-                            >
-                              Embedded
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                      <AddBlockMenu
+                        controlKey={block.id}
+                        openBlockId={openBlockId}
+                        onToggle={handleAddButtonClick}
+                        onAddText={() => handleAddTextBlock(block.id)}
+                      />
                     </SortableLessonBlock>)
-                })
-              }
-          </SortableContext>
-        </DndContext>
-
-
+                })}
+              </SortableContext>
+            </DndContext>
+          );
+        })()}
       </div>
     </div>
   );

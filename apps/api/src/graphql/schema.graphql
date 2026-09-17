@@ -1123,6 +1123,7 @@ type Mutation {
   deleteUser(id: ID!): User
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
+  reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt

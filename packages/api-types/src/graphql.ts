@@ -1150,6 +1150,7 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
+  reorderLessonBlocks?: Maybe<Array<LessonBlocks>>;
   setUserRole?: Maybe<User>;
   startNodeProgress?: Maybe<UserNodeProgress>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1269,6 +1270,12 @@ export type MutationPublishCourseArgs = {
 
 export type MutationPublishLessonBlockArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationReorderLessonBlocksArgs = {
+  nodeId: Scalars['ID']['input'];
+  orderedBlockIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -6627,6 +6634,57 @@ export type CreateCourseMutationVariables = Exact<{
 
 export type CreateCourseMutation = { __typename?: 'Mutation', createCourse?: { __typename?: 'Course', id: string, title: string } | null };
 
+export type AdminSkillNodeQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminSkillNodeQuery = { __typename?: 'Query', adminSkillNode?: { __typename?: 'SkillNode', id: string, title: string, tree: { __typename?: 'SkillTree', courseId: string, course: { __typename?: 'Course', title: string } } } | null };
+
+export type AdminLessonBlocksByNodeQueryVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminLessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null }> | null };
+
+export type SaveLessonTitleMutationVariables = Exact<{
+  updateSkillNodeId: Scalars['ID']['input'];
+  input: UpdateSkillNodeInput;
+}>;
+
+
+export type SaveLessonTitleMutation = { __typename?: 'Mutation', updateSkillNode?: { __typename?: 'SkillNode', id: string, title: string } | null };
+
+export type CreateLessonBlockMutationVariables = Exact<{
+  input: LessonBlocksCreateInput;
+}>;
+
+
+export type CreateLessonBlockMutation = { __typename?: 'Mutation', createLessonBlock?: { __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null } | null };
+
+export type UpdateLessonBlockMutationVariables = Exact<{
+  input: LessonBlocksUpdateInput;
+}>;
+
+
+export type UpdateLessonBlockMutation = { __typename?: 'Mutation', updateLessonBlock?: { __typename?: 'LessonBlocks', id: string, html?: string | null } | null };
+
+export type DeleteLessonBlockMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLessonBlockMutation = { __typename?: 'Mutation', deleteLessonBlock?: { __typename?: 'LessonBlocks', id: string } | null };
+
+export type ReorderLessonBlocksMutationVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+  orderedBlockIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type ReorderLessonBlocksMutation = { __typename?: 'Mutation', reorderLessonBlocks?: Array<{ __typename?: 'LessonBlocks', id: string, order: number }> | null };
+
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
 }>;
@@ -6952,6 +7010,246 @@ export function useCreateCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<CreateCourseMutation, CreateCourseMutationVariables>(CreateCourseDocument, options);
       }
 export type CreateCourseMutationHookResult = ReturnType<typeof useCreateCourseMutation>;
+export const AdminSkillNodeDocument = gql`
+    query adminSkillNode($id: ID!) {
+  adminSkillNode(id: $id) {
+    id
+    title
+    tree {
+      courseId
+      course {
+        title
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminSkillNodeQuery__
+ *
+ * To run a query within a React component, call `useAdminSkillNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminSkillNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminSkillNodeQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminSkillNodeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminSkillNodeQuery, AdminSkillNodeQueryVariables> & ({ variables: AdminSkillNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>(AdminSkillNodeDocument, options);
+      }
+export function useAdminSkillNodeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>(AdminSkillNodeDocument, options);
+        }
+export type AdminSkillNodeQueryHookResult = ReturnType<typeof useAdminSkillNodeQuery>;
+export type AdminSkillNodeLazyQueryHookResult = ReturnType<typeof useAdminSkillNodeLazyQuery>;
+export const AdminLessonBlocksByNodeDocument = gql`
+    query AdminLessonBlocksByNode($nodeId: ID!) {
+  lessonBlocksByNode(nodeId: $nodeId) {
+    id
+    nodeId
+    order
+    caption
+    type
+    html
+  }
+}
+    `;
+
+/**
+ * __useAdminLessonBlocksByNodeQuery__
+ *
+ * To run a query within a React component, call `useAdminLessonBlocksByNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLessonBlocksByNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLessonBlocksByNodeQuery({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *   },
+ * });
+ */
+export function useAdminLessonBlocksByNodeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables> & ({ variables: AdminLessonBlocksByNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>(AdminLessonBlocksByNodeDocument, options);
+      }
+export function useAdminLessonBlocksByNodeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>(AdminLessonBlocksByNodeDocument, options);
+        }
+export type AdminLessonBlocksByNodeQueryHookResult = ReturnType<typeof useAdminLessonBlocksByNodeQuery>;
+export type AdminLessonBlocksByNodeLazyQueryHookResult = ReturnType<typeof useAdminLessonBlocksByNodeLazyQuery>;
+export const SaveLessonTitleDocument = gql`
+    mutation SaveLessonTitle($updateSkillNodeId: ID!, $input: UpdateSkillNodeInput!) {
+  updateSkillNode(id: $updateSkillNodeId, input: $input) {
+    id
+    title
+  }
+}
+    `;
+
+/**
+ * __useSaveLessonTitleMutation__
+ *
+ * To run a mutation, you first call `useSaveLessonTitleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveLessonTitleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveLessonTitleMutation, { data, loading, error }] = useSaveLessonTitleMutation({
+ *   variables: {
+ *      updateSkillNodeId: // value for 'updateSkillNodeId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSaveLessonTitleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveLessonTitleMutation, SaveLessonTitleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SaveLessonTitleMutation, SaveLessonTitleMutationVariables>(SaveLessonTitleDocument, options);
+      }
+export type SaveLessonTitleMutationHookResult = ReturnType<typeof useSaveLessonTitleMutation>;
+export const CreateLessonBlockDocument = gql`
+    mutation CreateLessonBlock($input: LessonBlocksCreateInput!) {
+  createLessonBlock(input: $input) {
+    id
+    nodeId
+    order
+    caption
+    type
+    html
+  }
+}
+    `;
+
+/**
+ * __useCreateLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useCreateLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createLessonBlockMutation, { data, loading, error }] = useCreateLessonBlockMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateLessonBlockMutation, CreateLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateLessonBlockMutation, CreateLessonBlockMutationVariables>(CreateLessonBlockDocument, options);
+      }
+export type CreateLessonBlockMutationHookResult = ReturnType<typeof useCreateLessonBlockMutation>;
+export const UpdateLessonBlockDocument = gql`
+    mutation UpdateLessonBlock($input: LessonBlocksUpdateInput!) {
+  updateLessonBlock(input: $input) {
+    id
+    html
+  }
+}
+    `;
+
+/**
+ * __useUpdateLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useUpdateLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLessonBlockMutation, { data, loading, error }] = useUpdateLessonBlockMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateLessonBlockMutation, UpdateLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateLessonBlockMutation, UpdateLessonBlockMutationVariables>(UpdateLessonBlockDocument, options);
+      }
+export type UpdateLessonBlockMutationHookResult = ReturnType<typeof useUpdateLessonBlockMutation>;
+export const DeleteLessonBlockDocument = gql`
+    mutation DeleteLessonBlock($id: ID!) {
+  deleteLessonBlock(id: $id) {
+    id
+  }
+}
+    `;
+
+/**
+ * __useDeleteLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useDeleteLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLessonBlockMutation, { data, loading, error }] = useDeleteLessonBlockMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteLessonBlockMutation, DeleteLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteLessonBlockMutation, DeleteLessonBlockMutationVariables>(DeleteLessonBlockDocument, options);
+      }
+export type DeleteLessonBlockMutationHookResult = ReturnType<typeof useDeleteLessonBlockMutation>;
+export const ReorderLessonBlocksDocument = gql`
+    mutation ReorderLessonBlocks($nodeId: ID!, $orderedBlockIds: [ID!]!) {
+  reorderLessonBlocks(nodeId: $nodeId, orderedBlockIds: $orderedBlockIds) {
+    id
+    order
+  }
+}
+    `;
+
+/**
+ * __useReorderLessonBlocksMutation__
+ *
+ * To run a mutation, you first call `useReorderLessonBlocksMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReorderLessonBlocksMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reorderLessonBlocksMutation, { data, loading, error }] = useReorderLessonBlocksMutation({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *      orderedBlockIds: // value for 'orderedBlockIds'
+ *   },
+ * });
+ */
+export function useReorderLessonBlocksMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReorderLessonBlocksMutation, ReorderLessonBlocksMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ReorderLessonBlocksMutation, ReorderLessonBlocksMutationVariables>(ReorderLessonBlocksDocument, options);
+      }
+export type ReorderLessonBlocksMutationHookResult = ReturnType<typeof useReorderLessonBlocksMutation>;
 export const StartNodeProgressDocument = gql`
     mutation StartNodeProgress($nodeId: ID!) {
   startNodeProgress(nodeId: $nodeId) {
