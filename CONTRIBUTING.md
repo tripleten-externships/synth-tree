@@ -50,11 +50,29 @@ Keep the summary line under 72 characters. Add a body if the change needs explan
 
 ## Pull requests
 
-1. Open the PR against `main` and fill out the template (`.github/PULL_REQUEST_TEMPLATE.md`) — the Jira link, description, and pre-submission checklist are required.
+`development` is the default branch and the integration branch for the **dev**
+environment; `main` tracks **production**. Base your work on `development`.
+
+1. Branch off `development` and open the PR **against `development`** (never
+   `main`). Fill out the template (`.github/PULL_REQUEST_TEMPLATE.md`) — the Jira
+   link, description, and pre-submission checklist are required.
 2. Make sure CI passes before requesting review.
 3. PRs require at least one approval from a code owner (`.github/CODEOWNERS`).
-4. Merge with **Squash and merge** so each ticket lands as one commit on `main`.
+4. Merge with **Squash and merge** so each ticket lands as one commit on
+   `development`. Merging to `development` auto-deploys to the **dev** environment.
 5. After merge, delete the branch.
+
+### Releasing to production
+
+Production is released by merging `development` → `main`, which auto-deploys to
+**prod**. Only maintainers open `development` → `main` PRs, and they use a
+**merge commit** (not squash/rebase) so the deploy orchestrator's first-parent
+diff captures everything the release brings in. Never commit directly to
+`development` or `main`, and never delete either branch.
+
+See the [root README](./README.md#branching--deployment) and
+[`.github/workflows/README.md`](.github/workflows/README.md) for the full
+branch → environment mapping and how deploys are triggered.
 
 ## Local development
 

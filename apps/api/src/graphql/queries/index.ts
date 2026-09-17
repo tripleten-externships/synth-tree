@@ -3,6 +3,7 @@
 import "./course.admin.queries";
 import "./course.owner.queries";
 import "./course.public.queries";
+import "./dailyQuest.queries";
 import "./lessonBlock.queries";
 import "./progress.queries";
 import "./quiz.queries";
@@ -13,3 +14,4 @@ import "./skillTree.admin.queries";
 import "./skillTree.owner.queries";
 import "./skillTree.learner.queries";
 import "./user.queries";
+import "./userHearts.queries";

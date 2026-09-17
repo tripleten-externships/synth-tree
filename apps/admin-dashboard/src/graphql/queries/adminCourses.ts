@@ -18,3 +18,14 @@ export const ADMIN_GET_ALL_COURSES_QUERY = gql`
     }
   }
 `;
+
+export const ADMIN_COURSE_QUERY = gql`
+  query AdminCourse($id: ID!) {
+    adminCourse(id: $id) {
+      id
+      title
+      description
+      status
+    }
+  }
+`;

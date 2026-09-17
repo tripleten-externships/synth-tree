@@ -12,7 +12,8 @@ export interface EnvironmentConfig {
   region: string;
 
   // Domain configuration
-  domain: string;
+  domain: string; // Client/learner frontend (apps/client-frontend)
+  adminDomain: string; // Admin dashboard (apps/admin-dashboard)
   apiDomain: string;
   storybookDomain: string;
   hostedZoneName: string;
@@ -82,7 +83,8 @@ export const devConfig: EnvironmentConfig = {
   region: "us-east-1",
 
   // Domains
-  domain: "dev.synth-tree.com",
+  domain: "dev.synth-tree.com", // client-frontend (learner app)
+  adminDomain: "admin.dev.synth-tree.com", // admin-dashboard
   apiDomain: "api.dev.synth-tree.com",
   storybookDomain: "storybook.dev.synth-tree.com",
   hostedZoneName: "synth-tree.com",
@@ -156,7 +158,8 @@ export const prodConfig: EnvironmentConfig = {
   region: "us-east-1",
 
   // Domains
-  domain: "app.synth-tree.com",
+  domain: "app.synth-tree.com", // client-frontend (learner app)
+  adminDomain: "admin.synth-tree.com", // admin-dashboard
   apiDomain: "api.synth-tree.com",
   storybookDomain: "storybook.synth-tree.com",
   hostedZoneName: "synth-tree.com",

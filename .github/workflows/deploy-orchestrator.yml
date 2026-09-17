@@ -1,0 +1,303 @@
+name: Deploy Orchestrator
+
+# ============================================================================
+# The ONLY push-triggered deployer. Branch -> environment:
+#   development  -> dev   (synth-tree-dev-*)
+#   main         -> prod  (synth-tree-prod-*)
+# Feature branches -> PR into development -> release development -> main.
+#
+# It path-diffs the pushed commits and calls each service's reusable
+# deploy-*.yml (workflow_call) only for services whose files changed. A manual
+# run (workflow_dispatch) picks the environment and can force every service
+# with deploy_all. The individual deploy-*.yml workflows are otherwise only
+# run by hand from the Actions tab (and gated there to code owners).
+# ============================================================================
+
+on:
+  push:
+    branches:
+      - main
+      - development
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - ".github/workflows/deploy-*.yml"
+      - ".github/actions/require-codeowner/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      deploy_all:
+        description: "Redeploy every service, ignoring the change diff"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  # Key on the target so a dev run and a prod run never queue behind each
+  # other. Per-service serialization within one environment is additionally
+  # guaranteed by each reusable workflow's own environment-keyed group.
+  group: deploy-orchestrator-${{ inputs.environment || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      # '' when the ref/inputs don't map to an environment (nothing deploys).
+      target-env: ${{ steps.env.outputs.target-env }}
+      infra-changed: ${{ steps.changes.outputs.infra }}
+      api-changed: ${{ steps.changes.outputs.api }}
+      frontend-changed: ${{ steps.changes.outputs.frontend }}
+      admin-changed: ${{ steps.changes.outputs.admin }}
+      storybook-changed: ${{ steps.changes.outputs.storybook }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Resolve target environment
+        id: env
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_ENV="${{ inputs.environment }}"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TARGET_ENV="prod"
+          elif [ "${{ github.ref }}" = "refs/heads/development" ]; then
+            TARGET_ENV="dev"
+          else
+            TARGET_ENV=""
+          fi
+          echo "target-env=$TARGET_ENV" >> "$GITHUB_OUTPUT"
+          echo "Target environment: ${TARGET_ENV:-<none>}"
+
+      - name: Detect changes
+        id: changes
+        env:
+          # true only on a manual run with the toggle set; 'false' otherwise.
+          DEPLOY_ALL: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_all || 'false' }}
+        run: |
+          set -euo pipefail
+
+          # Diff the pushed commits. On a merge commit (development -> main, or a
+          # feature merge into development) HEAD~1 is the previous branch tip, so
+          # the first-parent diff captures everything the merge brings in. If
+          # HEAD~1 is unavailable (shallow / first commit), treat all as changed.
+          if git rev-parse --verify --quiet HEAD~1 >/dev/null; then
+            FILES="$(git diff --name-only HEAD~1 HEAD)"
+          else
+            FILES="ALL"
+          fi
+          echo "Changed files:"; echo "$FILES"
+
+          decide() {
+            local name="$1" pattern="$2"
+            if [ "$DEPLOY_ALL" = "true" ] || [ "$FILES" = "ALL" ]; then
+              echo "${name}=true" >> "$GITHUB_OUTPUT"
+              echo "✅ ${name}: forced"
+            elif grep -q -E "$pattern" <<<"$FILES"; then
+              echo "${name}=true" >> "$GITHUB_OUTPUT"
+              echo "✅ ${name}: changed"
+            else
+              echo "${name}=false" >> "$GITHUB_OUTPUT"
+              echo "ℹ️ ${name}: no changes"
+            fi
+          }
+
+          decide infra     '^(apps/infra/|\.github/workflows/deploy-infrastructure\.yml)'
+          decide api       '^(apps/api/|packages/|\.github/workflows/deploy-api\.yml)'
+          decide frontend  '^(apps/client-frontend/|packages/|\.github/workflows/deploy-frontend\.yml)'
+          decide admin     '^(apps/admin-dashboard/|packages/|\.github/workflows/deploy-admin\.yml)'
+          decide storybook '^(packages/ui/|packages/theme/|\.github/workflows/deploy-storybook\.yml)'
+
+  # ============================================================
+  # DEV (push to development, or manual environment=dev)
+  # ============================================================
+  infrastructure-dev:
+    name: Infrastructure (dev)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.target-env == 'dev' && needs.detect-changes.outputs.infra-changed == 'true'
+    uses: ./.github/workflows/deploy-infrastructure.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  api-dev:
+    name: API (dev)
+    needs: [detect-changes, infrastructure-dev]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'dev' &&
+      needs.detect-changes.outputs.api-changed == 'true' &&
+      (needs.infrastructure-dev.result == 'success' || needs.infrastructure-dev.result == 'skipped')
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  frontend-dev:
+    name: Client Frontend (dev)
+    needs: [detect-changes, infrastructure-dev, api-dev]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'dev' &&
+      needs.detect-changes.outputs.frontend-changed == 'true' &&
+      (needs.infrastructure-dev.result == 'success' || needs.infrastructure-dev.result == 'skipped') &&
+      (needs.api-dev.result == 'success' || needs.api-dev.result == 'skipped')
+    uses: ./.github/workflows/deploy-frontend.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  admin-dev:
+    name: Admin Dashboard (dev)
+    needs: [detect-changes, infrastructure-dev]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'dev' &&
+      needs.detect-changes.outputs.admin-changed == 'true' &&
+      (needs.infrastructure-dev.result == 'success' || needs.infrastructure-dev.result == 'skipped')
+    uses: ./.github/workflows/deploy-admin.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  storybook-dev:
+    name: Storybook (dev)
+    needs: [detect-changes, infrastructure-dev]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'dev' &&
+      needs.detect-changes.outputs.storybook-changed == 'true' &&
+      (needs.infrastructure-dev.result == 'success' || needs.infrastructure-dev.result == 'skipped')
+    uses: ./.github/workflows/deploy-storybook.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  # ============================================================
+  # PROD (push to main, or manual environment=prod)
+  # ============================================================
+  infrastructure-prod:
+    name: Infrastructure (prod)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.target-env == 'prod' && needs.detect-changes.outputs.infra-changed == 'true'
+    uses: ./.github/workflows/deploy-infrastructure.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  api-prod:
+    name: API (prod)
+    needs: [detect-changes, infrastructure-prod]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'prod' &&
+      needs.detect-changes.outputs.api-changed == 'true' &&
+      (needs.infrastructure-prod.result == 'success' || needs.infrastructure-prod.result == 'skipped')
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  frontend-prod:
+    name: Client Frontend (prod)
+    needs: [detect-changes, infrastructure-prod, api-prod]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'prod' &&
+      needs.detect-changes.outputs.frontend-changed == 'true' &&
+      (needs.infrastructure-prod.result == 'success' || needs.infrastructure-prod.result == 'skipped') &&
+      (needs.api-prod.result == 'success' || needs.api-prod.result == 'skipped')
+    uses: ./.github/workflows/deploy-frontend.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  admin-prod:
+    name: Admin Dashboard (prod)
+    needs: [detect-changes, infrastructure-prod]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'prod' &&
+      needs.detect-changes.outputs.admin-changed == 'true' &&
+      (needs.infrastructure-prod.result == 'success' || needs.infrastructure-prod.result == 'skipped')
+    uses: ./.github/workflows/deploy-admin.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  storybook-prod:
+    name: Storybook (prod)
+    needs: [detect-changes, infrastructure-prod]
+    if: |
+      always() &&
+      needs.detect-changes.outputs.target-env == 'prod' &&
+      needs.detect-changes.outputs.storybook-changed == 'true' &&
+      (needs.infrastructure-prod.result == 'success' || needs.infrastructure-prod.result == 'skipped')
+    uses: ./.github/workflows/deploy-storybook.yml
+    with:
+      environment: prod
+    secrets: inherit
+
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs:
+      - detect-changes
+      - infrastructure-dev
+      - api-dev
+      - frontend-dev
+      - admin-dev
+      - storybook-dev
+      - infrastructure-prod
+      - api-prod
+      - frontend-prod
+      - admin-prod
+      - storybook-prod
+    if: always()
+    steps:
+      - name: Summarize
+        run: |
+          ENV="${{ needs.detect-changes.outputs.target-env }}"
+          echo "## Deploy Orchestrator — ${ENV:-no target}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Service | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$ENV" = "prod" ]; then
+            echo "| Infrastructure | ${{ needs.infrastructure-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| API | ${{ needs.api-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Client Frontend | ${{ needs.frontend-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Admin Dashboard | ${{ needs.admin-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Storybook | ${{ needs.storybook-prod.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Infrastructure | ${{ needs.infrastructure-dev.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| API | ${{ needs.api-dev.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Client Frontend | ${{ needs.frontend-dev.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Admin Dashboard | ${{ needs.admin-dev.result }} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Storybook | ${{ needs.storybook-dev.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail if any deploy failed
+        run: |
+          RESULTS="${{ needs.infrastructure-dev.result }} ${{ needs.api-dev.result }} ${{ needs.frontend-dev.result }} ${{ needs.admin-dev.result }} ${{ needs.storybook-dev.result }} ${{ needs.infrastructure-prod.result }} ${{ needs.api-prod.result }} ${{ needs.frontend-prod.result }} ${{ needs.admin-prod.result }} ${{ needs.storybook-prod.result }}"
+          echo "Results: $RESULTS"
+          for r in $RESULTS; do
+            if [ "$r" = "failure" ]; then
+              echo "::error::One or more service deploys failed."
+              exit 1
+            fi
+          done
+          echo "✅ No failed deploys."
