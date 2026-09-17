@@ -7519,6 +7519,13 @@ export type UpdateOnboardingMutationVariables = Exact<{
 
 export type UpdateOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, interests: Array<string> } | null };
 
+export type CompleteOnboardingMutationVariables = Exact<{
+  dailyGoalMinutes: Scalars['Int']['input'];
+}>;
+
+
+export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete: boolean } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -8299,6 +8306,38 @@ export function useUpdateOnboardingMutation(baseOptions?: ApolloReactHooks.Mutat
         return ApolloReactHooks.useMutation<UpdateOnboardingMutation, UpdateOnboardingMutationVariables>(UpdateOnboardingDocument, options);
       }
 export type UpdateOnboardingMutationHookResult = ReturnType<typeof useUpdateOnboardingMutation>;
+export const CompleteOnboardingDocument = gql`
+    mutation CompleteOnboarding($dailyGoalMinutes: Int!) {
+  updateOnboarding(dailyGoalMinutes: $dailyGoalMinutes) {
+    id
+    dailyGoalMinutes
+    onboardingComplete
+  }
+}
+    `;
+
+/**
+ * __useCompleteOnboardingMutation__
+ *
+ * To run a mutation, you first call `useCompleteOnboardingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCompleteOnboardingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [completeOnboardingMutation, { data, loading, error }] = useCompleteOnboardingMutation({
+ *   variables: {
+ *      dailyGoalMinutes: // value for 'dailyGoalMinutes'
+ *   },
+ * });
+ */
+export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
+      }
+export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl) {

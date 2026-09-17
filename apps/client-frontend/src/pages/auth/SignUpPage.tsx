@@ -1,11 +1,11 @@
 import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
 import { auth } from "../../lib/firebase";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
-import { UPDATE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
+import { UPDATE_ONBOARDING, COMPLETE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -474,18 +474,121 @@ function Step2Interests({
   );
 }
 
-// ─── Step 3 stub ──────────────────────────────────────────────────────────────
+// ─── Step 3 – Daily goal ──────────────────────────────────────────────────────
 
-function Step3Stub() {
+// Must stay in sync with ALLOWED_DAILY_GOALS in the API
+// (apps/api/src/graphql/mutations/user.mutations.ts).
+const DAILY_GOALS = [
+  { minutes: 5, label: "Casual", detail: "5 min / day" },
+  { minutes: 15, label: "Regular", detail: "15 min / day", recommended: true },
+  { minutes: 30, label: "Serious", detail: "30 min / day" },
+  { minutes: 60, label: "Intense", detail: "1 h / day" },
+] as const;
+
+// Preselect the recommended option so "Start learning" works in one click.
+const DEFAULT_DAILY_GOAL = 15;
+
+function Step3DailyGoal({
+  onFinish,
+  saveDailyGoal,
+  dailyGoal,
+  setDailyGoal,
+}: {
+  onFinish: () => void;
+  saveDailyGoal: (opts: { variables: { dailyGoalMinutes: number } }) => Promise<unknown>;
+  // Owned by the page, like interests, so the pick survives step navigation.
+  dailyGoal: number;
+  setDailyGoal: Dispatch<SetStateAction<number>>;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFinish = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // Saving the goal also marks onboarding complete on the server.
+      await saveDailyGoal({ variables: { dailyGoalMinutes: dailyGoal } });
+      onFinish();
+    } catch {
+      setError("We couldn't save your daily goal. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">
-        ⚙️
-      </span>
-      <h2 className="text-xl font-bold text-foreground tracking-tight m-0">Preferences</h2>
-      <p className="text-sm text-muted-foreground leading-relaxed m-0 max-w-[300px]">
-        This step is coming soon (SYN-24).
+    <div>
+      <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
+        Set your daily goal
+      </h1>
+      <p className="text-[13px] text-muted-foreground font-medium mb-6">
+        How much time do you want to commit per day? You can change this anytime.
       </p>
+
+      <fieldset className="flex flex-col gap-2.5 mb-6">
+        <legend className="sr-only">Daily goal</legend>
+        {DAILY_GOALS.map((goal) => {
+          const selected = dailyGoal === goal.minutes;
+          return (
+            <label
+              key={goal.minutes}
+              className={[
+                "flex items-center justify-between border-2 rounded-xl px-[18px] py-3.5 cursor-pointer transition",
+                // The radio input is visually hidden, so the card carries the keyboard focus ring.
+                "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2",
+                selected ? "border-primary bg-accent" : "border-border bg-card",
+              ].join(" ")}
+            >
+              <input
+                type="radio"
+                name="daily-goal"
+                value={goal.minutes}
+                checked={selected}
+                onChange={() => {
+                  setError(null);
+                  setDailyGoal(goal.minutes);
+                }}
+                className="sr-only"
+              />
+              <span className="flex flex-col items-start gap-0.5">
+                <span className="text-[15px] font-semibold text-foreground">{goal.label}</span>
+                <span className="text-[13px] text-muted-foreground">{goal.detail}</span>
+              </span>
+              {"recommended" in goal && goal.recommended && (
+                <span className="text-[11px] font-semibold px-2 py-[3px] rounded-md bg-[hsl(var(--brand))] text-[hsl(var(--brand-foreground))]">
+                  recommended
+                </span>
+              )}
+            </label>
+          );
+        })}
+      </fieldset>
+
+      {error && (
+        <p
+          role="alert"
+          className="text-[13px] text-destructive bg-[hsl(var(--destructive)/0.1)] border border-[hsl(var(--destructive)/0.3)] rounded-lg px-3 py-2.5 mb-4"
+        >
+          {error}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleFinish}
+        disabled={loading}
+        className="w-full h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
+      >
+        {loading && <Spinner />}
+        {loading && (
+          <span className="sr-only" role="status">
+            Saving…
+          </span>
+        )}
+        {loading ? null : "Start learning"}
+      </button>
     </div>
   );
 }
@@ -498,8 +601,11 @@ export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [syncUser] = useMutation(SYNC_CURRENT_USER);
   const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
-  // Owned here (not in Step2Interests) so the selection survives step navigation.
+  const [completeOnboarding] = useMutation(COMPLETE_ONBOARDING);
+  const navigate = useNavigate();
+  // Owned here (not in the step components) so selections survive step navigation.
   const [interests, setInterests] = useState<string[]>([]);
+  const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
@@ -525,7 +631,14 @@ export default function SignUpPage() {
             setInterests={setInterests}
           />
         )}
-        {step === 3 && <Step3Stub />}
+        {step === 3 && (
+          <Step3DailyGoal
+            onFinish={() => navigate("/", { replace: true })}
+            saveDailyGoal={completeOnboarding}
+            dailyGoal={dailyGoal}
+            setDailyGoal={setDailyGoal}
+          />
+        )}
       </div>
     </div>
   );
