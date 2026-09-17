@@ -9,6 +9,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import CourseBuilder from "./pages/courses/CourseBuilder";
 import CoursesList from "./pages/courses/CoursesList";
 import AdminLeaderboardPage from "./pages/LeaderboardPage";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (
@@ -45,6 +46,14 @@ function App() {
                       element={
                         <DashboardLayout>
                           <AdminLeaderboardPage />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/lessons/:nodeId/edit"
+                      element={
+                        <DashboardLayout>
+                          <LessonEditor />
                         </DashboardLayout>
                       }
                     />
