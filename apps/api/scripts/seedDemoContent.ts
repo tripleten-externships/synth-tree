@@ -47,6 +47,8 @@ type QuestionSeed = {
   type: QuestionType;
   prompt: string;
   options?: { text: string; isCorrect?: boolean }[];
+  // FILL only: the graded answer key (trimmed, case-insensitive).
+  canonicalAnswer?: string;
 };
 
 type NodeSeed = {
@@ -100,11 +102,7 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "How many covalent bonds does a neutral carbon atom form?",
-                options: [
-                  { text: "2" },
-                  { text: "4", isCorrect: true },
-                  { text: "6" },
-                ],
+                options: [{ text: "2" }, { text: "4", isCorrect: true }, { text: "6" }],
               },
               {
                 type: QuestionType.MULTIPLE_CHOICE,
@@ -115,6 +113,14 @@ const COURSES: CourseSeed[] = [
                   { text: "Magnetic" },
                   { text: "Triple", isCorrect: true },
                 ],
+              },
+              {
+                // FILL sample. Grading trims + lowercases, so "sp" is accepted
+                // against the canonical "SP " (SYN-53 acceptance).
+                type: QuestionType.FILL,
+                prompt:
+                  "A carbon atom at the end of a triple bond is ___-hybridized. Fill in the blank (e.g. sp, sp2, sp3).",
+                canonicalAnswer: "SP ",
               },
             ],
           },
@@ -372,7 +378,13 @@ async function main() {
         for (let qi = 0; qi < n.quiz.questions.length; qi++) {
           const q = n.quiz.questions[qi];
           const question = await prisma.quizQuestion.create({
-            data: { quizId: quiz.id, type: q.type, prompt: q.prompt, order: qi },
+            data: {
+              quizId: quiz.id,
+              type: q.type,
+              prompt: q.prompt,
+              canonicalAnswer: q.canonicalAnswer ?? null,
+              order: qi,
+            },
           });
           if (q.options?.length) {
             await prisma.quizOption.createMany({

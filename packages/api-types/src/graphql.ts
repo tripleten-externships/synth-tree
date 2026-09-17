@@ -1220,6 +1220,7 @@ export type MutationCreateQuizOptionArgs = {
 
 
 export type MutationCreateQuizQuestionArgs = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   order?: InputMaybe<Scalars['Int']['input']>;
   prompt: Scalars['String']['input'];
   quizId: Scalars['String']['input'];
@@ -1362,6 +1363,7 @@ export type MutationUpdateQuizOptionArgs = {
 
 
 export type MutationUpdateQuizQuestionArgs = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   order?: InputMaybe<Scalars['Int']['input']>;
   prompt?: InputMaybe<Scalars['String']['input']>;
@@ -1999,6 +2001,7 @@ export type QueryMode =
   | 'insensitive';
 
 export type QuestionType =
+  | 'FILL'
   | 'MULTIPLE_CHOICE'
   | 'OPEN_QUESTION'
   | 'SINGLE_CHOICE';
@@ -3078,6 +3081,7 @@ export type QuizOrderByWithRelationInput = {
 export type QuizQuestion = {
   __typename?: 'QuizQuestion';
   answers: Array<QuizAttemptAnswer>;
+  canonicalAnswer?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   options: Array<QuizOption>;
@@ -3114,6 +3118,7 @@ export type QuizQuestionAvgOrderByAggregateInput = {
 };
 
 export type QuizQuestionCountOrderByAggregateInput = {
+  canonicalAnswer?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   order?: InputMaybe<SortOrder>;
@@ -3125,6 +3130,7 @@ export type QuizQuestionCountOrderByAggregateInput = {
 
 export type QuizQuestionCreateInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
@@ -3136,6 +3142,7 @@ export type QuizQuestionCreateInput = {
 };
 
 export type QuizQuestionCreateManyInput = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   order?: InputMaybe<Scalars['Int']['input']>;
@@ -3146,6 +3153,7 @@ export type QuizQuestionCreateManyInput = {
 };
 
 export type QuizQuestionCreateManyQuizInput = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   order?: InputMaybe<Scalars['Int']['input']>;
@@ -3194,6 +3202,7 @@ export type QuizQuestionCreateOrConnectWithoutQuizInput = {
 };
 
 export type QuizQuestionCreateWithoutAnswersInput = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
@@ -3206,6 +3215,7 @@ export type QuizQuestionCreateWithoutAnswersInput = {
 
 export type QuizQuestionCreateWithoutOptionsInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   order?: InputMaybe<Scalars['Int']['input']>;
@@ -3217,6 +3227,7 @@ export type QuizQuestionCreateWithoutOptionsInput = {
 
 export type QuizQuestionCreateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerCreateNestedManyWithoutQuestionInput>;
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionCreateNestedManyWithoutQuestionInput>;
@@ -3233,6 +3244,7 @@ export type QuizQuestionListRelationFilter = {
 };
 
 export type QuizQuestionMaxOrderByAggregateInput = {
+  canonicalAnswer?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   order?: InputMaybe<SortOrder>;
@@ -3243,6 +3255,7 @@ export type QuizQuestionMaxOrderByAggregateInput = {
 };
 
 export type QuizQuestionMinOrderByAggregateInput = {
+  canonicalAnswer?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   order?: InputMaybe<SortOrder>;
@@ -3262,6 +3275,7 @@ export type QuizQuestionOrderByWithAggregationInput = {
   _max?: InputMaybe<QuizQuestionMaxOrderByAggregateInput>;
   _min?: InputMaybe<QuizQuestionMinOrderByAggregateInput>;
   _sum?: InputMaybe<QuizQuestionSumOrderByAggregateInput>;
+  canonicalAnswer?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   order?: InputMaybe<SortOrder>;
@@ -3273,6 +3287,7 @@ export type QuizQuestionOrderByWithAggregationInput = {
 
 export type QuizQuestionOrderByWithRelationInput = {
   answers?: InputMaybe<QuizAttemptAnswerOrderByRelationAggregateInput>;
+  canonicalAnswer?: InputMaybe<SortOrder>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   options?: InputMaybe<QuizOptionOrderByRelationAggregateInput>;
@@ -3285,6 +3300,7 @@ export type QuizQuestionOrderByWithRelationInput = {
 };
 
 export type QuizQuestionScalarFieldEnum =
+  | 'canonicalAnswer'
   | 'createdAt'
   | 'id'
   | 'order'
@@ -3302,6 +3318,7 @@ export type QuizQuestionScalarWhereInput = {
   AND?: InputMaybe<Array<QuizQuestionScalarWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionScalarWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionScalarWhereInput>>;
+  canonicalAnswer?: InputMaybe<StringNullableFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
   order?: InputMaybe<IntFilter>;
@@ -3315,6 +3332,7 @@ export type QuizQuestionScalarWhereWithAggregatesInput = {
   AND?: InputMaybe<Array<QuizQuestionScalarWhereWithAggregatesInput>>;
   NOT?: InputMaybe<Array<QuizQuestionScalarWhereWithAggregatesInput>>;
   OR?: InputMaybe<Array<QuizQuestionScalarWhereWithAggregatesInput>>;
+  canonicalAnswer?: InputMaybe<StringNullableWithAggregatesFilter>;
   createdAt?: InputMaybe<DateTimeWithAggregatesFilter>;
   id?: InputMaybe<UuidWithAggregatesFilter>;
   order?: InputMaybe<IntWithAggregatesFilter>;
@@ -3330,6 +3348,7 @@ export type QuizQuestionSumOrderByAggregateInput = {
 
 export type QuizQuestionUpdateInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput>;
+  canonicalAnswer?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   options?: InputMaybe<QuizOptionUpdateManyWithoutQuestionNestedInput>;
@@ -3341,6 +3360,7 @@ export type QuizQuestionUpdateInput = {
 };
 
 export type QuizQuestionUpdateManyMutationInput = {
+  canonicalAnswer?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   order?: InputMaybe<IntFieldUpdateOperationsInput>;
@@ -3400,6 +3420,7 @@ export type QuizQuestionUpdateWithWhereUniqueWithoutQuizInput = {
 };
 
 export type QuizQuestionUpdateWithoutAnswersInput = {
+  canonicalAnswer?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   options?: InputMaybe<QuizOptionUpdateManyWithoutQuestionNestedInput>;
@@ -3412,6 +3433,7 @@ export type QuizQuestionUpdateWithoutAnswersInput = {
 
 export type QuizQuestionUpdateWithoutOptionsInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput>;
+  canonicalAnswer?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   order?: InputMaybe<IntFieldUpdateOperationsInput>;
@@ -3423,6 +3445,7 @@ export type QuizQuestionUpdateWithoutOptionsInput = {
 
 export type QuizQuestionUpdateWithoutQuizInput = {
   answers?: InputMaybe<QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput>;
+  canonicalAnswer?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   options?: InputMaybe<QuizOptionUpdateManyWithoutQuestionNestedInput>;
@@ -3455,6 +3478,7 @@ export type QuizQuestionWhereInput = {
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
+  canonicalAnswer?: InputMaybe<StringNullableFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
@@ -3471,6 +3495,7 @@ export type QuizQuestionWhereUniqueInput = {
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
   answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
+  canonicalAnswer?: InputMaybe<StringNullableFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
