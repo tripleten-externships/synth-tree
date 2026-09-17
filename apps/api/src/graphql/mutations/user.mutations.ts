@@ -3,7 +3,7 @@ import { builder } from "@graphql/builder";
 import { Prisma, Role as PrismaRole } from "@prisma/client";
 import { Role as RoleEnum } from "@graphql/__generated__/inputs";
 import { requireAdmin } from "@graphql/auth/requireAuth";
-import logger from '@lib/logger'; // Structured logger for tracking user sync and account events
+import logger from "@lib/logger"; // Structured logger for tracking user sync and account events
 
 // Canonical onboarding subjects. Must stay in sync with SUBJECTS in the client
 // SignUpPage (apps/client-frontend/src/pages/auth/SignUpPage.tsx).
@@ -36,14 +36,14 @@ builder.mutationFields((t) => ({
     },
     resolve: async (query, _parent, args, context) => {
       const firebaseUid = context.auth.requireAuth();
-      logger.debug({ userId: firebaseUid }, 'Syncing current user'); // Debug-level log to trace user sync flow during development
+      logger.debug({ userId: firebaseUid }, "Syncing current user"); // Debug-level log to trace user sync flow during development
       const ctxUser = context.user;
 
       const email = ctxUser?.email ?? null;
       if (!email) {
         throw new GraphQLError(
           "Authenticated Firebase user has no email; cannot sync user record",
-          { extensions: { code: "UNAUTHENTICATED" } }
+          { extensions: { code: "UNAUTHENTICATED" } },
         );
       }
 
@@ -52,10 +52,9 @@ builder.mutationFields((t) => ({
       });
 
       if (existingByEmail && existingByEmail.id !== firebaseUid) {
-        throw new GraphQLError(
-          "Email is already associated with a different user account",
-          { extensions: { code: "BAD_USER_INPUT" } }
-        );
+        throw new GraphQLError("Email is already associated with a different user account", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
       }
 
       const user = await context.prisma.user.upsert({
@@ -69,13 +68,15 @@ builder.mutationFields((t) => ({
           role: PrismaRole.USER, // use Prisma enum
         },
         update: {
-        email,
-        ...(args.name !== null && args.name !== undefined ? { name: args.name } : {}),
-        ...(args.photoUrl !== null && args.photoUrl !== undefined ? { photoUrl: args.photoUrl } : {}),
+          email,
+          ...(args.name !== null && args.name !== undefined ? { name: args.name } : {}),
+          ...(args.photoUrl !== null && args.photoUrl !== undefined
+            ? { photoUrl: args.photoUrl }
+            : {}),
         },
       });
 
-      logger.info({ userId: user.id, email: user.email }, 'User synced'); // High-level audit log for successful user creation/update
+      logger.info({ userId: user.id, email: user.email }, "User synced"); // High-level audit log for successful user creation/update
       return user;
     },
   }),

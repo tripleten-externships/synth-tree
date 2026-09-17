@@ -45,7 +45,11 @@ function ProgressBar({ step }: { step: Step }) {
             <div
               className={[
                 "h-full rounded-full transition-all duration-400",
-                isDone ? "w-full bg-[hsl(var(--primary)/0.5)]" : isActive ? "w-full bg-primary" : "w-0",
+                isDone
+                  ? "w-full bg-[hsl(var(--primary)/0.5)]"
+                  : isActive
+                    ? "w-full bg-primary"
+                    : "w-0",
               ].join(" ")}
             />
           </div>
@@ -201,7 +205,9 @@ function Step1Credentials({
       <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
         Create your account
       </h1>
-      <p className="text-[13px] text-muted-foreground font-medium mb-7">Step 1 of 3 — Your credentials</p>
+      <p className="text-[13px] text-muted-foreground font-medium mb-7">
+        Step 1 of 3 — Your credentials
+      </p>
 
       <div className="flex flex-col gap-[18px] mb-2">
         {/* Name */}
@@ -422,9 +428,7 @@ function Step2Interests({
               onClick={() => toggle(subject)}
               className={[
                 "border-2 rounded-xl px-3.5 py-2.5 text-sm text-foreground text-left transition",
-                selected
-                  ? "border-primary bg-accent"
-                  : "border-border bg-card hover:border-border",
+                selected ? "border-primary bg-accent" : "border-border bg-card hover:border-border",
               ].join(" ")}
             >
               {subject}
@@ -458,7 +462,11 @@ function Step2Interests({
           className="flex-[2] h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
         >
           {loading && <Spinner />}
-          {loading && <span className="sr-only" role="status">Saving…</span>}
+          {loading && (
+            <span className="sr-only" role="status">
+              Saving…
+            </span>
+          )}
           {loading ? null : "Continue"}
         </button>
       </div>

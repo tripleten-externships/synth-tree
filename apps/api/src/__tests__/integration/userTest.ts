@@ -3,12 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { getTestServer, stopTestServer } from "./server";
 import { makeUserContext, makeUnauthContext } from "./context";
-import {
-  seedUsers,
-  cleanAll,
-  REGULAR_USER_ID,
-  SECOND_REGULAR_USER_ID,
-} from "./seed";
+import { seedUsers, cleanAll, REGULAR_USER_ID, SECOND_REGULAR_USER_ID } from "./seed";
 
 const prisma = new PrismaClient();
 
@@ -84,7 +79,10 @@ describe("updateOnboarding (signup step 2 - interests)", () => {
   it("rejects interests that are not in the known subject list", async () => {
     const res = singleResult(
       await server.executeOperation(
-        { query: UPDATE_ONBOARDING, variables: { interests: ["Physics", "Underwater Basket Weaving"] } },
+        {
+          query: UPDATE_ONBOARDING,
+          variables: { interests: ["Physics", "Underwater Basket Weaving"] },
+        },
         { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
       ),
     );
