@@ -39,7 +39,11 @@ const placeholderCourses = [
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
   // navigate() lets us send the user to a different page when they click something
-  const { data: progressData } = useQuery<MyProgressData>(MY_PROGRESS_QUERY, {
+  const {
+    data: progressData,
+    loading: progressLoading,
+    error: progressError,
+  } = useQuery<MyProgressData>(MY_PROGRESS_QUERY, {
     fetchPolicy: "network-only",
   });
 
@@ -67,7 +71,21 @@ export default function Home() {
       </header>
 
       <section className="w-full">
-        {inProgressLesson ? (
+        {progressLoading ? (
+          // Skeleton placeholder that mirrors the ContinueCard shape so the
+          // empty state never flashes before the progress query settles.
+          <div
+            aria-hidden="true"
+            className="flex w-full animate-pulse items-center gap-6 rounded-3xl border border-border bg-card px-6 py-5 shadow-sm"
+          >
+            <div className="h-20 w-20 shrink-0 rounded-2xl bg-muted" />
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="h-4 w-1/3 rounded bg-muted" />
+              <div className="h-6 w-2/3 rounded bg-muted" />
+            </div>
+            <div className="h-12 w-28 shrink-0 rounded-2xl bg-muted" />
+          </div>
+        ) : inProgressLesson ? (
           <ContinueCard
             courseTitle={inProgressLesson.node.tree.course.title}
             lessonTitle={inProgressLesson.node.title}
@@ -77,7 +95,7 @@ export default function Home() {
               )
             }
           />
-        ) : (
+        ) : progressError ? null : (
           <button
             type="button"
             onClick={() => navigate("/catalog")}
@@ -107,15 +125,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* "Browse catalog" card — takes the user to the full course catalog page.
-      <button
-        type="button"
-        onClick={() => navigate("/catalog")}
-        className="w-full max-w-3xl rounded-3xl border-2 border-dashed border-border bg-card p-8 text-card-foreground shadow-sm transition-colors hover:border-primary hover:bg-accent hover:text-accent-foreground"
-      >
-        <span className="text-sm font-medium">Browse the full catalog →</span>
-      </button> */}
     </div>
   );
 }
