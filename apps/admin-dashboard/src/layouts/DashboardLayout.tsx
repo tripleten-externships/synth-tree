@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
 } from "@synth-tree/ui";
 import useAuth from "../hooks/useAuth";
-import SynthTreeLogo from "../assets/synth-tree.svg";
 import GenericAvatar from "../assets/avatar-generic.svg";
 import {Sun, Moon, LayoutList} from "lucide-react";
 
@@ -30,11 +29,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       >
         {/* LEFT: Logo */}
         <div className="flex items-center">
-          <img
-            src={SynthTreeLogo}
-            alt="Synth Tree logo"
-            className="h-6 w-auto dark:brightness-0 dark:invert"
-          />
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            Synth<span className="text-primary">Tree</span>
+            <span className="ml-1.5 align-middle text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Admin
+            </span>
+          </span>
         </div>
         {/* RIGHT: Courses link, avatar + admin badge container*/}
         <div className="flex items-center gap-8">

@@ -4,8 +4,15 @@ import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
+import { incrementDailyQuestProgress } from "src/services/dailyQuests";
+import { completeNodeForUser } from "src/services/progress";
+import { awardXp } from "../../services/xp";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput } from "../inputs/quiz.inputs";
+
+// SYN-40: passing a quiz awards a dedicated, fixed XP amount (distinct from a
+// node's own completion reward).
+const QUIZ_PASS_XP = 100;
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -93,8 +100,8 @@ builder.mutationFields((t) => ({
         where: { id },
       });
 
-      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting. 
-      
+      /* The code below is for soft deleting quizzes, but I decided not to use it because nodeId needs to be a unique ID. This means that you cannot make another quiz for the same node, even after deleting.
+
       const deleted = await ctx.prisma.quiz.update({
         ...query,
         where: { id },
@@ -367,6 +374,10 @@ builder.mutationFields((t) => ({
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
+        select: {
+          id: true,
+          nodeId: true,
+        },
       });
 
       if (!existing) {
@@ -412,13 +423,40 @@ builder.mutationFields((t) => ({
 
         const summary = await gradeQuizAttempt(tx, quizAttempt.id);
 
+        // SYN-36 / SYN-40: on a pass, mark the node complete AND award the
+        // quiz-pass XP in the SAME transaction as the graded attempt, so a
+        // failure can't leave a passed attempt / COMPLETED node without XP.
+        //
+        // - completeNodeForUser is the shared, idempotent completion helper
+        //   (required-quiz gate satisfied because the passing attempt was just
+        //   persisted) and feeds the LESSON_COMPLETED daily-quest hook.
+        // - awardXp keeps its own idempotency guard (rewardKey), so repeat
+        //   passes don't double-award.
+        if (summary.passed === true) {
+          await completeNodeForUser(tx, userId, existing.nodeId);
+
+          await awardXp(
+            ctx.prisma,
+            userId,
+            QUIZ_PASS_XP,
+            "quiz_pass",
+            { quizId },
+            tx,
+          );
+        }
+
         return {
           quizAttempt,
           summary,
         };
       });
 
-      logger.info({ userId, quizId, passed: result.summary.passed }, "Quiz attempt submitted");
+      const { summary } = result;
+      if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
+        await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
+      }
+
+      logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,

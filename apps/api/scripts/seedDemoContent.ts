@@ -85,6 +85,8 @@ const COURSES: CourseSeed[] = [
               type: ContentType.HTML,
               html: "<h2>Atoms &amp; Bonding</h2><p>Organic chemistry is the study of carbon-based molecules. We start with the <strong>covalent bond</strong>: two atoms sharing a pair of electrons.</p><ul><li>Carbon forms four bonds.</li><li>Bonds can be single, double, or triple.</li></ul>",
             },
+            // Page break: splits this lesson into two pages (SYN-60 multi-page demo).
+            { type: ContentType.PAGE_BREAK },
             {
               type: ContentType.VIDEO,
               url: "https://www.youtube.com/watch?v=FSyAehMdpyI",

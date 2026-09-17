@@ -90,22 +90,27 @@ export class DatabaseStack extends cdk.Stack {
     // ========================================
 
     /**
-     * Create Secrets Manager secret for database credentials
-     * This secret will be automatically populated by RDS with the actual credentials
-     * and can be used by ECS tasks to connect to the database
+     * Reference the Secrets Manager secret holding the database credentials.
+     *
+     * The secret is imported by name rather than created here. A hardcoded
+     * `secretName` combined with `new secretsmanager.Secret(...)` fails with
+     * `AlreadyExists` whenever the physical secret outlives a stack incarnation
+     * (Secrets Manager reserves the name through its recovery window) — exactly
+     * what wedged the dev Database stack in UPDATE_ROLLBACK_COMPLETE. Importing
+     * by name is idempotent: the stack neither creates nor deletes the secret,
+     * so re-deploys and stack recreations can no longer collide on it.
+     *
+     * Existence is guaranteed by the "Ensure database credentials secret
+     * exists" step in the deploy-infrastructure workflow, which creates the
+     * secret (username `postgres` + a generated password) only when absent and
+     * never touches it otherwise. RDS reads the `username`/`password` keys from
+     * it to provision the cluster, and ECS tasks read them at runtime.
      */
-    this.secret = new secretsmanager.Secret(this, "DatabaseSecret", {
-      secretName: `${config.name}/database/credentials`,
-      description: `Database credentials for ${config.name} environment`,
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          username: "postgres",
-        }),
-        generateStringKey: "password",
-        excludeCharacters: '"@/\\',
-        passwordLength: 32,
-      },
-    });
+    this.secret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "DatabaseSecret",
+      `${config.name}/database/credentials`,
+    );
 
     // Note: Secret rotation requires a Lambda function to handle the rotation logic.
     // This can be added later by creating a rotation Lambda and calling:
