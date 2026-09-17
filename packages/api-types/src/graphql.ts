@@ -7553,6 +7553,11 @@ export type MyProgressQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MyProgressQuery = { __typename?: 'Query', myProgress?: Array<{ __typename?: 'UserNodeProgress', id: string, status: ProgressStatus, updatedAt: any, node: { __typename?: 'SkillNode', id: string, title: string, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } } }> | null };
 
+export type OnboardingStatusQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete: boolean } | null };
+
 export type PublicCourseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -8511,6 +8516,40 @@ export function useMyProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
         }
 export type MyProgressQueryHookResult = ReturnType<typeof useMyProgressQuery>;
 export type MyProgressLazyQueryHookResult = ReturnType<typeof useMyProgressLazyQuery>;
+export const OnboardingStatusDocument = gql`
+    query OnboardingStatus {
+  currentUser {
+    id
+    onboardingComplete
+  }
+}
+    `;
+
+/**
+ * __useOnboardingStatusQuery__
+ *
+ * To run a query within a React component, call `useOnboardingStatusQuery` and pass it any options that fit your needs.
+ * When your component renders, `useOnboardingStatusQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useOnboardingStatusQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useOnboardingStatusQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(OnboardingStatusDocument, options);
+      }
+export function useOnboardingStatusLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(OnboardingStatusDocument, options);
+        }
+export type OnboardingStatusQueryHookResult = ReturnType<typeof useOnboardingStatusQuery>;
+export type OnboardingStatusLazyQueryHookResult = ReturnType<typeof useOnboardingStatusLazyQuery>;
 export const PublicCourseDocument = gql`
     query PublicCourse($id: ID!) {
   publicCourse(id: $id) {
