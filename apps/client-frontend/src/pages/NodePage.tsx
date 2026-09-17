@@ -33,9 +33,9 @@ export default function NodePage() {
       <h1 className="text-2xl font-bold text-foreground">{node.title}</h1>
 
       {/* Lesson content. Opening this marks the node in progress (SYN-31). */}
-      <LessonViewer nodeId={node.id} onNext={() => navigate(`/courses/${course.id}`)} />
+      <LessonViewer nodeId={node.id} quiz={node.quiz} onNext={() => navigate(`/courses/${course.id}`)} />
 
-      {node.quiz && <QuizRunner quiz={node.quiz} />}
+      {/* {node.quiz && <QuizRunner quiz={node.quiz} />} */}
     </div>
   );
 }
