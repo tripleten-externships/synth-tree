@@ -2,13 +2,22 @@ import { useEffect, useState } from "react";
 import { fetchLeaderboard } from "../utils/api"; // Calls your GraphQL API
 import { useAuth } from "../contexts/AuthContext"; // Gives access to Firebase user
 
+type LeaderboardEntry = {
+  userId: string;
+  displayName: string;
+  avatar: string | null;
+  totalXp: number;
+  streak: number;
+  rank: number;
+};
+
 export default function LeaderboardPage() {
   /**
    * entries → the list of leaderboard rows returned by the API
    * currentUserRank → the user's global rank (even if outside top 100)
    * loading → controls the loading state while fetching data
    */
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -57,13 +66,6 @@ export default function LeaderboardPage() {
   if (!entries.length) {
     return <div className="p-8">No XP yet — start earning!</div>;
   }
-
-  /**
-   * Find the current user's entry in the leaderboard.
-   * We compare using Firebase UID (user.uid), NOT user.id.
-   * This highlights the user's row in the table.
-   */
-  const currentUserEntry = entries.find((e) => e.userId === user?.uid);
 
   return (
     <div className="min-h-screen p-8">

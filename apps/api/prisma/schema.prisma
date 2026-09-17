@@ -344,6 +344,8 @@ model UserXp {
   weeklyXp  Json     @default("{}")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXp]) // leaderboard sorts and counts on totalXp
 }
 
 model UserStreak {

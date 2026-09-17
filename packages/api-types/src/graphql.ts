@@ -775,6 +775,22 @@ export type JsonWithAggregatesFilter = {
   string_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type LeaderboardEntry = {
+  __typename?: 'LeaderboardEntry';
+  avatar?: Maybe<Scalars['String']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  rank?: Maybe<Scalars['Int']['output']>;
+  streak?: Maybe<Scalars['Int']['output']>;
+  totalXp?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type LeaderboardPayload = {
+  __typename?: 'LeaderboardPayload';
+  currentUserRank?: Maybe<Scalars['Int']['output']>;
+  entries?: Maybe<Array<LeaderboardEntry>>;
+};
+
 export type LessonBlocks = {
   __typename?: 'LessonBlocks';
   caption?: Maybe<Scalars['String']['output']>;
@@ -1782,6 +1798,7 @@ export type Query = {
   courseForLearner?: Maybe<Course>;
   courseProgress?: Maybe<CourseProgress>;
   currentUser?: Maybe<User>;
+  leaderboard?: Maybe<LeaderboardPayload>;
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
@@ -1892,6 +1909,11 @@ export type QueryCourseForLearnerArgs = {
 export type QueryCourseProgressArgs = {
   courseId: Scalars['ID']['input'];
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryLeaderboardArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -7237,6 +7259,13 @@ export type AdminCourseQueryVariables = Exact<{
 
 export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus } | null };
 
+export type AdminLeaderboardQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AdminLeaderboardQuery = { __typename?: 'Query', leaderboard?: { __typename?: 'LeaderboardPayload', currentUserRank?: number | null, entries?: Array<{ __typename?: 'LeaderboardEntry', userId?: string | null, displayName?: string | null, avatar?: string | null, totalXp?: number | null, streak?: number | null, rank?: number | null }> | null } | null };
+
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -7269,6 +7298,13 @@ export type CreateCourseMutationVariables = Exact<{
 
 
 export type CreateCourseMutation = { __typename?: 'Mutation', createCourse?: { __typename?: 'Course', id: string, title: string } | null };
+
+export type GlobalLeaderboardQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GlobalLeaderboardQuery = { __typename?: 'Query', leaderboard?: { __typename?: 'LeaderboardPayload', currentUserRank?: number | null, entries?: Array<{ __typename?: 'LeaderboardEntry', userId?: string | null, displayName?: string | null, avatar?: string | null, totalXp?: number | null, streak?: number | null, rank?: number | null }> | null } | null };
 
 export type CompleteNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7452,6 +7488,48 @@ export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
         }
 export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
 export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
+export const AdminLeaderboardDocument = gql`
+    query AdminLeaderboard($limit: Int = 100) {
+  leaderboard(limit: $limit) {
+    currentUserRank
+    entries {
+      userId
+      displayName
+      avatar
+      totalXp
+      streak
+      rank
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminLeaderboardQuery__
+ *
+ * To run a query within a React component, call `useAdminLeaderboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLeaderboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLeaderboardQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useAdminLeaderboardQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>(AdminLeaderboardDocument, options);
+      }
+export function useAdminLeaderboardLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>(AdminLeaderboardDocument, options);
+        }
+export type AdminLeaderboardQueryHookResult = ReturnType<typeof useAdminLeaderboardQuery>;
+export type AdminLeaderboardLazyQueryHookResult = ReturnType<typeof useAdminLeaderboardLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -7609,6 +7687,48 @@ export function useCreateCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<CreateCourseMutation, CreateCourseMutationVariables>(CreateCourseDocument, options);
       }
 export type CreateCourseMutationHookResult = ReturnType<typeof useCreateCourseMutation>;
+export const GlobalLeaderboardDocument = gql`
+    query GlobalLeaderboard($limit: Int = 100) {
+  leaderboard(limit: $limit) {
+    currentUserRank
+    entries {
+      userId
+      displayName
+      avatar
+      totalXp
+      streak
+      rank
+    }
+  }
+}
+    `;
+
+/**
+ * __useGlobalLeaderboardQuery__
+ *
+ * To run a query within a React component, call `useGlobalLeaderboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGlobalLeaderboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGlobalLeaderboardQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGlobalLeaderboardQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>(GlobalLeaderboardDocument, options);
+      }
+export function useGlobalLeaderboardLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>(GlobalLeaderboardDocument, options);
+        }
+export type GlobalLeaderboardQueryHookResult = ReturnType<typeof useGlobalLeaderboardQuery>;
+export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLeaderboardLazyQuery>;
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
