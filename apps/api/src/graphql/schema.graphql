@@ -773,6 +773,20 @@ input JsonWithAggregatesFilter {
   string_starts_with: String
 }
 
+type LeaderboardEntry {
+  avatar: String
+  displayName: String
+  rank: Int
+  streak: Int
+  totalXp: Int
+  userId: String
+}
+
+type LeaderboardPayload {
+  currentUserRank: Int
+  entries: [LeaderboardEntry!]
+}
+
 type LessonBlocks {
   caption: String
   createdAt: DateTime!
@@ -1155,6 +1169,7 @@ type Mutation {
   deleteUser(id: ID!): User
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
+  reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
@@ -1604,6 +1619,7 @@ type Query {
   courseForLearner(id: ID!): Course
   courseProgress(courseId: ID!, userId: ID): CourseProgress
   currentUser: User
+  leaderboard(limit: Int = 100): LeaderboardPayload
   lessonBlock(id: ID!): LessonBlocks
   lessonBlocks(limit: Int = 25, offset: Int = 0): [LessonBlocks!]
   lessonBlocksByNode(nodeId: ID!): [LessonBlocks!]
@@ -3319,6 +3335,7 @@ type SkillNode {
   tree: SkillTree!
   treeId: String!
   updatedAt: DateTime!
+  xpReward: Int
 }
 
 input SkillNodeAvgOrderByAggregateInput {
@@ -3326,6 +3343,7 @@ input SkillNodeAvgOrderByAggregateInput {
   posX: SortOrder
   posY: SortOrder
   step: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeCountOrderByAggregateInput {
@@ -3339,6 +3357,7 @@ input SkillNodeCountOrderByAggregateInput {
   title: SortOrder
   treeId: SortOrder
   updatedAt: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeCreateInput {
@@ -3357,6 +3376,7 @@ input SkillNodeCreateInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateManyInput {
@@ -3370,6 +3390,7 @@ input SkillNodeCreateManyInput {
   title: String!
   treeId: String!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateManyTreeInput {
@@ -3382,6 +3403,7 @@ input SkillNodeCreateManyTreeInput {
   step: Int
   title: String!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateManyTreeInputEnvelope {
@@ -3471,6 +3493,7 @@ input SkillNodeCreateWithoutLessonsInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateWithoutPrerequisitesInput {
@@ -3488,6 +3511,7 @@ input SkillNodeCreateWithoutPrerequisitesInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateWithoutProgressesInput {
@@ -3505,6 +3529,7 @@ input SkillNodeCreateWithoutProgressesInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateWithoutQuizInput {
@@ -3522,6 +3547,7 @@ input SkillNodeCreateWithoutQuizInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateWithoutRequiredForInput {
@@ -3539,6 +3565,7 @@ input SkillNodeCreateWithoutRequiredForInput {
   title: String!
   tree: SkillTreeCreateNestedOneWithoutNodesInput!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeCreateWithoutTreeInput {
@@ -3556,6 +3583,7 @@ input SkillNodeCreateWithoutTreeInput {
   step: Int
   title: String!
   updatedAt: DateTime
+  xpReward: Int
 }
 
 input SkillNodeListRelationFilter {
@@ -3575,6 +3603,7 @@ input SkillNodeMaxOrderByAggregateInput {
   title: SortOrder
   treeId: SortOrder
   updatedAt: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeMinOrderByAggregateInput {
@@ -3588,6 +3617,7 @@ input SkillNodeMinOrderByAggregateInput {
   title: SortOrder
   treeId: SortOrder
   updatedAt: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeOrderByRelationAggregateInput {
@@ -3610,6 +3640,7 @@ input SkillNodeOrderByWithAggregationInput {
   title: SortOrder
   treeId: SortOrder
   updatedAt: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeOrderByWithRelationInput {
@@ -3629,6 +3660,7 @@ input SkillNodeOrderByWithRelationInput {
   tree: SkillTreeOrderByWithRelationInput
   treeId: SortOrder
   updatedAt: SortOrder
+  xpReward: SortOrder
 }
 
 type SkillNodePrerequisite {
@@ -3873,6 +3905,7 @@ enum SkillNodeScalarFieldEnum {
   title
   treeId
   updatedAt
+  xpReward
 }
 
 input SkillNodeScalarRelationFilter {
@@ -3894,6 +3927,7 @@ input SkillNodeScalarWhereInput {
   title: StringFilter
   treeId: UuidFilter
   updatedAt: DateTimeFilter
+  xpReward: IntNullableFilter
 }
 
 input SkillNodeScalarWhereWithAggregatesInput {
@@ -3910,6 +3944,7 @@ input SkillNodeScalarWhereWithAggregatesInput {
   title: StringWithAggregatesFilter
   treeId: UuidWithAggregatesFilter
   updatedAt: DateTimeWithAggregatesFilter
+  xpReward: IntNullableWithAggregatesFilter
 }
 
 input SkillNodeSumOrderByAggregateInput {
@@ -3917,6 +3952,7 @@ input SkillNodeSumOrderByAggregateInput {
   posX: SortOrder
   posY: SortOrder
   step: SortOrder
+  xpReward: SortOrder
 }
 
 input SkillNodeTreeIdPosXPosYCompoundUniqueInput {
@@ -3947,6 +3983,7 @@ input SkillNodeUpdateInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateManyMutationInput {
@@ -3959,6 +3996,7 @@ input SkillNodeUpdateManyMutationInput {
   step: IntFieldUpdateOperationsInput
   title: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateManyWithWhereWithoutTreeInput {
@@ -4065,6 +4103,7 @@ input SkillNodeUpdateWithoutLessonsInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateWithoutPrerequisitesInput {
@@ -4082,6 +4121,7 @@ input SkillNodeUpdateWithoutPrerequisitesInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateWithoutProgressesInput {
@@ -4099,6 +4139,7 @@ input SkillNodeUpdateWithoutProgressesInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateWithoutQuizInput {
@@ -4116,6 +4157,7 @@ input SkillNodeUpdateWithoutQuizInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateWithoutRequiredForInput {
@@ -4133,6 +4175,7 @@ input SkillNodeUpdateWithoutRequiredForInput {
   title: StringFieldUpdateOperationsInput
   tree: SkillTreeUpdateOneRequiredWithoutNodesNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpdateWithoutTreeInput {
@@ -4150,6 +4193,7 @@ input SkillNodeUpdateWithoutTreeInput {
   step: IntFieldUpdateOperationsInput
   title: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  xpReward: NullableIntFieldUpdateOperationsInput
 }
 
 input SkillNodeUpsertWithWhereUniqueWithoutTreeInput {
@@ -4208,6 +4252,7 @@ input SkillNodeWhereInput {
   tree: SkillTreeWhereInput
   treeId: UuidFilter
   updatedAt: DateTimeFilter
+  xpReward: IntNullableFilter
 }
 
 input SkillNodeWhereUniqueInput {
@@ -4232,6 +4277,7 @@ input SkillNodeWhereUniqueInput {
   treeId_posX_posY: SkillNodeTreeIdPosXPosYCompoundUniqueInput
   treeId_step_orderInStep: SkillNodeTreeIdStepOrderInStepCompoundUniqueInput
   updatedAt: DateTimeFilter
+  xpReward: IntNullableFilter
 }
 
 type SkillTree {
@@ -6592,6 +6638,7 @@ type XpEvent {
   id: ID!
   metadata: Json
   reason: String!
+  rewardKey: String
   user: User!
   userId: String!
 }
@@ -6606,6 +6653,7 @@ input XpEventCountOrderByAggregateInput {
   id: SortOrder
   metadata: SortOrder
   reason: SortOrder
+  rewardKey: SortOrder
   userId: SortOrder
 }
 
@@ -6615,6 +6663,7 @@ input XpEventCreateInput {
   id: String
   metadata: Json
   reason: String!
+  rewardKey: String
   user: UserCreateNestedOneWithoutXpEventsInput!
 }
 
@@ -6624,6 +6673,7 @@ input XpEventCreateManyInput {
   id: String
   metadata: Json
   reason: String!
+  rewardKey: String
   userId: String!
 }
 
@@ -6633,6 +6683,7 @@ input XpEventCreateManyUserInput {
   id: String
   metadata: Json
   reason: String!
+  rewardKey: String
 }
 
 input XpEventCreateManyUserInputEnvelope {
@@ -6658,6 +6709,7 @@ input XpEventCreateWithoutUserInput {
   id: String
   metadata: Json
   reason: String!
+  rewardKey: String
 }
 
 input XpEventListRelationFilter {
@@ -6671,6 +6723,7 @@ input XpEventMaxOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   reason: SortOrder
+  rewardKey: SortOrder
   userId: SortOrder
 }
 
@@ -6679,6 +6732,7 @@ input XpEventMinOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   reason: SortOrder
+  rewardKey: SortOrder
   userId: SortOrder
 }
 
@@ -6697,6 +6751,7 @@ input XpEventOrderByWithAggregationInput {
   id: SortOrder
   metadata: SortOrder
   reason: SortOrder
+  rewardKey: SortOrder
   userId: SortOrder
 }
 
@@ -6706,6 +6761,7 @@ input XpEventOrderByWithRelationInput {
   id: SortOrder
   metadata: SortOrder
   reason: SortOrder
+  rewardKey: SortOrder
   user: UserOrderByWithRelationInput
   userId: SortOrder
 }
@@ -6716,6 +6772,7 @@ enum XpEventScalarFieldEnum {
   id
   metadata
   reason
+  rewardKey
   userId
 }
 
@@ -6728,6 +6785,7 @@ input XpEventScalarWhereInput {
   id: UuidFilter
   metadata: JsonNullableFilter
   reason: StringFilter
+  rewardKey: StringNullableFilter
   userId: StringFilter
 }
 
@@ -6740,6 +6798,7 @@ input XpEventScalarWhereWithAggregatesInput {
   id: UuidWithAggregatesFilter
   metadata: JsonNullableWithAggregatesFilter
   reason: StringWithAggregatesFilter
+  rewardKey: StringNullableWithAggregatesFilter
   userId: StringWithAggregatesFilter
 }
 
@@ -6753,6 +6812,7 @@ input XpEventUpdateInput {
   id: StringFieldUpdateOperationsInput
   metadata: Json
   reason: StringFieldUpdateOperationsInput
+  rewardKey: NullableStringFieldUpdateOperationsInput
   user: UserUpdateOneRequiredWithoutXpEventsNestedInput
 }
 
@@ -6762,6 +6822,7 @@ input XpEventUpdateManyMutationInput {
   id: StringFieldUpdateOperationsInput
   metadata: Json
   reason: StringFieldUpdateOperationsInput
+  rewardKey: NullableStringFieldUpdateOperationsInput
 }
 
 input XpEventUpdateManyWithWhereWithoutUserInput {
@@ -6794,12 +6855,19 @@ input XpEventUpdateWithoutUserInput {
   id: StringFieldUpdateOperationsInput
   metadata: Json
   reason: StringFieldUpdateOperationsInput
+  rewardKey: NullableStringFieldUpdateOperationsInput
 }
 
 input XpEventUpsertWithWhereUniqueWithoutUserInput {
   create: XpEventCreateWithoutUserInput!
   update: XpEventUpdateWithoutUserInput!
   where: XpEventWhereUniqueInput!
+}
+
+input XpEventUserIdReasonRewardKeyCompoundUniqueInput {
+  reason: String!
+  rewardKey: String!
+  userId: String!
 }
 
 input XpEventWhereInput {
@@ -6811,6 +6879,7 @@ input XpEventWhereInput {
   id: UuidFilter
   metadata: JsonNullableFilter
   reason: StringFilter
+  rewardKey: StringNullableFilter
   user: UserWhereInput
   userId: StringFilter
 }
@@ -6824,6 +6893,7 @@ input XpEventWhereUniqueInput {
   id: String
   metadata: JsonNullableFilter
   reason: StringFilter
+  rewardKey: StringNullableFilter
   user: UserWhereInput
   userId: StringFilter
 }

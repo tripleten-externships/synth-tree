@@ -144,6 +144,7 @@ model SkillNode {
   title       String
   step        Int       @default(1) // logical level/layer (e.g., column)
   orderInStep Int       @default(0) // order within the step
+  xpReward    Int?      @default(50)
   posX        Int?      @default(0) // optional: UI layout
   posY        Int?      @default(0) // optional: UI layout
   createdAt   DateTime  @default(now())
@@ -344,6 +345,8 @@ model UserXp {
   weeklyXp  Json     @default("{}")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXp]) // leaderboard sorts and counts on totalXp
 }
 
 model UserStreak {
@@ -382,10 +385,12 @@ model XpEvent {
   userId    String
   amount    Int
   reason    String
+  rewardKey String?
   metadata  Json?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@unique([userId, reason, rewardKey])
 }

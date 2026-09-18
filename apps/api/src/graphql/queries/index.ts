@@ -5,6 +5,7 @@ import "./course.owner.queries";
 import "./course.public.queries";
 import "./analytics.admin.queries";
 import "./dailyQuest.queries";
+import "./leaderboard.query";
 import "./lessonBlock.queries";
 import "./progress.queries";
 import "./quiz.queries";
