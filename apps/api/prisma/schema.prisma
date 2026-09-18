@@ -242,6 +242,7 @@ model QuizQuestion {
   quizId    String       @db.Uuid
   type      QuestionType
   prompt    String
+  explanation String?
   order     Int          @default(0)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
