@@ -26,6 +26,16 @@ export const ADMIN_COURSE_QUERY = gql`
       title
       description
       status
+      trees {
+        id
+        title
+        nodes {
+          id
+          title
+          posX
+          posY
+        }
+      }
     }
   }
 `;
