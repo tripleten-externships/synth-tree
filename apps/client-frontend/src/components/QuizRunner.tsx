@@ -262,36 +262,48 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       </h2>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
-        {quiz.questions.map((q, i) => (
-          <div key={q.id}>
+        {quiz.questions.map((q, i) => {
+          const correctOptionIds = result?.answers.find((answer) => {
+            return answer.questionId === q.id;
+          })?.question.options.filter((option) => {
+            return option.isCorrect;
+          }).map((option) => {
+            return option.id;
+          });
+          console.log("answer", correctOptionIds);
+            return (
+              <div key={q.id}>
 
-            {q.type === "OPEN_QUESTION" ? (
-              <>
-                <p className="mb-2 font-medium text-foreground">
-                  {i + 1}. {q.prompt}
-                </p>
-                <textarea
-                  value={text[q.id] ?? ""}
-                  onChange={(e) =>
-                    setText((p) => ({
-                      ...p,
-                      [q.id]: e.target.value,
-                    }))
-                  }
-                  rows={3}
-                  placeholder="Your answer…"
-                  className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none"
-                />
-              </>
-            ) : q.type === "SINGLE_CHOICE" ? (
-              <QuizSingle question={q} choice={choice[q.id] ?? []} onToggle={(optionId) => toggle(q.id, optionId, false)} submitted = {submitted}/>
-            ) : q.type === "MULTIPLE_CHOICE" ? (
-              <QuizMulti question={q} choice={choice[q.id] ?? []} onToggle={(optionId) => toggle(q.id, optionId, true)} submitted = {submitted}/>
-            ) : (
-              <p>Unknown question type</p>
-            )}
-          </div>
-        ))}
+                {q.type === "OPEN_QUESTION" ? (
+                  <>
+                    <p className="mb-2 font-medium text-foreground">
+                      {i + 1}. {q.prompt}
+                    </p>
+                    <textarea
+                      value={text[q.id] ?? ""}
+                      onChange={(e) =>
+                        setText((p) => ({
+                          ...p,
+                          [q.id]: e.target.value,
+                        }))
+                      }
+                      rows={3}
+                      placeholder="Your answer…"
+                      className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none"
+                    />
+                  </>
+                ) : q.type === "SINGLE_CHOICE" ? (
+                  <QuizSingle question={q} questionNumber={i + 1} choice={choice[q.id] ?? []} onToggle={(optionId) => toggle(q.id, optionId, false)} submitted = {submitted} correctOptionIds = {correctOptionIds ?? []}/>
+                ) : q.type === "MULTIPLE_CHOICE" ? (
+                  <>
+                    <QuizMulti question={q} questionNumber={i + 1} choice={choice[q.id] ?? []} onToggle={(optionId) => toggle(q.id, optionId, true)} submitted = {submitted} correctOptionIds = {correctOptionIds ?? []}/>
+                  </>
+                ) : (
+                  <p>Unknown question type</p>
+                )}
+              </div>
+            )
+        })}
 
         <div className="flex items-center gap-4">
           <button

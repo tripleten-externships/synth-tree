@@ -3,7 +3,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { usePublicCourseQuery } from "@synth-tree/api-types";
 import { LessonViewer } from "../components/LessonViewer";
-import QuizRunner from "../components/QuizRunner";
 
 export default function NodePage() {
   const { courseId, nodeId } = useParams();
@@ -35,7 +34,6 @@ export default function NodePage() {
       {/* Lesson content. Opening this marks the node in progress (SYN-31). */}
       <LessonViewer nodeId={node.id} quiz={node.quiz} onNext={() => navigate(`/courses/${course.id}`)} />
 
-      {/* {node.quiz && <QuizRunner quiz={node.quiz} />} */}
     </div>
   );
 }
