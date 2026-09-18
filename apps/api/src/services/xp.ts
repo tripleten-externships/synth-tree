@@ -1,4 +1,5 @@
 import { PrismaClient, Prisma } from "@prisma/client";
+import { incrementDailyQuestProgress } from "./dailyQuests";
 
 export async function awardXp(
   prisma: PrismaClient,
@@ -11,8 +12,8 @@ export async function awardXp(
   const run = async (client: Prisma.TransactionClient) => {
     const rewardKey =
       metadata && typeof metadata === "object" && !Array.isArray(metadata)
-        ? (metadata as Record<string, unknown>).nodeId ??
-          (metadata as Record<string, unknown>).quizId
+        ? ((metadata as Record<string, unknown>).nodeId ??
+          (metadata as Record<string, unknown>).quizId)
         : undefined;
 
     if (typeof rewardKey !== "string") {
@@ -60,9 +61,7 @@ export async function awardXp(
 
     // Compare day boundaries in UTC so a user's daily total resets on the same
     // calendar day regardless of the server's local timezone.
-    const isNewDay =
-      userXp.todayAsOf.toISOString().slice(0, 10) !==
-      now.toISOString().slice(0, 10);
+    const isNewDay = userXp.todayAsOf.toISOString().slice(0, 10) !== now.toISOString().slice(0, 10);
 
     await client.userXp.update({
       where: {
@@ -102,6 +101,7 @@ export async function awardXp(
         weeklyXp: newWeeklyXp,
       },
     });
+    await incrementDailyQuestProgress(client, userId, "XP_EARNED", amount);
 
     return xpEvent;
   };
