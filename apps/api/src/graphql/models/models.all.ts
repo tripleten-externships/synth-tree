@@ -147,7 +147,12 @@ builder.prismaObject("QuizOption", {
 });
 builder.prismaObject("QuizAttempt", QuizAttemptObject);
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
-builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
+// Captured + exported (unlike the other prismaObject registrations) so the
+// completeNodeProgress payload type can reference UserNodeProgress as a nested
+// field. A plain objectRef can't reference a Prisma model by its string name —
+// it needs this ref handle. See CompleteNodeProgressPayload in
+// progress.mutations.ts (SYN-61).
+export const UserNodeProgressRef = builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
 // XP / streak models (added in #75). The User object exposes relations to these,
 // so the schema build requires them to be implemented here.
 builder.prismaObject("UserXp", UserXpObject);

@@ -34,6 +34,11 @@ input BoolWithAggregatesFilter {
   not: NestedBoolWithAggregatesFilter
 }
 
+type CompleteNodeProgressPayload {
+  progress: UserNodeProgress
+  xpAwarded: Int
+}
+
 enum ContentType {
   EMBED
   HTML
@@ -1118,7 +1123,7 @@ enum LessonStatus {
 }
 
 type Mutation {
-  completeNodeProgress(nodeId: ID!): UserNodeProgress
+  completeNodeProgress(nodeId: ID!): CompleteNodeProgressPayload
   createCourse(input: CreateCourseInput!): Course
   createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
