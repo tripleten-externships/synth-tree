@@ -10,8 +10,8 @@ export async function awardXp(
   return prisma.$transaction(async (tx) => {
     const rewardKey =
       metadata && typeof metadata === "object" && !Array.isArray(metadata)
-        ? (metadata as Record<string, unknown>).nodeId ??
-          (metadata as Record<string, unknown>).quizId
+        ? ((metadata as Record<string, unknown>).nodeId ??
+          (metadata as Record<string, unknown>).quizId)
         : undefined;
 
     if (typeof rewardKey !== "string") {
@@ -57,8 +57,7 @@ export async function awardXp(
 
     const now = new Date();
 
-    const isNewDay =
-      userXp.todayAsOf.toDateString() !== now.toDateString();
+    const isNewDay = userXp.todayAsOf.toDateString() !== now.toDateString();
 
     await tx.userXp.update({
       where: {
@@ -94,6 +93,78 @@ export async function awardXp(
       },
       data: {
         weeklyXp: newWeeklyXp,
+      },
+    });
+
+    const user = await tx.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        timezone: true,
+      },
+    });
+
+    const timezone = user?.timezone ?? "UTC";
+
+    const today = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+
+    const streak = await tx.userStreak.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    let currentDays = 1;
+
+    if (streak?.lastActive) {
+      const lastActiveDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(streak.lastActive);
+
+      if (lastActiveDate === today) {
+        currentDays = streak.currentDays;
+      } else {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        const yesterdayDate = new Intl.DateTimeFormat("en-CA", {
+          timeZone: timezone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(yesterday);
+
+        if (lastActiveDate === yesterdayDate) {
+          currentDays = streak.currentDays + 1;
+        }
+      }
+    }
+
+    const longestDays = Math.max(streak?.longestDays ?? 0, currentDays);
+
+    await tx.userStreak.upsert({
+      where: {
+        userId,
+      },
+      update: {
+        currentDays,
+        longestDays,
+        lastActive: now,
+      },
+      create: {
+        userId,
+        currentDays,
+        longestDays,
+        lastActive: now,
       },
     });
 
