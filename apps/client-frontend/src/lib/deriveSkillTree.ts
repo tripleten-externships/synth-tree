@@ -1,3 +1,4 @@
+import type { LearnerCourseTreeQuery } from "@synth-tree/api-types";
 import type { HexStatus } from "@synth-tree/ui";
 
 // TODO(SYN-28 follow-up): SkillNode has no `icon` field in the Prisma schema
@@ -6,23 +7,13 @@ import type { HexStatus } from "@synth-tree/ui";
 // discussion needed on whether icons are author-assigned or category-derived.
 const PLACEHOLDER_ICON = "flask";
 
-export interface RawPrerequisite {
-  dependsOnNodeId: string;
-}
-
-export interface RawProgress {
-  status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
-  completedAt: string | null;
-}
-
-export interface RawSkillNode {
-  id: string;
-  title: string;
-  posX: number | null;
-  posY: number | null;
-  prerequisites: RawPrerequisite[];
-  progressForViewer: RawProgress | null;
-}
+// Derived from the generated LearnerCourseTree query type (SYN-27) so the
+// query's `trees[n].nodes` can be passed straight into deriveSkillTree.
+export type RawSkillNode = NonNullable<
+  LearnerCourseTreeQuery["courseForLearner"]
+>["trees"][number]["nodes"][number];
+export type RawPrerequisite = RawSkillNode["prerequisites"][number];
+export type RawProgress = NonNullable<RawSkillNode["progressForViewer"]>;
 
 export interface CanvasNode {
   id: string;
