@@ -775,6 +775,22 @@ export type JsonWithAggregatesFilter = {
   string_starts_with?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type LeaderboardEntry = {
+  __typename?: 'LeaderboardEntry';
+  avatar?: Maybe<Scalars['String']['output']>;
+  displayName?: Maybe<Scalars['String']['output']>;
+  rank?: Maybe<Scalars['Int']['output']>;
+  streak?: Maybe<Scalars['Int']['output']>;
+  totalXp?: Maybe<Scalars['Int']['output']>;
+  userId?: Maybe<Scalars['String']['output']>;
+};
+
+export type LeaderboardPayload = {
+  __typename?: 'LeaderboardPayload';
+  currentUserRank?: Maybe<Scalars['Int']['output']>;
+  entries?: Maybe<Array<LeaderboardEntry>>;
+};
+
 export type LessonBlocks = {
   __typename?: 'LessonBlocks';
   caption?: Maybe<Scalars['String']['output']>;
@@ -1152,6 +1168,7 @@ export type Mutation = {
   deleteUser?: Maybe<User>;
   publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
+  reorderLessonBlocks?: Maybe<Array<LessonBlocks>>;
   setUserRole?: Maybe<User>;
   startNodeProgress?: Maybe<UserNodeProgress>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1277,6 +1294,12 @@ export type MutationPublishCourseArgs = {
 
 export type MutationPublishLessonBlockArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationReorderLessonBlocksArgs = {
+  nodeId: Scalars['ID']['input'];
+  orderedBlockIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -1782,6 +1805,7 @@ export type Query = {
   courseForLearner?: Maybe<Course>;
   courseProgress?: Maybe<CourseProgress>;
   currentUser?: Maybe<User>;
+  leaderboard?: Maybe<LeaderboardPayload>;
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
@@ -1892,6 +1916,11 @@ export type QueryCourseForLearnerArgs = {
 export type QueryCourseProgressArgs = {
   courseId: Scalars['ID']['input'];
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type QueryLeaderboardArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3648,6 +3677,7 @@ export type SkillNode = {
   tree: SkillTree;
   treeId: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  xpReward?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -3695,6 +3725,7 @@ export type SkillNodeAvgOrderByAggregateInput = {
   posX?: InputMaybe<SortOrder>;
   posY?: InputMaybe<SortOrder>;
   step?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeCountOrderByAggregateInput = {
@@ -3708,6 +3739,7 @@ export type SkillNodeCountOrderByAggregateInput = {
   title?: InputMaybe<SortOrder>;
   treeId?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeCreateInput = {
@@ -3726,6 +3758,7 @@ export type SkillNodeCreateInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateManyInput = {
@@ -3739,6 +3772,7 @@ export type SkillNodeCreateManyInput = {
   title: Scalars['String']['input'];
   treeId: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateManyTreeInput = {
@@ -3751,6 +3785,7 @@ export type SkillNodeCreateManyTreeInput = {
   step?: InputMaybe<Scalars['Int']['input']>;
   title: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateManyTreeInputEnvelope = {
@@ -3840,6 +3875,7 @@ export type SkillNodeCreateWithoutLessonsInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateWithoutPrerequisitesInput = {
@@ -3857,6 +3893,7 @@ export type SkillNodeCreateWithoutPrerequisitesInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateWithoutProgressesInput = {
@@ -3874,6 +3911,7 @@ export type SkillNodeCreateWithoutProgressesInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateWithoutQuizInput = {
@@ -3891,6 +3929,7 @@ export type SkillNodeCreateWithoutQuizInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateWithoutRequiredForInput = {
@@ -3908,6 +3947,7 @@ export type SkillNodeCreateWithoutRequiredForInput = {
   title: Scalars['String']['input'];
   tree: SkillTreeCreateNestedOneWithoutNodesInput;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeCreateWithoutTreeInput = {
@@ -3925,6 +3965,7 @@ export type SkillNodeCreateWithoutTreeInput = {
   step?: InputMaybe<Scalars['Int']['input']>;
   title: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  xpReward?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type SkillNodeListRelationFilter = {
@@ -3944,6 +3985,7 @@ export type SkillNodeMaxOrderByAggregateInput = {
   title?: InputMaybe<SortOrder>;
   treeId?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeMinOrderByAggregateInput = {
@@ -3957,6 +3999,7 @@ export type SkillNodeMinOrderByAggregateInput = {
   title?: InputMaybe<SortOrder>;
   treeId?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeOrderByRelationAggregateInput = {
@@ -3979,6 +4022,7 @@ export type SkillNodeOrderByWithAggregationInput = {
   title?: InputMaybe<SortOrder>;
   treeId?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeOrderByWithRelationInput = {
@@ -3998,6 +4042,7 @@ export type SkillNodeOrderByWithRelationInput = {
   tree?: InputMaybe<SkillTreeOrderByWithRelationInput>;
   treeId?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodePrerequisite = {
@@ -4241,7 +4286,8 @@ export type SkillNodeScalarFieldEnum =
   | 'step'
   | 'title'
   | 'treeId'
-  | 'updatedAt';
+  | 'updatedAt'
+  | 'xpReward';
 
 export type SkillNodeScalarRelationFilter = {
   is?: InputMaybe<SkillNodeWhereInput>;
@@ -4262,6 +4308,7 @@ export type SkillNodeScalarWhereInput = {
   title?: InputMaybe<StringFilter>;
   treeId?: InputMaybe<UuidFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
+  xpReward?: InputMaybe<IntNullableFilter>;
 };
 
 export type SkillNodeScalarWhereWithAggregatesInput = {
@@ -4278,6 +4325,7 @@ export type SkillNodeScalarWhereWithAggregatesInput = {
   title?: InputMaybe<StringWithAggregatesFilter>;
   treeId?: InputMaybe<UuidWithAggregatesFilter>;
   updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+  xpReward?: InputMaybe<IntNullableWithAggregatesFilter>;
 };
 
 export type SkillNodeSumOrderByAggregateInput = {
@@ -4285,6 +4333,7 @@ export type SkillNodeSumOrderByAggregateInput = {
   posX?: InputMaybe<SortOrder>;
   posY?: InputMaybe<SortOrder>;
   step?: InputMaybe<SortOrder>;
+  xpReward?: InputMaybe<SortOrder>;
 };
 
 export type SkillNodeTreeIdPosXPosYCompoundUniqueInput = {
@@ -4315,6 +4364,7 @@ export type SkillNodeUpdateInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateManyMutationInput = {
@@ -4327,6 +4377,7 @@ export type SkillNodeUpdateManyMutationInput = {
   step?: InputMaybe<IntFieldUpdateOperationsInput>;
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateManyWithWhereWithoutTreeInput = {
@@ -4433,6 +4484,7 @@ export type SkillNodeUpdateWithoutLessonsInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateWithoutPrerequisitesInput = {
@@ -4450,6 +4502,7 @@ export type SkillNodeUpdateWithoutPrerequisitesInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateWithoutProgressesInput = {
@@ -4467,6 +4520,7 @@ export type SkillNodeUpdateWithoutProgressesInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateWithoutQuizInput = {
@@ -4484,6 +4538,7 @@ export type SkillNodeUpdateWithoutQuizInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateWithoutRequiredForInput = {
@@ -4501,6 +4556,7 @@ export type SkillNodeUpdateWithoutRequiredForInput = {
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   tree?: InputMaybe<SkillTreeUpdateOneRequiredWithoutNodesNestedInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpdateWithoutTreeInput = {
@@ -4518,6 +4574,7 @@ export type SkillNodeUpdateWithoutTreeInput = {
   step?: InputMaybe<IntFieldUpdateOperationsInput>;
   title?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  xpReward?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
 };
 
 export type SkillNodeUpsertWithWhereUniqueWithoutTreeInput = {
@@ -4576,6 +4633,7 @@ export type SkillNodeWhereInput = {
   tree?: InputMaybe<SkillTreeWhereInput>;
   treeId?: InputMaybe<UuidFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
+  xpReward?: InputMaybe<IntNullableFilter>;
 };
 
 export type SkillNodeWhereUniqueInput = {
@@ -4600,6 +4658,7 @@ export type SkillNodeWhereUniqueInput = {
   treeId_posX_posY?: InputMaybe<SkillNodeTreeIdPosXPosYCompoundUniqueInput>;
   treeId_step_orderInStep?: InputMaybe<SkillNodeTreeIdStepOrderInStepCompoundUniqueInput>;
   updatedAt?: InputMaybe<DateTimeFilter>;
+  xpReward?: InputMaybe<IntNullableFilter>;
 };
 
 export type SkillTree = {
@@ -6982,6 +7041,7 @@ export type XpEvent = {
   id: Scalars['ID']['output'];
   metadata?: Maybe<Scalars['Json']['output']>;
   reason: Scalars['String']['output'];
+  rewardKey?: Maybe<Scalars['String']['output']>;
   user: User;
   userId: Scalars['String']['output'];
 };
@@ -6996,6 +7056,7 @@ export type XpEventCountOrderByAggregateInput = {
   id?: InputMaybe<SortOrder>;
   metadata?: InputMaybe<SortOrder>;
   reason?: InputMaybe<SortOrder>;
+  rewardKey?: InputMaybe<SortOrder>;
   userId?: InputMaybe<SortOrder>;
 };
 
@@ -7005,6 +7066,7 @@ export type XpEventCreateInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason: Scalars['String']['input'];
+  rewardKey?: InputMaybe<Scalars['String']['input']>;
   user: UserCreateNestedOneWithoutXpEventsInput;
 };
 
@@ -7014,6 +7076,7 @@ export type XpEventCreateManyInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason: Scalars['String']['input'];
+  rewardKey?: InputMaybe<Scalars['String']['input']>;
   userId: Scalars['String']['input'];
 };
 
@@ -7023,6 +7086,7 @@ export type XpEventCreateManyUserInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason: Scalars['String']['input'];
+  rewardKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type XpEventCreateManyUserInputEnvelope = {
@@ -7048,6 +7112,7 @@ export type XpEventCreateWithoutUserInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason: Scalars['String']['input'];
+  rewardKey?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type XpEventListRelationFilter = {
@@ -7061,6 +7126,7 @@ export type XpEventMaxOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   reason?: InputMaybe<SortOrder>;
+  rewardKey?: InputMaybe<SortOrder>;
   userId?: InputMaybe<SortOrder>;
 };
 
@@ -7069,6 +7135,7 @@ export type XpEventMinOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   reason?: InputMaybe<SortOrder>;
+  rewardKey?: InputMaybe<SortOrder>;
   userId?: InputMaybe<SortOrder>;
 };
 
@@ -7087,6 +7154,7 @@ export type XpEventOrderByWithAggregationInput = {
   id?: InputMaybe<SortOrder>;
   metadata?: InputMaybe<SortOrder>;
   reason?: InputMaybe<SortOrder>;
+  rewardKey?: InputMaybe<SortOrder>;
   userId?: InputMaybe<SortOrder>;
 };
 
@@ -7096,6 +7164,7 @@ export type XpEventOrderByWithRelationInput = {
   id?: InputMaybe<SortOrder>;
   metadata?: InputMaybe<SortOrder>;
   reason?: InputMaybe<SortOrder>;
+  rewardKey?: InputMaybe<SortOrder>;
   user?: InputMaybe<UserOrderByWithRelationInput>;
   userId?: InputMaybe<SortOrder>;
 };
@@ -7106,6 +7175,7 @@ export type XpEventScalarFieldEnum =
   | 'id'
   | 'metadata'
   | 'reason'
+  | 'rewardKey'
   | 'userId';
 
 export type XpEventScalarWhereInput = {
@@ -7117,6 +7187,7 @@ export type XpEventScalarWhereInput = {
   id?: InputMaybe<UuidFilter>;
   metadata?: InputMaybe<JsonNullableFilter>;
   reason?: InputMaybe<StringFilter>;
+  rewardKey?: InputMaybe<StringNullableFilter>;
   userId?: InputMaybe<StringFilter>;
 };
 
@@ -7129,6 +7200,7 @@ export type XpEventScalarWhereWithAggregatesInput = {
   id?: InputMaybe<UuidWithAggregatesFilter>;
   metadata?: InputMaybe<JsonNullableWithAggregatesFilter>;
   reason?: InputMaybe<StringWithAggregatesFilter>;
+  rewardKey?: InputMaybe<StringNullableWithAggregatesFilter>;
   userId?: InputMaybe<StringWithAggregatesFilter>;
 };
 
@@ -7142,6 +7214,7 @@ export type XpEventUpdateInput = {
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason?: InputMaybe<StringFieldUpdateOperationsInput>;
+  rewardKey?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   user?: InputMaybe<UserUpdateOneRequiredWithoutXpEventsNestedInput>;
 };
 
@@ -7151,6 +7224,7 @@ export type XpEventUpdateManyMutationInput = {
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason?: InputMaybe<StringFieldUpdateOperationsInput>;
+  rewardKey?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
 };
 
 export type XpEventUpdateManyWithWhereWithoutUserInput = {
@@ -7183,12 +7257,19 @@ export type XpEventUpdateWithoutUserInput = {
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   reason?: InputMaybe<StringFieldUpdateOperationsInput>;
+  rewardKey?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
 };
 
 export type XpEventUpsertWithWhereUniqueWithoutUserInput = {
   create: XpEventCreateWithoutUserInput;
   update: XpEventUpdateWithoutUserInput;
   where: XpEventWhereUniqueInput;
+};
+
+export type XpEventUserIdReasonRewardKeyCompoundUniqueInput = {
+  reason: Scalars['String']['input'];
+  rewardKey: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
 };
 
 export type XpEventWhereInput = {
@@ -7200,6 +7281,7 @@ export type XpEventWhereInput = {
   id?: InputMaybe<UuidFilter>;
   metadata?: InputMaybe<JsonNullableFilter>;
   reason?: InputMaybe<StringFilter>;
+  rewardKey?: InputMaybe<StringNullableFilter>;
   user?: InputMaybe<UserWhereInput>;
   userId?: InputMaybe<StringFilter>;
 };
@@ -7213,8 +7295,10 @@ export type XpEventWhereUniqueInput = {
   id?: InputMaybe<Scalars['String']['input']>;
   metadata?: InputMaybe<JsonNullableFilter>;
   reason?: InputMaybe<StringFilter>;
+  rewardKey?: InputMaybe<StringNullableFilter>;
   user?: InputMaybe<UserWhereInput>;
   userId?: InputMaybe<StringFilter>;
+  userId_reason_rewardKey?: InputMaybe<XpEventUserIdReasonRewardKeyCompoundUniqueInput>;
 };
 
 export type UpdateCourseMutationVariables = Exact<{
@@ -7244,6 +7328,13 @@ export type AdminCourseQueryVariables = Exact<{
 
 
 export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null }> }> } | null };
+
+export type AdminLeaderboardQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AdminLeaderboardQuery = { __typename?: 'Query', leaderboard?: { __typename?: 'LeaderboardPayload', currentUserRank?: number | null, entries?: Array<{ __typename?: 'LeaderboardEntry', userId?: string | null, displayName?: string | null, avatar?: string | null, totalXp?: number | null, streak?: number | null, rank?: number | null }> | null } | null };
 
 export type GetMyCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7277,6 +7368,64 @@ export type CreateCourseMutationVariables = Exact<{
 
 
 export type CreateCourseMutation = { __typename?: 'Mutation', createCourse?: { __typename?: 'Course', id: string, title: string } | null };
+
+export type AdminSkillNodeQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AdminSkillNodeQuery = { __typename?: 'Query', adminSkillNode?: { __typename?: 'SkillNode', id: string, title: string, tree: { __typename?: 'SkillTree', courseId: string, course: { __typename?: 'Course', title: string } } } | null };
+
+export type AdminLessonBlocksByNodeQueryVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminLessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null }> | null };
+
+export type SaveLessonTitleMutationVariables = Exact<{
+  updateSkillNodeId: Scalars['ID']['input'];
+  input: UpdateSkillNodeInput;
+}>;
+
+
+export type SaveLessonTitleMutation = { __typename?: 'Mutation', updateSkillNode?: { __typename?: 'SkillNode', id: string, title: string } | null };
+
+export type CreateLessonBlockMutationVariables = Exact<{
+  input: LessonBlocksCreateInput;
+}>;
+
+
+export type CreateLessonBlockMutation = { __typename?: 'Mutation', createLessonBlock?: { __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null } | null };
+
+export type UpdateLessonBlockMutationVariables = Exact<{
+  input: LessonBlocksUpdateInput;
+}>;
+
+
+export type UpdateLessonBlockMutation = { __typename?: 'Mutation', updateLessonBlock?: { __typename?: 'LessonBlocks', id: string, html?: string | null } | null };
+
+export type DeleteLessonBlockMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteLessonBlockMutation = { __typename?: 'Mutation', deleteLessonBlock?: { __typename?: 'LessonBlocks', id: string } | null };
+
+export type ReorderLessonBlocksMutationVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+  orderedBlockIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type ReorderLessonBlocksMutation = { __typename?: 'Mutation', reorderLessonBlocks?: Array<{ __typename?: 'LessonBlocks', id: string, order: number }> | null };
+
+export type GlobalLeaderboardQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GlobalLeaderboardQuery = { __typename?: 'Query', leaderboard?: { __typename?: 'LeaderboardPayload', currentUserRank?: number | null, entries?: Array<{ __typename?: 'LeaderboardEntry', userId?: string | null, displayName?: string | null, avatar?: string | null, totalXp?: number | null, streak?: number | null, rank?: number | null }> | null } | null };
 
 export type CompleteNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7328,6 +7477,11 @@ export type LessonBlocksByNodeQueryVariables = Exact<{
 
 
 export type LessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, type: ContentType, html?: string | null, url?: string | null, caption?: string | null, order: number }> | null };
+
+export type MyProgressQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyProgressQuery = { __typename?: 'Query', myProgress?: Array<{ __typename?: 'UserNodeProgress', id: string, status: ProgressStatus, updatedAt: any, node: { __typename?: 'SkillNode', id: string, title: string, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } } }> | null };
 
 export type PublicCourseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -7503,6 +7657,48 @@ export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
         }
 export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
 export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
+export const AdminLeaderboardDocument = gql`
+    query AdminLeaderboard($limit: Int = 100) {
+  leaderboard(limit: $limit) {
+    currentUserRank
+    entries {
+      userId
+      displayName
+      avatar
+      totalXp
+      streak
+      rank
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminLeaderboardQuery__
+ *
+ * To run a query within a React component, call `useAdminLeaderboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLeaderboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLeaderboardQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useAdminLeaderboardQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>(AdminLeaderboardDocument, options);
+      }
+export function useAdminLeaderboardLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLeaderboardQuery, AdminLeaderboardQueryVariables>(AdminLeaderboardDocument, options);
+        }
+export type AdminLeaderboardQueryHookResult = ReturnType<typeof useAdminLeaderboardQuery>;
+export type AdminLeaderboardLazyQueryHookResult = ReturnType<typeof useAdminLeaderboardLazyQuery>;
 export const GetMyCoursesDocument = gql`
     query GetMyCourses {
   adminMyCoursesWithContent(limit: 1) {
@@ -7660,6 +7856,288 @@ export function useCreateCourseMutation(baseOptions?: ApolloReactHooks.MutationH
         return ApolloReactHooks.useMutation<CreateCourseMutation, CreateCourseMutationVariables>(CreateCourseDocument, options);
       }
 export type CreateCourseMutationHookResult = ReturnType<typeof useCreateCourseMutation>;
+export const AdminSkillNodeDocument = gql`
+    query adminSkillNode($id: ID!) {
+  adminSkillNode(id: $id) {
+    id
+    title
+    tree {
+      courseId
+      course {
+        title
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminSkillNodeQuery__
+ *
+ * To run a query within a React component, call `useAdminSkillNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminSkillNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminSkillNodeQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAdminSkillNodeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminSkillNodeQuery, AdminSkillNodeQueryVariables> & ({ variables: AdminSkillNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>(AdminSkillNodeDocument, options);
+      }
+export function useAdminSkillNodeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminSkillNodeQuery, AdminSkillNodeQueryVariables>(AdminSkillNodeDocument, options);
+        }
+export type AdminSkillNodeQueryHookResult = ReturnType<typeof useAdminSkillNodeQuery>;
+export type AdminSkillNodeLazyQueryHookResult = ReturnType<typeof useAdminSkillNodeLazyQuery>;
+export const AdminLessonBlocksByNodeDocument = gql`
+    query AdminLessonBlocksByNode($nodeId: ID!) {
+  lessonBlocksByNode(nodeId: $nodeId) {
+    id
+    nodeId
+    order
+    caption
+    type
+    html
+  }
+}
+    `;
+
+/**
+ * __useAdminLessonBlocksByNodeQuery__
+ *
+ * To run a query within a React component, call `useAdminLessonBlocksByNodeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLessonBlocksByNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLessonBlocksByNodeQuery({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *   },
+ * });
+ */
+export function useAdminLessonBlocksByNodeQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables> & ({ variables: AdminLessonBlocksByNodeQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>(AdminLessonBlocksByNodeDocument, options);
+      }
+export function useAdminLessonBlocksByNodeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLessonBlocksByNodeQuery, AdminLessonBlocksByNodeQueryVariables>(AdminLessonBlocksByNodeDocument, options);
+        }
+export type AdminLessonBlocksByNodeQueryHookResult = ReturnType<typeof useAdminLessonBlocksByNodeQuery>;
+export type AdminLessonBlocksByNodeLazyQueryHookResult = ReturnType<typeof useAdminLessonBlocksByNodeLazyQuery>;
+export const SaveLessonTitleDocument = gql`
+    mutation SaveLessonTitle($updateSkillNodeId: ID!, $input: UpdateSkillNodeInput!) {
+  updateSkillNode(id: $updateSkillNodeId, input: $input) {
+    id
+    title
+  }
+}
+    `;
+
+/**
+ * __useSaveLessonTitleMutation__
+ *
+ * To run a mutation, you first call `useSaveLessonTitleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveLessonTitleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveLessonTitleMutation, { data, loading, error }] = useSaveLessonTitleMutation({
+ *   variables: {
+ *      updateSkillNodeId: // value for 'updateSkillNodeId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSaveLessonTitleMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveLessonTitleMutation, SaveLessonTitleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SaveLessonTitleMutation, SaveLessonTitleMutationVariables>(SaveLessonTitleDocument, options);
+      }
+export type SaveLessonTitleMutationHookResult = ReturnType<typeof useSaveLessonTitleMutation>;
+export const CreateLessonBlockDocument = gql`
+    mutation CreateLessonBlock($input: LessonBlocksCreateInput!) {
+  createLessonBlock(input: $input) {
+    id
+    nodeId
+    order
+    caption
+    type
+    html
+  }
+}
+    `;
+
+/**
+ * __useCreateLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useCreateLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createLessonBlockMutation, { data, loading, error }] = useCreateLessonBlockMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateLessonBlockMutation, CreateLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateLessonBlockMutation, CreateLessonBlockMutationVariables>(CreateLessonBlockDocument, options);
+      }
+export type CreateLessonBlockMutationHookResult = ReturnType<typeof useCreateLessonBlockMutation>;
+export const UpdateLessonBlockDocument = gql`
+    mutation UpdateLessonBlock($input: LessonBlocksUpdateInput!) {
+  updateLessonBlock(input: $input) {
+    id
+    html
+  }
+}
+    `;
+
+/**
+ * __useUpdateLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useUpdateLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateLessonBlockMutation, { data, loading, error }] = useUpdateLessonBlockMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateLessonBlockMutation, UpdateLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateLessonBlockMutation, UpdateLessonBlockMutationVariables>(UpdateLessonBlockDocument, options);
+      }
+export type UpdateLessonBlockMutationHookResult = ReturnType<typeof useUpdateLessonBlockMutation>;
+export const DeleteLessonBlockDocument = gql`
+    mutation DeleteLessonBlock($id: ID!) {
+  deleteLessonBlock(id: $id) {
+    id
+  }
+}
+    `;
+
+/**
+ * __useDeleteLessonBlockMutation__
+ *
+ * To run a mutation, you first call `useDeleteLessonBlockMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteLessonBlockMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteLessonBlockMutation, { data, loading, error }] = useDeleteLessonBlockMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteLessonBlockMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteLessonBlockMutation, DeleteLessonBlockMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteLessonBlockMutation, DeleteLessonBlockMutationVariables>(DeleteLessonBlockDocument, options);
+      }
+export type DeleteLessonBlockMutationHookResult = ReturnType<typeof useDeleteLessonBlockMutation>;
+export const ReorderLessonBlocksDocument = gql`
+    mutation ReorderLessonBlocks($nodeId: ID!, $orderedBlockIds: [ID!]!) {
+  reorderLessonBlocks(nodeId: $nodeId, orderedBlockIds: $orderedBlockIds) {
+    id
+    order
+  }
+}
+    `;
+
+/**
+ * __useReorderLessonBlocksMutation__
+ *
+ * To run a mutation, you first call `useReorderLessonBlocksMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReorderLessonBlocksMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reorderLessonBlocksMutation, { data, loading, error }] = useReorderLessonBlocksMutation({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *      orderedBlockIds: // value for 'orderedBlockIds'
+ *   },
+ * });
+ */
+export function useReorderLessonBlocksMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReorderLessonBlocksMutation, ReorderLessonBlocksMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ReorderLessonBlocksMutation, ReorderLessonBlocksMutationVariables>(ReorderLessonBlocksDocument, options);
+      }
+export type ReorderLessonBlocksMutationHookResult = ReturnType<typeof useReorderLessonBlocksMutation>;
+export const GlobalLeaderboardDocument = gql`
+    query GlobalLeaderboard($limit: Int = 100) {
+  leaderboard(limit: $limit) {
+    currentUserRank
+    entries {
+      userId
+      displayName
+      avatar
+      totalXp
+      streak
+      rank
+    }
+  }
+}
+    `;
+
+/**
+ * __useGlobalLeaderboardQuery__
+ *
+ * To run a query within a React component, call `useGlobalLeaderboardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGlobalLeaderboardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGlobalLeaderboardQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useGlobalLeaderboardQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>(GlobalLeaderboardDocument, options);
+      }
+export function useGlobalLeaderboardLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GlobalLeaderboardQuery, GlobalLeaderboardQueryVariables>(GlobalLeaderboardDocument, options);
+        }
+export type GlobalLeaderboardQueryHookResult = ReturnType<typeof useGlobalLeaderboardQuery>;
+export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLeaderboardLazyQuery>;
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
@@ -7927,6 +8405,53 @@ export function useLessonBlocksByNodeLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type LessonBlocksByNodeQueryHookResult = ReturnType<typeof useLessonBlocksByNodeQuery>;
 export type LessonBlocksByNodeLazyQueryHookResult = ReturnType<typeof useLessonBlocksByNodeLazyQuery>;
+export const MyProgressDocument = gql`
+    query MyProgress {
+  myProgress {
+    id
+    status
+    updatedAt
+    node {
+      id
+      title
+      tree {
+        id
+        title
+        course {
+          id
+          title
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyProgressQuery__
+ *
+ * To run a query within a React component, call `useMyProgressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyProgressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyProgressQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMyProgressQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MyProgressQuery, MyProgressQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MyProgressQuery, MyProgressQueryVariables>(MyProgressDocument, options);
+      }
+export function useMyProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyProgressQuery, MyProgressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MyProgressQuery, MyProgressQueryVariables>(MyProgressDocument, options);
+        }
+export type MyProgressQueryHookResult = ReturnType<typeof useMyProgressQuery>;
+export type MyProgressLazyQueryHookResult = ReturnType<typeof useMyProgressLazyQuery>;
 export const PublicCourseDocument = gql`
     query PublicCourse($id: ID!) {
   publicCourse(id: $id) {

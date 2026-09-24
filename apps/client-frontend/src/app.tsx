@@ -9,6 +9,7 @@ import MainLayout from "./layouts/MainLayout";
 
 import Home from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
 import LessonsPage from "./pages/LessonsPage";
 import SkillTreesPage from "./pages/SkillTreesPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "dashboard", element: <DashboardPage /> },
+      { path: "leaderboard", element: <LeaderboardPage /> },
       { path: "lessons", element: <LessonsPage /> },
       { path: "skill-trees", element: <SkillTreesPage /> },
       { path: "profile", element: <ProfilePage /> },
