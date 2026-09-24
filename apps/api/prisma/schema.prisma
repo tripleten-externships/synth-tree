@@ -63,15 +63,17 @@ enum ProgressStatus {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
-  timezone  String   @default("UTC")
-  name      String?
-  photoUrl  String?
-  role      Role     @default(USER)
-  interests String[] @default([]) // subjects picked during onboarding (SYN-46)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id
+  email              String   @unique
+  timezone           String   @default("UTC")
+  name               String?
+  photoUrl           String?
+  role               Role     @default(USER)
+  interests          String[] @default([]) // subjects picked during onboarding (SYN-46)
+  dailyGoalMinutes   Int? // minutes/day picked during onboarding (SYN-47)
+  onboardingComplete Boolean  @default(false) // flipped true at signup step 3 (SYN-47)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
@@ -392,6 +394,6 @@ model XpEvent {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
   @@unique([userId, reason, rewardKey])
+  @@index([userId, createdAt])
 }
