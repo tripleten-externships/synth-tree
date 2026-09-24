@@ -142,8 +142,11 @@ builder.mutationFields((t) => ({
       const quizInput = input as unknown as SaveQuizInputShape;
       validateSaveQuizInput(quizInput);
 
-      const quizId = await ctx.prisma.$transaction((tx) =>
-        saveQuizForNode(tx, String(nodeId), quizInput),
+      const quizId = await ctx.prisma.$transaction(
+        (tx) => saveQuizForNode(tx, String(nodeId), quizInput),
+        // A long quiz is a lot of statements, and the default 5s is tight for
+        // one on a loaded database.
+        { timeout: 15000 },
       );
 
       return ctx.prisma.quiz.findUniqueOrThrow({
@@ -337,8 +340,10 @@ builder.mutationFields((t) => ({
           questionId: questionId,
           text: text,
           // Append after the existing options so this mutation and saveQuiz
-          // agree on what `order` means.
-          order: existing.options.length,
+          // agree on what `order` means. Taken from the highest order rather
+          // than the count, which would repeat a position after a delete.
+          order:
+            existing.options.reduce((highest, option) => Math.max(highest, option.order), -1) + 1,
           ...(isCorrect !== undefined && isCorrect !== null && { isCorrect }),
         },
       });

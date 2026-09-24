@@ -348,6 +348,47 @@ describe("Quiz flow", () => {
       expect(res.errors).toBeDefined();
       expect(res.errors[0].message).toMatch(/multiple correct/i);
     });
+
+    // Appending has to look at the highest order rather than the count, or a
+    // question that has had an option deleted gets two options sharing a spot.
+    it("appends after the last option even when an earlier one was deleted", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Ordered Quiz", required: false },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: { quizId: quiz.id, type: "MULTIPLE_CHOICE", prompt: "Pick some" },
+      });
+      await prisma.quizOption.createMany({
+        data: [
+          { questionId: question.id, text: "A", order: 0 },
+          { questionId: question.id, text: "B", order: 1 },
+          { questionId: question.id, text: "C", order: 2 },
+        ],
+      });
+      await prisma.quizOption.deleteMany({ where: { questionId: question.id, text: "B" } });
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: CREATE_OPTION,
+            variables: { questionId: question.id, text: "D", isCorrect: false },
+          },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      const options = await prisma.quizOption.findMany({
+        where: { questionId: question.id },
+        orderBy: { order: "asc" },
+      });
+      expect(options.map((option) => [option.text, option.order])).toEqual([
+        ["A", 0],
+        ["C", 2],
+        ["D", 3],
+      ]);
+    });
   });
 
   describe("deleteQuiz", () => {
@@ -1076,6 +1117,65 @@ describe("Quiz flow", () => {
       });
 
       expect(res.errors?.[0].message).toMatch(/not part of this quiz/i);
+    });
+
+    // A new question owns no answers yet, so an answer id sent with one could
+    // only come from somewhere else.
+    it("rejects an answer id sent on a new question", async () => {
+      const mine = await seedNode();
+      const other = await seedNode();
+      const otherSaved = await save(other.node.id, {
+        required: false,
+        questions: [choiceQuestion("Theirs?", "Their answer")],
+      });
+      const foreignOption = otherSaved.data.saveQuiz.questions[0].options[0];
+
+      const res = await save(mine.node.id, {
+        required: false,
+        questions: [
+          {
+            type: "SINGLE_CHOICE",
+            prompt: "Mine?",
+            options: [
+              { id: foreignOption.id, text: "Overwritten", isCorrect: true },
+              { text: "Wrong", isCorrect: false },
+            ],
+          },
+        ],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/not part of this quiz/i);
+
+      const untouched = await prisma.quizOption.findUniqueOrThrow({
+        where: { id: foreignOption.id },
+      });
+      expect(untouched.text).toBe("Their answer");
+    });
+
+    it("rejects the same question id twice in one save", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Which?")],
+      });
+      const question = first.data.saveQuiz.questions[0];
+      const repeated = {
+        id: question.id,
+        type: "SINGLE_CHOICE",
+        prompt: "Which?",
+        options: question.options.map((o: any) => ({
+          id: o.id,
+          text: o.text,
+          isCorrect: o.isCorrect,
+        })),
+      };
+
+      const res = await save(node.id, {
+        required: false,
+        questions: [repeated, { ...repeated, prompt: "Duplicate?" }],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/appears twice/i);
     });
 
     it("rejects changing the type of an existing question", async () => {

@@ -23,7 +23,7 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   useAdminLessonQuizQuery,
@@ -265,6 +265,9 @@ function LessonEditor() {
   // the author removed is remembered here so Save can delete it.
   const [quizDraft, setQuizDraft] = useState<QuizDraft | null>(null);
   const [removedQuizId, setRemovedQuizId] = useState<string | null>(null);
+  // The server copy the draft was last built from, so a repeat of the same data
+  // does not overwrite unsaved edits.
+  const lastSyncedQuiz = useRef<string | null>(null);
 
   const {
     data: titleData,
@@ -478,11 +481,23 @@ function LessonEditor() {
     }
   };
 
-  // Re-sync the quiz draft whenever the server copy changes, which is on load
-  // and after each save.
+  // Re-sync the quiz draft when the server copy changes, which is on load and
+  // after each save. Apollo can hand the same quiz back again when something
+  // else writes to the cache, and rebuilding the draft then would throw away
+  // whatever the author has typed since, so unchanged data is ignored.
   useEffect(() => {
-    const quiz = quizData?.adminSkillNode?.quiz;
+    if (!quizData) {
+      return;
+    }
 
+    const quiz = quizData.adminSkillNode?.quiz ?? null;
+    const serverQuiz = JSON.stringify(quiz);
+
+    if (serverQuiz === lastSyncedQuiz.current) {
+      return;
+    }
+
+    lastSyncedQuiz.current = serverQuiz;
     setQuizDraft(quiz ? quizDraftFromServer(quiz) : null);
     setRemovedQuizId(null);
   }, [quizData]);
@@ -508,6 +523,14 @@ function LessonEditor() {
 
     setBlockText(startingText);
   }, [titleData, blockData]);
+
+  // Any edit means there is a quiz again, so a removal that has not been saved
+  // yet no longer applies. Without this, adding a quiz back after removing one
+  // would save the deletion and drop the new questions.
+  const handleQuizChange = (draft: QuizDraft) => {
+    setQuizDraft(draft);
+    setRemovedQuizId(null);
+  };
 
   // Removing a quiz that exists on the server also removes the attempts
   // learners have made, so it asks first. Nothing is deleted until Save.
@@ -692,7 +715,7 @@ function LessonEditor() {
         })()}
       </div>
 
-      <QuizEditor draft={quizDraft} onChange={setQuizDraft} onRemove={handleQuizRemove} />
+      <QuizEditor draft={quizDraft} onChange={handleQuizChange} onRemove={handleQuizRemove} />
     </div>
   );
 }

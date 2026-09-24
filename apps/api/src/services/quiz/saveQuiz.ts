@@ -105,6 +105,10 @@ export async function saveQuiz(
   nodeId: string,
   input: SaveQuizInputShape,
 ): Promise<string> {
+  // Validated here as well as in the resolver, so the rules hold for every
+  // caller rather than only the ones that remember to ask first.
+  validateSaveQuizInput(input);
+
   const existingQuiz = await tx.quiz.findUnique({
     where: { nodeId },
     select: { id: true, deletedAt: true },
@@ -132,22 +136,42 @@ export async function saveQuiz(
   });
   const existingById = new Map(existingQuestions.map((question) => [question.id, question]));
 
+  // Every id in the input has to name a row of this quiz. A new question carries
+  // no id, so it owns no options either: without this check an option id sent on
+  // a new question would be updated blindly, letting a caller overwrite an
+  // option belonging to someone else's quiz.
+  const seenQuestionIds = new Set<string>();
+  const seenOptionIds = new Set<string>();
+
   input.questions.forEach((question, index) => {
-    if (!question.id) return;
+    const label = `Question ${index + 1}`;
+    const existing = question.id ? existingById.get(question.id) : undefined;
 
-    const existing = existingById.get(question.id);
-    if (!existing) {
-      throw badInput(`Question ${index + 1} is not part of this quiz.`);
-    }
-    if (existing.type !== question.type) {
-      throw badInput(`Question ${index + 1} already exists, so its type cannot be changed.`);
+    if (question.id) {
+      if (!existing) {
+        throw badInput(`${label} is not part of this quiz.`);
+      }
+      if (existing.type !== question.type) {
+        throw badInput(`${label} already exists, so its type cannot be changed.`);
+      }
+      if (seenQuestionIds.has(question.id)) {
+        throw badInput(`${label} appears twice in this quiz.`);
+      }
+      seenQuestionIds.add(question.id);
     }
 
-    const ownOptionIds = new Set(existing.options.map((option) => option.id));
+    const ownOptionIds = new Set((existing?.options ?? []).map((option) => option.id));
+
     question.options.forEach((option) => {
-      if (option.id && !ownOptionIds.has(option.id)) {
+      if (!option.id) return;
+
+      if (!ownOptionIds.has(option.id)) {
         throw badInput(`An answer on question ${index + 1} is not part of this quiz.`);
       }
+      if (seenOptionIds.has(option.id)) {
+        throw badInput(`An answer on question ${index + 1} appears twice.`);
+      }
+      seenOptionIds.add(option.id);
     });
   });
 
@@ -197,6 +221,8 @@ export async function saveQuiz(
       await tx.quizOption.deleteMany({ where: { id: { in: removedOptionIds } } });
     }
 
+    const newOptions: Prisma.QuizOptionCreateManyInput[] = [];
+
     for (const [optionIndex, option] of question.options.entries()) {
       const optionData = {
         text: option.text.trim(),
@@ -207,10 +233,14 @@ export async function saveQuiz(
       if (option.id) {
         await tx.quizOption.update({ where: { id: option.id }, data: optionData });
       } else {
-        await tx.quizOption.create({
-          data: { ...optionData, questionId: savedQuestion.id },
-        });
+        newOptions.push({ ...optionData, questionId: savedQuestion.id });
       }
+    }
+
+    // One statement for the new answers instead of one each, which keeps the
+    // transaction short on a big quiz.
+    if (newOptions.length > 0) {
+      await tx.quizOption.createMany({ data: newOptions });
     }
   }
 
