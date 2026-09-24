@@ -335,8 +335,10 @@ async function main() {
       data: { courseId: course.id, title: c.tree.title, description: c.tree.description },
     });
 
-    // Create nodes first (so prerequisites can reference real ids), with
-    // distinct posX/posY to satisfy @@unique([treeId, posX, posY]).
+    // Create nodes first (so prerequisites can reference real ids). posX/posY
+    // are percentages (0-100) of the builder canvas, laid out on a 5% grid and
+    // kept in bounds. Distinct per (orderInStep, step), which satisfies
+    // @@unique([treeId, posX, posY]).
     const nodeIds: string[] = [];
     for (const n of c.tree.nodes) {
       const node = await prisma.skillNode.create({
@@ -345,8 +347,8 @@ async function main() {
           title: n.title,
           step: n.step,
           orderInStep: n.orderInStep,
-          posX: n.orderInStep * 200,
-          posY: n.step * 200,
+          posX: Math.min(90, 20 + n.orderInStep * 20),
+          posY: Math.min(90, 15 + n.step * 15),
         },
       });
       nodeIds.push(node.id);
