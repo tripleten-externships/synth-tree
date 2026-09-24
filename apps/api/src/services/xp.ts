@@ -1,5 +1,46 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 
+const DEFAULT_TIMEZONE = "UTC";
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+// Fall back to UTC for a missing or non-IANA timezone; Intl throws a
+// RangeError on unknown zones, which would otherwise abort the XP award.
+function resolveTimezone(timezone: string | null | undefined): string {
+  if (!timezone) {
+    return DEFAULT_TIMEZONE;
+  }
+
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+    return timezone;
+  } catch {
+    return DEFAULT_TIMEZONE;
+  }
+}
+
+// Calendar date of `date` in `timeZone`, as a UTC-midnight epoch value.
+function localDayStart(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(date);
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  return Date.UTC(get("year"), get("month") - 1, get("day"));
+}
+
+// Number of local calendar days from `from` to `to` in `timeZone`. Compares
+// calendar dates rather than subtracting 24h, so 23h/25h DST days count as one.
+function localDayDiff(from: Date, to: Date, timeZone: string): number {
+  return Math.round(
+    (localDayStart(to, timeZone) - localDayStart(from, timeZone)) / MS_PER_DAY,
+  );
+}
+
 export async function awardXp(
   prisma: PrismaClient,
   userId: string,
@@ -112,14 +153,7 @@ export async function awardXp(
       },
     });
 
-    const timezone = user?.timezone ?? "UTC";
-
-    const today = new Intl.DateTimeFormat("en-CA", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(now);
+    const timezone = resolveTimezone(user?.timezone);
 
     const streak = await client.userStreak.findUnique({
       where: {
@@ -130,29 +164,12 @@ export async function awardXp(
     let currentDays = 1;
 
     if (streak?.lastActive) {
-      const lastActiveDate = new Intl.DateTimeFormat("en-CA", {
-        timeZone: timezone,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(streak.lastActive);
+      const dayDiff = localDayDiff(streak.lastActive, now, timezone);
 
-      if (lastActiveDate === today) {
+      if (dayDiff === 0) {
         currentDays = streak.currentDays;
-      } else {
-        const yesterday = new Date(now);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        const yesterdayDate = new Intl.DateTimeFormat("en-CA", {
-          timeZone: timezone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).format(yesterday);
-
-        if (lastActiveDate === yesterdayDate) {
-          currentDays = streak.currentDays + 1;
-        }
+      } else if (dayDiff === 1) {
+        currentDays = streak.currentDays + 1;
       }
     }
 
