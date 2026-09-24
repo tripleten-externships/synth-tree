@@ -51,4 +51,3 @@ export const PUBLIC_GET_ALL_COURSES_QUERY = gql`
     }
   }
 `;
-
