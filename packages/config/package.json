@@ -21,6 +21,7 @@
   "devDependencies": {
     "@apollo/client": "^4.0.9",
     "firebase": "^11.10.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vite": "^7.1.7"
   }
 }
