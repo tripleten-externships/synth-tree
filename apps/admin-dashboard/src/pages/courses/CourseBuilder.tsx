@@ -174,7 +174,7 @@ function CourseBuilder() {
         </aside>
 
         <section
-          className={`flex flex-col rounded-lg border bg-card p-4 ${activeTab === "tree" ? "block" : "hidden"} lg:flex`}
+          className={`flex-col rounded-lg border bg-card p-4 ${activeTab === "tree" ? "flex" : "hidden"} lg:flex`}
         >
           <h2 className="mb-3 text-lg font-semibold">Tree Canvas</h2>
           {/* First tree only for now; a tree switcher is out of SYN-66's scope. */}
