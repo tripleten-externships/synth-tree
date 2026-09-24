@@ -120,10 +120,11 @@ export async function gradeQuizAttempt(
     // question's canonical answer, trimmed and case-insensitive.
     if (question.type === QuestionType.FILL) {
       const submitted = isOpenAnswer(answerJson) ? answerJson.text : "";
+      const expected = normalizeFillAnswer(question.canonicalAnswer ?? "");
 
-      const isCorrect =
-        !!question.canonicalAnswer &&
-        normalizeFillAnswer(submitted) === normalizeFillAnswer(question.canonicalAnswer);
+      // A blank/whitespace-only key is never matched, so an empty submission
+      // can't be graded correct against it.
+      const isCorrect = expected !== "" && normalizeFillAnswer(submitted) === expected;
 
       await tx.quizAttemptAnswer.update({
         where: { id: answer.id },

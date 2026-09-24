@@ -948,5 +948,29 @@ describe("Quiz flow", () => {
       );
       expect(missing.errors).toBeDefined();
     });
+
+    it("rejects updating a FILL question to a blank canonicalAnswer", async () => {
+      const { question } = await seedFillQuiz();
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: `
+              mutation UpdateFill($id: ID!, $canonicalAnswer: String) {
+                updateQuizQuestion(id: $id, canonicalAnswer: $canonicalAnswer) {
+                  id
+                }
+              }
+            `,
+            variables: { id: question.id, canonicalAnswer: "   " },
+          },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        ),
+      );
+      expect(res.errors).toBeDefined();
+
+      const unchanged = await prisma.quizQuestion.findUnique({ where: { id: question.id } });
+      expect(unchanged?.canonicalAnswer).toBe("SP ");
+    });
   });
 });

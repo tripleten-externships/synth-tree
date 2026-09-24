@@ -548,3 +548,33 @@ it("grades a mixed FILL + SINGLE_CHOICE quiz", async () => {
   expect(result.passed).toBe(true);
   expect(result.message).toBe("Passed");
 });
+
+// A whitespace-only answer key must never match (an empty submission would
+// otherwise normalize to "" and be graded correct).
+it("never grades a FILL question correct against a blank canonical answer", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "   ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFillBlankKey",
+    answers: [
+      {
+        id: "answerFillBlankKey",
+        question: mockQuiz.questions[0],
+        answer: { text: "" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFillBlankKey");
+
+  expect(result.correctCount).toBe(0);
+  expect(result.passed).toBe(false);
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFillBlankKey" },
+    data: { isCorrect: false },
+  });
+});

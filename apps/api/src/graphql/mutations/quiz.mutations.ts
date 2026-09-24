@@ -194,12 +194,15 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
-      if (
-        canonicalAnswer !== undefined &&
-        canonicalAnswer !== null &&
-        existing.type !== PrismaQuestionType.FILL
-      ) {
-        throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+      if (canonicalAnswer !== undefined && canonicalAnswer !== null) {
+        if (existing.type !== PrismaQuestionType.FILL) {
+          throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+        }
+        // Same rule as createQuizQuestion: a blank key would grade an empty
+        // submission as correct.
+        if (canonicalAnswer.trim() === "") {
+          throw new GraphQLError("A FILL question requires a canonicalAnswer");
+        }
       }
 
       const quizQuestion = await ctx.prisma.quizQuestion.update({
