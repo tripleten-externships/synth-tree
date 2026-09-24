@@ -36,9 +36,7 @@ function localDayStart(date: Date, timeZone: string): number {
 // Number of local calendar days from `from` to `to` in `timeZone`. Compares
 // calendar dates rather than subtracting 24h, so 23h/25h DST days count as one.
 function localDayDiff(from: Date, to: Date, timeZone: string): number {
-  return Math.round(
-    (localDayStart(to, timeZone) - localDayStart(from, timeZone)) / MS_PER_DAY,
-  );
+  return Math.round((localDayStart(to, timeZone) - localDayStart(from, timeZone)) / MS_PER_DAY);
 }
 
 export async function awardXp(
