@@ -1069,5 +1069,38 @@ describe("Quiz flow", () => {
         await readExplanation(course.id, makeUserContext(prisma, SECOND_REGULAR_USER_ID)),
       ).toBeNull();
     });
+
+    // The field resolver hides the text, but a filter would let a learner
+    // confirm it a guess at a time, so explanation is kept out of the
+    // where/orderBy inputs the way canonicalAnswer and isCorrect are.
+    it("does not let a learner filter questions by explanation", async () => {
+      const { course } = await seedPublishedQuiz();
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: `
+              query PublicCourse($id: ID!) {
+                publicCourse(id: $id) {
+                  trees {
+                    nodes {
+                      quiz {
+                        questions(where: { explanation: { contains: "2 + 2" } }) {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `,
+            variables: { id: course.id },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors?.[0].message).toMatch(/explanation/);
+    });
   });
 });

@@ -246,6 +246,10 @@ model QuizQuestion {
   quizId          String       @db.Uuid
   type            QuestionType
   prompt          String
+  // Revealed to a learner only after they submit (see the QuizQuestion object
+  // guard in models.all.ts). Kept out of where/orderBy for the same reason as
+  // canonicalAnswer: a filter would let a learner probe it a guess at a time.
+  /// @Pothos.omit(where, orderBy)
   explanation     String?
   // Expected answer for FILL questions; null for other types. Graded
   // case-insensitively and whitespace-trimmed. Hidden from learners until

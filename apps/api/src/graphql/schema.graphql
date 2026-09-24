@@ -2868,7 +2868,6 @@ input QuizQuestionOrderByWithAggregationInput {
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2880,7 +2879,6 @@ input QuizQuestionOrderByWithAggregationInput {
 input QuizQuestionOrderByWithRelationInput {
   answers: QuizAttemptAnswerOrderByRelationAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
   order: SortOrder
@@ -3080,7 +3078,6 @@ input QuizQuestionWhereInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3097,7 +3094,6 @@ input QuizQuestionWhereUniqueInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: String
   options: QuizOptionListRelationFilter
   order: IntFilter
