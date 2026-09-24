@@ -1,9 +1,10 @@
-import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useState, useCallback, useRef, type Dispatch, type SetStateAction } from "react";
+import { useSearchParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
 import { auth } from "../../lib/firebase";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
 import { UPDATE_ONBOARDING, COMPLETE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
 
@@ -129,6 +130,10 @@ function Step1Credentials({
   const [error, setError] = useState<string | null>(null);
   const [syncError, setSyncError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
+  // Set once this form has created the Firebase account, so the signed-in
+  // redirect below doesn't fire while (or after) this submit finishes setup.
+  const accountCreatedHere = useRef(false);
 
   const isValid = validateStep1(fields);
 
@@ -158,6 +163,7 @@ function Step1Credentials({
     try {
       await createUserWithEmailAndPassword(auth, fields.email.trim(), fields.password);
       firebaseUserCreated = true;
+      accountCreatedHere.current = true;
       await updateProfile(auth.currentUser!, { displayName: fields.name.trim() });
       await syncUser({ variables: { name: fields.name.trim() } });
       onSuccess();
@@ -199,6 +205,17 @@ function Step1Credentials({
     "h-[42px] px-3 border border-border rounded-lg text-sm text-foreground " +
     "bg-card outline-none transition focus:border-primary focus:ring-2 " +
     "focus:ring-ring/10 placeholder:text-muted-foreground w-full box-border";
+
+  // Wait for the initial auth state so a signed-in user doesn't see the form flash.
+  if (authLoading) return null;
+
+  // Already signed in (e.g. sent back to finish onboarding, or browser Back from
+  // step 2): the account exists, so resume at step 2 instead of letting this form
+  // create a second one. Skipped mid-submit — Firebase signs the new user in
+  // before syncUser has created their User row.
+  if (isAuthenticated && !loading && !accountCreatedHere.current) {
+    return <Navigate to="/auth/signup?step=2" replace />;
+  }
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -373,7 +390,8 @@ function Step2Interests({
   setInterests,
 }: {
   onNext: () => void;
-  onBack: () => void;
+  // Omitted for signed-in users: step 1 would only offer to create another account.
+  onBack?: () => void;
   saveInterests: (opts: { variables: { interests: string[] } }) => Promise<unknown>;
   // Selection is owned by the page so navigating Back to step 2 preserves it
   // instead of resetting to empty (which would overwrite saved interests with []).
@@ -447,14 +465,16 @@ function Step2Interests({
       )}
 
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={loading}
-          className="flex-1 h-11 rounded-[10px] border border-border text-muted-foreground text-[15px] font-semibold hover:bg-accent active:scale-[0.98] disabled:opacity-45 transition"
-        >
-          Back
-        </button>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={loading}
+            className="flex-1 h-11 rounded-[10px] border border-border text-muted-foreground text-[15px] font-semibold hover:bg-accent active:scale-[0.98] disabled:opacity-45 transition"
+          >
+            Back
+          </button>
+        )}
         <button
           type="button"
           onClick={handleContinue}
@@ -603,6 +623,7 @@ export default function SignUpPage() {
   const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
   const [completeOnboarding] = useMutation(COMPLETE_ONBOARDING);
   const navigate = useNavigate();
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
   // Owned here (not in the step components) so selections survive step navigation.
   const [interests, setInterests] = useState<string[]>([]);
   const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
@@ -625,7 +646,7 @@ export default function SignUpPage() {
         {step === 2 && (
           <Step2Interests
             onNext={() => goToStep(3)}
-            onBack={() => goToStep(1)}
+            onBack={authLoading || isAuthenticated ? undefined : () => goToStep(1)}
             saveInterests={updateOnboarding}
             interests={interests}
             setInterests={setInterests}
