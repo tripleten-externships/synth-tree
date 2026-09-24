@@ -4,6 +4,8 @@ function node(overrides: Partial<RawSkillNode>): RawSkillNode {
   return {
     id: "node-1",
     title: "Test Node",
+    step: 1,
+    orderInStep: 0,
     posX: 50,
     posY: 50,
     prerequisites: [],
@@ -20,14 +22,24 @@ describe("deriveSkillTree", () => {
 
   it("marks a COMPLETED node as completed", () => {
     const { nodes } = deriveSkillTree([
-      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "a",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      }),
     ]);
     expect(nodes[0].status).toBe("completed");
   });
 
   it("marks an IN_PROGRESS node as current", () => {
     const { nodes } = deriveSkillTree([
-      node({ id: "a", progressForViewer: { status: "IN_PROGRESS", completedAt: null } }),
+      node({
+        id: "a",
+        progressForViewer: { status: "IN_PROGRESS", completedAt: null, updatedAt: "2026-01-01" },
+      }),
     ]);
     expect(nodes[0].status).toBe("current");
   });
@@ -44,7 +56,14 @@ describe("deriveSkillTree", () => {
 
   it("marks a node as unlocked if all prerequisites are completed", () => {
     const raw = [
-      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "a",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      }),
       node({ id: "b", prerequisites: [{ dependsOnNodeId: "a" }] }),
     ];
     const { nodes } = deriveSkillTree(raw);
@@ -62,7 +81,14 @@ describe("deriveSkillTree", () => {
 
   it("marks an edge solid when source is completed and target is not locked", () => {
     const raw = [
-      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "a",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      }),
       node({ id: "b", prerequisites: [{ dependsOnNodeId: "a" }] }),
     ];
     const { edges } = deriveSkillTree(raw);
@@ -80,11 +106,22 @@ describe("deriveSkillTree", () => {
 
   it("keeps an edge solid once the target is also completed", () => {
     const raw = [
-      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "a",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      }),
       node({
         id: "b",
         prerequisites: [{ dependsOnNodeId: "a" }],
-        progressForViewer: { status: "COMPLETED", completedAt: "2026-01-02" },
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-02",
+          updatedAt: "2026-01-01",
+        },
       }),
     ];
     const { edges } = deriveSkillTree(raw);
@@ -93,7 +130,14 @@ describe("deriveSkillTree", () => {
 
   it("marks edges dashed into a multi-prereq node when only one prereq is done", () => {
     const raw = [
-      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "a",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      }),
       node({ id: "b", progressForViewer: null }),
       node({
         id: "c",
@@ -119,8 +163,18 @@ describe("nodeHref", () => {
   it("links unlocked, in-progress and completed nodes to their lesson", () => {
     const nodes = derived([
       { id: "a" },
-      { id: "b", progressForViewer: { status: "IN_PROGRESS", completedAt: null } },
-      { id: "c", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } },
+      {
+        id: "b",
+        progressForViewer: { status: "IN_PROGRESS", completedAt: null, updatedAt: "2026-01-01" },
+      },
+      {
+        id: "c",
+        progressForViewer: {
+          status: "COMPLETED",
+          completedAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      },
     ]);
 
     expect(nodes.map((n) => nodeHref("course-1", n))).toEqual([
