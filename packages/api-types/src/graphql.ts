@@ -7464,7 +7464,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type UpdateOnboardingMutationVariables = Exact<{
   interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -8188,6 +8188,7 @@ export const SubmitQuizAttemptDocument = gql`
         id
         prompt
         type
+        canonicalAnswer
         options {
           id
           text
