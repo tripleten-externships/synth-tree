@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
+import { Button, toast } from "@synth-tree/ui";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
 import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
@@ -23,13 +25,24 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
   const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS);
 
-  async function handleNext() {
+  const [finishing, setFinishing] = useState(false);
+
+  async function handleFinish() {
+    setFinishing(true);
     // Best-effort completion. If the node has a required quiz the learner hasn't
-    // passed, the server rejects completion — don't block navigation on that.
+    // passed, the server rejects completion — don't block navigation on that,
+    // but tell the learner why the lesson isn't marked complete.
     try {
       await completeNodeProgress({ variables: { nodeId } });
     } catch {
       // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
+      if (quiz?.required) {
+        toast.info("Pass the quiz to complete this lesson");
+      } else {
+        toast.error("Couldn't save your progress");
+      }
+    } finally {
+      setFinishing(false);
     }
 
     return onNext();
@@ -41,6 +54,11 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   useEffect(() => {
     setCurrentPage(0);
   }, [nodeId]);
+
+  // Start each page at the top, like turning a page.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [currentPage]);
 
   // Mark this node as in-progress when the learner opens the lesson.
   // The mutation is idempotent server-side, so revisits / re-renders are safe.
@@ -80,7 +98,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
         alt={caption || "Lesson image"}
         className="max-w-full h-auto rounded-lg shadow-md"
       />
-      {caption && <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>}
+      {caption && (
+        <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>
+      )}
     </figure>
   );
 
@@ -162,9 +182,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
     );
   };
 
-  const renderQuiz = (quiz: QuizForRunner) => (
-  <QuizRunner quiz={quiz} />
-);
+  const renderQuiz = (quiz: QuizForRunner) => <QuizRunner quiz={quiz} />;
 
   const renderBlock = (block: LessonBlock) => {
     switch (block.type) {
@@ -184,20 +202,22 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   return (
     <div className="flex flex-col gap-8">
       {/* Page progress: one segment per page, filled up to the current page. */}
-      <div>
-        <div className="flex gap-2" aria-label="Lesson progress">
-          {Array.from({length : totalPages}).map((_, i) => (
-            <div
-              key={i}
-              className={`h-2 flex-1 rounded-full ${
-                i <= pageIndex ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Page {pageIndex + 1} of {totalPages}
-        </p>
+      <div
+        className="flex gap-1"
+        role="progressbar"
+        aria-label="Lesson progress"
+        aria-valuemin={1}
+        aria-valuemax={totalPages}
+        aria-valuenow={pageIndex + 1}
+      >
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i <= pageIndex ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        ))}
       </div>
 
       {currentBlocks.map((block) => (
@@ -206,30 +226,31 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
 
       {isQuizPage && quiz && renderQuiz(quiz)}
 
-      <div className="mt-8 flex items-center justify-between">
-        <button
-          type="button"
-          className="px-6 py-3 font-semibold text-primary rounded-lg cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-40"
+      <div className="mt-4 flex items-center justify-between gap-4 border-t border-border pt-6">
+        <Button
+          variant="outline"
           onClick={() => setCurrentPage(Math.max(0, pageIndex - 1))}
           disabled={pageIndex === 0}
         >
-          Back
-        </button>
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
+          Previous
+        </Button>
 
-        <button
-          type="button"
-          className="px-8 py-3 bg-primary text-primary-foreground font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
-          onClick={() => {
-            if (isLastPage) {
-              // Finishing the lesson: complete the node (best-effort) then advance.
-              handleNext();
-            } else {
-              setCurrentPage(pageIndex + 1);
-            }
-          }}
+        <p className="text-sm tabular-nums text-muted-foreground">
+          {pageIndex + 1} of {totalPages}
+        </p>
+
+        <Button
+          onClick={() => (isLastPage ? handleFinish() : setCurrentPage(pageIndex + 1))}
+          disabled={finishing}
         >
-          {isLastPage ? "Next" : "Next Page"}
-        </button>
+          {isLastPage ? "Finish lesson" : "Continue"}
+          {isLastPage ? (
+            <Check className="ml-1.5 h-4 w-4" />
+          ) : (
+            <ArrowRight className="ml-1.5 h-4 w-4" />
+          )}
+        </Button>
       </div>
     </div>
   );
