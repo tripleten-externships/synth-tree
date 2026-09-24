@@ -4,7 +4,7 @@ import type { CanvasEdge, CanvasNode } from "../lib/deriveSkillTree";
 export interface SkillTreeCanvasProps {
   nodes: CanvasNode[];
   edges: CanvasEdge[];
-  onNodeClick?: (nodeId: string) => void;
+  onNodeClick?: (node: CanvasNode) => void;
   width?: number;
   height?: number;
 }
@@ -12,6 +12,13 @@ export interface SkillTreeCanvasProps {
 const DEFAULT_WIDTH = 520;
 const DEFAULT_HEIGHT = 800;
 const HEX_SIZE = 64;
+
+const STATUS_LABEL: Record<CanvasNode["status"], string> = {
+  completed: "completed",
+  current: "in progress",
+  unlocked: "unlocked",
+  locked: "locked",
+};
 
 function edgePath(from: CanvasNode, to: CanvasNode, width: number, height: number): string {
   const ax = (from.posXPercent / 100) * width;
@@ -50,26 +57,42 @@ export default function SkillTreeCanvas({
         ))}
       </svg>
 
-      {nodes.map((node) => (
-        <div
-          key={node.id}
-          className="absolute -translate-x-1/2 -translate-y-1/2"
-          style={{
-            left: `${node.posXPercent}%`,
-            top: `${node.posYPercent}%`,
-          }}
-        >
-          <Hex
-            // `as never` cast tied to the SYN-28 icon-field TODO in deriveSkillTree.ts —
-            // remove once SkillNode has a real icon field and this becomes type-safe.
-            icon={node.icon as never}
-            status={node.status}
-            size={HEX_SIZE}
-            onClick={onNodeClick ? () => onNodeClick(node.id) : undefined}
-            aria-label={node.title}
-          />
-        </div>
-      ))}
+      {nodes.map((node) => {
+        const locked = node.status === "locked";
+
+        return (
+          <div
+            key={node.id}
+            className="absolute -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${node.posXPercent}%`,
+              top: `${node.posYPercent}%`,
+              width: HEX_SIZE,
+              height: HEX_SIZE,
+            }}
+          >
+            <Hex
+              // `as never` cast tied to the SYN-28 icon-field TODO in deriveSkillTree.ts —
+              // remove once SkillNode has a real icon field and this becomes type-safe.
+              icon={node.icon as never}
+              status={node.status}
+              size={HEX_SIZE}
+              onClick={onNodeClick ? () => onNodeClick(node) : undefined}
+              // Locked nodes stay clickable so the caller can explain why they're
+              // locked, but they don't look actionable.
+              className={locked ? "cursor-not-allowed hover:translate-y-0" : undefined}
+              aria-label={`${node.title} (${STATUS_LABEL[node.status]})`}
+            />
+            <span
+              className={`pointer-events-none absolute left-1/2 top-full mt-1 w-28 -translate-x-1/2 text-center text-xs font-medium leading-tight ${
+                locked ? "text-muted-foreground" : "text-foreground"
+              }`}
+            >
+              {node.title}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
