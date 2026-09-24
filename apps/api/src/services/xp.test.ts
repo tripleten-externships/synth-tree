@@ -24,6 +24,13 @@ function setup() {
       }),
       update: jest.fn().mockResolvedValue({}),
     },
+    user: {
+      findUnique: jest.fn().mockResolvedValue({ timezone: "UTC" }),
+    },
+    userStreak: {
+      findUnique: jest.fn().mockResolvedValue(null),
+      upsert: jest.fn().mockResolvedValue({}),
+    },
   };
 
   const tx = client as unknown as Prisma.TransactionClient;
