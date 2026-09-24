@@ -1,4 +1,5 @@
 import { builder } from "@graphql/builder";
+import { isUuid } from "@lib/uuid";
 
 // get all users for admin
 // At least one root level query is required.
@@ -57,6 +58,7 @@ builder.queryFields((t) => ({
     },
     resolve: async (_query, _parent, { nodeId }, context) => {
       context.auth.requireAuth();
+      if (!isUuid(nodeId)) return [];
       return context.prisma.lessonBlocks.findMany({
         where: { nodeId },
         orderBy: [{ order: "asc" }],
