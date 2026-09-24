@@ -85,6 +85,16 @@ jobs:
           pnpm run lint
           echo "✅ Linting complete"
 
+      # @synth-tree/theme and @synth-tree/ui resolve their types from dist/,
+      # so they must be built before ui and admin-dashboard can type-check.
+      - name: Build theme library
+        working-directory: packages/theme
+        run: pnpm build
+
+      - name: Build component library
+        working-directory: packages/ui
+        run: pnpm build
+
       - name: Run TypeScript type check
         run: |
           echo "Running TypeScript type check..."
