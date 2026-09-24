@@ -8,7 +8,12 @@ import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import { completeNodeForUser } from "src/services/progress";
 import { awardXp } from "../../services/xp";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
-import { QuizAnswerInput } from "../inputs/quiz.inputs";
+import { QuizAnswerInput, SaveQuizInput } from "../inputs/quiz.inputs";
+import {
+  saveQuiz as saveQuizForNode,
+  validateSaveQuizInput,
+  type SaveQuizInputShape,
+} from "src/services/quiz/saveQuiz";
 
 // SYN-40: passing a quiz awards a dedicated, fixed XP amount (distinct from a
 // node's own completion reward).
@@ -113,6 +118,38 @@ builder.mutationFields((t) => ({
       */
 
       return deleted;
+    },
+  }),
+
+  /**
+   * SYN-72: saves an authored quiz for a node in one atomic call. The admin
+   * lesson editor sends the whole quiz, and rows are matched by id so editing
+   * keeps learners' existing answers. See services/quiz/saveQuiz.ts.
+   */
+  saveQuiz: t.prismaField({
+    type: "Quiz",
+    args: {
+      nodeId: t.arg.id({ required: true }),
+      input: t.arg({ type: SaveQuizInput, required: true }),
+    },
+    resolve: async (query, _root, { nodeId, input }, ctx) => {
+      ctx.auth.requireAuth();
+
+      await assertNodeOwnership(ctx, String(nodeId));
+
+      // Validate before opening the transaction so an invalid quiz costs
+      // nothing and never lands half-written.
+      const quizInput = input as unknown as SaveQuizInputShape;
+      validateSaveQuizInput(quizInput);
+
+      const quizId = await ctx.prisma.$transaction((tx) =>
+        saveQuizForNode(tx, String(nodeId), quizInput),
+      );
+
+      return ctx.prisma.quiz.findUniqueOrThrow({
+        ...query,
+        where: { id: quizId },
+      });
     },
   }),
 

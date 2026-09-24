@@ -1169,6 +1169,7 @@ export type Mutation = {
   publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   reorderLessonBlocks?: Maybe<Array<LessonBlocks>>;
+  saveQuiz?: Maybe<Quiz>;
   setUserRole?: Maybe<User>;
   startNodeProgress?: Maybe<UserNodeProgress>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1301,6 +1302,12 @@ export type MutationPublishLessonBlockArgs = {
 export type MutationReorderLessonBlocksArgs = {
   nodeId: Scalars['ID']['input'];
   orderedBlockIds: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationSaveQuizArgs = {
+  input: SaveQuizInput;
+  nodeId: Scalars['ID']['input'];
 };
 
 
@@ -3721,6 +3728,26 @@ export type QuizWhereUniqueInput = {
 export type Role =
   | 'ADMIN'
   | 'USER';
+
+export type SaveQuizInput = {
+  questions: Array<SaveQuizQuestionInput>;
+  required: Scalars['Boolean']['input'];
+};
+
+export type SaveQuizOptionInput = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  isCorrect: Scalars['Boolean']['input'];
+  text: Scalars['String']['input'];
+};
+
+export type SaveQuizQuestionInput = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
+  explanation?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  options: Array<SaveQuizOptionInput>;
+  prompt: Scalars['String']['input'];
+  type: QuestionType;
+};
 
 export type SkillNode = {
   __typename?: 'SkillNode';

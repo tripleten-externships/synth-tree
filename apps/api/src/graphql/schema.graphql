@@ -1140,6 +1140,7 @@ type Mutation {
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
+  saveQuiz(input: SaveQuizInput!, nodeId: ID!): Quiz
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
@@ -3280,6 +3281,26 @@ input QuizWhereUniqueInput {
 enum Role {
   ADMIN
   USER
+}
+
+input SaveQuizInput {
+  questions: [SaveQuizQuestionInput!]!
+  required: Boolean!
+}
+
+input SaveQuizOptionInput {
+  id: ID
+  isCorrect: Boolean!
+  text: String!
+}
+
+input SaveQuizQuestionInput {
+  canonicalAnswer: String
+  explanation: String
+  id: ID
+  options: [SaveQuizOptionInput!]!
+  prompt: String!
+  type: QuestionType!
 }
 
 type SkillNode {
