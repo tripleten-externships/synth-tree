@@ -28,12 +28,29 @@ interface UseNodeDragOptions {
 const clampPct = (v: number) => Math.min(100, Math.max(0, v));
 const snapPct = (v: number, step: number) => clampPct(Math.round(v / step) * step);
 
+// Minimum pointer travel (in CSS px) before a press becomes a drag. Anything
+// shorter is treated as a click: no local move and no onDrop, so simply
+// clicking a node never snaps/persists it (and leaves room for click-to-select).
+const DRAG_THRESHOLD_PX = 4;
+
+// The pointer that pressed a node. It only becomes a visible drag (`active`)
+// once it has travelled DRAG_THRESHOLD_PX from where it went down.
+interface Press {
+  id: string;
+  pointerId: number;
+  el: HTMLElement; // element holding pointer capture for this press
+  startClientX: number;
+  startClientY: number;
+  active: boolean;
+}
+
 export function useNodeDrag({ gridStep = 5, onDrop }: UseNodeDragOptions) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const [drag, setDrag] = useState<DragState | null>(null);
   // Mirror of `drag` so pointermove/up handlers can read the latest value
   // without being re-created (keeps their identity stable across the drag).
   const dragRef = useRef<DragState | null>(null);
+  const pressRef = useRef<Press | null>(null);
   // Offset (in percent) between the pointer and the node's origin at grab time,
   // so the node tracks the cursor instead of snapping its center under it.
   const grabOffset = useRef({ dx: 0, dy: 0 });
@@ -52,27 +69,55 @@ export function useNodeDrag({ gridStep = 5, onDrop }: UseNodeDragOptions) {
     };
   }, []);
 
+  // The press owned by this event's pointer, or null for any other pointer
+  // (e.g. a second finger) so it can't hijack or end the active drag.
+  const pressFor = (e: React.PointerEvent<HTMLElement>) => {
+    const press = pressRef.current;
+    return press && press.pointerId === e.pointerId ? press : null;
+  };
+
   const onPointerDown = useCallback(
     (e: React.PointerEvent<HTMLElement>, node: NodePosition) => {
       if (e.button !== 0) return; // primary button / touch only
+      // One drag at a time: ignore extra pointers while a press is live. A press
+      // whose element lost capture without a pointerup/cancel reaching us (e.g.
+      // the node unmounted mid-drag) is stale and gets replaced.
+      const prev = pressRef.current;
+      if (prev) {
+        if (prev.el.isConnected && prev.el.hasPointerCapture(prev.pointerId)) return;
+        pressRef.current = null;
+        setDragBoth(null);
+      }
       const p = pointerToPercent(e.clientX, e.clientY);
       if (!p) return;
       e.preventDefault();
       e.currentTarget.setPointerCapture(e.pointerId);
       grabOffset.current = { dx: node.posX - p.x, dy: node.posY - p.y };
-      setDragBoth({ id: node.id, posX: node.posX, posY: node.posY });
+      pressRef.current = {
+        id: node.id,
+        pointerId: e.pointerId,
+        el: e.currentTarget,
+        startClientX: e.clientX,
+        startClientY: e.clientY,
+        active: false,
+      };
     },
     [pointerToPercent, setDragBoth],
   );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
-      const cur = dragRef.current;
-      if (!cur) return;
+      const press = pressFor(e);
+      if (!press) return;
+      if (!press.active) {
+        const moved = Math.hypot(e.clientX - press.startClientX, e.clientY - press.startClientY);
+        if (moved < DRAG_THRESHOLD_PX) return;
+        press.active = true;
+      }
       const p = pointerToPercent(e.clientX, e.clientY);
       if (!p) return;
       setDragBoth({
-        id: cur.id,
+        id: press.id,
         posX: clampPct(p.x + grabOffset.current.dx),
         posY: clampPct(p.y + grabOffset.current.dy),
       });
@@ -90,13 +135,15 @@ export function useNodeDrag({ gridStep = 5, onDrop }: UseNodeDragOptions) {
 
   const onPointerUp = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
-      const cur = dragRef.current;
-      if (!cur) return;
+      const press = pressFor(e);
+      if (!press) return;
       releaseCapture(e);
-      const posX = snapPct(cur.posX, gridStep);
-      const posY = snapPct(cur.posY, gridStep);
+      pressRef.current = null;
+      const cur = dragRef.current;
       setDragBoth(null);
-      onDrop(cur.id, posX, posY);
+      // Sub-threshold press (a click): nothing moved, nothing to persist.
+      if (!press.active || !cur) return;
+      onDrop(cur.id, snapPct(cur.posX, gridStep), snapPct(cur.posY, gridStep));
     },
     [gridStep, onDrop, setDragBoth],
   );
@@ -105,8 +152,9 @@ export function useNodeDrag({ gridStep = 5, onDrop }: UseNodeDragOptions) {
   // persisting — the node falls back to its stored position.
   const onPointerCancel = useCallback(
     (e: React.PointerEvent<HTMLElement>) => {
-      if (!dragRef.current) return;
+      if (!pressFor(e)) return;
       releaseCapture(e);
+      pressRef.current = null;
       setDragBoth(null);
     },
     [setDragBoth],
