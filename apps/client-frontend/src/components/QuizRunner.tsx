@@ -13,7 +13,7 @@ type QuizOption = {
 export type QuizQuestion = {
   id: string;
   prompt: string;
-  explanation: string | null;
+  explanation?: string | null;
   type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION
   options: QuizOption[];
 };
