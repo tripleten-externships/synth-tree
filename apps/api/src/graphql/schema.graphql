@@ -4623,6 +4623,7 @@ type User {
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
+  timezone: String!
   updatedAt: DateTime!
   xp: UserXp
   xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
@@ -4642,6 +4643,7 @@ input UserCountOrderByAggregateInput {
   onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
@@ -4661,6 +4663,7 @@ input UserCreateInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4676,6 +4679,7 @@ input UserCreateManyInput {
   onboardingComplete: Boolean
   photoUrl: String
   role: Role
+  timezone: String
   updatedAt: DateTime
 }
 
@@ -4782,6 +4786,7 @@ input UserCreateWithoutCoursesAuthoredInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4802,6 +4807,7 @@ input UserCreateWithoutDailyQuestsInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4822,6 +4828,7 @@ input UserCreateWithoutHeartsInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4842,6 +4849,7 @@ input UserCreateWithoutNodeProgressInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4862,6 +4870,7 @@ input UserCreateWithoutQuizAttemptsInput {
   photoUrl: String
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4882,6 +4891,7 @@ input UserCreateWithoutStreakInput {
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4903,6 +4913,7 @@ input UserCreateWithoutXpEventsInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
 }
@@ -4923,6 +4934,7 @@ input UserCreateWithoutXpInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -5349,6 +5361,7 @@ input UserMaxOrderByAggregateInput {
   onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
@@ -5361,6 +5374,7 @@ input UserMinOrderByAggregateInput {
   onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
@@ -5714,6 +5728,7 @@ input UserOrderByWithAggregationInput {
   onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
@@ -5733,6 +5748,7 @@ input UserOrderByWithRelationInput {
   quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
   streak: UserStreakOrderByWithRelationInput
+  timezone: SortOrder
   updatedAt: SortOrder
   xp: UserXpOrderByWithRelationInput
   xpEvents: XpEventOrderByRelationAggregateInput
@@ -5748,6 +5764,7 @@ enum UserScalarFieldEnum {
   onboardingComplete
   photoUrl
   role
+  timezone
   updatedAt
 }
 
@@ -5769,6 +5786,7 @@ input UserScalarWhereWithAggregatesInput {
   onboardingComplete: BoolWithAggregatesFilter
   photoUrl: StringNullableWithAggregatesFilter
   role: EnumRoleWithAggregatesFilter
+  timezone: StringWithAggregatesFilter
   updatedAt: DateTimeWithAggregatesFilter
 }
 
@@ -5966,6 +5984,7 @@ input UserUpdateInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -5981,6 +6000,7 @@ input UserUpdateManyMutationInput {
   onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
 
@@ -6103,6 +6123,7 @@ input UserUpdateWithoutCoursesAuthoredInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6123,6 +6144,7 @@ input UserUpdateWithoutDailyQuestsInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6143,6 +6165,7 @@ input UserUpdateWithoutHeartsInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6163,6 +6186,7 @@ input UserUpdateWithoutNodeProgressInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6183,6 +6207,7 @@ input UserUpdateWithoutQuizAttemptsInput {
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6203,6 +6228,7 @@ input UserUpdateWithoutStreakInput {
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6224,6 +6250,7 @@ input UserUpdateWithoutXpEventsInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
 }
@@ -6244,6 +6271,7 @@ input UserUpdateWithoutXpInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6320,6 +6348,7 @@ input UserWhereInput {
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
+  timezone: StringFilter
   updatedAt: DateTimeFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter
@@ -6344,6 +6373,7 @@ input UserWhereUniqueInput {
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
+  timezone: StringFilter
   updatedAt: DateTimeFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter
