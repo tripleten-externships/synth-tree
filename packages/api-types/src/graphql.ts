@@ -5107,6 +5107,7 @@ export type User = {
   recommendedNext?: Maybe<Array<SkillNode>>;
   role: Role;
   streak?: Maybe<UserStreak>;
+  timezone: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
@@ -5175,6 +5176,7 @@ export type UserCountOrderByAggregateInput = {
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
+  timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
 
@@ -5192,6 +5194,7 @@ export type UserCreateInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5205,6 +5208,7 @@ export type UserCreateManyInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<Role>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
@@ -5309,6 +5313,7 @@ export type UserCreateWithoutCoursesAuthoredInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5327,6 +5332,7 @@ export type UserCreateWithoutDailyQuestsInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5345,6 +5351,7 @@ export type UserCreateWithoutHeartsInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5363,6 +5370,7 @@ export type UserCreateWithoutNodeProgressInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5381,6 +5389,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5399,6 +5408,7 @@ export type UserCreateWithoutStreakInput = {
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
@@ -5418,6 +5428,7 @@ export type UserCreateWithoutXpEventsInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
 };
@@ -5436,6 +5447,7 @@ export type UserCreateWithoutXpInput = {
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5860,6 +5872,7 @@ export type UserMaxOrderByAggregateInput = {
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
+  timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
 
@@ -5870,6 +5883,7 @@ export type UserMinOrderByAggregateInput = {
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
+  timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
 
@@ -6219,6 +6233,7 @@ export type UserOrderByWithAggregationInput = {
   name?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
   role?: InputMaybe<SortOrder>;
+  timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
 };
 
@@ -6236,6 +6251,7 @@ export type UserOrderByWithRelationInput = {
   quizAttempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   role?: InputMaybe<SortOrder>;
   streak?: InputMaybe<UserStreakOrderByWithRelationInput>;
+  timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
   xp?: InputMaybe<UserXpOrderByWithRelationInput>;
   xpEvents?: InputMaybe<XpEventOrderByRelationAggregateInput>;
@@ -6249,6 +6265,7 @@ export type UserScalarFieldEnum =
   | 'name'
   | 'photoUrl'
   | 'role'
+  | 'timezone'
   | 'updatedAt';
 
 export type UserScalarRelationFilter = {
@@ -6267,6 +6284,7 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: InputMaybe<StringNullableWithAggregatesFilter>;
   photoUrl?: InputMaybe<StringNullableWithAggregatesFilter>;
   role?: InputMaybe<EnumRoleWithAggregatesFilter>;
+  timezone?: InputMaybe<StringWithAggregatesFilter>;
   updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
 };
 
@@ -6458,6 +6476,7 @@ export type UserUpdateInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6471,6 +6490,7 @@ export type UserUpdateManyMutationInput = {
   name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
 
@@ -6591,6 +6611,7 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6609,6 +6630,7 @@ export type UserUpdateWithoutDailyQuestsInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6627,6 +6649,7 @@ export type UserUpdateWithoutHeartsInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6645,6 +6668,7 @@ export type UserUpdateWithoutNodeProgressInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6663,6 +6687,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6681,6 +6706,7 @@ export type UserUpdateWithoutStreakInput = {
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
@@ -6700,6 +6726,7 @@ export type UserUpdateWithoutXpEventsInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
 };
@@ -6718,6 +6745,7 @@ export type UserUpdateWithoutXpInput = {
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6792,6 +6820,7 @@ export type UserWhereInput = {
   quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
+  timezone?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
   xp?: InputMaybe<UserXpWhereInput>;
   xpEvents?: InputMaybe<XpEventListRelationFilter>;
@@ -6814,6 +6843,7 @@ export type UserWhereUniqueInput = {
   quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
+  timezone?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
   xp?: InputMaybe<UserXpWhereInput>;
   xpEvents?: InputMaybe<XpEventListRelationFilter>;
