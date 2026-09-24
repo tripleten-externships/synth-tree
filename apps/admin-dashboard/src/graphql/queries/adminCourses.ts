@@ -26,7 +26,7 @@ export const ADMIN_COURSE_QUERY = gql`
       title
       description
       status
-      trees {
+      trees(orderBy: [{ createdAt: asc }, { id: asc }]) {
         id
         title
         nodes {
