@@ -111,7 +111,34 @@ builder.prismaObject("SkillNode", {
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
-builder.prismaObject("QuizQuestion", QuizQuestionObject);
+builder.prismaObject("QuizQuestion", {
+  ...QuizQuestionObject,
+  fields: (t) => ({
+    ...QuizQuestionObject.fields(t),
+
+    // Answer-key guard for FILL questions. canonicalAnswer is only revealed to
+    // admins, or to a learner who has already submitted an attempt for this
+    // question's quiz. Otherwise it resolves to null, so a hand-crafted query
+    // can't read the expected answer before submitting. The results screen
+    // reads it post-submit (allowed).
+    canonicalAnswer: t.string({
+      nullable: true,
+      resolve: async (parent, _args, ctx) => {
+        if (ctx.auth.isAdmin()) return parent.canonicalAnswer;
+
+        const userId = ctx.auth.getUserId();
+        if (!userId) return null;
+
+        const attempt = await ctx.prisma.quizAttempt.findFirst({
+          where: { quizId: parent.quizId, userId },
+          select: { id: true },
+        });
+
+        return attempt ? parent.canonicalAnswer : null;
+      },
+    }),
+  }),
+});
 builder.prismaObject("QuizOption", {
   ...QuizOptionObject,
   fields: (t) => ({

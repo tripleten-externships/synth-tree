@@ -14,6 +14,7 @@ export const SUBMIT_QUIZ_ATTEMPT = gql`
           id
           prompt
           type
+          canonicalAnswer
           options {
             id
             text
