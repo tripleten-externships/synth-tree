@@ -2824,16 +2824,22 @@ export type QuizOption = {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   isCorrect?: Maybe<Scalars['Boolean']['output']>;
+  order: Scalars['Int']['output'];
   question: QuizQuestion;
   questionId: Scalars['String']['output'];
   text: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type QuizOptionAvgOrderByAggregateInput = {
+  order?: InputMaybe<SortOrder>;
+};
+
 export type QuizOptionCountOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2843,6 +2849,7 @@ export type QuizOptionCreateInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   question: QuizQuestionCreateNestedOneWithoutOptionsInput;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -2852,6 +2859,7 @@ export type QuizOptionCreateManyInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   questionId: Scalars['String']['input'];
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -2861,6 +2869,7 @@ export type QuizOptionCreateManyQuestionInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2886,6 +2895,7 @@ export type QuizOptionCreateWithoutQuestionInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2900,6 +2910,7 @@ export type QuizOptionMaxOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2909,6 +2920,7 @@ export type QuizOptionMinOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2919,11 +2931,14 @@ export type QuizOptionOrderByRelationAggregateInput = {
 };
 
 export type QuizOptionOrderByWithAggregationInput = {
+  _avg?: InputMaybe<QuizOptionAvgOrderByAggregateInput>;
   _count?: InputMaybe<QuizOptionCountOrderByAggregateInput>;
   _max?: InputMaybe<QuizOptionMaxOrderByAggregateInput>;
   _min?: InputMaybe<QuizOptionMinOrderByAggregateInput>;
+  _sum?: InputMaybe<QuizOptionSumOrderByAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2932,6 +2947,7 @@ export type QuizOptionOrderByWithAggregationInput = {
 export type QuizOptionOrderByWithRelationInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   question?: InputMaybe<QuizQuestionOrderByWithRelationInput>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
@@ -2942,6 +2958,7 @@ export type QuizOptionScalarFieldEnum =
   | 'createdAt'
   | 'id'
   | 'isCorrect'
+  | 'order'
   | 'questionId'
   | 'text'
   | 'updatedAt';
@@ -2953,6 +2970,7 @@ export type QuizOptionScalarWhereInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
   isCorrect?: InputMaybe<BoolFilter>;
+  order?: InputMaybe<IntFilter>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
@@ -2965,15 +2983,21 @@ export type QuizOptionScalarWhereWithAggregatesInput = {
   createdAt?: InputMaybe<DateTimeWithAggregatesFilter>;
   id?: InputMaybe<UuidWithAggregatesFilter>;
   isCorrect?: InputMaybe<BoolWithAggregatesFilter>;
+  order?: InputMaybe<IntWithAggregatesFilter>;
   questionId?: InputMaybe<UuidWithAggregatesFilter>;
   text?: InputMaybe<StringWithAggregatesFilter>;
   updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+};
+
+export type QuizOptionSumOrderByAggregateInput = {
+  order?: InputMaybe<SortOrder>;
 };
 
 export type QuizOptionUpdateInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   question?: InputMaybe<QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
@@ -2983,6 +3007,7 @@ export type QuizOptionUpdateManyMutationInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
@@ -3015,6 +3040,7 @@ export type QuizOptionUpdateWithoutQuestionInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
@@ -3031,6 +3057,7 @@ export type QuizOptionWhereInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
+  order?: InputMaybe<IntFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
@@ -3043,6 +3070,7 @@ export type QuizOptionWhereUniqueInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<IntFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;

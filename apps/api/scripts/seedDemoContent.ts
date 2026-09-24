@@ -805,10 +805,11 @@ async function main() {
           let correctOptionIds: string[] = [];
           if (q.options?.length) {
             const options = await prisma.quizOption.createManyAndReturn({
-              data: q.options.map((o) => ({
+              data: q.options.map((o, oi) => ({
                 questionId: question.id,
                 text: o.text,
                 isCorrect: o.isCorrect ?? false,
+                order: oi,
               })),
             });
             correctOptionIds = options.filter((o) => o.isCorrect).map((o) => o.id);

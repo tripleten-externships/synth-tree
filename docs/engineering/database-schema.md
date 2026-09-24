@@ -85,8 +85,8 @@ Prerequisites → SkillNodePrerequisite maps “Node B requires Node A.”
 
 ### QuizOption
 
-- **Key Fields:** `id`, `questionId`, `text`, `isCorrect`.
-- **Purpose:** Enumerates possible responses and correctness for choice-based questions.
+- **Key Fields:** `id`, `questionId`, `text`, `isCorrect`, `order`.
+- **Purpose:** Enumerates possible responses and correctness for choice-based questions. `order` is the author-defined display order within the question; learner and admin queries sort on it so editing an option never moves it.
 
 ### QuizAttempt
 
@@ -390,12 +390,14 @@ model QuizQuestion {
 // QuizOption
 // - Correctness flags live at the option level.
 // - For MULTIPLE_CHOICE, multiple options may be correct.
+// - `order` keeps the author's option order stable for rendering.
 // ================================================================
 model QuizOption {
   id          String   @id @default(uuid()) @db.Uuid
   questionId  String   @db.Uuid
   text        String
   isCorrect   Boolean  @default(false)
+  order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

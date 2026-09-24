@@ -299,6 +299,9 @@ builder.mutationFields((t) => ({
         data: {
           questionId: questionId,
           text: text,
+          // Append after the existing options so this mutation and saveQuiz
+          // agree on what `order` means.
+          order: existing.options.length,
           ...(isCorrect !== undefined && isCorrect !== null && { isCorrect }),
         },
       });
