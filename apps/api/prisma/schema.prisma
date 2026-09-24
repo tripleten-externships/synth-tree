@@ -36,6 +36,7 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   OPEN_QUESTION
+  FILL
 }
 
 enum ContentType {
@@ -63,14 +64,17 @@ enum ProgressStatus {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
-  name      String?
-  photoUrl  String?
-  role      Role     @default(USER)
-  interests String[] @default([]) // subjects picked during onboarding (SYN-46)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id
+  email              String   @unique
+  timezone           String   @default("UTC")
+  name               String?
+  photoUrl           String?
+  role               Role     @default(USER)
+  interests          String[] @default([]) // subjects picked during onboarding (SYN-46)
+  dailyGoalMinutes   Int? // minutes/day picked during onboarding (SYN-47)
+  onboardingComplete Boolean  @default(false) // flipped true at signup step 3 (SYN-47)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
@@ -238,14 +242,19 @@ model Quiz {
 // - Keep ordering stable for rendering.
 // ================================================================
 model QuizQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  quizId    String       @db.Uuid
-  type      QuestionType
-  prompt    String
-  explanation String?
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id              String       @id @default(uuid()) @db.Uuid
+  quizId          String       @db.Uuid
+  type            QuestionType
+  prompt          String
+  explanation     String?
+  // Expected answer for FILL questions; null for other types. Graded
+  // case-insensitively and whitespace-trimmed. Hidden from learners until
+  // they submit an attempt (see QuizQuestion object guard in models.all.ts).
+  /// @Pothos.omit(where, orderBy)
+  canonicalAnswer String?      @db.Text
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION
@@ -263,6 +272,7 @@ model QuizOption {
   id         String   @id @default(uuid()) @db.Uuid
   questionId String   @db.Uuid
   text       String
+  /// @Pothos.omit(where, orderBy)
   isCorrect  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -392,6 +402,6 @@ model XpEvent {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
   @@unique([userId, reason, rewardKey])
+  @@index([userId, createdAt])
 }

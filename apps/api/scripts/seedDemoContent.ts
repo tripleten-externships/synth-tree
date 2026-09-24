@@ -48,6 +48,8 @@ type QuestionSeed = {
   prompt: string;
   explanation?: string;
   options?: { text: string; isCorrect?: boolean }[];
+  // FILL only: the graded answer key (trimmed, case-insensitive).
+  canonicalAnswer?: string;
 };
 
 type NodeSeed = {
@@ -102,11 +104,7 @@ const COURSES: CourseSeed[] = [
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "How many covalent bonds does a neutral carbon atom form?",
                 explanation: "A neutral carbon atom has four valence electrons and typically forms four covalent bonds to complete its valence shell.",
-                options: [
-                  { text: "2" },
-                  { text: "4", isCorrect: true },
-                  { text: "6" },
-                ],
+                options: [{ text: "2" }, { text: "4", isCorrect: true }, { text: "6" }],
               },
               {
                 type: QuestionType.MULTIPLE_CHOICE,
@@ -119,6 +117,14 @@ const COURSES: CourseSeed[] = [
                   { text: "Magnetic" },
                   { text: "Triple", isCorrect: true },
                 ],
+              },
+              {
+                // FILL sample. Grading trims + lowercases, so "sp" is accepted
+                // against the canonical "SP " (SYN-53 acceptance).
+                type: QuestionType.FILL,
+                prompt:
+                  "A carbon atom at the end of a triple bond is ___-hybridized. Fill in the blank (e.g. sp, sp2, sp3).",
+                canonicalAnswer: "SP ",
               },
             ],
           },
@@ -343,8 +349,10 @@ async function main() {
       data: { courseId: course.id, title: c.tree.title, description: c.tree.description },
     });
 
-    // Create nodes first (so prerequisites can reference real ids), with
-    // distinct posX/posY to satisfy @@unique([treeId, posX, posY]).
+    // Create nodes first (so prerequisites can reference real ids). posX/posY
+    // are percentages (0-100) of the builder canvas, laid out on a 5% grid and
+    // kept in bounds. Distinct per (orderInStep, step), which satisfies
+    // @@unique([treeId, posX, posY]).
     const nodeIds: string[] = [];
     for (const n of c.tree.nodes) {
       const node = await prisma.skillNode.create({
@@ -353,8 +361,8 @@ async function main() {
           title: n.title,
           step: n.step,
           orderInStep: n.orderInStep,
-          posX: n.orderInStep * 200,
-          posY: n.step * 200,
+          posX: Math.min(90, 20 + n.orderInStep * 20),
+          posY: Math.min(90, 15 + n.step * 15),
         },
       });
       nodeIds.push(node.id);
@@ -380,7 +388,14 @@ async function main() {
         for (let qi = 0; qi < n.quiz.questions.length; qi++) {
           const q = n.quiz.questions[qi];
           const question = await prisma.quizQuestion.create({
-            data: { quizId: quiz.id, type: q.type, prompt: q.prompt, explanation: q.explanation, order: qi },
+            data: {
+              quizId: quiz.id,
+              type: q.type,
+              prompt: q.prompt,
+              explanation: q.explanation,
+              canonicalAnswer: q.canonicalAnswer ?? null,
+              order: qi,
+            },
           });
           if (q.options?.length) {
             await prisma.quizOption.createMany({

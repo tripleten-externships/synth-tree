@@ -1,11 +1,20 @@
-import { useState, useCallback, type Dispatch, type SetStateAction } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
+import { useSearchParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
+import { useSavedInterestsQuery } from "@synth-tree/api-types";
 import { auth } from "../../lib/firebase";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
-import { UPDATE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
+import { UPDATE_ONBOARDING, COMPLETE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -45,7 +54,11 @@ function ProgressBar({ step }: { step: Step }) {
             <div
               className={[
                 "h-full rounded-full transition-all duration-400",
-                isDone ? "w-full bg-[hsl(var(--primary)/0.5)]" : isActive ? "w-full bg-primary" : "w-0",
+                isDone
+                  ? "w-full bg-[hsl(var(--primary)/0.5)]"
+                  : isActive
+                    ? "w-full bg-primary"
+                    : "w-0",
               ].join(" ")}
             />
           </div>
@@ -125,6 +138,10 @@ function Step1Credentials({
   const [error, setError] = useState<string | null>(null);
   const [syncError, setSyncError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
+  // Set once this form has created the Firebase account, so the signed-in
+  // redirect below doesn't fire while (or after) this submit finishes setup.
+  const accountCreatedHere = useRef(false);
 
   const isValid = validateStep1(fields);
 
@@ -154,6 +171,7 @@ function Step1Credentials({
     try {
       await createUserWithEmailAndPassword(auth, fields.email.trim(), fields.password);
       firebaseUserCreated = true;
+      accountCreatedHere.current = true;
       await updateProfile(auth.currentUser!, { displayName: fields.name.trim() });
       await syncUser({ variables: { name: fields.name.trim() } });
       onSuccess();
@@ -196,12 +214,25 @@ function Step1Credentials({
     "bg-card outline-none transition focus:border-primary focus:ring-2 " +
     "focus:ring-ring/10 placeholder:text-muted-foreground w-full box-border";
 
+  // Wait for the initial auth state so a signed-in user doesn't see the form flash.
+  if (authLoading) return null;
+
+  // Already signed in (e.g. sent back to finish onboarding, or browser Back from
+  // step 2): the account exists, so resume at step 2 instead of letting this form
+  // create a second one. Skipped mid-submit — Firebase signs the new user in
+  // before syncUser has created their User row.
+  if (isAuthenticated && !loading && !accountCreatedHere.current) {
+    return <Navigate to="/auth/signup?step=2" replace />;
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate>
       <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
         Create your account
       </h1>
-      <p className="text-[13px] text-muted-foreground font-medium mb-7">Step 1 of 3 — Your credentials</p>
+      <p className="text-[13px] text-muted-foreground font-medium mb-7">
+        Step 1 of 3 — Your credentials
+      </p>
 
       <div className="flex flex-col gap-[18px] mb-2">
         {/* Name */}
@@ -365,14 +396,19 @@ function Step2Interests({
   saveInterests,
   interests,
   setInterests,
+  loadingSaved,
 }: {
   onNext: () => void;
-  onBack: () => void;
+  // Omitted for signed-in users: step 1 would only offer to create another account.
+  onBack?: () => void;
   saveInterests: (opts: { variables: { interests: string[] } }) => Promise<unknown>;
   // Selection is owned by the page so navigating Back to step 2 preserves it
   // instead of resetting to empty (which would overwrite saved interests with []).
   interests: string[];
   setInterests: Dispatch<SetStateAction<string[]>>;
+  // True while previously saved interests are still loading; Continue waits so it
+  // can't save an empty selection over them.
+  loadingSaved: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -388,7 +424,7 @@ function Step2Interests({
   );
 
   const handleContinue = async () => {
-    if (loading) return;
+    if (loading || loadingSaved) return;
     setLoading(true);
     setError(null);
     try {
@@ -422,9 +458,7 @@ function Step2Interests({
               onClick={() => toggle(subject)}
               className={[
                 "border-2 rounded-xl px-3.5 py-2.5 text-sm text-foreground text-left transition",
-                selected
-                  ? "border-primary bg-accent"
-                  : "border-border bg-card hover:border-border",
+                selected ? "border-primary bg-accent" : "border-border bg-card hover:border-border",
               ].join(" ")}
             >
               {subject}
@@ -443,22 +477,28 @@ function Step2Interests({
       )}
 
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={loading}
-          className="flex-1 h-11 rounded-[10px] border border-border text-muted-foreground text-[15px] font-semibold hover:bg-accent active:scale-[0.98] disabled:opacity-45 transition"
-        >
-          Back
-        </button>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={loading}
+            className="flex-1 h-11 rounded-[10px] border border-border text-muted-foreground text-[15px] font-semibold hover:bg-accent active:scale-[0.98] disabled:opacity-45 transition"
+          >
+            Back
+          </button>
+        )}
         <button
           type="button"
           onClick={handleContinue}
-          disabled={loading}
+          disabled={loading || loadingSaved}
           className="flex-[2] h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
         >
           {loading && <Spinner />}
-          {loading && <span className="sr-only" role="status">Saving…</span>}
+          {loading && (
+            <span className="sr-only" role="status">
+              Saving…
+            </span>
+          )}
           {loading ? null : "Continue"}
         </button>
       </div>
@@ -466,18 +506,121 @@ function Step2Interests({
   );
 }
 
-// ─── Step 3 stub ──────────────────────────────────────────────────────────────
+// ─── Step 3 – Daily goal ──────────────────────────────────────────────────────
 
-function Step3Stub() {
+// Must stay in sync with ALLOWED_DAILY_GOALS in the API
+// (apps/api/src/graphql/mutations/user.mutations.ts).
+const DAILY_GOALS = [
+  { minutes: 5, label: "Casual", detail: "5 min / day" },
+  { minutes: 15, label: "Regular", detail: "15 min / day", recommended: true },
+  { minutes: 30, label: "Serious", detail: "30 min / day" },
+  { minutes: 60, label: "Intense", detail: "1 h / day" },
+] as const;
+
+// Preselect the recommended option so "Start learning" works in one click.
+const DEFAULT_DAILY_GOAL = 15;
+
+function Step3DailyGoal({
+  onFinish,
+  saveDailyGoal,
+  dailyGoal,
+  setDailyGoal,
+}: {
+  onFinish: () => void;
+  saveDailyGoal: (opts: { variables: { dailyGoalMinutes: number } }) => Promise<unknown>;
+  // Owned by the page, like interests, so the pick survives step navigation.
+  dailyGoal: number;
+  setDailyGoal: Dispatch<SetStateAction<number>>;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFinish = async () => {
+    if (loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      // Saving the goal also marks onboarding complete on the server.
+      await saveDailyGoal({ variables: { dailyGoalMinutes: dailyGoal } });
+      onFinish();
+    } catch {
+      setError("We couldn't save your daily goal. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">
-        ⚙️
-      </span>
-      <h2 className="text-xl font-bold text-foreground tracking-tight m-0">Preferences</h2>
-      <p className="text-sm text-muted-foreground leading-relaxed m-0 max-w-[300px]">
-        This step is coming soon (SYN-24).
+    <div>
+      <h1 className="text-[22px] font-bold text-foreground tracking-tight mb-1">
+        Set your daily goal
+      </h1>
+      <p className="text-[13px] text-muted-foreground font-medium mb-6">
+        How much time do you want to commit per day? You can change this anytime.
       </p>
+
+      <fieldset className="flex flex-col gap-2.5 mb-6">
+        <legend className="sr-only">Daily goal</legend>
+        {DAILY_GOALS.map((goal) => {
+          const selected = dailyGoal === goal.minutes;
+          return (
+            <label
+              key={goal.minutes}
+              className={[
+                "flex items-center justify-between border-2 rounded-xl px-[18px] py-3.5 cursor-pointer transition",
+                // The radio input is visually hidden, so the card carries the keyboard focus ring.
+                "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2",
+                selected ? "border-primary bg-accent" : "border-border bg-card",
+              ].join(" ")}
+            >
+              <input
+                type="radio"
+                name="daily-goal"
+                value={goal.minutes}
+                checked={selected}
+                onChange={() => {
+                  setError(null);
+                  setDailyGoal(goal.minutes);
+                }}
+                className="sr-only"
+              />
+              <span className="flex flex-col items-start gap-0.5">
+                <span className="text-[15px] font-semibold text-foreground">{goal.label}</span>
+                <span className="text-[13px] text-muted-foreground">{goal.detail}</span>
+              </span>
+              {"recommended" in goal && goal.recommended && (
+                <span className="text-[11px] font-semibold px-2 py-[3px] rounded-md bg-[hsl(var(--brand))] text-[hsl(var(--brand-foreground))]">
+                  recommended
+                </span>
+              )}
+            </label>
+          );
+        })}
+      </fieldset>
+
+      {error && (
+        <p
+          role="alert"
+          className="text-[13px] text-destructive bg-[hsl(var(--destructive)/0.1)] border border-[hsl(var(--destructive)/0.3)] rounded-lg px-3 py-2.5 mb-4"
+        >
+          {error}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleFinish}
+        disabled={loading}
+        className="w-full h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
+      >
+        {loading && <Spinner />}
+        {loading && (
+          <span className="sr-only" role="status">
+            Saving…
+          </span>
+        )}
+        {loading ? null : "Start learning"}
+      </button>
     </div>
   );
 }
@@ -490,11 +633,31 @@ export default function SignUpPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [syncUser] = useMutation(SYNC_CURRENT_USER);
   const [updateOnboarding] = useMutation(UPDATE_ONBOARDING);
-  // Owned here (not in Step2Interests) so the selection survives step navigation.
+  const [completeOnboarding] = useMutation(COMPLETE_ONBOARDING);
+  const navigate = useNavigate();
+  const { isAuthenticated, loading: authLoading } = useAuthContext();
+  // Owned here (not in the step components) so selections survive step navigation.
   const [interests, setInterests] = useState<string[]>([]);
+  const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
+
+  // Pre-fill step 2 with interests a returning user already saved, so Continue
+  // doesn't overwrite them with []. Only fetched on step 2: during step 1 the
+  // User row may not exist yet.
+  const { data: savedData, loading: savedLoading } = useSavedInterestsQuery({
+    skip: step !== 2 || authLoading || !isAuthenticated,
+    fetchPolicy: "network-only",
+  });
+  const prefilled = useRef(false);
+  useEffect(() => {
+    const saved = savedData?.currentUser?.interests;
+    if (prefilled.current || !saved) return;
+    prefilled.current = true;
+    // Keep picks already made in this visit (e.g. browser Back from step 3).
+    setInterests((prev) => (prev.length > 0 ? prev : saved));
+  }, [savedData]);
 
   const goToStep = useCallback(
     (next: Step) => {
@@ -511,13 +674,21 @@ export default function SignUpPage() {
         {step === 2 && (
           <Step2Interests
             onNext={() => goToStep(3)}
-            onBack={() => goToStep(1)}
+            onBack={authLoading || isAuthenticated ? undefined : () => goToStep(1)}
+            loadingSaved={authLoading || savedLoading}
             saveInterests={updateOnboarding}
             interests={interests}
             setInterests={setInterests}
           />
         )}
-        {step === 3 && <Step3Stub />}
+        {step === 3 && (
+          <Step3DailyGoal
+            onFinish={() => navigate("/", { replace: true })}
+            saveDailyGoal={completeOnboarding}
+            dailyGoal={dailyGoal}
+            setDailyGoal={setDailyGoal}
+          />
+        )}
       </div>
     </div>
   );

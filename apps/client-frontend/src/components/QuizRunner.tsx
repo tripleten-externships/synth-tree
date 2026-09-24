@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
 import QuizSingle from "./QuizSingle";
 import QuizMulti from "./QuizMulti";
@@ -14,8 +15,10 @@ export type QuizQuestion = {
   id: string;
   prompt: string;
   explanation?: string | null;
-  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION
+  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION | FILL
   options: QuizOption[];
+  // FILL only; revealed post-submit by the server's answer-key guard.
+  canonicalAnswer?: string | null;
 };
 
 export type QuizForRunner = {
@@ -47,8 +50,8 @@ type SubmitResult = {
 };
 
 // Question types answered with free text; every other type is answered by
-// selecting options. Add new text-answer types here (e.g. FILL).
-const TEXT_ANSWER_TYPES = new Set(["OPEN_QUESTION"]);
+// selecting options.
+const TEXT_ANSWER_TYPES = new Set(["OPEN_QUESTION", "FILL"]);
 const isTextAnswer = (type: string) => TEXT_ANSWER_TYPES.has(type);
 
 function ResultSummary({ result }: { result: QuizAttemptResult }) {
@@ -189,6 +192,26 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
             />
           </>
         );
+      case "FILL":
+        return (
+          <>
+            <p className="mb-2 font-medium text-foreground">
+              {questionNumber}. {q.prompt}
+            </p>
+            <Input
+              type="text"
+              value={text[q.id] ?? ""}
+              onChange={(e) =>
+                setText((p) => ({
+                  ...p,
+                  [q.id]: e.target.value,
+                }))
+              }
+              disabled={submitted}
+              placeholder="Your answer…"
+            />
+          </>
+        );
       case "SINGLE_CHOICE":
         return (
           <QuizSingle
@@ -235,7 +258,8 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
             <div key={q.id}>
               {renderQuestion(q, i + 1, correctOptionIds)}
 
-              {submitted && !isTextAnswer(q.type) && (
+              {/* Open questions are graded manually, so they get no inline feedback. */}
+              {submitted && q.type !== "OPEN_QUESTION" && (
                 <div
                   className={`mt-4 rounded-xl px-4 py-4 ${
                     submittedAnswer?.isCorrect
@@ -244,6 +268,12 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
                   }`}
                 >
                   <strong>{submittedAnswer?.isCorrect ? "Correct." : "Incorrect."}</strong>{" "}
+                  {q.type === "FILL" && !submittedAnswer?.isCorrect && (
+                    <>
+                      Correct answer:{" "}
+                      {submittedAnswer?.question.canonicalAnswer?.trim() || "Not available"}.{" "}
+                    </>
+                  )}
                   {submittedAnswer?.question.explanation}
                 </div>
               )}
