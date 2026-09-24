@@ -46,6 +46,7 @@ type LessonSeed = {
 type QuestionSeed = {
   type: QuestionType;
   prompt: string;
+  explanation?: string;
   options?: { text: string; isCorrect?: boolean }[];
   // FILL only: the graded answer key (trimmed, case-insensitive).
   canonicalAnswer?: string;
@@ -102,11 +103,14 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "How many covalent bonds does a neutral carbon atom form?",
+                explanation: "A neutral carbon atom has four valence electrons and typically forms four covalent bonds to complete its valence shell.",
                 options: [{ text: "2" }, { text: "4", isCorrect: true }, { text: "6" }],
               },
               {
                 type: QuestionType.MULTIPLE_CHOICE,
                 prompt: "Which of these are types of covalent bonds? (select all)",
+                explanation:
+                  "Single, double, and triple bonds are all types of covalent bonds, which involve atoms sharing one or more pairs of electrons.",
                 options: [
                   { text: "Single", isCorrect: true },
                   { text: "Double", isCorrect: true },
@@ -155,6 +159,8 @@ const COURSES: CourseSeed[] = [
                 type: QuestionType.OPEN_QUESTION,
                 prompt:
                   "In your own words, explain the difference between a structural isomer and a stereoisomer.",
+                explanation:
+                  "Structural isomers have the same molecular formula but differ in how their atoms are connected, while stereoisomers have the same connectivity but differ in the three-dimensional arrangement of their atoms.",
               },
             ],
           },
@@ -200,6 +206,8 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "Velocity is the rate of change of…",
+                explanation:
+                  "Velocity describes how an object's position changes over time, while acceleration describes how velocity changes over time.",
                 options: [
                   { text: "Position", isCorrect: true },
                   { text: "Acceleration" },
@@ -384,6 +392,7 @@ async function main() {
               quizId: quiz.id,
               type: q.type,
               prompt: q.prompt,
+              explanation: q.explanation,
               canonicalAnswer: q.canonicalAnswer ?? null,
               order: qi,
             },

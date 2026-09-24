@@ -6,13 +6,16 @@ import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
 import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
+import QuizRunner from "./QuizRunner";
+import type { QuizForRunner } from "./QuizRunner";
 
 interface LessonViewerProps {
   nodeId: string;
+  quiz?: QuizForRunner | null;
   onNext: () => void;
 }
 
-export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) => {
+export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext }) => {
   const { data, loading, error } = useLessonBlocksByNodeQuery({
     variables: { nodeId },
   });
@@ -50,13 +53,18 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
 
+  // Check whether this lesson has a quiz.
+  const hasQuiz = !!quiz;
+
   // A "page" is the run of blocks between PAGE_BREAK markers. No breaks -> one
   // page (renders exactly like before). pageIndex is clamped so a shorter
   // refetch can never leave us pointing past the last page.
   const pages = splitLessonPages(data?.lessonBlocksByNode ?? []);
-  const pageIndex = Math.min(currentPage, pages.length - 1);
-  const currentBlocks = pages[pageIndex];
-  const isLastPage = pageIndex === pages.length - 1;
+  const totalPages = pages.length + (hasQuiz ? 1 : 0);
+  const pageIndex = Math.min(currentPage, totalPages - 1);
+  const currentBlocks = pages[pageIndex] ?? [];
+  const isQuizPage = hasQuiz && pageIndex === pages.length;
+  const isLastPage = pageIndex === totalPages - 1;
 
   const renderHTML = (html: string) => (
     <div
@@ -154,6 +162,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
     );
   };
 
+  const renderQuiz = (quiz: QuizForRunner) => (
+  <QuizRunner quiz={quiz} />
+);
+
   const renderBlock = (block: LessonBlock) => {
     switch (block.type) {
       case "HTML":
@@ -174,7 +186,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
       {/* Page progress: one segment per page, filled up to the current page. */}
       <div>
         <div className="flex gap-2" aria-label="Lesson progress">
-          {pages.map((_, i) => (
+          {Array.from({length : totalPages}).map((_, i) => (
             <div
               key={i}
               className={`h-2 flex-1 rounded-full ${
@@ -184,13 +196,15 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
           ))}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          Page {pageIndex + 1} of {pages.length}
+          Page {pageIndex + 1} of {totalPages}
         </p>
       </div>
 
       {currentBlocks.map((block) => (
         <div key={block.id}>{renderBlock(block)}</div>
       ))}
+
+      {isQuizPage && quiz && renderQuiz(quiz)}
 
       <div className="mt-8 flex items-center justify-between">
         <button

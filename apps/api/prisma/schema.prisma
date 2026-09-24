@@ -246,6 +246,7 @@ model QuizQuestion {
   quizId          String       @db.Uuid
   type            QuestionType
   prompt          String
+  explanation     String?
   // Expected answer for FILL questions; null for other types. Graded
   // case-insensitively and whitespace-trimmed. Hidden from learners until
   // they submit an attempt (see QuizQuestion object guard in models.all.ts).

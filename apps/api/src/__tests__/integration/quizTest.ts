@@ -973,4 +973,101 @@ describe("Quiz flow", () => {
       expect(unchanged?.canonicalAnswer).toBe("SP ");
     });
   });
+
+  describe("QuizQuestion.explanation guard", () => {
+    const PUBLIC_COURSE_EXPLANATIONS = `
+      query PublicCourse($id: ID!) {
+        publicCourse(id: $id) {
+          trees { nodes { quiz { questions { id explanation } } } }
+        }
+      }
+    `;
+
+    const SUBMIT_WITH_EXPLANATION = `
+      mutation SubmitQuizAttempt($quizId: ID!, $answers: [QuizAnswerInput!]!) {
+        submitQuizAttempt(quizId: $quizId, answers: $answers) {
+          answers { question { explanation } }
+        }
+      }
+    `;
+
+    async function seedPublishedQuiz() {
+      const { course, node } = await seedNode();
+      await prisma.course.update({
+        where: { id: course.id },
+        data: { status: "PUBLISHED" },
+      });
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Explained", required: false },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: {
+          quizId: quiz.id,
+          type: "SINGLE_CHOICE",
+          prompt: "2 + 2?",
+          explanation: "Because 2 + 2 = 4.",
+        },
+      });
+      const option = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "4", isCorrect: true },
+      });
+      return { course, quiz, question, option };
+    }
+
+    async function readExplanation(courseId: string, contextValue: GraphQLContext) {
+      const res = singleResult(
+        await server.executeOperation(
+          { query: PUBLIC_COURSE_EXPLANATIONS, variables: { id: courseId } },
+          { contextValue },
+        ),
+      );
+      expect(res.errors).toBeUndefined();
+      return res.data.publicCourse.trees[0].nodes[0].quiz.questions[0].explanation;
+    }
+
+    it("hides the explanation before the learner has submitted an attempt", async () => {
+      const { course } = await seedPublishedQuiz();
+
+      expect(await readExplanation(course.id, makeUnauthContext(prisma))).toBeNull();
+      expect(await readExplanation(course.id, makeUserContext(prisma, REGULAR_USER_ID))).toBeNull();
+    });
+
+    it("reveals the explanation to admins", async () => {
+      const { course } = await seedPublishedQuiz();
+
+      expect(await readExplanation(course.id, makeAdminContext(prisma, ADMIN_USER_ID))).toBe(
+        "Because 2 + 2 = 4.",
+      );
+    });
+
+    it("reveals the explanation in the submit result and afterwards", async () => {
+      const { course, quiz, question, option } = await seedPublishedQuiz();
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: quiz.nodeId, status: "IN_PROGRESS" },
+      });
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: SUBMIT_WITH_EXPLANATION,
+            variables: {
+              quizId: quiz.id,
+              answers: [{ questionId: question.id, selectedOptionIds: [option.id] }],
+            },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+      expect(res.errors).toBeUndefined();
+      expect(res.data.submitQuizAttempt.answers[0].question.explanation).toBe("Because 2 + 2 = 4.");
+
+      expect(await readExplanation(course.id, makeUserContext(prisma, REGULAR_USER_ID))).toBe(
+        "Because 2 + 2 = 4.",
+      );
+      // Another learner who hasn't attempted it still can't see it.
+      expect(
+        await readExplanation(course.id, makeUserContext(prisma, SECOND_REGULAR_USER_ID)),
+      ).toBeNull();
+    });
+  });
 });

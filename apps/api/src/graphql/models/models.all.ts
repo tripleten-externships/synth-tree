@@ -1,5 +1,6 @@
 // src/graphql/models.all.ts
 import { builder } from "@graphql/builder";
+import type { GraphQLContext } from "@graphql/context";
 
 import { UserObject } from "@graphql/__generated__/User";
 import { CourseObject } from "@graphql/__generated__/Course";
@@ -111,6 +112,21 @@ builder.prismaObject("SkillNode", {
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
+// Answer keys (FILL canonicalAnswer, explanations) are only visible to admins
+// or to a learner who has already submitted an attempt for the quiz.
+async function canSeeQuizAnswers(quizId: string, ctx: GraphQLContext): Promise<boolean> {
+  if (ctx.auth.isAdmin()) return true;
+
+  const userId = ctx.auth.getUserId();
+  if (!userId) return false;
+
+  const attempt = await ctx.prisma.quizAttempt.findFirst({
+    where: { quizId, userId },
+    select: { id: true },
+  });
+  return attempt !== null;
+}
+
 builder.prismaObject("QuizQuestion", {
   ...QuizQuestionObject,
   fields: (t) => ({
@@ -123,19 +139,15 @@ builder.prismaObject("QuizQuestion", {
     // reads it post-submit (allowed).
     canonicalAnswer: t.string({
       nullable: true,
-      resolve: async (parent, _args, ctx) => {
-        if (ctx.auth.isAdmin()) return parent.canonicalAnswer;
+      resolve: async (parent, _args, ctx) =>
+        (await canSeeQuizAnswers(parent.quizId, ctx)) ? parent.canonicalAnswer : null,
+    }),
 
-        const userId = ctx.auth.getUserId();
-        if (!userId) return null;
-
-        const attempt = await ctx.prisma.quizAttempt.findFirst({
-          where: { quizId: parent.quizId, userId },
-          select: { id: true },
-        });
-
-        return attempt ? parent.canonicalAnswer : null;
-      },
+    // Same guard for explanations: they usually give the answer away.
+    explanation: t.string({
+      nullable: true,
+      resolve: async (parent, _args, ctx) =>
+        (await canSeeQuizAnswers(parent.quizId, ctx)) ? parent.explanation : null,
     }),
   }),
 });
