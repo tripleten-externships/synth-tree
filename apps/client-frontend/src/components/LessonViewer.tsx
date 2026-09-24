@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import DOMPurify from "dompurify";
-import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { Button, toast } from "@synth-tree/ui";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
-import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
+import { splitLessonPages } from "../lib/splitLessonPages";
+import LessonReadBlocks from "./LessonReadBlocks";
 import QuizRunner from "./QuizRunner";
 import type { QuizForRunner } from "./QuizRunner";
 
@@ -84,121 +83,6 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   const isQuizPage = hasQuiz && pageIndex === pages.length;
   const isLastPage = pageIndex === totalPages - 1;
 
-  const renderHTML = (html: string) => (
-    <div
-      className="leading-relaxed text-foreground"
-      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
-    />
-  );
-
-  const renderImage = (url: string, caption?: string | null) => (
-    <figure className="m-0 text-center">
-      <img
-        src={url}
-        alt={caption || "Lesson image"}
-        className="max-w-full h-auto rounded-lg shadow-md"
-      />
-      {caption && (
-        <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>
-      )}
-    </figure>
-  );
-
-  const renderVideo = (url: string) => (
-    <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden shadow-md">
-      <div className="absolute top-0 left-0 w-full h-full">
-        <ReactPlayer src={url} controls width="100%" height="100%" />
-      </div>
-    </div>
-  );
-
-  const ALLOWED_EMBED_HOSTS = new Set([
-    "youtube.com",
-    "www.youtube.com",
-    "www.youtube-nocookie.com",
-    "youtube-nocookie.com",
-    "vimeo.com",
-    "www.vimeo.com",
-    "player.vimeo.com",
-    "codepen.io",
-    "www.codepen.io",
-  ]);
-
-  const renderEmbed = (embedContent: string) => {
-    let src = "";
-    let title = "Embedded content";
-    let allow: string | undefined;
-
-    if (embedContent.trim().startsWith("<")) {
-      const sanitized = DOMPurify.sanitize(embedContent, {
-        ALLOWED_TAGS: ["iframe"],
-        ALLOWED_ATTR: [
-          "src",
-          "title",
-          "allow",
-          "allowfullscreen",
-          "frameborder",
-          "loading",
-          "referrerpolicy",
-        ],
-      });
-
-      const doc = new DOMParser().parseFromString(sanitized, "text/html");
-      const iframe = doc.querySelector("iframe");
-
-      if (!iframe) return null;
-
-      src = iframe.getAttribute("src") ?? "";
-      title = iframe.getAttribute("title") || "Embedded content";
-      allow = iframe.getAttribute("allow") || undefined;
-    } else {
-      src = embedContent;
-    }
-
-    if (!src) return null;
-
-    let hostname: string;
-
-    try {
-      hostname = new URL(src).hostname;
-    } catch {
-      return null;
-    }
-
-    if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
-      return null;
-    }
-
-    return (
-      <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-        <iframe
-          src={src}
-          title={title}
-          className="absolute top-0 left-0 w-full h-full border-0"
-          allow={allow}
-          allowFullScreen
-        />
-      </div>
-    );
-  };
-
-  const renderQuiz = (quiz: QuizForRunner) => <QuizRunner quiz={quiz} />;
-
-  const renderBlock = (block: LessonBlock) => {
-    switch (block.type) {
-      case "HTML":
-        return renderHTML(block.html ?? "");
-      case "IMAGE":
-        return renderImage(block.url ?? "", block.caption);
-      case "VIDEO":
-        return renderVideo(block.url ?? "");
-      case "EMBED":
-        return renderEmbed(block.html ?? block.url ?? "");
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="flex flex-col gap-8">
       {/* Page progress: one segment per page, filled up to the current page. */}
@@ -220,11 +104,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
         ))}
       </div>
 
-      {currentBlocks.map((block) => (
-        <div key={block.id}>{renderBlock(block)}</div>
-      ))}
+      <LessonReadBlocks blocks={currentBlocks} />
 
-      {isQuizPage && quiz && renderQuiz(quiz)}
+      {isQuizPage && quiz && <QuizRunner quiz={quiz} />}
 
       <div className="mt-4 flex items-center justify-between gap-4 border-t border-border pt-6">
         <Button

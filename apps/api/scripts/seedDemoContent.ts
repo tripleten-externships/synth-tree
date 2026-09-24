@@ -86,7 +86,14 @@ const COURSES: CourseSeed[] = [
           lessons: [
             {
               type: ContentType.HTML,
-              html: "<h2>Atoms &amp; Bonding</h2><p>Organic chemistry is the study of carbon-based molecules. We start with the <strong>covalent bond</strong>: two atoms sharing a pair of electrons.</p><ul><li>Carbon forms four bonds.</li><li>Bonds can be single, double, or triple.</li></ul>",
+              html: "<h2>Atoms &amp; Bonding</h2><p>Organic chemistry is the study of carbon-based molecules. We start with the <strong>covalent bond</strong>: two atoms sharing a pair of electrons.</p><ul><li>Carbon forms four bonds.</li><li>Bonds can be single, double, or triple.</li></ul><h3>Hybrid orbitals</h3><p>To make those bonds, carbon mixes its outer orbitals into <strong>hybrid orbitals</strong>. How many it mixes sets the shape of the molecule: sp is linear, sp² is trigonal planar, and sp³ is tetrahedral.</p><blockquote>Tip: count the atoms and lone pairs around a carbon. Two means sp, three means sp², four means sp³.</blockquote>",
+            },
+            {
+              // Served by the learner app (apps/client-frontend/public/demo) so
+              // the demo seed doesn't depend on an external image host.
+              type: ContentType.IMAGE,
+              url: "/demo/hybrid-orbitals.svg",
+              caption: "sp, sp², and sp³ hybrid orbitals",
             },
             // Page break: splits this lesson into two pages (SYN-60 multi-page demo).
             { type: ContentType.PAGE_BREAK },
