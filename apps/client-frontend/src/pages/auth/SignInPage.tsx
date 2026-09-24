@@ -65,7 +65,7 @@ function BrandMark() {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <polygon points={hexPoints(12, 12, 10)} stroke="currentColor" strokeWidth="1.5" />
       </svg>
-      <span className="text-base font-semibold">Synth Tree</span>
+      <span className="text-base font-semibold">SynthTree</span>
     </div>
   );
 }
@@ -222,7 +222,7 @@ export default function SignInPage() {
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            New to Synth Tree?{" "}
+            New to SynthTree?{" "}
             <Link to="/auth/signup" className="font-medium text-primary hover:underline">
               Create an account
             </Link>

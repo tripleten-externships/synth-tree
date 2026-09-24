@@ -108,7 +108,7 @@ export default function ProfilePage() {
   if (firebaseLoading || (loading && !data)) {
     return (
       <div className="min-h-screen p-8">
-        <p className="text-gray-600">Loading profile...</p>
+        <p className="text-muted-foreground">Loading profile...</p>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="min-h-screen p-8">
-        <p className="text-red-600">Error loading profile.</p>
+        <p className="text-destructive">Error loading profile.</p>
       </div>
     );
   }
@@ -139,23 +139,23 @@ export default function ProfilePage() {
               className="w-24 h-24 rounded-full object-cover border"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-600">
+            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
               {user.name?.charAt(0)?.toUpperCase() ?? user.email?.charAt(0)?.toUpperCase() ?? "?"}
             </div>
           )}
           <div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>
-            <p className="text-gray-600">{user.email}</p>
-            <p className="text-sm text-gray-500">Role: {user.role}</p>
+            <p className="text-muted-foreground">{user.email}</p>
+            <p className="text-sm text-muted-foreground">Role: {user.role}</p>
           </div>
         </section>
 
         {/* Edit Form */}
-        <section className="bg-white p-6 rounded-lg shadow space-y-4 mt-6">
+        <section className="bg-card p-6 rounded-lg shadow space-y-4 mt-6">
           <h3 className="text-xl font-semibold">Edit Profile</h3>
 
            <label className="block">
-            <span className="text-gray-700">Name</span>
+            <span className="text-foreground">Name</span>
             {/* defaultValue + key so input resets when real data loads.
                 onFocus selects all text for easy replacement.
                 onBlur updates state only when user leaves the field. */}
@@ -170,7 +170,7 @@ export default function ProfilePage() {
           </label>
 
           <label className="block">
-            <span className="text-gray-700">Photo URL</span>
+            <span className="text-foreground">Photo URL</span>
             {/* Same pattern as name — onBlur prevents avatar flickering
                 while typing/deleting a long URL. onFocus selects all
                 so user can replace the whole URL in one click + type. */}
@@ -186,7 +186,7 @@ export default function ProfilePage() {
 
           <button
             onClick={handleSave}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded"
           >
             Save Changes
           </button>
@@ -194,23 +194,23 @@ export default function ProfilePage() {
 
         {/* Stats */}
         <section className="grid grid-cols-3 gap-4 mt-6">
-          <div className="bg-white p-4 rounded shadow text-center">
+          <div className="bg-card p-4 rounded shadow text-center">
             <p className="text-2xl font-bold">{user.stats?.courses ?? 0}</p>
-            <p className="text-gray-600">Courses</p>
+            <p className="text-muted-foreground">Courses</p>
           </div>
 
-          <div className="bg-white p-4 rounded shadow text-center">
+          <div className="bg-card p-4 rounded shadow text-center">
             <p className="text-2xl font-bold">{user.stats?.nodes ?? 0}</p>
-            <p className="text-gray-600">Nodes</p>
+            <p className="text-muted-foreground">Nodes</p>
           </div>
 
-          <div className="bg-white p-4 rounded shadow text-center">
+          <div className="bg-card p-4 rounded shadow text-center">
             <p className="text-2xl font-bold">{user.stats?.quizzes ?? 0}</p>
-            <p className="text-gray-600">Quizzes</p>
+            <p className="text-muted-foreground">Quizzes</p>
           </div>
         </section>
 
-        <button onClick={logout} className="text-red-600 underline mt-6">Logout</button>
+        <button onClick={logout} className="text-destructive underline mt-6">Logout</button>
       </main>
     </div>
   );

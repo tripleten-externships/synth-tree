@@ -60,7 +60,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
   const renderHTML = (html: string) => (
     <div
-      className="leading-relaxed text-gray-800"
+      className="leading-relaxed text-foreground"
       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
     />
   );
@@ -72,7 +72,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
         alt={caption || "Lesson image"}
         className="max-w-full h-auto rounded-lg shadow-md"
       />
-      {caption && <figcaption className="mt-3 text-sm text-gray-500 italic">{caption}</figcaption>}
+      {caption && <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>}
     </figure>
   );
 
@@ -178,12 +178,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
             <div
               key={i}
               className={`h-2 flex-1 rounded-full ${
-                i <= pageIndex ? "bg-[#667eea]" : "bg-gray-200"
+                i <= pageIndex ? "bg-primary" : "bg-muted"
               }`}
             />
           ))}
         </div>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           Page {pageIndex + 1} of {pages.length}
         </p>
       </div>
@@ -195,7 +195,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
       <div className="mt-8 flex items-center justify-between">
         <button
           type="button"
-          className="px-6 py-3 font-semibold text-[#667eea] rounded-lg cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-40"
+          className="px-6 py-3 font-semibold text-primary rounded-lg cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-40"
           onClick={() => setCurrentPage(Math.max(0, pageIndex - 1))}
           disabled={pageIndex === 0}
         >
@@ -204,7 +204,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
         <button
           type="button"
-          className="px-8 py-3 bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+          className="px-8 py-3 bg-primary text-primary-foreground font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
           onClick={() => {
             if (isLastPage) {
               // Finishing the lesson: complete the node (best-effort) then advance.

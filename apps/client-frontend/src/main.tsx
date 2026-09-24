@@ -11,7 +11,7 @@ import "./index.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ApolloProvider client={apolloClient}>
-      <ThemeProvider>
+      <ThemeProvider defaultColorMode="light" enableSystem={false}>
         <App />
       </ThemeProvider>
     </ApolloProvider>
