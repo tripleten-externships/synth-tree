@@ -111,7 +111,32 @@ builder.prismaObject("SkillNode", {
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
-builder.prismaObject("QuizQuestion", QuizQuestionObject);
+builder.prismaObject("QuizQuestion", {
+  ...QuizQuestionObject,
+  fields: (t) => ({
+    ...QuizQuestionObject.fields(t),
+
+    // Same answer-key guard as QuizOption.isCorrect: explanations usually give
+    // the answer away, so only reveal them to admins or to a learner who has
+    // already submitted an attempt for this quiz.
+    explanation: t.string({
+      nullable: true,
+      resolve: async (parent, _args, ctx) => {
+        if (ctx.auth.isAdmin()) return parent.explanation;
+
+        const userId = ctx.auth.getUserId();
+        if (!userId) return null;
+
+        const attempt = await ctx.prisma.quizAttempt.findFirst({
+          where: { quizId: parent.quizId, userId },
+          select: { id: true },
+        });
+
+        return attempt ? parent.explanation : null;
+      },
+    }),
+  }),
+});
 builder.prismaObject("QuizOption", {
   ...QuizOptionObject,
   fields: (t) => ({
