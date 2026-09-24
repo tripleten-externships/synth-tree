@@ -65,6 +65,7 @@ enum ProgressStatus {
 model User {
   id        String   @id
   email     String   @unique
+  timezone  String   @default("UTC")
   name      String?
   photoUrl  String?
   role      Role     @default(USER)
