@@ -367,6 +367,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
+        changes,
         lint-and-typecheck,
         test-api,
         build-api,
@@ -377,9 +378,15 @@ jobs:
     if: always()
     steps:
       - name: Check results
+        env:
+          # Skipped jobs (path filter didn't match) are fine; a failed or
+          # cancelled job — including Detect Changes, which would otherwise
+          # silently skip everything downstream — fails the summary.
+          ANY_FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: |
           echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Detect Changes: ${{ needs.changes.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Lint & Type Check: ${{ needs.lint-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- API Tests: ${{ needs.test-api.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- API Build: ${{ needs.build-api.result }}" >> $GITHUB_STEP_SUMMARY
@@ -387,15 +394,9 @@ jobs:
           echo "- Storybook Build: ${{ needs.build-storybook.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Infrastructure Validation: ${{ needs.validate-infra.result }}" >> $GITHUB_STEP_SUMMARY
 
-          # Check if any job failed
-          if [[ "${{ needs.lint-and-typecheck.result }}" == "failure" ]] || \
-             [[ "${{ needs.test-api.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-api.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
-             [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
+          if [[ "$ANY_FAILED" == "true" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
+            echo "❌ Some validation checks failed or were cancelled. Please review the errors above." >> $GITHUB_STEP_SUMMARY
             exit 1
           else
             echo "" >> $GITHUB_STEP_SUMMARY
