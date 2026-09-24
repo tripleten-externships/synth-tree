@@ -268,6 +268,7 @@ model QuizOption {
   id         String   @id @default(uuid()) @db.Uuid
   questionId String   @db.Uuid
   text       String
+  /// @Pothos.omit(where, orderBy)
   isCorrect  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

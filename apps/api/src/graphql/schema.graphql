@@ -2501,7 +2501,6 @@ input QuizOptionOrderByWithAggregationInput {
   _min: QuizOptionMinOrderByAggregateInput
   createdAt: SortOrder
   id: SortOrder
-  isCorrect: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2510,7 +2509,6 @@ input QuizOptionOrderByWithAggregationInput {
 input QuizOptionOrderByWithRelationInput {
   createdAt: SortOrder
   id: SortOrder
-  isCorrect: SortOrder
   question: QuizQuestionOrderByWithRelationInput
   questionId: SortOrder
   text: SortOrder
@@ -2611,7 +2609,6 @@ input QuizOptionWhereInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: UuidFilter
-  isCorrect: BoolFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2624,7 +2621,6 @@ input QuizOptionWhereUniqueInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: String
-  isCorrect: BoolFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter

@@ -2923,7 +2923,6 @@ export type QuizOptionOrderByWithAggregationInput = {
   _min?: InputMaybe<QuizOptionMinOrderByAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
-  isCorrect?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2932,7 +2931,6 @@ export type QuizOptionOrderByWithAggregationInput = {
 export type QuizOptionOrderByWithRelationInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
-  isCorrect?: InputMaybe<SortOrder>;
   question?: InputMaybe<QuizQuestionOrderByWithRelationInput>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
@@ -3032,7 +3030,6 @@ export type QuizOptionWhereInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
-  isCorrect?: InputMaybe<BoolFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
@@ -3045,7 +3042,6 @@ export type QuizOptionWhereUniqueInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
-  isCorrect?: InputMaybe<BoolFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
