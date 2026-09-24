@@ -6,8 +6,9 @@ export async function awardXp(
   amount: number,
   reason: string,
   metadata?: Prisma.InputJsonValue,
+  tx?: Prisma.TransactionClient,
 ) {
-  return prisma.$transaction(async (tx) => {
+  const run = async (client: Prisma.TransactionClient) => {
     const rewardKey =
       metadata && typeof metadata === "object" && !Array.isArray(metadata)
         ? ((metadata as Record<string, unknown>).nodeId ??
@@ -18,7 +19,7 @@ export async function awardXp(
       throw new Error("XP reward requires a nodeId or quizId");
     }
 
-    const existingEvent = await tx.xpEvent.findFirst({
+    const existingEvent = await client.xpEvent.findFirst({
       where: {
         userId,
         reason,
@@ -30,7 +31,7 @@ export async function awardXp(
       return existingEvent;
     }
 
-    const xpEvent = await tx.xpEvent.create({
+    const xpEvent = await client.xpEvent.create({
       data: {
         userId,
         amount,
@@ -40,7 +41,7 @@ export async function awardXp(
       },
     });
 
-    const userXp = await tx.userXp.upsert({
+    const userXp = await client.userXp.upsert({
       where: {
         userId,
       },
@@ -57,9 +58,13 @@ export async function awardXp(
 
     const now = new Date();
 
-    const isNewDay = userXp.todayAsOf.toDateString() !== now.toDateString();
+    // Compare day boundaries in UTC so a user's daily total resets on the same
+    // calendar day regardless of the server's local timezone.
+    const isNewDay =
+      userXp.todayAsOf.toISOString().slice(0, 10) !==
+      now.toISOString().slice(0, 10);
 
-    await tx.userXp.update({
+    await client.userXp.update({
       where: {
         userId,
       },
@@ -69,12 +74,14 @@ export async function awardXp(
       },
     });
 
-    const dayOfWeek = now.getDay();
+    // Compute the week-start key in UTC (week starts Monday) so weekly buckets
+    // are stable across timezones.
+    const dayOfWeek = now.getUTCDay();
 
     const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - daysSinceMonday);
+    weekStart.setUTCDate(now.getUTCDate() - daysSinceMonday);
 
     const weekKey = weekStart.toISOString().slice(0, 10);
 
@@ -87,7 +94,7 @@ export async function awardXp(
       [weekKey]: currentWeekXp + amount,
     };
 
-    await tx.userXp.update({
+    await client.userXp.update({
       where: {
         userId,
       },
@@ -96,7 +103,7 @@ export async function awardXp(
       },
     });
 
-    const user = await tx.user.findUnique({
+    const user = await client.user.findUnique({
       where: {
         id: userId,
       },
@@ -114,7 +121,7 @@ export async function awardXp(
       day: "2-digit",
     }).format(now);
 
-    const streak = await tx.userStreak.findUnique({
+    const streak = await client.userStreak.findUnique({
       where: {
         userId,
       },
@@ -151,7 +158,7 @@ export async function awardXp(
 
     const longestDays = Math.max(streak?.longestDays ?? 0, currentDays);
 
-    await tx.userStreak.upsert({
+    await client.userStreak.upsert({
       where: {
         userId,
       },
@@ -169,5 +176,13 @@ export async function awardXp(
     });
 
     return xpEvent;
-  });
+  };
+
+  // Reuse the caller's transaction when one is supplied so the XP award commits
+  // atomically with the surrounding write; otherwise open our own.
+  if (tx) {
+    return run(tx);
+  }
+
+  return prisma.$transaction(run);
 }

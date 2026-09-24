@@ -55,7 +55,7 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, { id, input }, ctx) => {
       ctx.auth.requireAuth();
 
-      await assertCourseOwnership(ctx, id);
+      requireAdmin(ctx);
 
       const { title, description, status } = input;
 
@@ -154,10 +154,7 @@ builder.mutationFields((t) => ({
         data: { deletedAt: new Date() },
       });
 
-      logger.info(
-        { courseId: id, title: existing.title },
-        "Course soft-deleted",
-      );
+      logger.info({ courseId: id, title: existing.title }, "Course soft-deleted");
 
       return deleted;
     },

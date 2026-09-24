@@ -1,13 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@synth-tree/ui";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import { AuthFeature } from "./features/auth";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoutes } from "./components/ProtectedRoutes";
-import DashboardLayout from "./layouts/DashboardLayout";
 import ErrorBoundary from "./components/ErrorBoundary";
-import CoursesList from "./pages/courses/CoursesList";
+import { ProtectedRoutes } from "./components/ProtectedRoutes";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AuthFeature } from "./features/auth";
+import DashboardLayout from "./layouts/DashboardLayout";
 import CourseBuilder from "./pages/courses/CourseBuilder";
+import CoursesList from "./pages/courses/CoursesList";
+import AdminLeaderboardPage from "./pages/LeaderboardPage";
+import LessonEditor from "./pages/lessons/LessonEditor";
 
 function App() {
   return (
@@ -36,6 +38,22 @@ function App() {
                       element={
                         <DashboardLayout>
                           <CourseBuilder />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/leaderboard"
+                      element={
+                        <DashboardLayout>
+                          <AdminLeaderboardPage />
+                        </DashboardLayout>
+                      }
+                    />
+                    <Route
+                      path="/lessons/:nodeId/edit"
+                      element={
+                        <DashboardLayout>
+                          <LessonEditor />
                         </DashboardLayout>
                       }
                     />

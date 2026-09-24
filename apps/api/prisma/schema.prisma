@@ -43,6 +43,7 @@ enum ContentType {
   VIDEO
   EMBED
   HTML
+  PAGE_BREAK // page boundary marker: splits a lesson into pages; carries no url/html
 }
 
 enum LessonStatus {
@@ -68,6 +69,7 @@ model User {
   name      String?
   photoUrl  String?
   role      Role     @default(USER)
+  interests String[] @default([]) // subjects picked during onboarding (SYN-46)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -80,6 +82,8 @@ model User {
   xp           UserXp?
   streak       UserStreak?
   xpEvents     XpEvent[]
+  hearts       UserHearts?
+  dailyQuests  UserDailyQuest[]
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -270,15 +274,15 @@ model QuizOption {
 
 // ================================================================
 // QuizAttempt
-// - v1 grading is boolean: passed/failed, no numeric score.
-// - Application logic determines "passed" by checking that all
-//   auto-gradable answers are correct (or true if none exist).
+// - Grading has three states: passed, failed, or pending manual review.
+// - Open-only quizzes pass automatically. Mixed quizzes stay pending
+//   when their choice answers pass but an open answer still needs review.
 // ================================================================
 model QuizAttempt {
   id      String   @id @default(uuid()) @db.Uuid
   quizId  String   @db.Uuid
   userId  String
-  passed  Boolean
+  passed  Boolean?
   takenAt DateTime @default(now())
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -342,6 +346,8 @@ model UserXp {
   weeklyXp  Json     @default("{}")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXp]) // leaderboard sorts and counts on totalXp
 }
 
 model UserStreak {
@@ -351,6 +357,28 @@ model UserStreak {
   lastActive  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserHearts {
+  userId         String   @id
+  currentHearts  Int      @default(5)
+  lastRefilledAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserDailyQuest {
+  userId    String
+  questKey  String
+  date      DateTime
+  goal      Int
+  current   Int      @default(0)
+  completed Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questKey, date])
+  @@index([userId, date])
 }
 
 model XpEvent {
