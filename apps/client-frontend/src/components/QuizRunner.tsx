@@ -106,7 +106,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   const [showAnswerError, setShowAnswerError] = useState(false);
 
   const submitted = !!result;
-  const hasIncorrectAnswer = result?.answers.some((answer) => answer.isCorrect === false);
+  const isPendingReview = result?.passed === null;
 
   const allQuestionsAnswered = quiz.questions.every((q) =>
     isTextAnswer(q.type) ? !!text[q.id]?.trim() : (choice[q.id] ?? []).length > 0,
@@ -163,6 +163,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     setChoice({});
     setText({});
     setResult(null);
+    setShowAnswerError(false);
   };
 
   const renderQuestion = (q: QuizQuestion, questionNumber: number, correctOptionIds: string[]) => {
@@ -267,7 +268,8 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
             </span>
           )}
 
-          {hasIncorrectAnswer && (
+          {/* No retry while an attempt is awaiting manual review. */}
+          {submitted && !isPendingReview && (
             <button
               type="button"
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
