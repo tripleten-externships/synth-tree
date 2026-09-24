@@ -35,13 +35,25 @@ jobs:
           filters: |
             infra:
               - 'apps/infra/**'
+            # Root workspace/config files and this workflow affect every app,
+            # so changes to them must run the api and frontend jobs too.
             api:
               - 'apps/api/**'
               - 'packages/api-types/**'
+              - '.github/workflows/pr-validation.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig*.json'
             frontend:
               - 'apps/admin-dashboard/**'
               - 'apps/client-frontend/**'
               - 'packages/**'
+              - '.github/workflows/pr-validation.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig*.json'
             ui:
               - 'packages/ui/**'
               - 'packages/theme/**'
