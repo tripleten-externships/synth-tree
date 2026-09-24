@@ -7558,6 +7558,11 @@ export type OnboardingStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete: boolean } | null };
 
+export type SavedInterestsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SavedInterestsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, interests: Array<string> } | null };
+
 export type PublicCourseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -8550,6 +8555,40 @@ export function useOnboardingStatusLazyQuery(baseOptions?: ApolloReactHooks.Lazy
         }
 export type OnboardingStatusQueryHookResult = ReturnType<typeof useOnboardingStatusQuery>;
 export type OnboardingStatusLazyQueryHookResult = ReturnType<typeof useOnboardingStatusLazyQuery>;
+export const SavedInterestsDocument = gql`
+    query SavedInterests {
+  currentUser {
+    id
+    interests
+  }
+}
+    `;
+
+/**
+ * __useSavedInterestsQuery__
+ *
+ * To run a query within a React component, call `useSavedInterestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSavedInterestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSavedInterestsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSavedInterestsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SavedInterestsQuery, SavedInterestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<SavedInterestsQuery, SavedInterestsQueryVariables>(SavedInterestsDocument, options);
+      }
+export function useSavedInterestsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SavedInterestsQuery, SavedInterestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<SavedInterestsQuery, SavedInterestsQueryVariables>(SavedInterestsDocument, options);
+        }
+export type SavedInterestsQueryHookResult = ReturnType<typeof useSavedInterestsQuery>;
+export type SavedInterestsLazyQueryHookResult = ReturnType<typeof useSavedInterestsLazyQuery>;
 export const PublicCourseDocument = gql`
     query PublicCourse($id: ID!) {
   publicCourse(id: $id) {

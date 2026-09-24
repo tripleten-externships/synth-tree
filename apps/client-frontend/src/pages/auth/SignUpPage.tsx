@@ -1,8 +1,16 @@
-import { useState, useCallback, useRef, type Dispatch, type SetStateAction } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { useSearchParams, useNavigate, Link, Navigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useMutation } from "@apollo/client/react";
+import { useSavedInterestsQuery } from "@synth-tree/api-types";
 import { auth } from "../../lib/firebase";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
@@ -388,6 +396,7 @@ function Step2Interests({
   saveInterests,
   interests,
   setInterests,
+  loadingSaved,
 }: {
   onNext: () => void;
   // Omitted for signed-in users: step 1 would only offer to create another account.
@@ -397,6 +406,9 @@ function Step2Interests({
   // instead of resetting to empty (which would overwrite saved interests with []).
   interests: string[];
   setInterests: Dispatch<SetStateAction<string[]>>;
+  // True while previously saved interests are still loading; Continue waits so it
+  // can't save an empty selection over them.
+  loadingSaved: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -412,7 +424,7 @@ function Step2Interests({
   );
 
   const handleContinue = async () => {
-    if (loading) return;
+    if (loading || loadingSaved) return;
     setLoading(true);
     setError(null);
     try {
@@ -478,7 +490,7 @@ function Step2Interests({
         <button
           type="button"
           onClick={handleContinue}
-          disabled={loading}
+          disabled={loading || loadingSaved}
           className="flex-[2] h-11 rounded-[10px] bg-primary hover:opacity-90 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-primary-foreground text-[15px] font-semibold flex items-center justify-center gap-2 transition"
         >
           {loading && <Spinner />}
@@ -631,6 +643,22 @@ export default function SignUpPage() {
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
 
+  // Pre-fill step 2 with interests a returning user already saved, so Continue
+  // doesn't overwrite them with []. Only fetched on step 2: during step 1 the
+  // User row may not exist yet.
+  const { data: savedData, loading: savedLoading } = useSavedInterestsQuery({
+    skip: step !== 2 || authLoading || !isAuthenticated,
+    fetchPolicy: "network-only",
+  });
+  const prefilled = useRef(false);
+  useEffect(() => {
+    const saved = savedData?.currentUser?.interests;
+    if (prefilled.current || !saved) return;
+    prefilled.current = true;
+    // Keep picks already made in this visit (e.g. browser Back from step 3).
+    setInterests((prev) => (prev.length > 0 ? prev : saved));
+  }, [savedData]);
+
   const goToStep = useCallback(
     (next: Step) => {
       setSearchParams({ step: String(next) }, { replace: false });
@@ -647,6 +675,7 @@ export default function SignUpPage() {
           <Step2Interests
             onNext={() => goToStep(3)}
             onBack={authLoading || isAuthenticated ? undefined : () => goToStep(1)}
+            loadingSaved={authLoading || savedLoading}
             saveInterests={updateOnboarding}
             interests={interests}
             setInterests={setInterests}
