@@ -360,7 +360,7 @@ jobs:
         working-directory: apps/infra
         run: |
           echo "Running infrastructure tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          pnpm test
 
   summary:
     name: PR Validation Summary
