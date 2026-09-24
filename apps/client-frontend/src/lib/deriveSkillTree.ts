@@ -5,7 +5,7 @@ import type { HexStatus } from "@synth-tree/ui";
 // yet, but Hex requires one. Every node uses this placeholder icon until a
 // real per-node icon field exists. Flagged explicitly in the PR - see
 // discussion needed on whether icons are author-assigned or category-derived.
-const PLACEHOLDER_ICON = "flask";
+export const PLACEHOLDER_ICON = "flask";
 
 // Derived from the generated LearnerCourseTree query type (SYN-27) so the
 // query's `trees[n].nodes` can be passed straight into deriveSkillTree.
@@ -86,4 +86,11 @@ export function deriveSkillTree(rawNodes: RawSkillNode[]): DerivedSkillTree {
   }
 
   return { nodes, edges };
+}
+
+// Where clicking a node takes the learner, or null when the node is locked
+// (the caller shows a "complete prerequisites first" hint instead, SYN-29).
+export function nodeHref(courseId: string, node: CanvasNode): string | null {
+  if (node.status === "locked") return null;
+  return `/courses/${courseId}/nodes/${node.id}`;
 }

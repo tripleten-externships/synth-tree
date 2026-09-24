@@ -1,4 +1,4 @@
-import { deriveSkillTree, type RawSkillNode } from "../src/lib/deriveSkillTree";
+import { deriveSkillTree, nodeHref, type RawSkillNode } from "../src/lib/deriveSkillTree";
 
 function node(overrides: Partial<RawSkillNode>): RawSkillNode {
   return {
@@ -109,5 +109,32 @@ describe("deriveSkillTree", () => {
   it("produces no edges for a node with no prerequisites", () => {
     const { edges } = deriveSkillTree([node({ id: "a", prerequisites: [] })]);
     expect(edges).toHaveLength(0);
+  });
+});
+
+describe("nodeHref", () => {
+  const derived = (overrides: Partial<RawSkillNode>[]) =>
+    deriveSkillTree(overrides.map((o) => node(o))).nodes;
+
+  it("links unlocked, in-progress and completed nodes to their lesson", () => {
+    const nodes = derived([
+      { id: "a" },
+      { id: "b", progressForViewer: { status: "IN_PROGRESS", completedAt: null } },
+      { id: "c", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } },
+    ]);
+
+    expect(nodes.map((n) => nodeHref("course-1", n))).toEqual([
+      "/courses/course-1/nodes/a",
+      "/courses/course-1/nodes/b",
+      "/courses/course-1/nodes/c",
+    ]);
+  });
+
+  it("returns null for a locked node", () => {
+    const nodes = derived([{ id: "a" }, { id: "b", prerequisites: [{ dependsOnNodeId: "a" }] }]);
+    const locked = nodes.find((n) => n.id === "b")!;
+
+    expect(locked.status).toBe("locked");
+    expect(nodeHref("course-1", locked)).toBeNull();
   });
 });
