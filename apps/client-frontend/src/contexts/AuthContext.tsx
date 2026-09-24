@@ -41,9 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => signOut(auth);
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, isAuthenticated: !!user, login, logout }}
-    >
+    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -55,4 +53,8 @@ export function useAuthContext(): AuthContextType {
     throw new Error("useAuthContext must be used within an AuthProvider");
   }
   return ctx;
+}
+
+export function useAuth() {
+  return useAuthContext();
 }
