@@ -20,6 +20,10 @@ import { UserHeartsObject } from "@graphql/__generated__/UserHearts";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
 import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
 
+const UnlockedStatusEnum = builder.enumType("UnlockedStatus", {
+  values: ["COMPLETED", "IN_PROGRESS", "UNLOCKED", "LOCKED"] as const,
+});
+
 // We are not using the auto crud from pothos. Utilize the prisma models. Inputs types and other types will still need to be manually created.
 // Can break this file into multiple. Used one now for brevity.
 
@@ -87,6 +91,20 @@ builder.prismaObject("SkillNode", {
   fields: (t) => ({
     ...SkillNodeObject.fields(t),
 
+    derivedStatus: t.field({
+      type: UnlockedStatusEnum,
+      nullable: false,
+      resolve: (parent, _args, ctx) => {
+        ctx.auth.requireAuth();
+
+        const loader = ctx.loaders.derivedStatus;
+        if (!loader) {
+          throw new Error("Derived status loader is unavailable");
+        }
+
+        return loader.load(parent.id);
+      },
+    }),
     // The authenticated viewer's progress row for this node, or null if they
     // have no progress record yet. Lets the learner tree query surface per-node
     // status (NOT_STARTED / IN_PROGRESS / COMPLETED) without a second round-trip.

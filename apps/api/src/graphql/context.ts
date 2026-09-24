@@ -2,7 +2,8 @@ import { Request } from "express";
 import { PrismaClient, Role } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { admin } from "../firebase";
-import logger from '@lib/logger'; // Logger used for auth-related warnings and request context visibility
+import logger from "@lib/logger"; // Logger used for auth-related warnings and request context visibility
+import { createDerivedStatusLoader } from "./loaders/derivedStatus.loader";
 
 export interface GraphQLContext {
   user: {
@@ -16,6 +17,9 @@ export interface GraphQLContext {
     getUserId: () => string | null;
     isAdmin: () => boolean;
   };
+  loaders: {
+    derivedStatus: ReturnType<typeof createDerivedStatusLoader> | null;
+  };
 }
 
 export async function createGraphQLContext({
@@ -27,34 +31,38 @@ export async function createGraphQLContext({
 }): Promise<GraphQLContext> {
   let user: { uid: string; email?: string; role: Role } | null = null;
 
-  // Extract and verify token
+  // Extract and verify token.
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
+
     if (admin) {
       try {
         const decoded = await admin.auth().verifyIdToken(token);
         const userRecord = await prisma.user.findUnique({
           where: { id: decoded.uid },
         });
-        // Don't throw if user not found — syncCurrentUser will create them
-        user = userRecord ? {
-          uid: decoded.uid,
-          email: decoded.email,
-          role: userRecord.role,
-        } : {
-          uid: decoded.uid,
-         email: decoded.email,
-          role: Role.USER,
-        };
+
+        // syncCurrentUser will create the user if no record exists yet.
+        user = userRecord
+          ? {
+              uid: decoded.uid,
+              email: decoded.email,
+              role: userRecord.role,
+            }
+          : {
+              uid: decoded.uid,
+              email: decoded.email,
+              role: Role.USER,
+            };
       } catch (error) {
-        // Token verification failed, user remains null
-        logger.warn({ err: error }, 'Token verification failed'); // Warn when Firebase token verification fails — user remains unauthenticated
+        // Token verification failed; user remains unauthenticated.
+        logger.warn({ err: error }, "Token verification failed");
       }
     }
   }
 
-  // Create auth helper methods bound to the current user
+  // Create auth helper methods bound to the current user.
   const auth = {
     requireAuth: (): string => {
       const userId = auth.getUserId();
@@ -77,5 +85,8 @@ export async function createGraphQLContext({
     user,
     prisma,
     auth,
+    loaders: {
+      derivedStatus: user ? createDerivedStatusLoader(prisma, user.uid) : null,
+    },
   };
 }

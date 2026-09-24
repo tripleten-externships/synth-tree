@@ -36,29 +36,27 @@ export interface DerivedSkillTree {
   edges: CanvasEdge[];
 }
 
-function toHexStatus(node: RawSkillNode, allNodesById: Map<string, RawSkillNode>): HexStatus {
-  const progressStatus = node.progressForViewer?.status ?? "NOT_STARTED";
-
-  if (progressStatus === "COMPLETED") return "completed";
-  if (progressStatus === "IN_PROGRESS") return "current";
-
-  const allPrereqsComplete = node.prerequisites.every((prereq) => {
-    const prereqNode = allNodesById.get(prereq.dependsOnNodeId);
-    return prereqNode?.progressForViewer?.status === "COMPLETED";
-  });
-
-  return allPrereqsComplete ? "unlocked" : "locked";
+function toHexStatus(node: RawSkillNode): HexStatus {
+  switch (node.derivedStatus) {
+    case "COMPLETED":
+      return "completed";
+    case "IN_PROGRESS":
+      return "current";
+    case "UNLOCKED":
+      return "unlocked";
+    case "LOCKED":
+      return "locked";
+  }
 }
 
 export function deriveSkillTree(rawNodes: RawSkillNode[]): DerivedSkillTree {
-  const allNodesById = new Map(rawNodes.map((n) => [n.id, n]));
 
   const nodes: CanvasNode[] = rawNodes.map((raw) => ({
     id: raw.id,
     title: raw.title,
     posXPercent: raw.posX ?? 0,
     posYPercent: raw.posY ?? 0,
-    status: toHexStatus(raw, allNodesById),
+    status: toHexStatus(raw),
     icon: PLACEHOLDER_ICON,
   }));
 
