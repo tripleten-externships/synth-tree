@@ -2833,7 +2833,6 @@ input QuizQuestionOrderByWithAggregationInput {
   _max: QuizQuestionMaxOrderByAggregateInput
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
-  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   order: SortOrder
@@ -2845,7 +2844,6 @@ input QuizQuestionOrderByWithAggregationInput {
 
 input QuizQuestionOrderByWithRelationInput {
   answers: QuizAttemptAnswerOrderByRelationAggregateInput
-  canonicalAnswer: SortOrder
   createdAt: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
@@ -3037,7 +3035,6 @@ input QuizQuestionWhereInput {
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
-  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
@@ -3054,7 +3051,6 @@ input QuizQuestionWhereUniqueInput {
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
-  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
   id: String
   options: QuizOptionListRelationFilter
