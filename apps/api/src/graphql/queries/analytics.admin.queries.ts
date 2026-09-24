@@ -20,7 +20,8 @@ AnalyticsSummaryRef.implement({
   }),
 });
 
-let cachedData: { timestamp: number; data: AnalyticsSummary } | null = null;
+// Cached per range so toggling the range doesn't return another range's numbers.
+const cache = new Map<string, { timestamp: number; data: AnalyticsSummary }>();
 const CACHE_TTL_MS = 60 * 1000;
 
 builder.queryFields((t) => ({
@@ -43,7 +44,10 @@ builder.queryFields((t) => ({
       // }
 
 
+      // Unknown ranges fall back to 7d below, so key them as 7d too (keeps the cache bounded).
+      const cacheKey = range === "30d" || range === "90d" || range === "all" ? range : "7d";
       const nowTimestamp = Date.now();
+      const cachedData = cache.get(cacheKey);
       if (cachedData && nowTimestamp - cachedData.timestamp < CACHE_TTL_MS) {
         return cachedData.data;
       }
@@ -90,10 +94,10 @@ builder.queryFields((t) => ({
         courseCompletionRate: 68.2,
       };
 
-      cachedData = {
+      cache.set(cacheKey, {
         timestamp: nowTimestamp,
         data: result,
-      };
+      });
 
       return result;
     },
