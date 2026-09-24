@@ -20,11 +20,42 @@ const STATUS_LABEL: Record<CanvasNode["status"], string> = {
   locked: "locked",
 };
 
-function edgePath(from: CanvasNode, to: CanvasNode, width: number, height: number): string {
-  const ax = (from.posXPercent / 100) * width;
-  const ay = (from.posYPercent / 100) * height;
-  const bx = (to.posXPercent / 100) * width;
-  const by = (to.posYPercent / 100) * height;
+// Padding around the nodes' bounding box, in canvas units: room for half a
+// hex on every side plus the title label under the bottom row.
+const PAD_X = 70;
+const PAD_TOP = 50;
+const PAD_BOTTOM = 80;
+
+interface Viewport {
+  width: number;
+  height: number;
+  x: (node: CanvasNode) => number;
+  y: (node: CanvasNode) => number;
+}
+
+// Crop the canvas to the nodes' bounding box so a tree authored in one corner
+// of the 0–100% grid still renders centered and fills the available width.
+// Relative spacing is preserved: `width`/`height` set how many canvas units
+// 100% of posX/posY spans.
+function fitViewport(nodes: CanvasNode[], width: number, height: number): Viewport {
+  const xs = nodes.map((n) => n.posXPercent);
+  const ys = nodes.map((n) => n.posYPercent);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+
+  return {
+    width: ((Math.max(...xs) - minX) / 100) * width + PAD_X * 2,
+    height: ((Math.max(...ys) - minY) / 100) * height + PAD_TOP + PAD_BOTTOM,
+    x: (n) => ((n.posXPercent - minX) / 100) * width + PAD_X,
+    y: (n) => ((n.posYPercent - minY) / 100) * height + PAD_TOP,
+  };
+}
+
+function edgePath(from: CanvasNode, to: CanvasNode, view: Viewport): string {
+  const ax = view.x(from);
+  const ay = view.y(from);
+  const bx = view.x(to);
+  const by = view.y(to);
   const midY = (ay + by) / 2;
 
   return `M ${ax} ${ay} C ${ax} ${midY}, ${bx} ${midY}, ${bx} ${by}`;
@@ -37,22 +68,31 @@ export default function SkillTreeCanvas({
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
 }: SkillTreeCanvasProps) {
+  if (nodes.length === 0) return null;
+
+  const view = fitViewport(nodes, width, height);
+
   return (
-    <div className="relative" style={{ width: "100%", aspectRatio: `${width} / ${height}` }}>
+    <div
+      className="relative"
+      style={{ width: "100%", aspectRatio: `${view.width} / ${view.height}` }}
+    >
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${view.width} ${view.height}`}
         className="absolute inset-0 h-full w-full"
         aria-hidden
       >
         {edges.map((edge) => (
           <path
             key={edge.id}
-            d={edgePath(edge.from, edge.to, width, height)}
+            d={edgePath(edge.from, edge.to, view)}
             fill="none"
             stroke={edge.solid ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
             strokeWidth={3}
             strokeDasharray={edge.solid ? undefined : "6 6"}
             opacity={edge.solid ? 1 : 0.5}
+            // Keep stroke width and dash length constant as the fitted canvas scales.
+            vectorEffect="non-scaling-stroke"
           />
         ))}
       </svg>
@@ -65,8 +105,8 @@ export default function SkillTreeCanvas({
             key={node.id}
             className="absolute -translate-x-1/2 -translate-y-1/2"
             style={{
-              left: `${node.posXPercent}%`,
-              top: `${node.posYPercent}%`,
+              left: `${(view.x(node) / view.width) * 100}%`,
+              top: `${(view.y(node) / view.height) * 100}%`,
               width: HEX_SIZE,
               height: HEX_SIZE,
             }}
@@ -84,7 +124,7 @@ export default function SkillTreeCanvas({
               aria-label={`${node.title} (${STATUS_LABEL[node.status]})`}
             />
             <span
-              className={`pointer-events-none absolute left-1/2 top-full mt-1 w-28 -translate-x-1/2 text-center text-xs font-medium leading-tight ${
+              className={`pointer-events-none absolute left-1/2 top-full mt-1 w-max max-w-28 -translate-x-1/2 rounded bg-background/90 px-1 text-center text-xs font-medium leading-tight ${
                 locked ? "text-muted-foreground" : "text-foreground"
               }`}
             >
