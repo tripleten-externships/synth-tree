@@ -25,6 +25,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import {
+  useAdminLessonQuizQuery,
+  useDeleteQuizMutation,
+  useSaveQuizMutation,
+} from "@synth-tree/api-types";
+
+import QuizEditor from "./quiz/QuizEditor";
+import { quizDraftFromServer, toSaveQuizInput, type QuizDraft } from "./quiz/quizDraft";
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 
@@ -253,6 +261,10 @@ function LessonEditor() {
   );
   const [deletedBlockIds, setDeletedBlockIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  // The quiz is edited as a draft and written on Save, like the blocks. A quiz
+  // the author removed is remembered here so Save can delete it.
+  const [quizDraft, setQuizDraft] = useState<QuizDraft | null>(null);
+  const [removedQuizId, setRemovedQuizId] = useState<string | null>(null);
 
   const {
     data: titleData,
@@ -274,6 +286,14 @@ function LessonEditor() {
       nodeId,
     },
   });
+
+  const { data: quizData, refetch: refetchQuiz } = useAdminLessonQuizQuery({
+    variables: { nodeId: nodeId ?? "" },
+    skip: !nodeId,
+  });
+
+  const [saveQuiz] = useSaveQuizMutation();
+  const [deleteQuiz] = useDeleteQuizMutation();
 
   const [saveLessonTitle] = useMutation(SAVE_LESSON_TITLE);
 
@@ -345,6 +365,22 @@ function LessonEditor() {
     setIsSaving(true);
 
     try {
+      // 0. Persist the quiz first. The API validates the whole quiz, so an
+      // invalid one stops the save here instead of after the lesson is written.
+      if (removedQuizId) {
+        await deleteQuiz({ variables: { id: removedQuizId } });
+        setRemovedQuizId(null);
+      } else if (quizDraft) {
+        await saveQuiz({
+          variables: {
+            nodeId,
+            input: toSaveQuizInput(quizDraft),
+          },
+        });
+      }
+
+      await refetchQuiz();
+
       // 1. Persist the lesson title.
       await saveLessonTitle({
         variables: {
@@ -442,6 +478,15 @@ function LessonEditor() {
     }
   };
 
+  // Re-sync the quiz draft whenever the server copy changes, which is on load
+  // and after each save.
+  useEffect(() => {
+    const quiz = quizData?.adminSkillNode?.quiz;
+
+    setQuizDraft(quiz ? quizDraftFromServer(quiz) : null);
+    setRemovedQuizId(null);
+  }, [quizData]);
+
   useEffect(() => {
     if (titleData?.adminSkillNode?.title) {
       setTitle(titleData.adminSkillNode.title);
@@ -463,6 +508,24 @@ function LessonEditor() {
 
     setBlockText(startingText);
   }, [titleData, blockData]);
+
+  // Removing a quiz that exists on the server also removes the attempts
+  // learners have made, so it asks first. Nothing is deleted until Save.
+  const handleQuizRemove = () => {
+    const savedQuizId = quizData?.adminSkillNode?.quiz?.id ?? null;
+
+    if (
+      savedQuizId &&
+      !window.confirm(
+        "Removing this quiz also deletes learners' past attempts at it when you save. Remove it?",
+      )
+    ) {
+      return;
+    }
+
+    setQuizDraft(null);
+    setRemovedQuizId(savedQuizId);
+  };
 
   const handleBlockChange = (blockId: string, newText: string) => {
     setBlockText((previousText) => ({
@@ -628,6 +691,8 @@ function LessonEditor() {
           );
         })()}
       </div>
+
+      <QuizEditor draft={quizDraft} onChange={setQuizDraft} onRemove={handleQuizRemove} />
     </div>
   );
 }

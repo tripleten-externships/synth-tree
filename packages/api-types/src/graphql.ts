@@ -7492,6 +7492,21 @@ export type XpEventWhereUniqueInput = {
   userId_reason_rewardKey?: InputMaybe<XpEventUserIdReasonRewardKeyCompoundUniqueInput>;
 };
 
+export type SaveQuizMutationVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+  input: SaveQuizInput;
+}>;
+
+
+export type SaveQuizMutation = { __typename?: 'Mutation', saveQuiz?: { __typename?: 'Quiz', id: string, title?: string | null, required: boolean, questions: Array<{ __typename?: 'QuizQuestion', id: string, type: QuestionType, prompt: string, explanation?: string | null, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> }> } | null };
+
+export type DeleteQuizMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteQuizMutation = { __typename?: 'Mutation', deleteQuiz?: { __typename?: 'Quiz', id: string } | null };
+
 export type UpdateCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateCourseInput;
@@ -7519,6 +7534,13 @@ export type AdminCourseQueryVariables = Exact<{
 
 
 export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null }> }> } | null };
+
+export type AdminLessonQuizQueryVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminLessonQuizQuery = { __typename?: 'Query', adminSkillNode?: { __typename?: 'SkillNode', id: string, quiz?: { __typename?: 'Quiz', id: string, title?: string | null, required: boolean, questions: Array<{ __typename?: 'QuizQuestion', id: string, type: QuestionType, prompt: string, explanation?: string | null, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> }> } | null } | null };
 
 export type AdminLeaderboardQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7711,6 +7733,81 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const SaveQuizDocument = gql`
+    mutation SaveQuiz($nodeId: ID!, $input: SaveQuizInput!) {
+  saveQuiz(nodeId: $nodeId, input: $input) {
+    id
+    title
+    required
+    questions(orderBy: [{order: asc}]) {
+      id
+      type
+      prompt
+      explanation
+      canonicalAnswer
+      options(orderBy: [{order: asc}]) {
+        id
+        text
+        isCorrect
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useSaveQuizMutation__
+ *
+ * To run a mutation, you first call `useSaveQuizMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveQuizMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveQuizMutation, { data, loading, error }] = useSaveQuizMutation({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSaveQuizMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveQuizMutation, SaveQuizMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SaveQuizMutation, SaveQuizMutationVariables>(SaveQuizDocument, options);
+      }
+export type SaveQuizMutationHookResult = ReturnType<typeof useSaveQuizMutation>;
+export const DeleteQuizDocument = gql`
+    mutation DeleteQuiz($id: ID!) {
+  deleteQuiz(id: $id) {
+    id
+  }
+}
+    `;
+
+/**
+ * __useDeleteQuizMutation__
+ *
+ * To run a mutation, you first call `useDeleteQuizMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteQuizMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteQuizMutation, { data, loading, error }] = useDeleteQuizMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteQuizMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteQuizMutation, DeleteQuizMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteQuizMutation, DeleteQuizMutationVariables>(DeleteQuizDocument, options);
+      }
+export type DeleteQuizMutationHookResult = ReturnType<typeof useDeleteQuizMutation>;
 export const UpdateCourseDocument = gql`
     mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
   updateCourse(id: $id, input: $input) {
@@ -7865,6 +7962,57 @@ export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
         }
 export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
 export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
+export const AdminLessonQuizDocument = gql`
+    query AdminLessonQuiz($nodeId: ID!) {
+  adminSkillNode(id: $nodeId) {
+    id
+    quiz {
+      id
+      title
+      required
+      questions(orderBy: [{order: asc}]) {
+        id
+        type
+        prompt
+        explanation
+        canonicalAnswer
+        options(orderBy: [{order: asc}]) {
+          id
+          text
+          isCorrect
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminLessonQuizQuery__
+ *
+ * To run a query within a React component, call `useAdminLessonQuizQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLessonQuizQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLessonQuizQuery({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *   },
+ * });
+ */
+export function useAdminLessonQuizQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminLessonQuizQuery, AdminLessonQuizQueryVariables> & ({ variables: AdminLessonQuizQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>(AdminLessonQuizDocument, options);
+      }
+export function useAdminLessonQuizLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>(AdminLessonQuizDocument, options);
+        }
+export type AdminLessonQuizQueryHookResult = ReturnType<typeof useAdminLessonQuizQuery>;
+export type AdminLessonQuizLazyQueryHookResult = ReturnType<typeof useAdminLessonQuizLazyQuery>;
 export const AdminLeaderboardDocument = gql`
     query AdminLeaderboard($limit: Int = 100) {
   leaderboard(limit: $limit) {
@@ -8424,7 +8572,7 @@ export const SubmitQuizAttemptDocument = gql`
         explanation
         type
         canonicalAnswer
-        options {
+        options(orderBy: [{order: asc}]) {
           id
           text
           isCorrect
@@ -8786,11 +8934,11 @@ export const PublicCourseDocument = gql`
           id
           title
           required
-          questions {
+          questions(orderBy: [{order: asc}]) {
             id
             prompt
             type
-            options {
+            options(orderBy: [{order: asc}]) {
               id
               text
             }
