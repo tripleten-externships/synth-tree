@@ -53,10 +53,7 @@ describe("deriveSkillTree", () => {
   });
 
   it("derives one edge per prerequisite relationship", () => {
-    const raw = [
-      node({ id: "a" }),
-      node({ id: "b", prerequisites: [{ dependsOnNodeId: "a" }] }),
-    ];
+    const raw = [node({ id: "a" }), node({ id: "b", prerequisites: [{ dependsOnNodeId: "a" }] })];
     const { edges } = deriveSkillTree(raw);
     expect(edges).toHaveLength(1);
     expect(edges[0].from.id).toBe("a");
