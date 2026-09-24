@@ -3261,6 +3261,7 @@ enum Role {
 type SkillNode {
   createdAt: DateTime!
   deletedAt: DateTime
+  derivedStatus: UnlockedStatus!
   id: ID!
   lessons(cursor: LessonBlocksWhereUniqueInput, distinct: [LessonBlocksScalarFieldEnum!], orderBy: [LessonBlocksOrderByWithRelationInput!], skip: Int, take: Int, where: LessonBlocksWhereInput): [LessonBlocks!]!
   orderInStep: Int!
@@ -4624,6 +4625,13 @@ enum TransactionIsolationLevel {
   ReadUncommitted
   RepeatableRead
   Serializable
+}
+
+enum UnlockedStatus {
+  COMPLETED
+  IN_PROGRESS
+  LOCKED
+  UNLOCKED
 }
 
 input UpdateCourseInput {

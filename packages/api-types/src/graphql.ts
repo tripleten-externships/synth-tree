@@ -3702,6 +3702,7 @@ export type SkillNode = {
   __typename?: 'SkillNode';
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  derivedStatus: UnlockedStatus;
   id: Scalars['ID']['output'];
   lessons: Array<LessonBlocks>;
   orderInStep: Scalars['Int']['output'];
@@ -5113,6 +5114,12 @@ export type TransactionIsolationLevel =
   | 'ReadUncommitted'
   | 'RepeatableRead'
   | 'Serializable';
+
+export type UnlockedStatus =
+  | 'COMPLETED'
+  | 'IN_PROGRESS'
+  | 'LOCKED'
+  | 'UNLOCKED';
 
 export type UpdateCourseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
@@ -7616,7 +7623,7 @@ export type LearnerCourseTreeQueryVariables = Exact<{
 }>;
 
 
-export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
+export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, derivedStatus: UnlockedStatus, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -8521,6 +8528,7 @@ export const LearnerCourseTreeDocument = gql`
         orderInStep
         posX
         posY
+        derivedStatus
         prerequisites {
           dependsOnNodeId
         }

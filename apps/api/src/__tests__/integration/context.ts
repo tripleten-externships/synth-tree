@@ -8,11 +8,9 @@ makeUnauthContext() is for simulating a unauthenticated request
 import { PrismaClient, Role } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { GraphQLError } from "graphql";
+import { createDerivedStatusLoader } from "@graphql/loaders/derivedStatus.loader";
 
-export function makeAdminContext(
-  prisma: PrismaClient,
-  userId: string,
-): GraphQLContext {
+export function makeAdminContext(prisma: PrismaClient, userId: string): GraphQLContext {
   return {
     user: { uid: userId, email: "admin@test.com", role: Role.ADMIN },
     prisma,
@@ -21,13 +19,13 @@ export function makeAdminContext(
       getUserId: () => userId,
       isAdmin: () => true,
     },
+    loaders: {
+      derivedStatus: createDerivedStatusLoader(prisma, userId),
+    },
   };
 }
 
-export function makeUserContext(
-  prisma: PrismaClient,
-  userId: string,
-): GraphQLContext {
+export function makeUserContext(prisma: PrismaClient, userId: string): GraphQLContext {
   return {
     user: { uid: userId, email: "user@test.com", role: Role.USER },
     prisma,
@@ -35,6 +33,9 @@ export function makeUserContext(
       requireAuth: () => userId,
       getUserId: () => userId,
       isAdmin: () => false,
+    },
+    loaders: {
+      derivedStatus: createDerivedStatusLoader(prisma, userId),
     },
   };
 }
@@ -49,6 +50,9 @@ export function makeUnauthContext(prisma: PrismaClient): GraphQLContext {
       },
       getUserId: () => null,
       isAdmin: () => false,
+    },
+    loaders: {
+      derivedStatus: null,
     },
   };
 }
