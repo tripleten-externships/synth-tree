@@ -60,7 +60,7 @@ describe("deriveSkillTree", () => {
     expect(edges[0].to.id).toBe("b");
   });
 
-  it("marks an edge solid when source is completed and target is unlocked", () => {
+  it("marks an edge solid when source is completed and target is not locked", () => {
     const raw = [
       node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
       node({ id: "b", prerequisites: [{ dependsOnNodeId: "a" }] }),
@@ -76,6 +76,34 @@ describe("deriveSkillTree", () => {
     ];
     const { edges } = deriveSkillTree(raw);
     expect(edges[0].solid).toBe(false);
+  });
+
+  it("keeps an edge solid once the target is also completed", () => {
+    const raw = [
+      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({
+        id: "b",
+        prerequisites: [{ dependsOnNodeId: "a" }],
+        progressForViewer: { status: "COMPLETED", completedAt: "2026-01-02" },
+      }),
+    ];
+    const { edges } = deriveSkillTree(raw);
+    expect(edges[0].solid).toBe(true);
+  });
+
+  it("marks edges dashed into a multi-prereq node when only one prereq is done", () => {
+    const raw = [
+      node({ id: "a", progressForViewer: { status: "COMPLETED", completedAt: "2026-01-01" } }),
+      node({ id: "b", progressForViewer: null }),
+      node({
+        id: "c",
+        prerequisites: [{ dependsOnNodeId: "a" }, { dependsOnNodeId: "b" }],
+      }),
+    ];
+    const { nodes, edges } = deriveSkillTree(raw);
+    expect(nodes.find((n) => n.id === "c")!.status).toBe("locked");
+    expect(edges.find((e) => e.id === "a->c")!.solid).toBe(false);
+    expect(edges.find((e) => e.id === "b->c")!.solid).toBe(false);
   });
 
   it("produces no edges for a node with no prerequisites", () => {
