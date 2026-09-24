@@ -6,8 +6,13 @@ import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import { completeNodeForUser } from "src/services/progress";
+import { awardXp } from "../../services/xp";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput } from "../inputs/quiz.inputs";
+
+// SYN-40: passing a quiz awards a dedicated, fixed XP amount (distinct from a
+// node's own completion reward).
+const QUIZ_PASS_XP = 100;
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -444,6 +449,28 @@ builder.mutationFields((t) => ({
 
         const summary = await gradeQuizAttempt(tx, quizAttempt.id);
 
+        // SYN-36 / SYN-40: on a pass, mark the node complete AND award the
+        // quiz-pass XP in the SAME transaction as the graded attempt, so a
+        // failure can't leave a passed attempt / COMPLETED node without XP.
+        //
+        // - completeNodeForUser is the shared, idempotent completion helper
+        //   (required-quiz gate satisfied because the passing attempt was just
+        //   persisted) and feeds the LESSON_COMPLETED daily-quest hook.
+        // - awardXp keeps its own idempotency guard (rewardKey), so repeat
+        //   passes don't double-award.
+        if (summary.passed === true) {
+          await completeNodeForUser(tx, userId, existing.nodeId);
+
+          await awardXp(
+            ctx.prisma,
+            userId,
+            QUIZ_PASS_XP,
+            "quiz_pass",
+            { quizId },
+            tx,
+          );
+        }
+
         return {
           quizAttempt,
           summary,
@@ -453,14 +480,6 @@ builder.mutationFields((t) => ({
       const { summary } = result;
       if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
         await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
-      }
-
-      // SYN-36: passing the quiz marks the node complete. Route it through the
-      // shared completion helper so it's idempotent and feeds the daily-quest
-      // hook, consistent with completeNodeProgress. (The required-quiz gate is
-      // satisfied here because the passing attempt was just persisted.)
-      if (summary.passed === true) {
-        await completeNodeForUser(ctx.prisma, userId, existing.nodeId);
       }
 
       logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");
