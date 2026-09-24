@@ -1140,6 +1140,7 @@ type Mutation {
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
+  saveQuiz(input: SaveQuizInput!, nodeId: ID!): Quiz
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
@@ -2401,16 +2402,22 @@ type QuizOption {
   createdAt: DateTime!
   id: ID!
   isCorrect: Boolean
+  order: Int!
   question: QuizQuestion!
   questionId: String!
   text: String!
   updatedAt: DateTime!
 }
 
+input QuizOptionAvgOrderByAggregateInput {
+  order: SortOrder
+}
+
 input QuizOptionCountOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2420,6 +2427,7 @@ input QuizOptionCreateInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   question: QuizQuestionCreateNestedOneWithoutOptionsInput!
   text: String!
   updatedAt: DateTime
@@ -2429,6 +2437,7 @@ input QuizOptionCreateManyInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   questionId: String!
   text: String!
   updatedAt: DateTime
@@ -2438,6 +2447,7 @@ input QuizOptionCreateManyQuestionInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   text: String!
   updatedAt: DateTime
 }
@@ -2463,6 +2473,7 @@ input QuizOptionCreateWithoutQuestionInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   text: String!
   updatedAt: DateTime
 }
@@ -2477,6 +2488,7 @@ input QuizOptionMaxOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2486,6 +2498,7 @@ input QuizOptionMinOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2496,11 +2509,14 @@ input QuizOptionOrderByRelationAggregateInput {
 }
 
 input QuizOptionOrderByWithAggregationInput {
+  _avg: QuizOptionAvgOrderByAggregateInput
   _count: QuizOptionCountOrderByAggregateInput
   _max: QuizOptionMaxOrderByAggregateInput
   _min: QuizOptionMinOrderByAggregateInput
+  _sum: QuizOptionSumOrderByAggregateInput
   createdAt: SortOrder
   id: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2509,6 +2525,7 @@ input QuizOptionOrderByWithAggregationInput {
 input QuizOptionOrderByWithRelationInput {
   createdAt: SortOrder
   id: SortOrder
+  order: SortOrder
   question: QuizQuestionOrderByWithRelationInput
   questionId: SortOrder
   text: SortOrder
@@ -2519,6 +2536,7 @@ enum QuizOptionScalarFieldEnum {
   createdAt
   id
   isCorrect
+  order
   questionId
   text
   updatedAt
@@ -2531,6 +2549,7 @@ input QuizOptionScalarWhereInput {
   createdAt: DateTimeFilter
   id: UuidFilter
   isCorrect: BoolFilter
+  order: IntFilter
   questionId: UuidFilter
   text: StringFilter
   updatedAt: DateTimeFilter
@@ -2543,15 +2562,21 @@ input QuizOptionScalarWhereWithAggregatesInput {
   createdAt: DateTimeWithAggregatesFilter
   id: UuidWithAggregatesFilter
   isCorrect: BoolWithAggregatesFilter
+  order: IntWithAggregatesFilter
   questionId: UuidWithAggregatesFilter
   text: StringWithAggregatesFilter
   updatedAt: DateTimeWithAggregatesFilter
+}
+
+input QuizOptionSumOrderByAggregateInput {
+  order: SortOrder
 }
 
 input QuizOptionUpdateInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   question: QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
@@ -2561,6 +2586,7 @@ input QuizOptionUpdateManyMutationInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
@@ -2593,6 +2619,7 @@ input QuizOptionUpdateWithoutQuestionInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
@@ -2609,6 +2636,7 @@ input QuizOptionWhereInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: UuidFilter
+  order: IntFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2621,6 +2649,7 @@ input QuizOptionWhereUniqueInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: String
+  order: IntFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2840,7 +2869,6 @@ input QuizQuestionOrderByWithAggregationInput {
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2852,7 +2880,6 @@ input QuizQuestionOrderByWithAggregationInput {
 input QuizQuestionOrderByWithRelationInput {
   answers: QuizAttemptAnswerOrderByRelationAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
   order: SortOrder
@@ -3052,7 +3079,6 @@ input QuizQuestionWhereInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3069,7 +3095,6 @@ input QuizQuestionWhereUniqueInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: String
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3256,6 +3281,26 @@ input QuizWhereUniqueInput {
 enum Role {
   ADMIN
   USER
+}
+
+input SaveQuizInput {
+  questions: [SaveQuizQuestionInput!]!
+  required: Boolean!
+}
+
+input SaveQuizOptionInput {
+  id: ID
+  isCorrect: Boolean!
+  text: String!
+}
+
+input SaveQuizQuestionInput {
+  canonicalAnswer: String
+  explanation: String
+  id: ID
+  options: [SaveQuizOptionInput!]!
+  prompt: String!
+  type: QuestionType!
 }
 
 type SkillNode {

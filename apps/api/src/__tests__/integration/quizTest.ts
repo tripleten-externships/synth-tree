@@ -348,6 +348,47 @@ describe("Quiz flow", () => {
       expect(res.errors).toBeDefined();
       expect(res.errors[0].message).toMatch(/multiple correct/i);
     });
+
+    // Appending has to look at the highest order rather than the count, or a
+    // question that has had an option deleted gets two options sharing a spot.
+    it("appends after the last option even when an earlier one was deleted", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Ordered Quiz", required: false },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: { quizId: quiz.id, type: "MULTIPLE_CHOICE", prompt: "Pick some" },
+      });
+      await prisma.quizOption.createMany({
+        data: [
+          { questionId: question.id, text: "A", order: 0 },
+          { questionId: question.id, text: "B", order: 1 },
+          { questionId: question.id, text: "C", order: 2 },
+        ],
+      });
+      await prisma.quizOption.deleteMany({ where: { questionId: question.id, text: "B" } });
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: CREATE_OPTION,
+            variables: { questionId: question.id, text: "D", isCorrect: false },
+          },
+          { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      const options = await prisma.quizOption.findMany({
+        where: { questionId: question.id },
+        orderBy: { order: "asc" },
+      });
+      expect(options.map((option) => [option.text, option.order])).toEqual([
+        ["A", 0],
+        ["C", 2],
+        ["D", 3],
+      ]);
+    });
   });
 
   describe("deleteQuiz", () => {
@@ -788,6 +829,442 @@ describe("Quiz flow", () => {
     });
   });
 
+  // SYN-72: the admin lesson editor saves a whole authored quiz in one call.
+  describe("saveQuiz", () => {
+    const SAVE_QUIZ = `
+      mutation SaveQuiz($nodeId: ID!, $input: SaveQuizInput!) {
+        saveQuiz(nodeId: $nodeId, input: $input) {
+          id
+          title
+          required
+          questions(orderBy: [{ order: asc }]) {
+            id
+            type
+            prompt
+            explanation
+            canonicalAnswer
+            order
+            options(orderBy: [{ order: asc }]) {
+              id
+              text
+              isCorrect
+              order
+            }
+          }
+        }
+      }
+    `;
+
+    function choiceQuestion(prompt: string, correctText = "Right") {
+      return {
+        type: "SINGLE_CHOICE",
+        prompt,
+        options: [
+          { text: correctText, isCorrect: true },
+          { text: "Wrong", isCorrect: false },
+        ],
+      };
+    }
+
+    async function save(
+      nodeId: string,
+      input: Record<string, unknown>,
+      contextValue = makeAdminContext(prisma, ADMIN_USER_ID),
+    ) {
+      return singleResult(
+        await server.executeOperation(
+          { query: SAVE_QUIZ, variables: { nodeId, input } },
+          { contextValue },
+        ),
+      );
+    }
+
+    it("creates the quiz and its questions in the authored order", async () => {
+      const { node } = await seedNode();
+
+      const res = await save(node.id, {
+        required: true,
+        questions: [choiceQuestion("First?"), choiceQuestion("Second?"), choiceQuestion("Third?")],
+      });
+
+      expect(res.errors).toBeUndefined();
+      const quiz = res.data.saveQuiz;
+      expect(quiz.required).toBe(true);
+      expect(quiz.questions.map((q: any) => q.prompt)).toEqual(["First?", "Second?", "Third?"]);
+      expect(quiz.questions.map((q: any) => q.order)).toEqual([0, 1, 2]);
+      expect(quiz.questions[0].options.map((o: any) => o.order)).toEqual([0, 1]);
+      // One quiz per node, so a second save must reuse it rather than fail.
+      expect(await prisma.quiz.count({ where: { nodeId: node.id } })).toBe(1);
+    });
+
+    it("updates questions and options in place so learner answers survive", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Before?")],
+      });
+      const question = first.data.saveQuiz.questions[0];
+      const option = question.options[0];
+
+      // A learner answers it before the author edits the wording.
+      const attempt = await prisma.quizAttempt.create({
+        data: {
+          quizId: first.data.saveQuiz.id,
+          userId: REGULAR_USER_ID,
+          passed: true,
+          answers: {
+            create: [
+              {
+                questionId: question.id,
+                answer: { selectedOptionIds: [option.id] },
+                isCorrect: true,
+              },
+            ],
+          },
+        },
+      });
+
+      const second = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            id: question.id,
+            type: "SINGLE_CHOICE",
+            prompt: "After?",
+            options: [
+              { id: option.id, text: "Still right", isCorrect: true },
+              { text: "Brand new", isCorrect: false },
+            ],
+          },
+        ],
+      });
+
+      expect(second.errors).toBeUndefined();
+      const saved = second.data.saveQuiz.questions[0];
+      expect(saved.id).toBe(question.id);
+      expect(saved.prompt).toBe("After?");
+      expect(saved.options[0].id).toBe(option.id);
+      expect(saved.options[0].text).toBe("Still right");
+      expect(saved.options.map((o: any) => o.text)).toEqual(["Still right", "Brand new"]);
+
+      // The rows were updated rather than replaced, so the answer the learner
+      // already gave is still attached to the question.
+      const keptAnswers = await prisma.quizAttemptAnswer.findMany({
+        where: { attemptId: attempt.id },
+      });
+      expect(keptAnswers).toHaveLength(1);
+      expect(keptAnswers[0].questionId).toBe(question.id);
+    });
+
+    it("moves the correct answer within a single-choice question in one save", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Which?")],
+      });
+      const question = first.data.saveQuiz.questions[0];
+      const [wasCorrect, wasWrong] = question.options;
+
+      const second = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            id: question.id,
+            type: "SINGLE_CHOICE",
+            prompt: "Which?",
+            options: [
+              { id: wasCorrect.id, text: wasCorrect.text, isCorrect: false },
+              { id: wasWrong.id, text: wasWrong.text, isCorrect: true },
+            ],
+          },
+        ],
+      });
+
+      expect(second.errors).toBeUndefined();
+      expect(second.data.saveQuiz.questions[0].options.map((o: any) => o.isCorrect)).toEqual([
+        false,
+        true,
+      ]);
+    });
+
+    it("deletes questions and options the author removed", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Keep?"), choiceQuestion("Drop?")],
+      });
+      const [keep, drop] = first.data.saveQuiz.questions;
+
+      const second = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            id: keep.id,
+            type: "SINGLE_CHOICE",
+            prompt: "Keep?",
+            options: [
+              { id: keep.options[0].id, text: "Right", isCorrect: true },
+              { text: "Replacement", isCorrect: false },
+            ],
+          },
+        ],
+      });
+
+      expect(second.errors).toBeUndefined();
+      expect(second.data.saveQuiz.questions).toHaveLength(1);
+      expect(await prisma.quizQuestion.findUnique({ where: { id: drop.id } })).toBeNull();
+      // The second original option was left out of the input, so it is gone.
+      expect(await prisma.quizOption.findUnique({ where: { id: keep.options[1].id } })).toBeNull();
+    });
+
+    it("stores a FILL answer key and clears it when the question is not FILL", async () => {
+      const { node } = await seedNode();
+
+      const res = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            type: "FILL",
+            prompt: "A triple bond is ___-hybridized.",
+            canonicalAnswer: "SP",
+            options: [],
+          },
+          { ...choiceQuestion("Which?"), explanation: "Because it is." },
+        ],
+      });
+
+      expect(res.errors).toBeUndefined();
+      const [fill, single] = res.data.saveQuiz.questions;
+      expect(fill.canonicalAnswer).toBe("SP");
+      expect(fill.options).toHaveLength(0);
+      expect(single.canonicalAnswer).toBeNull();
+      expect(single.explanation).toBe("Because it is.");
+    });
+
+    it("keeps an explanation across saves and clears a blank one", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [{ ...choiceQuestion("Which?"), explanation: "The first reason." }],
+      });
+      const question = first.data.saveQuiz.questions[0];
+
+      const second = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            id: question.id,
+            type: "SINGLE_CHOICE",
+            prompt: "Which?",
+            explanation: "   ",
+            options: question.options.map((o: any) => ({
+              id: o.id,
+              text: o.text,
+              isCorrect: o.isCorrect,
+            })),
+          },
+        ],
+      });
+
+      expect(second.errors).toBeUndefined();
+      expect(second.data.saveQuiz.questions[0].explanation).toBeNull();
+    });
+
+    it("rejects an invalid quiz without writing anything", async () => {
+      const { node } = await seedNode();
+
+      const res = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            type: "SINGLE_CHOICE",
+            prompt: "Which?",
+            options: [
+              { text: "Both right", isCorrect: true },
+              { text: "Also right", isCorrect: true },
+            ],
+          },
+        ],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/exactly one correct answer/i);
+      expect(res.errors?.[0].extensions?.code).toBe("BAD_USER_INPUT");
+      expect(await prisma.quiz.count({ where: { nodeId: node.id } })).toBe(0);
+    });
+
+    it("rejects a question id that belongs to another quiz", async () => {
+      const mine = await seedNode();
+      const other = await seedNode();
+      const otherSaved = await save(other.node.id, {
+        required: false,
+        questions: [choiceQuestion("Theirs?")],
+      });
+      const foreignQuestionId = otherSaved.data.saveQuiz.questions[0].id;
+
+      const res = await save(mine.node.id, {
+        required: false,
+        questions: [
+          {
+            id: foreignQuestionId,
+            type: "SINGLE_CHOICE",
+            prompt: "Mine?",
+            options: [
+              { text: "Right", isCorrect: true },
+              { text: "Wrong", isCorrect: false },
+            ],
+          },
+        ],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/not part of this quiz/i);
+    });
+
+    // A new question owns no answers yet, so an answer id sent with one could
+    // only come from somewhere else.
+    it("rejects an answer id sent on a new question", async () => {
+      const mine = await seedNode();
+      const other = await seedNode();
+      const otherSaved = await save(other.node.id, {
+        required: false,
+        questions: [choiceQuestion("Theirs?", "Their answer")],
+      });
+      const foreignOption = otherSaved.data.saveQuiz.questions[0].options[0];
+
+      const res = await save(mine.node.id, {
+        required: false,
+        questions: [
+          {
+            type: "SINGLE_CHOICE",
+            prompt: "Mine?",
+            options: [
+              { id: foreignOption.id, text: "Overwritten", isCorrect: true },
+              { text: "Wrong", isCorrect: false },
+            ],
+          },
+        ],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/not part of this quiz/i);
+
+      const untouched = await prisma.quizOption.findUniqueOrThrow({
+        where: { id: foreignOption.id },
+      });
+      expect(untouched.text).toBe("Their answer");
+    });
+
+    it("rejects the same question id twice in one save", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Which?")],
+      });
+      const question = first.data.saveQuiz.questions[0];
+      const repeated = {
+        id: question.id,
+        type: "SINGLE_CHOICE",
+        prompt: "Which?",
+        options: question.options.map((o: any) => ({
+          id: o.id,
+          text: o.text,
+          isCorrect: o.isCorrect,
+        })),
+      };
+
+      const res = await save(node.id, {
+        required: false,
+        questions: [repeated, { ...repeated, prompt: "Duplicate?" }],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/appears twice/i);
+    });
+
+    it("rejects changing the type of an existing question", async () => {
+      const { node } = await seedNode();
+      const first = await save(node.id, {
+        required: false,
+        questions: [choiceQuestion("Which?")],
+      });
+      const question = first.data.saveQuiz.questions[0];
+
+      const res = await save(node.id, {
+        required: false,
+        questions: [
+          {
+            id: question.id,
+            type: "MULTIPLE_CHOICE",
+            prompt: "Which?",
+            options: question.options.map((o: any) => ({
+              id: o.id,
+              text: o.text,
+              isCorrect: o.isCorrect,
+            })),
+          },
+        ],
+      });
+
+      expect(res.errors?.[0].message).toMatch(/type/i);
+    });
+
+    it("lets the node owner save, and blocks other users and anonymous requests", async () => {
+      const owned = await seedNode(REGULAR_USER_ID);
+      const input = { required: false, questions: [choiceQuestion("Mine?")] };
+
+      const asOwner = await save(owned.node.id, input, makeUserContext(prisma, REGULAR_USER_ID));
+      expect(asOwner.errors).toBeUndefined();
+
+      const asOtherUser = await save(
+        owned.node.id,
+        input,
+        makeUserContext(prisma, SECOND_REGULAR_USER_ID),
+      );
+      expect(asOtherUser.errors?.[0].extensions?.code).toBe("FORBIDDEN");
+
+      const asAnonymous = await save(owned.node.id, input, makeUnauthContext(prisma));
+      expect(asAnonymous.errors).toBeDefined();
+      expect(asAnonymous.data?.saveQuiz).toBeFalsy();
+    });
+
+    // SYN-72 acceptance: an author builds a 3-question single-choice quiz and a
+    // learner takes it correctly.
+    it("lets a learner pass a quiz the author just built", async () => {
+      const { course, node } = await seedNode();
+      await prisma.course.update({
+        where: { id: course.id },
+        data: { status: "PUBLISHED" },
+      });
+
+      const saved = await save(node.id, {
+        required: true,
+        questions: [
+          choiceQuestion("First?", "First right"),
+          choiceQuestion("Second?", "Second right"),
+          choiceQuestion("Third?", "Third right"),
+        ],
+      });
+      expect(saved.errors).toBeUndefined();
+
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
+      });
+
+      const quiz = saved.data.saveQuiz;
+      const answers = quiz.questions.map((q: any) => ({
+        questionId: q.id,
+        selectedOptionIds: [q.options.find((o: any) => o.isCorrect).id],
+      }));
+
+      const attempt = singleResult(
+        await server.executeOperation(
+          { query: SUBMIT_ATTEMPT, variables: { quizId: quiz.id, answers } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(attempt.errors).toBeUndefined();
+      expect(attempt.data.submitQuizAttempt.passed).toBe(true);
+    });
+  });
+
   describe("FILL questions", () => {
     const CREATE_FILL_QUESTION = `
       mutation CreateFillQuestion($quizId: String!, $prompt: String!, $canonicalAnswer: String) {
@@ -1068,6 +1545,39 @@ describe("Quiz flow", () => {
       expect(
         await readExplanation(course.id, makeUserContext(prisma, SECOND_REGULAR_USER_ID)),
       ).toBeNull();
+    });
+
+    // The field resolver hides the text, but a filter would let a learner
+    // confirm it a guess at a time, so explanation is kept out of the
+    // where/orderBy inputs the way canonicalAnswer and isCorrect are.
+    it("does not let a learner filter questions by explanation", async () => {
+      const { course } = await seedPublishedQuiz();
+
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: `
+              query PublicCourse($id: ID!) {
+                publicCourse(id: $id) {
+                  trees {
+                    nodes {
+                      quiz {
+                        questions(where: { explanation: { contains: "2 + 2" } }) {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `,
+            variables: { id: course.id },
+          },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors?.[0].message).toMatch(/explanation/);
     });
   });
 });

@@ -1,13 +1,38 @@
-import { gql } from '@apollo/client';
-import { useMutation, useQuery } from '@apollo/client/react';
-import {closestCenter,DndContext,type DragEndEvent} from "@dnd-kit/core";
-import {arrayMove,SortableContext,useSortable,verticalListSortingStrategy} from "@dnd-kit/sortable";
+import { gql } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
+import { closestCenter, DndContext, type DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button, Input, toast } from "@synth-tree/ui";
-import DOMPurify from 'dompurify';
-import { AlignJustify, Check, ChevronLeft, Code2, Eye, GripVertical,Image, Pen, PlaySquare, Plus, Trash} from 'lucide-react';
-import { useEffect,useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import DOMPurify from "dompurify";
+import {
+  AlignJustify,
+  Check,
+  ChevronLeft,
+  Code2,
+  Eye,
+  GripVertical,
+  Image,
+  Pen,
+  PlaySquare,
+  Plus,
+  Trash,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import {
+  useAdminLessonQuizQuery,
+  useDeleteQuizMutation,
+  useSaveQuizMutation,
+} from "@synth-tree/api-types";
+
+import QuizEditor from "./quiz/QuizEditor";
+import { quizDraftFromServer, toSaveQuizInput, type QuizDraft } from "./quiz/quizDraft";
 
 // ─── 1. GRAPHQL ───────────────────────────────────────────────────────────────
 
@@ -42,8 +67,8 @@ const GET_LESSON_BLOCK = gql`
 const SAVE_LESSON_TITLE = gql`
   mutation SaveLessonTitle($updateSkillNodeId: ID!, $input: UpdateSkillNodeInput!) {
     updateSkillNode(id: $updateSkillNodeId, input: $input) {
-    id
-    title
+      id
+      title
     }
   }
 `;
@@ -115,21 +140,30 @@ type GetLessonBlocksResponse = {
 
 // ─── 3. COMPONENT ─────────────────────────────────────────────────────────────
 
-function SortableLessonBlock({block, children} : {block: GetLessonBlocksResponse["lessonBlocksByNode"][number]; children: React.ReactNode}) {
-  const sortable = useSortable({id: block.id,});
+function SortableLessonBlock({
+  block,
+  children,
+}: {
+  block: GetLessonBlocksResponse["lessonBlocksByNode"][number];
+  children: React.ReactNode;
+}) {
+  const sortable = useSortable({ id: block.id });
   const style = {
     transform: CSS.Transform.toString(sortable.transform),
-    transition: sortable.transition
+    transition: sortable.transition,
   };
 
-  return(
+  return (
     <div ref={sortable.setNodeRef} style={style} className="flex">
-      <button {...sortable.listeners} {...sortable.attributes} ref={sortable.setActivatorNodeRef} style={{ touchAction: "none" }}>
+      <button
+        {...sortable.listeners}
+        {...sortable.attributes}
+        ref={sortable.setActivatorNodeRef}
+        style={{ touchAction: "none" }}
+      >
         <GripVertical />
       </button>
-      <div className="flex w-full flex-col">
-        {children}
-      </div>
+      <div className="flex w-full flex-col">{children}</div>
     </div>
   );
 }
@@ -217,52 +251,68 @@ function AddBlockMenu({
   );
 }
 
-function LessonEditor(){
+function LessonEditor() {
   const { nodeId } = useParams();
   const [title, setTitle] = useState("");
   const [blockText, setBlockText] = useState<Record<string, string>>({});
   const [openBlockId, setOpenBlockId] = useState<string | null>(null);
-  const [lessonBlocks, setLessonBlocks] = useState<GetLessonBlocksResponse["lessonBlocksByNode"]>([]);
+  const [lessonBlocks, setLessonBlocks] = useState<GetLessonBlocksResponse["lessonBlocksByNode"]>(
+    [],
+  );
   const [deletedBlockIds, setDeletedBlockIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  // The quiz is edited as a draft and written on Save, like the blocks. A quiz
+  // the author removed is remembered here so Save can delete it.
+  const [quizDraft, setQuizDraft] = useState<QuizDraft | null>(null);
+  const [removedQuizId, setRemovedQuizId] = useState<string | null>(null);
+  // The server copy the draft was last built from, so a repeat of the same data
+  // does not overwrite unsaved edits.
+  const lastSyncedQuiz = useRef<string | null>(null);
 
-  const { data: titleData, loading: titleLoading, error: titleError } = useQuery<GetLessonTitleResponse>(GET_LESSON_TITLE, {
+  const {
+    data: titleData,
+    loading: titleLoading,
+    error: titleError,
+  } = useQuery<GetLessonTitleResponse>(GET_LESSON_TITLE, {
     variables: {
       id: nodeId,
     },
   });
 
-  const { data: blockData, loading: blockLoading, error: blockError, refetch: refetchLessonBlocks } = useQuery<GetLessonBlocksResponse>(GET_LESSON_BLOCK, {
+  const {
+    data: blockData,
+    loading: blockLoading,
+    error: blockError,
+    refetch: refetchLessonBlocks,
+  } = useQuery<GetLessonBlocksResponse>(GET_LESSON_BLOCK, {
     variables: {
       nodeId,
     },
   });
 
-  const [saveLessonTitle] = useMutation(
-    SAVE_LESSON_TITLE
-  );
+  const { data: quizData, refetch: refetchQuiz } = useAdminLessonQuizQuery({
+    variables: { nodeId: nodeId ?? "" },
+    skip: !nodeId,
+  });
+
+  const [saveQuiz] = useSaveQuizMutation();
+  const [deleteQuiz] = useDeleteQuizMutation();
+
+  const [saveLessonTitle] = useMutation(SAVE_LESSON_TITLE);
 
   const [createLessonBlock] = useMutation<{
     createLessonBlock: GetLessonBlocksResponse["lessonBlocksByNode"][number] | null;
   }>(CREATE_LESSON_BLOCK);
 
-  const [updateLessonBlock] = useMutation(
-    UPDATE_LESSON_BLOCK
-  );
+  const [updateLessonBlock] = useMutation(UPDATE_LESSON_BLOCK);
 
-  const [deleteLessonBlock] = useMutation(
-    DELETE_LESSON_BLOCK
-  );
+  const [deleteLessonBlock] = useMutation(DELETE_LESSON_BLOCK);
 
-  const [reorderLessonBlocks] = useMutation(
-    REORDER_LESSON_BLOCKS
-  );
+  const [reorderLessonBlocks] = useMutation(REORDER_LESSON_BLOCKS);
 
   const handleAddButtonClick = (blockId: string) => {
-    setOpenBlockId((currentBlockId) =>
-      currentBlockId === blockId ? null : blockId,
-    );
-  }
+    setOpenBlockId((currentBlockId) => (currentBlockId === blockId ? null : blockId));
+  };
 
   // Adding a block is a local-only edit: it inserts a temporary block into
   // state and defers the actual DB write to Save, so it is consistent with how
@@ -318,6 +368,22 @@ function LessonEditor(){
     setIsSaving(true);
 
     try {
+      // 0. Persist the quiz first. The API validates the whole quiz, so an
+      // invalid one stops the save here instead of after the lesson is written.
+      if (removedQuizId) {
+        await deleteQuiz({ variables: { id: removedQuizId } });
+        setRemovedQuizId(null);
+      } else if (quizDraft) {
+        await saveQuiz({
+          variables: {
+            nodeId,
+            input: toSaveQuizInput(quizDraft),
+          },
+        });
+      }
+
+      await refetchQuiz();
+
       // 1. Persist the lesson title.
       await saveLessonTitle({
         variables: {
@@ -388,9 +454,7 @@ function LessonEditor(){
       );
 
       // 5. Persist the final ordering atomically in a single mutation.
-      const orderedBlockIds = blocksToSave.map(
-        (block) => tempIdToRealId.get(block.id) ?? block.id,
-      );
+      const orderedBlockIds = blocksToSave.map((block) => tempIdToRealId.get(block.id) ?? block.id);
 
       if (orderedBlockIds.length > 0) {
         await reorderLessonBlocks({
@@ -410,14 +474,33 @@ function LessonEditor(){
       });
     } catch (error) {
       toast("Unable to save lesson", {
-        description: error instanceof Error
-          ? error.message
-          : "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
       });
     } finally {
       setIsSaving(false);
     }
   };
+
+  // Re-sync the quiz draft when the server copy changes, which is on load and
+  // after each save. Apollo can hand the same quiz back again when something
+  // else writes to the cache, and rebuilding the draft then would throw away
+  // whatever the author has typed since, so unchanged data is ignored.
+  useEffect(() => {
+    if (!quizData) {
+      return;
+    }
+
+    const quiz = quizData.adminSkillNode?.quiz ?? null;
+    const serverQuiz = JSON.stringify(quiz);
+
+    if (serverQuiz === lastSyncedQuiz.current) {
+      return;
+    }
+
+    lastSyncedQuiz.current = serverQuiz;
+    setQuizDraft(quiz ? quizDraftFromServer(quiz) : null);
+    setRemovedQuizId(null);
+  }, [quizData]);
 
   useEffect(() => {
     if (titleData?.adminSkillNode?.title) {
@@ -439,8 +522,33 @@ function LessonEditor(){
       });
 
     setBlockText(startingText);
-
   }, [titleData, blockData]);
+
+  // Any edit means there is a quiz again, so a removal that has not been saved
+  // yet no longer applies. Without this, adding a quiz back after removing one
+  // would save the deletion and drop the new questions.
+  const handleQuizChange = (draft: QuizDraft) => {
+    setQuizDraft(draft);
+    setRemovedQuizId(null);
+  };
+
+  // Removing a quiz that exists on the server also removes the attempts
+  // learners have made, so it asks first. Nothing is deleted until Save.
+  const handleQuizRemove = () => {
+    const savedQuizId = quizData?.adminSkillNode?.quiz?.id ?? null;
+
+    if (
+      savedQuizId &&
+      !window.confirm(
+        "Removing this quiz also deletes learners' past attempts at it when you save. Remove it?",
+      )
+    ) {
+      return;
+    }
+
+    setQuizDraft(null);
+    setRemovedQuizId(savedQuizId);
+  };
 
   const handleBlockChange = (blockId: string, newText: string) => {
     setBlockText((previousText) => ({
@@ -487,13 +595,12 @@ function LessonEditor(){
       order: index,
     }));
 
-    setLessonBlocks(reorderedBlocks)
-
+    setLessonBlocks(reorderedBlocks);
   };
 
   if (titleLoading) {
-      return <p>Loading lesson...</p>;
-    }
+    return <p>Loading lesson...</p>;
+  }
 
   if (blockLoading) {
     return <p>Loading lesson blocks...</p>;
@@ -506,7 +613,7 @@ function LessonEditor(){
   if (blockError) {
     return <p>Unable to load lesson blocks.</p>;
   }
-  return(
+  return (
     <div className="mx-auto w-full max-w-[780px] px-6 py-6">
       <div className="flex justify-between mb-6">
         <Button
@@ -519,10 +626,22 @@ function LessonEditor(){
           </Link>
         </Button>
         <div className="flex gap-2">
-          <Button className="rounded-xl" variant="outline" leftIcon={<Eye />} disabled title="Preview coming soon">
+          <Button
+            className="rounded-xl"
+            variant="outline"
+            leftIcon={<Eye />}
+            disabled
+            title="Preview coming soon"
+          >
             Preview
           </Button>
-          <Button onClick={handleSave} disabled={isSaving} loading={isSaving} className="text-primary-foreground bg-primary rounded-xl hover:brightness-[0.96]" leftIcon={<Check />}>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            loading={isSaving}
+            className="text-primary-foreground bg-primary rounded-xl hover:brightness-[0.96]"
+            leftIcon={<Check />}
+          >
             {isSaving ? "Saving…" : "Save lesson"}
           </Button>
         </div>
@@ -530,14 +649,21 @@ function LessonEditor(){
       <p className="mb-1">
         {titleData?.adminSkillNode?.tree.course.title} · {titleData?.adminSkillNode?.title}
       </p>
-      <Input value={title} onChange={(e) => setTitle(e.target.value)} type="text" aria-label="Lesson title"/>
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        type="text"
+        aria-label="Lesson title"
+      />
       <div className="flex flex-col justify-center align-center">
         {(() => {
           const htmlBlocks = lessonBlocks.filter((block) => block.type === "HTML");
 
           return (
-            <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter} >
-              <SortableContext items={htmlBlocks.map((block) => block.id)} strategy={verticalListSortingStrategy}
+            <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+              <SortableContext
+                items={htmlBlocks.map((block) => block.id)}
+                strategy={verticalListSortingStrategy}
               >
                 {htmlBlocks.length === 0 && (
                   <p className="mt-4 mb-2 text-center text-sm text-muted-foreground">
@@ -555,14 +681,15 @@ function LessonEditor(){
 
                 {htmlBlocks.map((block) => {
                   return (
-                    <SortableLessonBlock  block={block} key={block.id} >
+                    <SortableLessonBlock block={block} key={block.id}>
                       <Button
                         onClick={() => handleBlockDelete(block.id)}
-                        className="self-start rounded-xl text-foreground hover:bg-muted hover:text-foreground border-0" variant="outline"
+                        className="self-start rounded-xl text-foreground hover:bg-muted hover:text-foreground border-0"
+                        variant="outline"
                         size="sm"
                         aria-label="Delete block"
                       >
-                        <Trash className="h-4 w-4"/>
+                        <Trash className="h-4 w-4" />
                       </Button>
                       <div
                         contentEditable
@@ -570,26 +697,25 @@ function LessonEditor(){
                           __html: DOMPurify.sanitize(blockText[block.id] ?? ""),
                         }}
                         onBlur={(e) => {
-                          handleBlockChange(
-                            block.id,
-                            e.currentTarget.innerHTML
-                          );
+                          handleBlockChange(block.id, e.currentTarget.innerHTML);
                         }}
-                      >
-                      </div>
+                      ></div>
                       <AddBlockMenu
                         controlKey={block.id}
                         openBlockId={openBlockId}
                         onToggle={handleAddButtonClick}
                         onAddText={() => handleAddTextBlock(block.id)}
                       />
-                    </SortableLessonBlock>)
+                    </SortableLessonBlock>
+                  );
                 })}
               </SortableContext>
             </DndContext>
           );
         })()}
       </div>
+
+      <QuizEditor draft={quizDraft} onChange={handleQuizChange} onRemove={handleQuizRemove} />
     </div>
   );
 }
