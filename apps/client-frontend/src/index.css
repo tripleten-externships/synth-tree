@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* SYN-61: one-shot scale-up "pop" for the lesson-finish screen. */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-pop {
+  animation: pop 400ms ease-out both;
+}
+
+/* Stagger: checkmark pops first, XP pill follows ~200ms later */
+.animate-pop-delayed {
+  animation: pop 400ms ease-out 200ms both;
+}
