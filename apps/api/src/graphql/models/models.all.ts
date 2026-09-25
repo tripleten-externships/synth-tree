@@ -9,11 +9,18 @@ import { SkillTreeObject } from "@graphql/__generated__/SkillTree";
 import { SkillNodeObject } from "@graphql/__generated__/SkillNode";
 import { SkillNodePrerequisiteObject } from "@graphql/__generated__/SkillNodePrerequisite";
 import { LessonBlocksObject } from "@graphql/__generated__/LessonBlocks";
-import { QuizObject, QuizAttemptsFieldObject } from "@graphql/__generated__/Quiz";
+import {
+  QuizObject,
+  QuizAttemptsFieldObject,
+  QuizQuestionsFieldObject,
+} from "@graphql/__generated__/Quiz";
+import { QuizQuestionsFieldArgs } from "@graphql/__generated__/Quiz/object.base";
 import {
   QuizQuestionObject,
   QuizQuestionAnswersFieldObject,
+  QuizQuestionOptionsFieldObject,
 } from "@graphql/__generated__/QuizQuestion";
+import { QuizQuestionOptionsFieldArgs } from "@graphql/__generated__/QuizQuestion/object.base";
 import { QuizOptionObject } from "@graphql/__generated__/QuizOption";
 import { QuizAttemptObject } from "@graphql/__generated__/QuizAttempt";
 import { QuizAttemptAnswerObject } from "@graphql/__generated__/QuizAttemptAnswer";
@@ -37,6 +44,12 @@ function viewerAttemptsFilter(ctx: GraphQLContext): Prisma.QuizAttemptWhereInput
   const userId = ctx.auth.getUserId();
   return { userId: { in: userId ? [userId] : [] } };
 }
+
+// Answer-key guard: `distinct` is not offered on quiz questions or options.
+// options(distinct: [isCorrect]) returns one option per value, so the correct
+// option is always in the result, and @Pothos.omit can't reach distinct.
+const { distinct: _questionsDistinct, ...quizQuestionsArgs } = QuizQuestionsFieldArgs;
+const { distinct: _optionsDistinct, ...questionOptionsArgs } = QuizQuestionOptionsFieldArgs;
 
 builder.prismaObject("User", {
   ...UserObject,
@@ -144,6 +157,11 @@ builder.prismaObject("Quiz", {
   fields: (t) => ({
     ...QuizObject.fields(t),
 
+    questions: t.relation("questions", {
+      ...QuizQuestionsFieldObject(t),
+      args: quizQuestionsArgs,
+    }),
+
     // Only the viewer's own attempts, unless they're an admin.
     attempts: t.relation("attempts", {
       ...QuizAttemptsFieldObject(t),
@@ -194,6 +212,11 @@ builder.prismaObject("QuizQuestion", {
       nullable: true,
       resolve: async (parent, _args, ctx) =>
         (await canSeeQuizAnswers(parent.quizId, ctx)) ? parent.explanation : null,
+    }),
+
+    options: t.relation("options", {
+      ...QuizQuestionOptionsFieldObject(t),
+      args: questionOptionsArgs,
     }),
 
     // Only answers from the viewer's own attempts, unless they're an admin.

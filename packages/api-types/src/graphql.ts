@@ -2034,7 +2034,6 @@ export type QuizAttemptsArgs = {
 
 export type QuizQuestionsArgs = {
   cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -3063,7 +3062,6 @@ export type QuizOrderByWithAggregationInput = {
 };
 
 export type QuizOrderByWithRelationInput = {
-  attempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   deletedAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
@@ -3104,7 +3102,6 @@ export type QuizQuestionAnswersArgs = {
 
 export type QuizQuestionOptionsArgs = {
   cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -3293,7 +3290,6 @@ export type QuizQuestionOrderByWithAggregationInput = {
 };
 
 export type QuizQuestionOrderByWithRelationInput = {
-  answers?: InputMaybe<QuizAttemptAnswerOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   explanation?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
@@ -3492,7 +3488,6 @@ export type QuizQuestionWhereInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   explanation?: InputMaybe<StringNullableFilter>;
   id?: InputMaybe<UuidFilter>;
@@ -3509,7 +3504,6 @@ export type QuizQuestionWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   explanation?: InputMaybe<StringNullableFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
@@ -3666,7 +3660,6 @@ export type QuizWhereInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<UuidFilter>;
@@ -3682,7 +3675,6 @@ export type QuizWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
@@ -6326,7 +6318,6 @@ export type UserOrderByWithRelationInput = {
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
   onboardingComplete?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
-  quizAttempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   role?: InputMaybe<SortOrder>;
   streak?: InputMaybe<UserStreakOrderByWithRelationInput>;
   timezone?: InputMaybe<SortOrder>;
@@ -6925,7 +6916,6 @@ export type UserWhereInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
@@ -6950,7 +6940,6 @@ export type UserWhereUniqueInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;

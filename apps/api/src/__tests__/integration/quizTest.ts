@@ -1223,5 +1223,55 @@ describe("Quiz flow", () => {
       expect(quiz.attempts).toEqual([]);
       expect(quiz.questions[0].answers).toEqual([]);
     });
+
+    // distinct: [isCorrect] returns one option per value, so the correct option
+    // is always in the result. @Pothos.omit can't reach distinct, so the
+    // argument is not offered on quiz questions or options at all.
+    it("rejects distinct on quiz questions and options", async () => {
+      const { course } = await seedTwoAttempts();
+
+      for (const selection of [
+        "questions { options(distinct: [isCorrect]) { id } }",
+        "questions(distinct: [canonicalAnswer]) { id }",
+      ]) {
+        const res = await run(
+          `
+            query PublicCourse($id: ID!) {
+              publicCourse(id: $id) { trees { nodes { quiz { ${selection} } } } }
+            }
+          `,
+          { id: course.id },
+          makeUserContext(prisma, REGULAR_USER_ID),
+        );
+        expect(res.errors?.[0].message).toMatch(/distinct/);
+      }
+    });
+
+    // Filtering questions by other learners' graded answers would confirm a
+    // guess ("did anyone get it right by picking A?") without reading them.
+    it("rejects filtering questions by learners' answers", async () => {
+      const { course } = await seedTwoAttempts();
+
+      const res = await run(
+        `
+          query PublicCourse($id: ID!) {
+            publicCourse(id: $id) {
+              trees {
+                nodes {
+                  quiz {
+                    questions(where: { answers: { some: { isCorrect: { equals: true } } } }) {
+                      id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        { id: course.id },
+        makeUserContext(prisma, REGULAR_USER_ID),
+      );
+      expect(res.errors?.[0].message).toMatch(/answers/);
+    });
   });
 });
