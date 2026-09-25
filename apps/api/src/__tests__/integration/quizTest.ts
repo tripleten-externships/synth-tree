@@ -1070,4 +1070,158 @@ describe("Quiz flow", () => {
       ).toBeNull();
     });
   });
+
+  // SYN-125: a learner must not see another learner's attempts, or work out
+  // the correct option from what the schema lets them query.
+  describe("attempt privacy and answer-key probes", () => {
+    // Learner 2 picks the correct option (A) and learner 1 picks a wrong one (B).
+    async function seedTwoAttempts() {
+      const { course, node } = await seedNode();
+      await prisma.course.update({
+        where: { id: course.id },
+        data: { status: "PUBLISHED" },
+      });
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "Probe Quiz", required: true },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: { quizId: quiz.id, type: "SINGLE_CHOICE", prompt: "Pick A" },
+      });
+      const a = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "A", isCorrect: true },
+      });
+      const b = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "B" },
+      });
+
+      for (const [userId, optionId] of [
+        [SECOND_REGULAR_USER_ID, a.id],
+        [REGULAR_USER_ID, b.id],
+      ]) {
+        await prisma.userNodeProgress.create({
+          data: { userId, nodeId: node.id, status: "IN_PROGRESS" },
+        });
+        const res = singleResult(
+          await server.executeOperation(
+            {
+              query: SUBMIT_ATTEMPT,
+              variables: {
+                quizId: quiz.id,
+                answers: [{ questionId: question.id, selectedOptionIds: [optionId] }],
+              },
+            },
+            { contextValue: makeUserContext(prisma, userId) },
+          ),
+        );
+        expect(res.errors).toBeUndefined();
+      }
+
+      return { course, quiz };
+    }
+
+    async function run(
+      query: string,
+      variables: Record<string, unknown>,
+      contextValue: GraphQLContext,
+    ) {
+      return singleResult(await server.executeOperation({ query, variables }, { contextValue }));
+    }
+
+    it("shows a learner only their own attempts on a quiz, and admins all of them", async () => {
+      const { quiz } = await seedTwoAttempts();
+      const QUIZ_ATTEMPTS = `
+        query Quiz($id: ID!) {
+          quiz(id: $id) { attempts { userId } }
+        }
+      `;
+
+      const learner = await run(
+        QUIZ_ATTEMPTS,
+        { id: quiz.id },
+        makeUserContext(prisma, REGULAR_USER_ID),
+      );
+      expect(learner.errors).toBeUndefined();
+      expect(learner.data.quiz.attempts).toEqual([{ userId: REGULAR_USER_ID }]);
+
+      const admin = await run(
+        QUIZ_ATTEMPTS,
+        { id: quiz.id },
+        makeAdminContext(prisma, ADMIN_USER_ID),
+      );
+      expect(admin.errors).toBeUndefined();
+      expect(admin.data.quiz.attempts).toHaveLength(2);
+    });
+
+    it("shows a learner only their own answers on a question, and admins all of them", async () => {
+      const { quiz } = await seedTwoAttempts();
+      const QUESTION_ANSWERS = `
+        query Quiz($id: ID!) {
+          quiz(id: $id) { questions { answers { attempt { userId } } } }
+        }
+      `;
+
+      const learner = await run(
+        QUESTION_ANSWERS,
+        { id: quiz.id },
+        makeUserContext(prisma, REGULAR_USER_ID),
+      );
+      expect(learner.errors).toBeUndefined();
+      expect(learner.data.quiz.questions[0].answers).toEqual([
+        { attempt: { userId: REGULAR_USER_ID } },
+      ]);
+
+      const admin = await run(
+        QUESTION_ANSWERS,
+        { id: quiz.id },
+        makeAdminContext(prisma, ADMIN_USER_ID),
+      );
+      expect(admin.errors).toBeUndefined();
+      expect(admin.data.quiz.questions[0].answers).toHaveLength(2);
+    });
+
+    it("hides another learner's attempts when their User is reached through the course", async () => {
+      const { course } = await seedTwoAttempts();
+
+      const res = await run(
+        `
+          query PublicCourse($id: ID!) {
+            publicCourse(id: $id) {
+              trees { nodes { progresses { user { id quizAttempts { id } } } } }
+            }
+          }
+        `,
+        { id: course.id },
+        makeUserContext(prisma, REGULAR_USER_ID),
+      );
+      expect(res.errors).toBeUndefined();
+
+      const progresses: { user: { id: string; quizAttempts: { id: string }[] } }[] =
+        res.data.publicCourse.trees[0].nodes[0].progresses;
+      const othersAttempts = progresses
+        .filter(({ user }) => user.id !== REGULAR_USER_ID)
+        .flatMap(({ user }) => user.quizAttempts);
+      expect(othersAttempts).toEqual([]);
+    });
+
+    it("returns no attempts or answers to a signed-out viewer", async () => {
+      const { course } = await seedTwoAttempts();
+
+      const res = await run(
+        `
+          query PublicCourse($id: ID!) {
+            publicCourse(id: $id) {
+              trees { nodes { quiz { attempts { id } questions { answers { id } } } } }
+            }
+          }
+        `,
+        { id: course.id },
+        makeUnauthContext(prisma),
+      );
+      expect(res.errors).toBeUndefined();
+
+      const quiz = res.data.publicCourse.trees[0].nodes[0].quiz;
+      expect(quiz.attempts).toEqual([]);
+      expect(quiz.questions[0].answers).toEqual([]);
+    });
+  });
 });
