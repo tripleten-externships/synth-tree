@@ -45,6 +45,7 @@ Prerequisites → SkillNodePrerequisite maps “Node B requires Node A.”
 ### User
 
 - **Key Fields:** `id` (Firebase UID), `email`, optional profile metadata (`name`, `photoUrl`), `role` (`ADMIN` or `USER`).
+- **Onboarding Fields:** `interests` (subjects picked at signup step 2), `dailyGoalMinutes` (5, 15, 30 or 60, picked at step 3) and `onboardingComplete` (set to true when step 3 is saved; the learner app sends users back to signup until it is true).
 - **Relationships:** Authors `Course` records, maintains progress via `UserNodeProgress`, and accumulates quiz `QuizAttempt`s.
 
 ### Course

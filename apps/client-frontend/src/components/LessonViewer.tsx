@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import DOMPurify from "dompurify";
-import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
-import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useCompleteNodeProgressMutation, useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
-import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
-import { Icon } from "@synth-tree/ui";
+import { Button, toast } from "@synth-tree/ui";
+import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
+import { splitLessonPages } from "../lib/splitLessonPages";
+import LessonReadBlocks from "./LessonReadBlocks";
+import QuizRunner from "./QuizRunner";
+import type { QuizForRunner } from "./QuizRunner";
 
 interface LessonViewerProps {
   nodeId: string;
+  quiz?: QuizForRunner | null;
   onNext: () => void;
 }
 
-export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) => {
+export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext }) => {
   const { data, loading, error } = useLessonBlocksByNodeQuery({
     variables: { nodeId },
   });
@@ -20,21 +23,31 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
   const [completeNodeProgress] = useCompleteNodeProgressMutation();
 
+  const [finishing, setFinishing] = useState(false);
   // When set, the lesson is complete and we show the finish screen (SYN-61)
   // instead of navigating away, so the learner sees the XP they just earned.
   const [xpEarned, setXpEarned] = useState<number | null>(null);
 
   async function handleFinish() {
+    setFinishing(true);
     // Best-effort completion. If the node has a required quiz the learner hasn't
-    // passed, the server rejects completion — don't block navigation on that.
+    // passed, the server rejects completion — don't block navigation on that,
+    // but tell the learner why the lesson isn't marked complete.
     try {
       const { data } = await completeNodeProgress({ variables: { nodeId } });
-      // Completed: show the finish screen with the XP just awarded.
+      // Completed: show the finish screen with the XP just awarded (SYN-61)
+      // instead of navigating away.
       setXpEarned(data?.completeNodeProgress?.xpAwarded ?? 0);
     } catch {
       // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
-      // Nothing was awarded, so skip the finish screen and just move on.
+      if (quiz?.required) {
+        toast.info("Pass the quiz to complete this lesson");
+      } else {
+        toast.error("Couldn't save your progress");
+      }
       onNext();
+    } finally {
+      setFinishing(false);
     }
   }
 
@@ -44,6 +57,11 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   useEffect(() => {
     setCurrentPage(0);
   }, [nodeId]);
+
+  // Start each page at the top, like turning a page.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [currentPage]);
 
   // Mark this node as in-progress when the learner opens the lesson.
   // The mutation is idempotent server-side, so revisits / re-renders are safe.
@@ -55,198 +73,92 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
+
+  // Lesson finished: show the XP reward screen (SYN-61).
   if (xpEarned !== null) {
     return (
       <div className="flex flex-col items-center gap-6 py-16 text-center">
         {/* Green success checkmark — pops in on mount */}
         <div className="animate-pop flex h-20 w-20 items-center justify-center rounded-full bg-green-500">
-          <Icon name="check" size={44} strokeWidth={3} className="text-white" />
+          <Check className="h-11 w-11 text-white" strokeWidth={3} />
         </div>
         <h2 className="text-2xl font-bold text-foreground">Lesson complete!</h2>
 
-        {/* XP pill - pops in just after the checkmark. */}
+        {/* XP pill — pops in just after the checkmark. Hidden when nothing was awarded. */}
         {xpEarned > 0 && (
           <span className="animate-pop-delayed inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-lg font-semibold text-primary-foreground">
             +{xpEarned} XP earned
           </span>
         )}
-        <button
-          type="button"
-          className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg"
-          onClick={onNext}
-        >
-          Continue
-        </button>
+
+        <Button onClick={onNext}>Continue</Button>
       </div>
     );
   }
+
+  // Check whether this lesson has a quiz.
+  const hasQuiz = !!quiz;
 
   // A "page" is the run of blocks between PAGE_BREAK markers. No breaks -> one
   // page (renders exactly like before). pageIndex is clamped so a shorter
   // refetch can never leave us pointing past the last page.
   const pages = splitLessonPages(data?.lessonBlocksByNode ?? []);
-  const pageIndex = Math.min(currentPage, pages.length - 1);
-  const currentBlocks = pages[pageIndex];
-  const isLastPage = pageIndex === pages.length - 1;
-
-  const renderHTML = (html: string) => (
-    <div
-      className="leading-relaxed text-foreground"
-      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
-    />
-  );
-
-  const renderImage = (url: string, caption?: string | null) => (
-    <figure className="m-0 text-center">
-      <img
-        src={url}
-        alt={caption || "Lesson image"}
-        className="max-w-full h-auto rounded-lg shadow-md"
-      />
-      {caption && (
-        <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>
-      )}
-    </figure>
-  );
-
-  const renderVideo = (url: string) => (
-    <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden shadow-md">
-      <div className="absolute top-0 left-0 w-full h-full">
-        <ReactPlayer src={url} controls width="100%" height="100%" />
-      </div>
-    </div>
-  );
-
-  const ALLOWED_EMBED_HOSTS = new Set([
-    "youtube.com",
-    "www.youtube.com",
-    "www.youtube-nocookie.com",
-    "youtube-nocookie.com",
-    "vimeo.com",
-    "www.vimeo.com",
-    "player.vimeo.com",
-    "codepen.io",
-    "www.codepen.io",
-  ]);
-
-  const renderEmbed = (embedContent: string) => {
-    let src = "";
-    let title = "Embedded content";
-    let allow: string | undefined;
-
-    if (embedContent.trim().startsWith("<")) {
-      const sanitized = DOMPurify.sanitize(embedContent, {
-        ALLOWED_TAGS: ["iframe"],
-        ALLOWED_ATTR: [
-          "src",
-          "title",
-          "allow",
-          "allowfullscreen",
-          "frameborder",
-          "loading",
-          "referrerpolicy",
-        ],
-      });
-
-      const doc = new DOMParser().parseFromString(sanitized, "text/html");
-      const iframe = doc.querySelector("iframe");
-
-      if (!iframe) return null;
-
-      src = iframe.getAttribute("src") ?? "";
-      title = iframe.getAttribute("title") || "Embedded content";
-      allow = iframe.getAttribute("allow") || undefined;
-    } else {
-      src = embedContent;
-    }
-
-    if (!src) return null;
-
-    let hostname: string;
-
-    try {
-      hostname = new URL(src).hostname;
-    } catch {
-      return null;
-    }
-
-    if (!ALLOWED_EMBED_HOSTS.has(hostname)) {
-      return null;
-    }
-
-    return (
-      <div className="relative w-full pt-[56.25%] rounded-lg overflow-hidden shadow-md">
-        <iframe
-          src={src}
-          title={title}
-          className="absolute top-0 left-0 w-full h-full border-0"
-          allow={allow}
-          allowFullScreen
-        />
-      </div>
-    );
-  };
-
-  const renderBlock = (block: LessonBlock) => {
-    switch (block.type) {
-      case "HTML":
-        return renderHTML(block.html ?? "");
-      case "IMAGE":
-        return renderImage(block.url ?? "", block.caption);
-      case "VIDEO":
-        return renderVideo(block.url ?? "");
-      case "EMBED":
-        return renderEmbed(block.html ?? block.url ?? "");
-      default:
-        return null;
-    }
-  };
+  const totalPages = pages.length + (hasQuiz ? 1 : 0);
+  const pageIndex = Math.min(currentPage, totalPages - 1);
+  const currentBlocks = pages[pageIndex] ?? [];
+  const isQuizPage = hasQuiz && pageIndex === pages.length;
+  const isLastPage = pageIndex === totalPages - 1;
 
   return (
     <div className="flex flex-col gap-8">
       {/* Page progress: one segment per page, filled up to the current page. */}
-      <div>
-        <div className="flex gap-2" aria-label="Lesson progress">
-          {pages.map((_, i) => (
-            <div
-              key={i}
-              className={`h-2 flex-1 rounded-full ${i <= pageIndex ? "bg-primary" : "bg-muted"}`}
-            />
-          ))}
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Page {pageIndex + 1} of {pages.length}
-        </p>
+      <div
+        className="flex gap-1"
+        role="progressbar"
+        aria-label="Lesson progress"
+        aria-valuemin={1}
+        aria-valuemax={totalPages}
+        aria-valuenow={pageIndex + 1}
+      >
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i <= pageIndex ? "bg-primary" : "bg-muted"
+            }`}
+          />
+        ))}
       </div>
 
-      {currentBlocks.map((block) => (
-        <div key={block.id}>{renderBlock(block)}</div>
-      ))}
+      <LessonReadBlocks blocks={currentBlocks} />
 
-      <div className="mt-8 flex items-center justify-between">
-        <button
-          type="button"
-          className="px-6 py-3 font-semibold text-primary rounded-lg cursor-pointer transition-all disabled:cursor-not-allowed disabled:opacity-40"
+      {isQuizPage && quiz && <QuizRunner quiz={quiz} />}
+
+      <div className="mt-4 flex items-center justify-between gap-4 border-t border-border pt-6">
+        <Button
+          variant="outline"
           onClick={() => setCurrentPage(Math.max(0, pageIndex - 1))}
           disabled={pageIndex === 0}
         >
-          Back
-        </button>
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
+          Previous
+        </Button>
 
-        <button
-          type="button"
-          className="px-8 py-3 bg-primary text-primary-foreground font-semibold text-lg rounded-lg cursor-pointer transition-all shadow-lg hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
-          onClick={() => {
-            if (isLastPage) {
-              // Finishing the lesson: complete the node (best-effort) then advance.
-              handleFinish();
-            } else {
-              setCurrentPage(pageIndex + 1);
-            }
-          }}
+        <p className="text-sm tabular-nums text-muted-foreground">
+          {pageIndex + 1} of {totalPages}
+        </p>
+
+        <Button
+          onClick={() => (isLastPage ? handleFinish() : setCurrentPage(pageIndex + 1))}
+          disabled={finishing}
         >
-          {isLastPage ? "Next" : "Next Page"}
-        </button>
+          {isLastPage ? "Finish lesson" : "Continue"}
+          {isLastPage ? (
+            <Check className="ml-1.5 h-4 w-4" />
+          ) : (
+            <ArrowRight className="ml-1.5 h-4 w-4" />
+          )}
+        </Button>
       </div>
     </div>
   );

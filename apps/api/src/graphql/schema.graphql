@@ -1129,7 +1129,7 @@ type Mutation {
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
   createQuiz(nodeId: String!, required: Boolean!, title: String!): Quiz
   createQuizOption(isCorrect: Boolean, questionId: String!, text: String!): QuizOption
-  createQuizQuestion(order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
+  createQuizQuestion(canonicalAnswer: String, order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
   createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
   createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
   createSkillTree(input: CreateSkillTreeInput!): SkillTree
@@ -1152,10 +1152,10 @@ type Mutation {
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
-  updateOnboarding(interests: [String!]!): User
+  updateOnboarding(dailyGoalMinutes: Int, interests: [String!]): User
   updateQuiz(id: ID!, required: Boolean, title: String): Quiz
   updateQuizOption(id: ID!, isCorrect: Boolean, text: String): QuizOption
-  updateQuizQuestion(id: ID!, order: Int, prompt: String): QuizQuestion
+  updateQuizQuestion(canonicalAnswer: String, id: ID!, order: Int, prompt: String): QuizQuestion
   updateSkillNode(id: ID!, input: UpdateSkillNodeInput!): SkillNode
   updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
@@ -1615,6 +1615,7 @@ enum QueryMode {
 }
 
 enum QuestionType {
+  FILL
   MULTIPLE_CHOICE
   OPEN_QUESTION
   SINGLE_CHOICE
@@ -2505,7 +2506,6 @@ input QuizOptionOrderByWithAggregationInput {
   _min: QuizOptionMinOrderByAggregateInput
   createdAt: SortOrder
   id: SortOrder
-  isCorrect: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2514,7 +2514,6 @@ input QuizOptionOrderByWithAggregationInput {
 input QuizOptionOrderByWithRelationInput {
   createdAt: SortOrder
   id: SortOrder
-  isCorrect: SortOrder
   question: QuizQuestionOrderByWithRelationInput
   questionId: SortOrder
   text: SortOrder
@@ -2615,7 +2614,6 @@ input QuizOptionWhereInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: UuidFilter
-  isCorrect: BoolFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2628,7 +2626,6 @@ input QuizOptionWhereUniqueInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: String
-  isCorrect: BoolFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2663,7 +2660,9 @@ input QuizOrderByWithRelationInput {
 
 type QuizQuestion {
   answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  canonicalAnswer: String
   createdAt: DateTime!
+  explanation: String
   id: ID!
   options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
   order: Int!
@@ -2679,7 +2678,9 @@ input QuizQuestionAvgOrderByAggregateInput {
 }
 
 input QuizQuestionCountOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
+  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2690,7 +2691,9 @@ input QuizQuestionCountOrderByAggregateInput {
 
 input QuizQuestionCreateInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
   order: Int
@@ -2701,7 +2704,9 @@ input QuizQuestionCreateInput {
 }
 
 input QuizQuestionCreateManyInput {
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   order: Int
   prompt: String!
@@ -2711,7 +2716,9 @@ input QuizQuestionCreateManyInput {
 }
 
 input QuizQuestionCreateManyQuizInput {
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   order: Int
   prompt: String!
@@ -2759,7 +2766,9 @@ input QuizQuestionCreateOrConnectWithoutQuizInput {
 }
 
 input QuizQuestionCreateWithoutAnswersInput {
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
   order: Int
@@ -2771,7 +2780,9 @@ input QuizQuestionCreateWithoutAnswersInput {
 
 input QuizQuestionCreateWithoutOptionsInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   order: Int
   prompt: String!
@@ -2782,7 +2793,9 @@ input QuizQuestionCreateWithoutOptionsInput {
 
 input QuizQuestionCreateWithoutQuizInput {
   answers: QuizAttemptAnswerCreateNestedManyWithoutQuestionInput
+  canonicalAnswer: String
   createdAt: DateTime
+  explanation: String
   id: String
   options: QuizOptionCreateNestedManyWithoutQuestionInput
   order: Int
@@ -2798,7 +2811,9 @@ input QuizQuestionListRelationFilter {
 }
 
 input QuizQuestionMaxOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
+  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2808,7 +2823,9 @@ input QuizQuestionMaxOrderByAggregateInput {
 }
 
 input QuizQuestionMinOrderByAggregateInput {
+  canonicalAnswer: SortOrder
   createdAt: SortOrder
+  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2828,6 +2845,7 @@ input QuizQuestionOrderByWithAggregationInput {
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
   createdAt: SortOrder
+  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -2839,6 +2857,7 @@ input QuizQuestionOrderByWithAggregationInput {
 input QuizQuestionOrderByWithRelationInput {
   answers: QuizAttemptAnswerOrderByRelationAggregateInput
   createdAt: SortOrder
+  explanation: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
   order: SortOrder
@@ -2850,7 +2869,9 @@ input QuizQuestionOrderByWithRelationInput {
 }
 
 enum QuizQuestionScalarFieldEnum {
+  canonicalAnswer
   createdAt
+  explanation
   id
   order
   prompt
@@ -2868,7 +2889,9 @@ input QuizQuestionScalarWhereInput {
   AND: [QuizQuestionScalarWhereInput!]
   NOT: [QuizQuestionScalarWhereInput!]
   OR: [QuizQuestionScalarWhereInput!]
+  canonicalAnswer: StringNullableFilter
   createdAt: DateTimeFilter
+  explanation: StringNullableFilter
   id: UuidFilter
   order: IntFilter
   prompt: StringFilter
@@ -2881,7 +2904,9 @@ input QuizQuestionScalarWhereWithAggregatesInput {
   AND: [QuizQuestionScalarWhereWithAggregatesInput!]
   NOT: [QuizQuestionScalarWhereWithAggregatesInput!]
   OR: [QuizQuestionScalarWhereWithAggregatesInput!]
+  canonicalAnswer: StringNullableWithAggregatesFilter
   createdAt: DateTimeWithAggregatesFilter
+  explanation: StringNullableWithAggregatesFilter
   id: UuidWithAggregatesFilter
   order: IntWithAggregatesFilter
   prompt: StringWithAggregatesFilter
@@ -2896,7 +2921,9 @@ input QuizQuestionSumOrderByAggregateInput {
 
 input QuizQuestionUpdateInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  explanation: NullableStringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
   order: IntFieldUpdateOperationsInput
@@ -2907,7 +2934,9 @@ input QuizQuestionUpdateInput {
 }
 
 input QuizQuestionUpdateManyMutationInput {
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  explanation: NullableStringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   order: IntFieldUpdateOperationsInput
   prompt: StringFieldUpdateOperationsInput
@@ -2966,7 +2995,9 @@ input QuizQuestionUpdateWithWhereUniqueWithoutQuizInput {
 }
 
 input QuizQuestionUpdateWithoutAnswersInput {
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  explanation: NullableStringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
   order: IntFieldUpdateOperationsInput
@@ -2978,7 +3009,9 @@ input QuizQuestionUpdateWithoutAnswersInput {
 
 input QuizQuestionUpdateWithoutOptionsInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  explanation: NullableStringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   order: IntFieldUpdateOperationsInput
   prompt: StringFieldUpdateOperationsInput
@@ -2989,7 +3022,9 @@ input QuizQuestionUpdateWithoutOptionsInput {
 
 input QuizQuestionUpdateWithoutQuizInput {
   answers: QuizAttemptAnswerUpdateManyWithoutQuestionNestedInput
+  canonicalAnswer: NullableStringFieldUpdateOperationsInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  explanation: NullableStringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   options: QuizOptionUpdateManyWithoutQuestionNestedInput
   order: IntFieldUpdateOperationsInput
@@ -3022,6 +3057,7 @@ input QuizQuestionWhereInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
+  explanation: StringNullableFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3038,6 +3074,7 @@ input QuizQuestionWhereUniqueInput {
   OR: [QuizQuestionWhereInput!]
   answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
+  explanation: StringNullableFilter
   id: String
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -4614,6 +4651,7 @@ input UpdateSkillTreeInput {
 type User {
   coursesAuthored(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
   createdAt: DateTime!
+  dailyGoalMinutes: Int
   dailyQuests(cursor: UserDailyQuestWhereUniqueInput, distinct: [UserDailyQuestScalarFieldEnum!], orderBy: [UserDailyQuestOrderByWithRelationInput!], skip: Int, take: Int, where: UserDailyQuestWhereInput): [UserDailyQuest!]!
   email: String!
   hearts: UserHearts
@@ -4621,30 +4659,40 @@ type User {
   interests: [String!]!
   name: String
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
+  onboardingComplete: Boolean!
   photoUrl: String
   quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
+  timezone: String!
   updatedAt: DateTime!
   xp: UserXp
   xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
 }
 
+input UserAvgOrderByAggregateInput {
+  dailyGoalMinutes: SortOrder
+}
+
 input UserCountOrderByAggregateInput {
   createdAt: SortOrder
+  dailyGoalMinutes: SortOrder
   email: SortOrder
   id: SortOrder
   interests: SortOrder
   name: SortOrder
+  onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
 input UserCreateInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4652,10 +4700,12 @@ input UserCreateInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4663,12 +4713,15 @@ input UserCreateInput {
 
 input UserCreateManyInput {
   createdAt: DateTime
+  dailyGoalMinutes: Int
   email: String!
   id: String!
   interests: [String!]
   name: String
+  onboardingComplete: Boolean
   photoUrl: String
   role: Role
+  timezone: String
   updatedAt: DateTime
 }
 
@@ -4762,6 +4815,7 @@ input UserCreateOrConnectWithoutXpInput {
 
 input UserCreateWithoutCoursesAuthoredInput {
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4769,10 +4823,12 @@ input UserCreateWithoutCoursesAuthoredInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4781,16 +4837,19 @@ input UserCreateWithoutCoursesAuthoredInput {
 input UserCreateWithoutDailyQuestsInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4799,16 +4858,19 @@ input UserCreateWithoutDailyQuestsInput {
 input UserCreateWithoutHeartsInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   id: String!
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4817,16 +4879,19 @@ input UserCreateWithoutHeartsInput {
 input UserCreateWithoutNodeProgressInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
   id: String!
   interests: [String!]
   name: String
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4835,6 +4900,7 @@ input UserCreateWithoutNodeProgressInput {
 input UserCreateWithoutQuizAttemptsInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4842,9 +4908,11 @@ input UserCreateWithoutQuizAttemptsInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4853,6 +4921,7 @@ input UserCreateWithoutQuizAttemptsInput {
 input UserCreateWithoutStreakInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4860,9 +4929,11 @@ input UserCreateWithoutStreakInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4871,6 +4942,7 @@ input UserCreateWithoutStreakInput {
 input UserCreateWithoutXpEventsInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4878,10 +4950,12 @@ input UserCreateWithoutXpEventsInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
 }
@@ -4889,6 +4963,7 @@ input UserCreateWithoutXpEventsInput {
 input UserCreateWithoutXpInput {
   coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
   createdAt: DateTime
+  dailyGoalMinutes: Int
   dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
   email: String!
   hearts: UserHeartsCreateNestedOneWithoutUserInput
@@ -4896,10 +4971,12 @@ input UserCreateWithoutXpInput {
   interests: [String!]
   name: String
   nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   streak: UserStreakCreateNestedOneWithoutUserInput
+  timezone: String
   updatedAt: DateTime
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -5319,21 +5396,27 @@ input UserHeartsWhereUniqueInput {
 
 input UserMaxOrderByAggregateInput {
   createdAt: SortOrder
+  dailyGoalMinutes: SortOrder
   email: SortOrder
   id: SortOrder
   name: SortOrder
+  onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
 input UserMinOrderByAggregateInput {
   createdAt: SortOrder
+  dailyGoalMinutes: SortOrder
   email: SortOrder
   id: SortOrder
   name: SortOrder
+  onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
@@ -5673,22 +5756,28 @@ input UserNodeProgressWhereUniqueInput {
 }
 
 input UserOrderByWithAggregationInput {
+  _avg: UserAvgOrderByAggregateInput
   _count: UserCountOrderByAggregateInput
   _max: UserMaxOrderByAggregateInput
   _min: UserMinOrderByAggregateInput
+  _sum: UserSumOrderByAggregateInput
   createdAt: SortOrder
+  dailyGoalMinutes: SortOrder
   email: SortOrder
   id: SortOrder
   interests: SortOrder
   name: SortOrder
+  onboardingComplete: SortOrder
   photoUrl: SortOrder
   role: SortOrder
+  timezone: SortOrder
   updatedAt: SortOrder
 }
 
 input UserOrderByWithRelationInput {
   coursesAuthored: CourseOrderByRelationAggregateInput
   createdAt: SortOrder
+  dailyGoalMinutes: SortOrder
   dailyQuests: UserDailyQuestOrderByRelationAggregateInput
   email: SortOrder
   hearts: UserHeartsOrderByWithRelationInput
@@ -5696,10 +5785,12 @@ input UserOrderByWithRelationInput {
   interests: SortOrder
   name: SortOrder
   nodeProgress: UserNodeProgressOrderByRelationAggregateInput
+  onboardingComplete: SortOrder
   photoUrl: SortOrder
   quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
   streak: UserStreakOrderByWithRelationInput
+  timezone: SortOrder
   updatedAt: SortOrder
   xp: UserXpOrderByWithRelationInput
   xpEvents: XpEventOrderByRelationAggregateInput
@@ -5707,12 +5798,15 @@ input UserOrderByWithRelationInput {
 
 enum UserScalarFieldEnum {
   createdAt
+  dailyGoalMinutes
   email
   id
   interests
   name
+  onboardingComplete
   photoUrl
   role
+  timezone
   updatedAt
 }
 
@@ -5726,12 +5820,15 @@ input UserScalarWhereWithAggregatesInput {
   NOT: [UserScalarWhereWithAggregatesInput!]
   OR: [UserScalarWhereWithAggregatesInput!]
   createdAt: DateTimeWithAggregatesFilter
+  dailyGoalMinutes: IntNullableWithAggregatesFilter
   email: StringWithAggregatesFilter
   id: StringWithAggregatesFilter
   interests: StringNullableListFilter
   name: StringNullableWithAggregatesFilter
+  onboardingComplete: BoolWithAggregatesFilter
   photoUrl: StringNullableWithAggregatesFilter
   role: EnumRoleWithAggregatesFilter
+  timezone: StringWithAggregatesFilter
   updatedAt: DateTimeWithAggregatesFilter
 }
 
@@ -5909,9 +6006,14 @@ input UserStreakWhereUniqueInput {
   userId: String
 }
 
+input UserSumOrderByAggregateInput {
+  dailyGoalMinutes: SortOrder
+}
+
 input UserUpdateInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -5919,10 +6021,12 @@ input UserUpdateInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -5930,12 +6034,15 @@ input UserUpdateInput {
 
 input UserUpdateManyMutationInput {
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
 
@@ -6045,6 +6152,7 @@ input UserUpdateToOneWithWhereWithoutXpInput {
 
 input UserUpdateWithoutCoursesAuthoredInput {
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -6052,10 +6160,12 @@ input UserUpdateWithoutCoursesAuthoredInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6064,16 +6174,19 @@ input UserUpdateWithoutCoursesAuthoredInput {
 input UserUpdateWithoutDailyQuestsInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6082,16 +6195,19 @@ input UserUpdateWithoutDailyQuestsInput {
 input UserUpdateWithoutHeartsInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6100,16 +6216,19 @@ input UserUpdateWithoutHeartsInput {
 input UserUpdateWithoutNodeProgressInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
   id: StringFieldUpdateOperationsInput
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6118,6 +6237,7 @@ input UserUpdateWithoutNodeProgressInput {
 input UserUpdateWithoutQuizAttemptsInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -6125,9 +6245,11 @@ input UserUpdateWithoutQuizAttemptsInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6136,6 +6258,7 @@ input UserUpdateWithoutQuizAttemptsInput {
 input UserUpdateWithoutStreakInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -6143,9 +6266,11 @@ input UserUpdateWithoutStreakInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6154,6 +6279,7 @@ input UserUpdateWithoutStreakInput {
 input UserUpdateWithoutXpEventsInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -6161,10 +6287,12 @@ input UserUpdateWithoutXpEventsInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
 }
@@ -6172,6 +6300,7 @@ input UserUpdateWithoutXpEventsInput {
 input UserUpdateWithoutXpInput {
   coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
   createdAt: DateTimeFieldUpdateOperationsInput
+  dailyGoalMinutes: NullableIntFieldUpdateOperationsInput
   dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
   email: StringFieldUpdateOperationsInput
   hearts: UserHeartsUpdateOneWithoutUserNestedInput
@@ -6179,10 +6308,12 @@ input UserUpdateWithoutXpInput {
   interests: [String!]
   name: NullableStringFieldUpdateOperationsInput
   nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  onboardingComplete: BoolFieldUpdateOperationsInput
   photoUrl: NullableStringFieldUpdateOperationsInput
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   streak: UserStreakUpdateOneWithoutUserNestedInput
+  timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6246,6 +6377,7 @@ input UserWhereInput {
   OR: [UserWhereInput!]
   coursesAuthored: CourseListRelationFilter
   createdAt: DateTimeFilter
+  dailyGoalMinutes: IntNullableFilter
   dailyQuests: UserDailyQuestListRelationFilter
   email: StringFilter
   hearts: UserHeartsWhereInput
@@ -6253,10 +6385,12 @@ input UserWhereInput {
   interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
+  onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
+  timezone: StringFilter
   updatedAt: DateTimeFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter
@@ -6268,6 +6402,7 @@ input UserWhereUniqueInput {
   OR: [UserWhereInput!]
   coursesAuthored: CourseListRelationFilter
   createdAt: DateTimeFilter
+  dailyGoalMinutes: IntNullableFilter
   dailyQuests: UserDailyQuestListRelationFilter
   email: String
   hearts: UserHeartsWhereInput
@@ -6275,10 +6410,12 @@ input UserWhereUniqueInput {
   interests: StringNullableListFilter
   name: StringNullableFilter
   nodeProgress: UserNodeProgressListRelationFilter
+  onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
   quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
+  timezone: StringFilter
   updatedAt: DateTimeFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter

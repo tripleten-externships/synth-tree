@@ -73,7 +73,14 @@ async function main() {
   await prisma.user.upsert({
     where: { id: uid },
     update: { email: ADMIN_EMAIL, role: Role.ADMIN },
-    create: { id: uid, email: ADMIN_EMAIL, name: ADMIN_NAME, role: Role.ADMIN },
+    // Seeded accounts skip signup, so mark onboarding done (SYN-47).
+    create: {
+      id: uid,
+      email: ADMIN_EMAIL,
+      name: ADMIN_NAME,
+      role: Role.ADMIN,
+      onboardingComplete: true,
+    },
   });
   console.log(`✅ Prod admin ready: ${ADMIN_EMAIL} (ADMIN). Sign in with Google.`);
 }

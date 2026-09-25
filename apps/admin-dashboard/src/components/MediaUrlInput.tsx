@@ -20,7 +20,7 @@ interface VideoProvider {
 const IMAGE_EXTENSIONS = /\.(jpeg|jpg|png|gif|webp)(\?.*)?$/i;
 
 
-const YOUTUBE_REGEX = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+const YOUTUBE_REGEX = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/;
 
 const VIMEO_REGEX = /(?:vimeo\.com\/)(\d+)/;
 

@@ -26,3 +26,79 @@
 .animate-pop-delayed {
   animation: pop 400ms ease-out 200ms both;
 }
+
+/* Read-mode lesson text (SYN-32). Lesson HTML is authored as plain
+   headings / paragraphs / lists; Tailwind's preflight strips their default
+   styles, so restore readable typography here using theme tokens. */
+@layer components {
+  .lesson-prose {
+    max-width: 70ch;
+    color: hsl(var(--foreground));
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .lesson-prose > * + * {
+    margin-top: 1em;
+  }
+  .lesson-prose h2 {
+    margin-top: 1.6em;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .lesson-prose h3 {
+    margin-top: 1.4em;
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .lesson-prose > :first-child {
+    margin-top: 0;
+  }
+  .lesson-prose ul,
+  .lesson-prose ol {
+    padding-left: 1.5em;
+  }
+  .lesson-prose ul {
+    list-style: disc;
+  }
+  .lesson-prose ol {
+    list-style: decimal;
+  }
+  .lesson-prose li + li {
+    margin-top: 0.3em;
+  }
+  .lesson-prose li::marker {
+    color: hsl(var(--muted-foreground));
+  }
+  .lesson-prose strong {
+    font-weight: 600;
+  }
+  .lesson-prose a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .lesson-prose code {
+    border-radius: 0.3em;
+    background: hsl(var(--muted));
+    padding: 0.1em 0.35em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+  }
+  /* Callouts: authored as <blockquote> or <aside>. */
+  .lesson-prose blockquote,
+  .lesson-prose aside {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    border-radius: 0.875rem;
+    background: hsl(var(--accent));
+    padding: 1rem 1.25rem;
+    color: hsl(var(--accent-foreground));
+    font-size: 0.925rem;
+    line-height: 1.55;
+  }
+  .lesson-prose hr {
+    border-color: hsl(var(--border));
+  }
+}
