@@ -58,6 +58,12 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
+export type CompleteNodeProgressPayload = {
+  __typename?: 'CompleteNodeProgressPayload';
+  progress?: Maybe<UserNodeProgress>;
+  xpAwarded?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ContentType =
   | 'EMBED'
   | 'HTML'
@@ -1147,7 +1153,7 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNodeProgress?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<CompleteNodeProgressPayload>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -7572,7 +7578,7 @@ export type CompleteNodeProgressMutationVariables = Exact<{
 }>;
 
 
-export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'CompleteNodeProgressPayload', xpAwarded?: number | null, progress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -8298,8 +8304,11 @@ export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLe
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
-    id
-    status
+    progress {
+      id
+      status
+    }
+    xpAwarded
   }
 }
     `;

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
+import { useCompleteNodeProgressMutation, useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { Button, toast } from "@synth-tree/ui";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
-import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
 import { splitLessonPages } from "../lib/splitLessonPages";
 import LessonReadBlocks from "./LessonReadBlocks";
 import QuizRunner from "./QuizRunner";
@@ -22,9 +21,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
-  const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS);
+  const [completeNodeProgress] = useCompleteNodeProgressMutation();
 
   const [finishing, setFinishing] = useState(false);
+  // When set, the lesson is complete and we show the finish screen (SYN-61)
+  // instead of navigating away, so the learner sees the XP they just earned.
+  const [xpEarned, setXpEarned] = useState<number | null>(null);
 
   async function handleFinish() {
     setFinishing(true);
@@ -32,7 +34,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
     // passed, the server rejects completion — don't block navigation on that,
     // but tell the learner why the lesson isn't marked complete.
     try {
-      await completeNodeProgress({ variables: { nodeId } });
+      const { data } = await completeNodeProgress({ variables: { nodeId } });
+      // Completed: show the finish screen with the XP just awarded (SYN-61)
+      // instead of navigating away.
+      setXpEarned(data?.completeNodeProgress?.xpAwarded ?? 0);
     } catch {
       // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
       if (quiz?.required) {
@@ -40,11 +45,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
       } else {
         toast.error("Couldn't save your progress");
       }
+      onNext();
     } finally {
       setFinishing(false);
     }
-
-    return onNext();
   }
 
   // Which lesson page is visible. Reset when the node changes so navigating
@@ -69,6 +73,28 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
 
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
+
+  // Lesson finished: show the XP reward screen (SYN-61).
+  if (xpEarned !== null) {
+    return (
+      <div className="flex flex-col items-center gap-6 py-16 text-center">
+        {/* Green success checkmark — pops in on mount */}
+        <div className="animate-pop flex h-20 w-20 items-center justify-center rounded-full bg-green-500">
+          <Check className="h-11 w-11 text-white" strokeWidth={3} />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">Lesson complete!</h2>
+
+        {/* XP pill — pops in just after the checkmark. Hidden when nothing was awarded. */}
+        {xpEarned > 0 && (
+          <span className="animate-pop-delayed inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-lg font-semibold text-primary-foreground">
+            +{xpEarned} XP earned
+          </span>
+        )}
+
+        <Button onClick={onNext}>Continue</Button>
+      </div>
+    );
+  }
 
   // Check whether this lesson has a quiz.
   const hasQuiz = !!quiz;
