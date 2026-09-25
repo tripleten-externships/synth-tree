@@ -15,6 +15,7 @@ import { auth } from "../../lib/firebase";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { SYNC_CURRENT_USER } from "../../graphql/queries/currentUser";
 import { UPDATE_ONBOARDING, COMPLETE_ONBOARDING } from "../../graphql/mutations/updateOnboarding";
+import { DEFAULT_DAILY_GOAL_MINUTES } from "../../lib/xpWeek";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -517,9 +518,6 @@ const DAILY_GOALS = [
   { minutes: 60, label: "Intense", detail: "1 h / day" },
 ] as const;
 
-// Preselect the recommended option so "Start learning" works in one click.
-const DEFAULT_DAILY_GOAL = 15;
-
 function Step3DailyGoal({
   onFinish,
   saveDailyGoal,
@@ -638,7 +636,9 @@ export default function SignUpPage() {
   const { isAuthenticated, loading: authLoading } = useAuthContext();
   // Owned here (not in the step components) so selections survive step navigation.
   const [interests, setInterests] = useState<string[]>([]);
-  const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
+  // Preselect the recommended option so "Start learning" works in one click.
+  // The home page's goal card falls back to the same default.
+  const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL_MINUTES);
 
   const rawStep = parseInt(searchParams.get("step") ?? "1", 10);
   const step: Step = (VALID_STEPS.has(rawStep) ? rawStep : 1) as Step;
