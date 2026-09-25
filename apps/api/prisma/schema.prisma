@@ -81,6 +81,9 @@ model User {
 
   // Learning:
   nodeProgress UserNodeProgress[] // 1 row per (user,node)
+  // Kept out of where/orderBy: a filter on attempts would let anyone check
+  // other learners' graded answers without reading them (SYN-125).
+  /// @Pothos.omit(where, orderBy)
   quizAttempts QuizAttempt[] // all attempts across quizzes
   xp           UserXp?
   streak       UserStreak?
@@ -233,6 +236,9 @@ model Quiz {
 
   node      SkillNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   questions QuizQuestion[]
+  // Kept out of where/orderBy: a filter on attempts would let anyone check
+  // other learners' graded answers without reading them (SYN-125).
+  /// @Pothos.omit(where, orderBy)
   attempts  QuizAttempt[]
 }
 
@@ -258,6 +264,9 @@ model QuizQuestion {
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION
+  // Kept out of where/orderBy: a filter on answers would let anyone check
+  // other learners' graded answers without reading them (SYN-125).
+  /// @Pothos.omit(where, orderBy)
   answers QuizAttemptAnswer[] // backrefs for per-attempt answers
 
   @@index([quizId])
