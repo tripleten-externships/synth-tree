@@ -98,10 +98,14 @@ const StatusBadge = ({ status }: { status: CourseStatus }) => {
   return (
     <span
       className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-        isPublished ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+        isPublished ? "bg-success/15 text-foreground" : "bg-muted text-muted-foreground"
       }`}
     >
-      {isPublished ? <Eye className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+      {isPublished ? (
+        <Eye className="w-3 h-3 text-success" />
+      ) : (
+        <TrendingDown className="w-3 h-3" />
+      )}
       {isPublished ? "Published" : "Draft"}
     </span>
   );
@@ -109,31 +113,31 @@ const StatusBadge = ({ status }: { status: CourseStatus }) => {
 
 const HexIcon = ({ Icon = FlaskConical }: { Icon?: LucideIcon }) => (
   <div
-    className="w-16 h-16 bg-blue-500 flex items-center justify-center mb-4"
+    className="w-16 h-16 bg-primary flex items-center justify-center mb-4"
     style={{
       clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
     }}
   >
-    <Icon className="w-8 h-8 text-white" />
+    <Icon className="w-8 h-8 text-primary-foreground" />
   </div>
 );
 
 const SkeletonCard = () => (
-  <div className="border border-gray-200 rounded-xl p-6 animate-pulse">
-    <div className="w-16 h-16 bg-gray-200 rounded-lg mb-4" />
-    <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
-    <div className="h-4 bg-gray-200 rounded w-full mb-1" />
-    <div className="h-4 bg-gray-200 rounded w-1/3 mt-3" />
+  <div className="border border-border bg-card rounded-xl p-6 animate-pulse">
+    <div className="w-16 h-16 bg-muted rounded-lg mb-4" />
+    <div className="h-5 bg-muted rounded w-3/4 mb-2" />
+    <div className="h-4 bg-muted rounded w-full mb-1" />
+    <div className="h-4 bg-muted rounded w-1/3 mt-3" />
   </div>
 );
 
 const NewCourseCard = ({ onClick }: { onClick: () => void }) => (
   <button
     onClick={onClick}
-    className="border border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center hover:shadow-md transition-shadow min-h-[180px] w-full"
+    className="border border-border bg-card rounded-xl p-6 flex flex-col items-center justify-center hover:shadow-md transition-shadow min-h-[180px] w-full"
   >
-    <Plus className="w-6 h-6 mb-2 text-gray-500" />
-    <span className="text-base font-medium text-gray-700">New course</span>
+    <Plus className="w-6 h-6 mb-2 text-muted-foreground" />
+    <span className="text-base font-medium text-foreground">New course</span>
   </button>
 );
 
@@ -149,14 +153,14 @@ type CourseCardProps = {
 
 const CourseCard = ({ course, onDelete, onPublish, onEdit, Icon }: CourseCardProps) => (
   <div
-    className="border border-gray-200 rounded-xl p-6 relative hover:shadow-md transition-shadow cursor-pointer"
+    className="border border-border bg-card rounded-xl p-6 relative hover:shadow-md transition-shadow cursor-pointer"
     onClick={() => onEdit(course.id)}
   >
     <div className="absolute top-4 right-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="p-1 rounded hover:bg-gray-100" onClick={(e) => e.stopPropagation()}>
-            <MoreHorizontal className="w-5 h-5 text-gray-500" />
+          <button className="p-1 rounded hover:bg-muted" onClick={(e) => e.stopPropagation()}>
+            <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -191,8 +195,8 @@ const CourseCard = ({ course, onDelete, onPublish, onEdit, Icon }: CourseCardPro
 
     <HexIcon Icon={Icon} />
     <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
-    <p className="text-xs text-gray-400 mb-1">by {course.author.name ?? "Unknown"}</p>
-    <p className="text-xs text-gray-400 mb-3">edited {relativeTime(course.updatedAt)}</p>
+    <p className="text-xs text-muted-foreground mb-1">by {course.author.name ?? "Unknown"}</p>
+    <p className="text-xs text-muted-foreground mb-3">edited {relativeTime(course.updatedAt)}</p>
 
     <StatusBadge status={course.status} />
   </div>
@@ -272,7 +276,7 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
           <div>
             <label className="text-sm font-medium block mb-1">
-              Title <span className="text-red-500">*</span>
+              Title <span className="text-destructive">*</span>
             </label>
             <Input
               type="text"
@@ -407,7 +411,7 @@ const CoursesList = () => {
         <h1 className="text-3xl font-bold">Courses</h1>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg"
         >
           <Plus className="w-4 h-4" />
           Create Course
@@ -424,8 +428,8 @@ const CoursesList = () => {
               onClick={() => setStatusFilter(opt.value)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 statusFilter === opt.value
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               }`}
             >
               {opt.label}
@@ -438,8 +442,8 @@ const CoursesList = () => {
             onClick={() => setAndPersistView("grid")}
             className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
               viewMode === "grid"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
           >
             Grid
@@ -448,8 +452,8 @@ const CoursesList = () => {
             onClick={() => setAndPersistView("list")}
             className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
               viewMode === "list"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             }`}
           >
             List
@@ -459,7 +463,7 @@ const CoursesList = () => {
 
       {/* ── Error state ── */}
       {error && (
-        <div className="text-red-600 bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div className="text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-4 mb-6">
           Failed to load courses. Please try again.
         </div>
       )}
@@ -479,11 +483,13 @@ const CoursesList = () => {
       {/* ── Empty state ── */}
       {isEmpty && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-gray-500 text-lg mb-2">No courses yet</p>
-          <p className="text-gray-400 text-sm mb-6">Get started by creating your first course.</p>
+          <p className="text-muted-foreground text-lg mb-2">No courses yet</p>
+          <p className="text-muted-foreground text-sm mb-6">
+            Get started by creating your first course.
+          </p>
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg"
           >
             <Plus className="w-4 h-4" />
             Create First Course
@@ -508,9 +514,9 @@ const CoursesList = () => {
               <NewCourseCard onClick={() => setModalOpen(true)} />
             </div>
           ) : (
-            <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+            <div className="overflow-x-auto bg-card rounded-lg border border-border">
               <table className="min-w-full text-left text-sm">
-                <thead className="bg-gray-50 text-gray-700">
+                <thead className="bg-muted text-muted-foreground">
                   <tr>
                     <th className="px-4 py-3 font-medium">Course</th>
                     <th className="px-4 py-3 font-medium">Status</th>
@@ -525,8 +531,8 @@ const CoursesList = () => {
                   {courses.map((course) => (
                     <tr key={course.id} className="border-t">
                       <td className="px-4 py-3 align-top">
-                        <div className="font-medium text-gray-900">{course.title}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="font-medium text-foreground">{course.title}</div>
+                        <div className="text-xs text-muted-foreground">
                           by {course.author.name ?? "Unknown"}
                         </div>
                       </td>
@@ -541,19 +547,19 @@ const CoursesList = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => navigate(`/courses/${course.id}/edit`)}
-                            className="text-sm text-blue-600"
+                            className="text-sm text-primary"
                           >
                             Open
                           </button>
                           <button
                             onClick={() => handlePublish(course.id)}
-                            className="text-sm text-gray-600"
+                            className="text-sm text-muted-foreground hover:text-foreground"
                           >
                             {course.status === "PUBLISHED" ? "Unpublish" : "Publish"}
                           </button>
                           <button
                             onClick={() => handleDelete(course.id)}
-                            className="text-sm text-red-600"
+                            className="text-sm text-destructive"
                           >
                             Delete
                           </button>
@@ -581,20 +587,20 @@ const CoursesList = () => {
           <DialogHeader>
             <DialogTitle>Delete course</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Delete course <span className="font-semibold">"{deleteTargetTitle}"</span>? Learners
             will lose access. This can be undone by an admin.
           </p>
           <DialogFooter className="mt-4">
             <button
               onClick={() => setDeleteTargetId(null)}
-              className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50"
+              className="px-4 py-2 text-sm rounded-lg border border-border hover:bg-muted"
             >
               Cancel
             </button>
             <button
               onClick={confirmDelete}
-              className="px-4 py-2 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white"
+              className="px-4 py-2 text-sm rounded-lg bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               Delete
             </button>
