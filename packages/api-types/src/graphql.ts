@@ -7611,6 +7611,13 @@ export type SyncCurrentUserMutationVariables = Exact<{
 
 export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
 
+export type HomeXpWidgetsQueryVariables = Exact<{
+  since: Scalars['DateTime']['input'];
+}>;
+
+
+export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone: string, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
+
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
 }>;
@@ -8505,6 +8512,51 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const HomeXpWidgetsDocument = gql`
+    query HomeXpWidgets($since: DateTime!) {
+  currentUser {
+    id
+    dailyGoalMinutes
+    timezone
+    streak {
+      currentDays
+      lastActive
+    }
+    xpEvents(where: {createdAt: {gte: $since}}) {
+      id
+      amount
+      createdAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useHomeXpWidgetsQuery__
+ *
+ * To run a query within a React component, call `useHomeXpWidgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeXpWidgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHomeXpWidgetsQuery({
+ *   variables: {
+ *      since: // value for 'since'
+ *   },
+ * });
+ */
+export function useHomeXpWidgetsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables> & ({ variables: HomeXpWidgetsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+      }
+export function useHomeXpWidgetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+        }
+export type HomeXpWidgetsQueryHookResult = ReturnType<typeof useHomeXpWidgetsQuery>;
+export type HomeXpWidgetsLazyQueryHookResult = ReturnType<typeof useHomeXpWidgetsLazyQuery>;
 export const LearnerCourseTreeDocument = gql`
     query LearnerCourseTree($courseId: ID!) {
   courseForLearner(id: $courseId) {
