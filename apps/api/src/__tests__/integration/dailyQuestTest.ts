@@ -40,8 +40,11 @@ const MY_DAILY_QUESTS = `
 const COMPLETE_NODE = `
   mutation CompleteNodeProgress($nodeId: ID!) {
     completeNodeProgress(nodeId: $nodeId) {
-      id
-      status
+      progress {
+        id
+        status
+      }
+      xpAwarded
     }
   }
 `;
@@ -97,7 +100,7 @@ describe("Daily quests", () => {
         ),
       );
       expect(res.errors).toBeUndefined();
-      expect(res.data.completeNodeProgress.status).toBe("COMPLETED");
+      expect(res.data.completeNodeProgress.progress.status).toBe("COMPLETED");
     }
 
     const lessonQuest = await prisma.userDailyQuest.findFirst({
@@ -180,6 +183,6 @@ describe("Daily quests", () => {
     );
 
     expect(res.errors).toBeUndefined();
-    expect(res.data.completeNodeProgress.status).toBe("COMPLETED");
+    expect(res.data.completeNodeProgress.progress.status).toBe("COMPLETED");
   });
 });
