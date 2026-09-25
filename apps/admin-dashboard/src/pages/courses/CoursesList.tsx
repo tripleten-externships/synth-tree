@@ -219,24 +219,23 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   // Manually typed since this file uses the raw gql + useMutation
   // pattern (not a codegen-generated hook) — needed for onCompleted's
   // data to be typed.
-  const [createCourse, { loading }] = useMutation<{ createCourse: { id: string; title: string } | null }>(
-    CREATE_COURSE,
-    {
-      refetchQueries: [{ query: AdminGetAllCoursesDocument }],
-      onCompleted: (data) => {
-        const created = data.createCourse;
-        if (!created) return;
-        resetForm();
-        onCreated();
-        // SYN-62: navigate to the new course's builder page on success
-        navigate(`/courses/${created.id}/edit`);
-      },
-      onError: (err) => {
-        // Surface the failure and keep the modal open so the user can retry.
-        toast.error("Couldn't create course", { description: err.message });
-      },
+  const [createCourse, { loading }] = useMutation<{
+    createCourse: { id: string; title: string } | null;
+  }>(CREATE_COURSE, {
+    refetchQueries: [{ query: AdminGetAllCoursesDocument }],
+    onCompleted: (data) => {
+      const created = data.createCourse;
+      if (!created) return;
+      resetForm();
+      onCreated();
+      // SYN-62: navigate to the new course's builder page on success
+      navigate(`/courses/${created.id}/edit`);
     },
-  );
+    onError: (err) => {
+      // Surface the failure and keep the modal open so the user can retry.
+      toast.error("Couldn't create course", { description: err.message });
+    },
+  });
 
   const handleClose = () => {
     resetForm();
@@ -259,7 +258,12 @@ const CreateCourseModal = ({ open, onClose, onCreated }: CreateCourseModalProps)
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) handleClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) handleClose();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Course</DialogTitle>

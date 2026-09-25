@@ -22,10 +22,18 @@ export const SkeletonList = () => (
             <td className="px-4 py-3">
               <div className="h-6 w-24 rounded-full bg-gray-200" />
             </td>
-            <td className="px-4 py-3"><div className="h-4 w-8 rounded bg-gray-200" /></td>
-            <td className="px-4 py-3"><div className="h-4 w-8 rounded bg-gray-200" /></td>
-            <td className="px-4 py-3"><div className="h-4 w-8 rounded bg-gray-200" /></td>
-            <td className="px-4 py-3"><div className="h-4 w-8 rounded bg-gray-200" /></td>
+            <td className="px-4 py-3">
+              <div className="h-4 w-8 rounded bg-gray-200" />
+            </td>
+            <td className="px-4 py-3">
+              <div className="h-4 w-8 rounded bg-gray-200" />
+            </td>
+            <td className="px-4 py-3">
+              <div className="h-4 w-8 rounded bg-gray-200" />
+            </td>
+            <td className="px-4 py-3">
+              <div className="h-4 w-8 rounded bg-gray-200" />
+            </td>
             <td className="px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="h-4 w-10 rounded bg-gray-200" />
