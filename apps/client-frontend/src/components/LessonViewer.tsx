@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
 import ReactPlayer from "react-player";
 import { useMutation } from "@apollo/client/react";
-import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
-import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
+import { useCompleteNodeProgressMutation, useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { splitLessonPages, type LessonBlock } from "../lib/splitLessonPages";
+import { Icon } from "@synth-tree/ui";
 
 interface LessonViewerProps {
   nodeId: string;
@@ -18,18 +18,24 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
-  const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS);
+  const [completeNodeProgress] = useCompleteNodeProgressMutation();
 
-  async function handleNext() {
+  // When set, the lesson is complete and we show the finish screen (SYN-61)
+  // instead of navigating away, so the learner sees the XP they just earned.
+  const [xpEarned, setXpEarned] = useState<number | null>(null);
+
+  async function handleFinish() {
     // Best-effort completion. If the node has a required quiz the learner hasn't
     // passed, the server rejects completion — don't block navigation on that.
     try {
-      await completeNodeProgress({ variables: { nodeId } });
+      const { data } = await completeNodeProgress({ variables: { nodeId } });
+      // Completed: show the finish screen with the XP just awarded.
+      setXpEarned(data?.completeNodeProgress?.xpAwarded ?? 0);
     } catch {
       // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
+      // Nothing was awarded, so skip the finish screen and just move on.
+      onNext();
     }
-
-    return onNext();
   }
 
   // Which lesson page is visible. Reset when the node changes so navigating
@@ -49,6 +55,31 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
 
   if (loading) return <div>Loading lesson...</div>;
   if (error) return <div>Error loading lesson.</div>;
+  if (xpEarned !== null) {
+    return (
+      <div className="flex flex-col items-center gap-6 py-16 text-center">
+        {/* Green success checkmark — pops in on mount */}
+        <div className="animate-pop flex h-20 w-20 items-center justify-center rounded-full bg-green-500">
+          <Icon name="check" size={44} strokeWidth={3} className="text-white" />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">Lesson complete!</h2>
+
+        {/* XP pill - pops in just after the checkmark. */}
+        {xpEarned > 0 && (
+          <span className="animate-pop-delayed inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-lg font-semibold text-primary-foreground">
+            +{xpEarned} XP earned
+          </span>
+        )}
+        <button
+          type="button"
+          className="px-8 py-3 bg-primary text-primary-foreground font-semibold rounded-lg"
+          onClick={onNext}
+        >
+          Continue
+        </button>
+      </div>
+    );
+  }
 
   // A "page" is the run of blocks between PAGE_BREAK markers. No breaks -> one
   // page (renders exactly like before). pageIndex is clamped so a shorter
@@ -72,7 +103,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
         alt={caption || "Lesson image"}
         className="max-w-full h-auto rounded-lg shadow-md"
       />
-      {caption && <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>}
+      {caption && (
+        <figcaption className="mt-3 text-sm text-muted-foreground italic">{caption}</figcaption>
+      )}
     </figure>
   );
 
@@ -177,9 +210,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
           {pages.map((_, i) => (
             <div
               key={i}
-              className={`h-2 flex-1 rounded-full ${
-                i <= pageIndex ? "bg-primary" : "bg-muted"
-              }`}
+              className={`h-2 flex-1 rounded-full ${i <= pageIndex ? "bg-primary" : "bg-muted"}`}
             />
           ))}
         </div>
@@ -208,7 +239,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, onNext }) =>
           onClick={() => {
             if (isLastPage) {
               // Finishing the lesson: complete the node (best-effort) then advance.
-              handleNext();
+              handleFinish();
             } else {
               setCurrentPage(pageIndex + 1);
             }
