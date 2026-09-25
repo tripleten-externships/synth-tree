@@ -1195,12 +1195,13 @@ describe("Quiz flow", () => {
       );
       expect(res.errors).toBeUndefined();
 
+      // progresses still lists every learner on the node. If that gets scoped
+      // to the viewer too, reach learner 2 some other way so this test keeps
+      // covering User.quizAttempts.
       const progresses: { user: { id: string; quizAttempts: { id: string }[] } }[] =
         res.data.publicCourse.trees[0].nodes[0].progresses;
-      const othersAttempts = progresses
-        .filter(({ user }) => user.id !== REGULAR_USER_ID)
-        .flatMap(({ user }) => user.quizAttempts);
-      expect(othersAttempts).toEqual([]);
+      const learner2 = progresses.find(({ user }) => user.id === SECOND_REGULAR_USER_ID);
+      expect(learner2?.user.quizAttempts).toEqual([]);
     });
 
     it("returns no attempts or answers to a signed-out viewer", async () => {
@@ -1247,31 +1248,43 @@ describe("Quiz flow", () => {
       }
     });
 
-    // Filtering questions by other learners' graded answers would confirm a
-    // guess ("did anyone get it right by picking A?") without reading them.
-    it("rejects filtering questions by learners' answers", async () => {
+    // Filtering by other learners' graded answers would confirm a guess ("did
+    // anyone get it right by picking A?") without reading them.
+    it("rejects filters that reach learners' attempts or answers", async () => {
       const { course } = await seedTwoAttempts();
 
-      const res = await run(
-        `
-          query PublicCourse($id: ID!) {
-            publicCourse(id: $id) {
-              trees {
-                nodes {
-                  quiz {
-                    questions(where: { answers: { some: { isCorrect: { equals: true } } } }) {
-                      id
-                    }
-                  }
-                }
-              }
+      const probes: { nodesArgs: string; selection: string; field: RegExp }[] = [
+        {
+          nodesArgs: "",
+          selection:
+            "quiz { questions(where: { answers: { some: { isCorrect: { equals: true } } } }) { id } }",
+          field: /answers/,
+        },
+        {
+          nodesArgs: "(where: { quiz: { attempts: { some: { passed: { equals: true } } } } })",
+          selection: "id",
+          field: /attempts/,
+        },
+        {
+          nodesArgs:
+            "(where: { progresses: { some: { user: { quizAttempts: { some: { passed: { equals: true } } } } } } })",
+          selection: "id",
+          field: /quizAttempts/,
+        },
+      ];
+
+      for (const { nodesArgs, selection, field } of probes) {
+        const res = await run(
+          `
+            query PublicCourse($id: ID!) {
+              publicCourse(id: $id) { trees { nodes${nodesArgs} { ${selection} } } }
             }
-          }
-        `,
-        { id: course.id },
-        makeUserContext(prisma, REGULAR_USER_ID),
-      );
-      expect(res.errors?.[0].message).toMatch(/answers/);
+          `,
+          { id: course.id },
+          makeUserContext(prisma, REGULAR_USER_ID),
+        );
+        expect(res.errors?.[0].message).toMatch(field);
+      }
     });
   });
 });
