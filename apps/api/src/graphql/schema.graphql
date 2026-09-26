@@ -1,3 +1,23 @@
+type AnalyticsMetric {
+  current: Float
+  percentChange: Float
+  previous: Float
+}
+
+enum AnalyticsRange {
+  ALL
+  NINETY_DAYS
+  SEVEN_DAYS
+  THIRTY_DAYS
+}
+
+type AnalyticsSummary {
+  activeLearners: AnalyticsMetric!
+  avgSessionMinutes: AnalyticsMetric!
+  courseCompletionRate: AnalyticsMetric!
+  lessonsCompleted: AnalyticsMetric!
+}
+
 """Batch payloads from prisma."""
 type BatchPayload {
   """Prisma Batch Payload"""
@@ -1570,6 +1590,7 @@ enum ProgressStatus {
 }
 
 type Query {
+  adminAnalytics(range: AnalyticsRange! = SEVEN_DAYS): AnalyticsSummary!
   adminCourse(id: ID!): Course
   adminGetAllCourses(limit: Int, page: Int, search: String, status: CourseStatus): [Course!]
   adminMyCourse(id: ID!): Course

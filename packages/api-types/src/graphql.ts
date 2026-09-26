@@ -21,6 +21,27 @@ export type Scalars = {
   NEVER: { input: any; output: any; }
 };
 
+export type AnalyticsMetric = {
+  __typename?: 'AnalyticsMetric';
+  current?: Maybe<Scalars['Float']['output']>;
+  percentChange?: Maybe<Scalars['Float']['output']>;
+  previous?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AnalyticsRange =
+  | 'ALL'
+  | 'NINETY_DAYS'
+  | 'SEVEN_DAYS'
+  | 'THIRTY_DAYS';
+
+export type AnalyticsSummary = {
+  __typename?: 'AnalyticsSummary';
+  activeLearners: AnalyticsMetric;
+  avgSessionMinutes: AnalyticsMetric;
+  courseCompletionRate: AnalyticsMetric;
+  lessonsCompleted: AnalyticsMetric;
+};
+
 /** Batch payloads from prisma. */
 export type BatchPayload = {
   __typename?: 'BatchPayload';
@@ -1792,6 +1813,7 @@ export type ProgressStatus =
 
 export type Query = {
   __typename?: 'Query';
+  adminAnalytics: AnalyticsSummary;
   adminCourse?: Maybe<Course>;
   adminGetAllCourses?: Maybe<Array<Course>>;
   adminMyCourse?: Maybe<Course>;
@@ -1824,6 +1846,11 @@ export type Query = {
   skillNode?: Maybe<SkillNode>;
   skillNodes?: Maybe<Array<SkillNode>>;
   skillNodesByTree?: Maybe<Array<SkillNode>>;
+};
+
+
+export type QueryAdminAnalyticsArgs = {
+  range?: AnalyticsRange;
 };
 
 
@@ -7457,6 +7484,13 @@ export type UpdateSkillNodeMutationVariables = Exact<{
 
 export type UpdateSkillNodeMutation = { __typename?: 'Mutation', updateSkillNode?: { __typename?: 'SkillNode', id: string, posX?: number | null, posY?: number | null } | null };
 
+export type AdminAnalyticsQueryVariables = Exact<{
+  range: AnalyticsRange;
+}>;
+
+
+export type AdminAnalyticsQuery = { __typename?: 'Query', adminAnalytics: { __typename?: 'AnalyticsSummary', activeLearners: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, lessonsCompleted: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, avgSessionMinutes: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, courseCompletionRate: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null } } };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -7727,6 +7761,59 @@ export function useUpdateSkillNodeMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<UpdateSkillNodeMutation, UpdateSkillNodeMutationVariables>(UpdateSkillNodeDocument, options);
       }
 export type UpdateSkillNodeMutationHookResult = ReturnType<typeof useUpdateSkillNodeMutation>;
+export const AdminAnalyticsDocument = gql`
+    query AdminAnalytics($range: AnalyticsRange!) {
+  adminAnalytics(range: $range) {
+    activeLearners {
+      current
+      previous
+      percentChange
+    }
+    lessonsCompleted {
+      current
+      previous
+      percentChange
+    }
+    avgSessionMinutes {
+      current
+      previous
+      percentChange
+    }
+    courseCompletionRate {
+      current
+      previous
+      percentChange
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminAnalyticsQuery__
+ *
+ * To run a query within a React component, call `useAdminAnalyticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminAnalyticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminAnalyticsQuery({
+ *   variables: {
+ *      range: // value for 'range'
+ *   },
+ * });
+ */
+export function useAdminAnalyticsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminAnalyticsQuery, AdminAnalyticsQueryVariables> & ({ variables: AdminAnalyticsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>(AdminAnalyticsDocument, options);
+      }
+export function useAdminAnalyticsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>(AdminAnalyticsDocument, options);
+        }
+export type AdminAnalyticsQueryHookResult = ReturnType<typeof useAdminAnalyticsQuery>;
+export type AdminAnalyticsLazyQueryHookResult = ReturnType<typeof useAdminAnalyticsLazyQuery>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {

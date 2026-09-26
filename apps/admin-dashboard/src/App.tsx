@@ -10,6 +10,7 @@ import CourseBuilder from "./pages/courses/CourseBuilder";
 import CoursesList from "./pages/courses/CoursesList";
 import AdminLeaderboardPage from "./pages/LeaderboardPage";
 import LessonEditor from "./pages/lessons/LessonEditor";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
   return (
@@ -25,6 +26,10 @@ function App() {
                   <Routes>
                     <Route path="/dashboard" element={<Navigate to="/courses" replace />} />
                     <Route path="/" element={<Navigate to="/courses" replace />} />
+                    <Route
+                      path="/analytics"
+                      element={<DashboardLayout><AnalyticsPage /></DashboardLayout>}
+                    />
                     <Route
                       path="/courses"
                       element={
