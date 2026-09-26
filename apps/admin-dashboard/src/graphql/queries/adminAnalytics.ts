@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const ADMIN_ANALYTICS_QUERY = gql`
-  query AdminAnalytics($range: DateRange!) {
+  query AdminAnalytics($range: AnalyticsRange!) {
     adminAnalytics(range: $range) {
       activeLearners {
         current
@@ -13,7 +13,7 @@ export const ADMIN_ANALYTICS_QUERY = gql`
         previous
         percentChange
       }
-      avgSessionDuration {
+      avgSessionMinutes {
         current
         previous
         percentChange

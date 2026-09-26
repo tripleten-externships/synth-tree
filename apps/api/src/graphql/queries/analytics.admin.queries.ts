@@ -1,105 +1,66 @@
 import { builder } from "@graphql/builder";
 import { requireAdmin } from "@graphql/auth/requireAuth";
-//import { GraphQLError } from "graphql";
+import {
+  getAdminAnalytics,
+  type AnalyticsSummary,
+  type MetricStat,
+} from "../../services/analytics";
 
-export interface AnalyticsSummary {
-  activeLearners: number;
-  lessonsCompleted: number;
-  avgSessionMinutes: number;
-  courseCompletionRate: number;
-}
+const AnalyticsRange = builder.enumType("AnalyticsRange", {
+  values: {
+    SEVEN_DAYS: { value: "7d" },
+    THIRTY_DAYS: { value: "30d" },
+    NINETY_DAYS: { value: "90d" },
+    ALL: { value: "all" },
+  } as const,
+});
 
-const AnalyticsSummaryRef = builder.objectRef<AnalyticsSummary>("AnalyticsSummary");
-
-AnalyticsSummaryRef.implement({
+const MetricStatRef = builder.objectRef<MetricStat>("AnalyticsMetric");
+MetricStatRef.implement({
   fields: (t) => ({
-    activeLearners: t.exposeInt("activeLearners"),
-    lessonsCompleted: t.exposeInt("lessonsCompleted"),
-    avgSessionMinutes: t.exposeFloat("avgSessionMinutes"),
-    courseCompletionRate: t.exposeFloat("courseCompletionRate"),
+    current: t.exposeFloat("current", { nullable: true }),
+    previous: t.exposeFloat("previous", { nullable: true }),
+    percentChange: t.exposeFloat("percentChange", { nullable: true }),
   }),
 });
 
-// Cached per range so toggling the range doesn't return another range's numbers.
-const cache = new Map<string, { timestamp: number; data: AnalyticsSummary }>();
-const CACHE_TTL_MS = 60 * 1000;
+const AnalyticsSummaryRef = builder.objectRef<AnalyticsSummary>("AnalyticsSummary");
+AnalyticsSummaryRef.implement({
+  fields: (t) => ({
+    activeLearners: t.field({
+      type: MetricStatRef,
+      nullable: false,
+      resolve: (p) => p.activeLearners,
+    }),
+    lessonsCompleted: t.field({
+      type: MetricStatRef,
+      nullable: false,
+      resolve: (p) => p.lessonsCompleted,
+    }),
+    avgSessionMinutes: t.field({
+      type: MetricStatRef,
+      nullable: false,
+      resolve: (p) => p.avgSessionMinutes,
+    }),
+    courseCompletionRate: t.field({
+      type: MetricStatRef,
+      nullable: false,
+      resolve: (p) => p.courseCompletionRate,
+    }),
+  }),
+});
 
 builder.queryFields((t) => ({
   adminAnalytics: t.field({
     type: AnalyticsSummaryRef,
+    nullable: false,
     args: {
-      range: t.arg.string({ required: false }),
+      range: t.arg({ type: AnalyticsRange, required: true, defaultValue: "7d" }),
     },
     resolve: async (_root, { range }, ctx) => {
       ctx.auth.requireAuth();
       requireAdmin(ctx);
-
-      // STRICT ERROR HANDLING (Uncomment to enforce & Uncomment GraphQLError import ) ---
-
-      // const validRanges = ["7d", "30d", "90d", "all"];
-      // if (range && !validRanges.includes(range)) {
-      //   throw new GraphQLError(`Invalid range parameter: "${range}". Must be one of: ${validRanges.join(", ")}`, {
-      //     extensions: { code: "BAD_USER_INPUT" },
-      //   });
-      // }
-
-
-      // Unknown ranges fall back to 7d below, so key them as 7d too (keeps the cache bounded).
-      const cacheKey = range === "30d" || range === "90d" || range === "all" ? range : "7d";
-      const nowTimestamp = Date.now();
-      const cachedData = cache.get(cacheKey);
-      if (cachedData && nowTimestamp - cachedData.timestamp < CACHE_TTL_MS) {
-        return cachedData.data;
-      }
-
-      const now = new Date();
-      let days = 7;
-
-      if (range === "30d") days = 30;
-      else if (range === "90d") days = 90;
-      else if (range === "all") days = 365 * 5;
-
-      const currentStartDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-      const previousStartDate = new Date(currentStartDate.getTime() - days * 24 * 60 * 60 * 1000);
-
-      const activeLearners = await ctx.prisma.user.count({
-        where: { updatedAt: { gte: currentStartDate } },
-      });
-      const prevActiveLearners = await ctx.prisma.user.count({
-        where: { updatedAt: { gte: previousStartDate, lt: currentStartDate } },
-      });
-
-      const lessonsCompleted = await ctx.prisma.userNodeProgress.count({
-        where: {
-          status: "COMPLETED",
-          updatedAt: { gte: currentStartDate },
-        },
-      });
-      const prevLessonsCompleted = await ctx.prisma.userNodeProgress.count({
-        where: {
-          status: "COMPLETED",
-          updatedAt: { gte: previousStartDate, lt: currentStartDate },
-        },
-      });
-
-      const calcChange = (curr: number, prev: number) => {
-        if (prev === 0) return curr > 0 ? 100 : 0;
-        return Number((((curr - prev) / prev) * 100).toFixed(1));
-      };
-
-      const result = {
-        activeLearners,
-        lessonsCompleted,
-        avgSessionMinutes: 14.5,
-        courseCompletionRate: 68.2,
-      };
-
-      cache.set(cacheKey, {
-        timestamp: nowTimestamp,
-        data: result,
-      });
-
-      return result;
+      return getAdminAnalytics(ctx.prisma, range);
     },
   }),
 }));
