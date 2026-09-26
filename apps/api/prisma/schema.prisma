@@ -76,6 +76,9 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  userAchievements UserAchievement[]
+
+
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
 
@@ -405,3 +408,27 @@ model XpEvent {
   @@unique([userId, reason, rewardKey])
   @@index([userId, createdAt])
 }
+
+
+model Achievement {
+  id          String   @id   // string keys, not uuids — easier to reference: "first-step", "week-streak", …
+  name        String
+  description String
+  icon        String
+  color       String   // "primary" | "success" | "warning" | "destructive" | "brand"
+  trigger     String   // matched in code: "lesson_completed_count:1", "streak_days:7", "quiz_perfect", …
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  userId        String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  @@id([userId, achievementId])
+
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
