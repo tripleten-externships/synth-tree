@@ -13,7 +13,7 @@ import { GraphQLError } from "graphql";
 export async function deleteSkillNodeAndRebuildGating(
   tx: Prisma.TransactionClient,
   treeId: string,
-  nodeId: string
+  nodeId: string,
 ): Promise<void> {
   // 1. Ensure node exists in this tree
   const node = await tx.skillNode.findFirst({
@@ -71,11 +71,7 @@ export async function deleteSkillNodeAndRebuildGating(
       const newOrderInStep = i + 1;
 
       // Only update if changed (avoid noisy writes)
-      if (
-        n.orderInStep !== newOrderInStep ||
-        n.posX !== newOrderInStep ||
-        n.posY !== step
-      ) {
+      if (n.orderInStep !== newOrderInStep || n.posX !== newOrderInStep || n.posY !== step) {
         await tx.skillNode.update({
           where: { id: n.id },
           data: {

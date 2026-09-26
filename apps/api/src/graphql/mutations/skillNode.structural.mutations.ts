@@ -47,7 +47,7 @@ builder.mutationFields((t) => ({
 
         if (existingNode) {
           throw new GraphQLError(
-            "This tree already has nodes. Use createSkillNodeToRight or createSkillNodeBelow instead."
+            "This tree already has nodes. Use createSkillNodeToRight or createSkillNodeBelow instead.",
           );
         }
 
@@ -181,7 +181,7 @@ builder.mutationFields((t) => ({
         if (existingInRow) {
           // You *can* relax this later, but for now we enforce "one node per row created via 'below'"
           throw new GraphQLError(
-            "A node already exists in the next row. Use createSkillNodeToRight to add more nodes to that row."
+            "A node already exists in the next row. Use createSkillNodeToRight to add more nodes to that row.",
           );
         }
 
@@ -192,9 +192,7 @@ builder.mutationFields((t) => ({
         });
 
         if (!lastNodeAbove) {
-          throw new GraphQLError(
-            "No nodes found in the row above to gate from"
-          );
+          throw new GraphQLError("No nodes found in the row above to gate from");
         }
 
         const newNode = await tx.skillNode.create({
