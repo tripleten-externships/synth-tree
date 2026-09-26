@@ -8,13 +8,22 @@ export const LEARNER_COURSE_QUERY = gql`
       description
       trees {
         id
+        title
         nodes {
           id
           title
+          step
+          orderInStep
           posX
           posY
-          prerequisites { dependsOnNodeId }
-          progressForViewer { status completedAt }
+          prerequisites {
+            dependsOnNodeId
+          }
+          progressForViewer {
+            status
+            completedAt
+            updatedAt
+          }
         }
       }
     }

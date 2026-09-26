@@ -1,4 +1,5 @@
 import { builder } from "@graphql/builder";
+import { isUuid } from "@lib/uuid";
 import { CourseStatus } from "@graphql/__generated__/inputs";
 
 // Public access to multiple courses.
@@ -49,6 +50,9 @@ builder.queryFields((t) => ({
       id: t.arg.id({ required: true }),
     },
     resolve: async (query, _root, { id }, ctx) => {
+      // A malformed id can't match any course; don't let Postgres reject it.
+      if (!isUuid(id)) return null;
+
       const course = await ctx.prisma.course.findFirst({
         ...query,
         where: {

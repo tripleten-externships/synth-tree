@@ -154,7 +154,8 @@ export async function createLocalUser(
   const user = await prisma.user.upsert({
     where: { id: uid },
     update: { email: opts.email, name: opts.name, role },
-    create: { id: uid, email: opts.email, name: opts.name, role },
+    // Script-created accounts skip signup, so mark onboarding done (SYN-47).
+    create: { id: uid, email: opts.email, name: opts.name, role, onboardingComplete: true },
   });
   console.log(`✅ Prisma user upserted: id=${user.id} role=${user.role}`);
 
