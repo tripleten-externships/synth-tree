@@ -163,7 +163,7 @@ This is the core of the demo, and everything in it is new since the last one.
      from #5 at the start.
    - _"Everything we just did moved them up past two classmates."_
 7. **Profile.** Edit the display name → **Save**. Stay on light mode. If you want to show dark mode,
-   toggle it on Home, not on the leaderboard.
+   toggle it on Home or the leaderboard.
 8. _Optional, mobile:_ press Cmd+Shift+M in DevTools. Show the hamburger menu and the bottom tab
    bar (Home / Profile).
 
@@ -247,7 +247,6 @@ Narrate this, or use a slide. The dev GraphQL sandbox needs a Firebase token, so
   (SYN-130)
 - **Isomerism quiz:** it's an open-response question that waits for manual review, which doesn't
   exist yet. There's no retry.
-- **Leaderboard in dark mode:** hard to read. (SYN-133)
 - **Profile stat tiles:** they don't show real numbers yet. (SYN-134)
 - **Forgot password:** disabled.
 
