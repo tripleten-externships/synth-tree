@@ -2,9 +2,14 @@ import { builder } from "@graphql/builder";
 import { prisma } from "@lib/prisma";
 import { LeaderboardEntry, LeaderboardEntryRef } from "@graphql/types/leaderboardEntry";
 
-// Shown for users who never set a display name. Deliberately not derived from
-// their email, since every signed-in learner can see the leaderboard.
+// Shown for users without a display name (null, or blank after clearing it on
+// Profile). Deliberately not derived from their email, since every signed-in
+// learner can see the leaderboard.
 const FALLBACK_DISPLAY_NAME = "Learner";
+
+function displayNameOf(name: string | null | undefined): string {
+  return name?.trim() || FALLBACK_DISPLAY_NAME;
+}
 
 // Wrapper type: contains the list + the current user's global rank
 export const LeaderboardPayloadRef = builder.objectRef<{
@@ -71,7 +76,7 @@ builder.queryField("leaderboard", (t) =>
       // 5. Build current user's leaderboard entry
       const currentUserEntry = {
         userId: currentUserUid,
-        displayName: currentUser?.name ?? FALLBACK_DISPLAY_NAME,
+        displayName: displayNameOf(currentUser?.name),
         avatar: currentUser?.photoUrl ?? null,
         totalXp: currentUserTotalXp,
         streak: currentUser?.streak?.currentDays ?? 0,
@@ -92,7 +97,7 @@ builder.queryField("leaderboard", (t) =>
         previousRank = rank;
         return {
           userId: u.userId,
-          displayName: u.user.name ?? FALLBACK_DISPLAY_NAME,
+          displayName: displayNameOf(u.user.name),
           avatar: u.user.photoUrl ?? null,
           totalXp: u.totalXp,
           streak: u.user.streak?.currentDays ?? 0,
