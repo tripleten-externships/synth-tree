@@ -38,6 +38,12 @@ const UPDATE_NODE = `
   }
 `;
 
+const DELETE_ADVANCED = `
+  mutation DeleteAdvanced($id: ID!) {
+    deleteSkillNodeAdvanced(id: $id)
+  }
+`;
+
 // SYN-128: both canvases read posX/posY as percentages (0-100), so the
 // create mutations have to place nodes on that scale, spaced far enough apart
 // that they don't overlap, and never on a cell another node already uses.
@@ -166,6 +172,28 @@ describe("SkillNode positions", () => {
         expect(n.posY).toBeGreaterThanOrEqual(0);
         expect(n.posY).toBeLessThanOrEqual(100);
       }
+    });
+  });
+
+  describe("deleteSkillNodeAdvanced", () => {
+    it("keeps the remaining nodes where they are", async () => {
+      const a = await createFirst();
+      const b = await createRight(a.id, "B");
+      const c = await createRight(a.id, "C");
+
+      const res = await run(DELETE_ADVANCED, { id: b.id });
+      expect(res.errors).toBeUndefined();
+
+      const after = await prisma.skillNode.findMany({
+        where: { treeId },
+        orderBy: { orderInStep: "asc" },
+      });
+      expect(
+        after.map((n) => ({ id: n.id, orderInStep: n.orderInStep, ...positionOf(n as any) })),
+      ).toEqual([
+        { id: a.id, orderInStep: 1, posX: 10, posY: 10 },
+        { id: c.id, orderInStep: 2, posX: 50, posY: 10 },
+      ]);
     });
   });
 });
