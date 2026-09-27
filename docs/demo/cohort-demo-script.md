@@ -243,8 +243,6 @@ Narrate this, or use a slide. The dev GraphQL sandbox needs a Firebase token, so
 
 - **Nav stubs:** **Dashboard**, **Lessons** and **Skill Trees** in the top nav are placeholders.
   The mobile **Catalog** tab also opens a placeholder. (SYN-132)
-- **Recommended next → "Vectors":** it belongs to a **draft** course and opens "Course not found".
-  (SYN-130)
 - **Isomerism quiz:** it's an open-response question that waits for manual review, which doesn't
   exist yet. There's no retry.
 - **Leaderboard in dark mode:** hard to read. (SYN-133)
