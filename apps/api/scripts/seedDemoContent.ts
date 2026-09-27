@@ -13,9 +13,15 @@
  *
  * The demo courses are authored by a synthetic "Demo Author" user. Admins see
  * and manage all courses (admin bypasses ownership checks), so you can publish/
- * unpublish/delete these while logged in as admin@local.dev. If learner@local.dev
- * exists, a little progress is seeded for them so the "Recommended next" carousel
- * and progress have data.
+ * unpublish/delete these while logged in as admin@local.dev.
+ *
+ * It also seeds learner ACTIVITY so the app looks lived-in:
+ *   - seven synthetic classmates (ids "demo-learner-*", no Firebase accounts)
+ *     with progress, quiz attempts, XP and streaks, so the leaderboard has a field;
+ *   - if learner@local.dev exists: progress across all three published courses,
+ *     250 XP and a 4-day streak. Its XP/streak are RESET on every run. Atoms &
+ *     Bonding is left without a quiz pass, so passing that quiz in a demo still
+ *     awards +100 XP, extends the streak and moves the learner up a rank.
  */
 
 import "dotenv/config";
@@ -46,7 +52,10 @@ type LessonSeed = {
 type QuestionSeed = {
   type: QuestionType;
   prompt: string;
+  explanation?: string;
   options?: { text: string; isCorrect?: boolean }[];
+  // FILL only: the graded answer key (trimmed, case-insensitive).
+  canonicalAnswer?: string;
 };
 
 type NodeSeed = {
@@ -83,7 +92,14 @@ const COURSES: CourseSeed[] = [
           lessons: [
             {
               type: ContentType.HTML,
-              html: "<h2>Atoms &amp; Bonding</h2><p>Organic chemistry is the study of carbon-based molecules. We start with the <strong>covalent bond</strong>: two atoms sharing a pair of electrons.</p><ul><li>Carbon forms four bonds.</li><li>Bonds can be single, double, or triple.</li></ul>",
+              html: "<h2>Atoms &amp; Bonding</h2><p>Organic chemistry is the study of carbon-based molecules. We start with the <strong>covalent bond</strong>: two atoms sharing a pair of electrons.</p><ul><li>Carbon forms four bonds.</li><li>Bonds can be single, double, or triple.</li></ul><h3>Hybrid orbitals</h3><p>To make those bonds, carbon mixes its outer orbitals into <strong>hybrid orbitals</strong>. How many it mixes sets the shape of the molecule: sp is linear, sp² is trigonal planar, and sp³ is tetrahedral.</p><blockquote>Tip: count the atoms and lone pairs around a carbon. Two means sp, three means sp², four means sp³.</blockquote>",
+            },
+            {
+              // Served by the learner app (apps/client-frontend/public/demo) so
+              // the demo seed doesn't depend on an external image host.
+              type: ContentType.IMAGE,
+              url: "/demo/hybrid-orbitals.svg",
+              caption: "sp, sp², and sp³ hybrid orbitals",
             },
             // Page break: splits this lesson into two pages (SYN-60 multi-page demo).
             { type: ContentType.PAGE_BREAK },
@@ -100,21 +116,28 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "How many covalent bonds does a neutral carbon atom form?",
-                options: [
-                  { text: "2" },
-                  { text: "4", isCorrect: true },
-                  { text: "6" },
-                ],
+                explanation: "A neutral carbon atom has four valence electrons and typically forms four covalent bonds to complete its valence shell.",
+                options: [{ text: "2" }, { text: "4", isCorrect: true }, { text: "6" }],
               },
               {
                 type: QuestionType.MULTIPLE_CHOICE,
                 prompt: "Which of these are types of covalent bonds? (select all)",
+                explanation:
+                  "Single, double, and triple bonds are all types of covalent bonds, which involve atoms sharing one or more pairs of electrons.",
                 options: [
                   { text: "Single", isCorrect: true },
                   { text: "Double", isCorrect: true },
                   { text: "Magnetic" },
                   { text: "Triple", isCorrect: true },
                 ],
+              },
+              {
+                // FILL sample. Grading trims + lowercases, so "sp" is accepted
+                // against the canonical "SP " (SYN-53 acceptance).
+                type: QuestionType.FILL,
+                prompt:
+                  "A carbon atom at the end of a triple bond is ___-hybridized. Fill in the blank (e.g. sp, sp2, sp3).",
+                canonicalAnswer: "SP ",
               },
             ],
           },
@@ -149,6 +172,8 @@ const COURSES: CourseSeed[] = [
                 type: QuestionType.OPEN_QUESTION,
                 prompt:
                   "In your own words, explain the difference between a structural isomer and a stereoisomer.",
+                explanation:
+                  "Structural isomers have the same molecular formula but differ in how their atoms are connected, while stereoisomers have the same connectivity but differ in the three-dimensional arrangement of their atoms.",
               },
             ],
           },
@@ -162,6 +187,42 @@ const COURSES: CourseSeed[] = [
             {
               type: ContentType.HTML,
               html: "<h2>Your First Reaction</h2><p>Substitution, addition, and elimination are the three reaction families you'll meet first. We'll trace electrons through each.</p>",
+            },
+          ],
+        },
+        {
+          title: "Nomenclature",
+          step: 2,
+          orderInStep: 1,
+          prereqs: [1],
+          lessons: [
+            {
+              type: ContentType.HTML,
+              html: "<h2>Nomenclature</h2><p>IUPAC names are built from three parts: a <strong>parent chain</strong>, <strong>substituents</strong>, and a <strong>suffix</strong> for the main functional group.</p><ol><li>Find the longest carbon chain.</li><li>Number it so substituents get the lowest locants.</li><li>List substituents alphabetically.</li></ol><blockquote>Example: CH₃CH₂OH is <em>ethanol</em> — a two-carbon chain (eth-) with an alcohol suffix (-ol).</blockquote>",
+            },
+          ],
+        },
+        {
+          title: "Stereochemistry",
+          step: 3,
+          orderInStep: 1,
+          prereqs: [2],
+          lessons: [
+            {
+              type: ContentType.HTML,
+              html: "<h2>Stereochemistry</h2><p>A carbon bonded to four different groups is a <strong>stereocenter</strong>. Its two mirror-image arrangements are <em>enantiomers</em>: same connectivity, different handedness.</p><ul><li>Assign priorities with the Cahn–Ingold–Prelog rules.</li><li>Label each stereocenter <em>R</em> or <em>S</em>.</li></ul>",
+            },
+          ],
+        },
+        {
+          title: "Reaction Mechanisms",
+          step: 4,
+          orderInStep: 0,
+          prereqs: [3, 4],
+          lessons: [
+            {
+              type: ContentType.HTML,
+              html: "<h2>Reaction Mechanisms</h2><p>A mechanism is the step-by-step story of a reaction: which bonds break, which form, and in what order. Curved arrows track electron pairs from <strong>nucleophile</strong> to <strong>electrophile</strong>.</p><blockquote>Tip: every arrow starts at electrons — a lone pair or a bond — never at a positive charge.</blockquote>",
             },
           ],
         },
@@ -194,6 +255,8 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "Velocity is the rate of change of…",
+                explanation:
+                  "Velocity describes how an object's position changes over time, while acceleration describes how velocity changes over time.",
                 options: [
                   { text: "Position", isCorrect: true },
                   { text: "Acceleration" },
@@ -294,6 +357,356 @@ const COURSES: CourseSeed[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// Demo activity: classmates for the leaderboard + the local learner's history
+// ---------------------------------------------------------------------------
+
+type SeededQuestion = {
+  id: string;
+  type: QuestionType;
+  correctOptionIds: string[];
+  canonicalAnswer: string | null;
+};
+type SeededNode = {
+  id: string;
+  xpReward: number;
+  quiz?: { id: string; required: boolean; questions: SeededQuestion[] };
+};
+type SeededContent = Map<string, Map<string, SeededNode>>;
+
+// Mirrors the API's awards: completing a node pays node.xpReward
+// ("node_completion"); passing a quiz pays QUIZ_PASS_XP ("quiz_pass",
+// apps/api/src/graphql/mutations/quiz.mutations.ts).
+const QUIZ_PASS_XP = 100;
+
+type Completion = {
+  course: string;
+  node: string;
+  // Complete via a passing quiz attempt (quiz XP) instead of node-completion
+  // XP. Defaults to true when the node has a required quiz.
+  viaQuiz?: boolean;
+};
+
+type ActivityPlan = {
+  // Oldest first. The most recent `streak` completions land on consecutive
+  // days ending `lastActiveDaysAgo`; earlier ones are spaced out before that.
+  completed: Completion[];
+  inProgress?: { course: string; node: string }[];
+  streak: number;
+  longestStreak: number;
+  lastActiveDaysAgo: number;
+};
+
+// Synthetic classmates (no Firebase accounts; they only appear on the
+// leaderboard). Removed and recreated on every run.
+const DEMO_LEARNER_ID_PREFIX = "demo-learner-";
+
+const OC = "Organic Chemistry";
+const PHY = "Foundations of Physics";
+const BIO = "Cell Biology";
+const ORGANIC_PATH = [
+  "Atoms & Bonding",
+  "Functional Groups",
+  "Isomerism",
+  "Nomenclature",
+  "Your First Reaction",
+  "Stereochemistry",
+  "Reaction Mechanisms",
+].map((node) => ({ course: OC, node }));
+const PHYSICS_PATH = ["Kinematics", "Newton's Laws", "Energy & Work"].map((node) => ({
+  course: PHY,
+  node,
+}));
+const BIOLOGY_PATH = ["The Cell Membrane", "Organelles"].map((node) => ({ course: BIO, node }));
+
+const DEMO_CLASSMATES: { slug: string; name: string; interests: string[]; plan: ActivityPlan }[] = [
+  {
+    slug: "maya",
+    name: "Maya Chen",
+    interests: ["Chemistry", "Biology"],
+    plan: {
+      completed: [...ORGANIC_PATH, ...PHYSICS_PATH, ...BIOLOGY_PATH],
+      streak: 21,
+      longestStreak: 21,
+      lastActiveDaysAgo: 0,
+    },
+  },
+  {
+    slug: "jordan",
+    name: "Jordan Ellis",
+    interests: ["Chemistry", "Physics"],
+    plan: {
+      completed: [...ORGANIC_PATH.slice(0, 5), ...PHYSICS_PATH.slice(0, 2)],
+      streak: 12,
+      longestStreak: 15,
+      lastActiveDaysAgo: 0,
+    },
+  },
+  {
+    slug: "leo",
+    name: "Leo Martins",
+    interests: ["Physics", "Mathematics"],
+    plan: {
+      completed: [...PHYSICS_PATH, ORGANIC_PATH[0], ORGANIC_PATH[1], ORGANIC_PATH[3]],
+      // Lapsed streak: last active almost a week ago.
+      streak: 0,
+      longestStreak: 8,
+      lastActiveDaysAgo: 6,
+    },
+  },
+  {
+    // Sits just above the local learner (300 vs 250 XP), so passing the Atoms &
+    // Bonding quiz live in the demo (+100 XP) moves the learner up a rank.
+    slug: "priya",
+    name: "Priya Raman",
+    interests: ["Physics", "Biology"],
+    plan: {
+      completed: [...PHYSICS_PATH, ...BIOLOGY_PATH],
+      streak: 7,
+      longestStreak: 7,
+      lastActiveDaysAgo: 1,
+    },
+  },
+  {
+    slug: "sam",
+    name: "Sam Okafor",
+    interests: ["Chemistry", "Biology"],
+    plan: {
+      completed: [ORGANIC_PATH[0], ORGANIC_PATH[1], BIOLOGY_PATH[0]],
+      inProgress: [{ course: OC, node: "Isomerism" }],
+      streak: 3,
+      longestStreak: 5,
+      lastActiveDaysAgo: 0,
+    },
+  },
+  {
+    slug: "noah",
+    name: "Noah Kim",
+    interests: ["Chemistry"],
+    plan: {
+      completed: [ORGANIC_PATH[0], ORGANIC_PATH[1]],
+      streak: 2,
+      longestStreak: 4,
+      lastActiveDaysAgo: 1,
+    },
+  },
+  {
+    slug: "ava",
+    name: "Ava Thompson",
+    interests: ["Biology", "Earth science"],
+    plan: {
+      completed: [BIOLOGY_PATH[0]],
+      inProgress: [{ course: BIO, node: "Organelles" }],
+      streak: 1,
+      longestStreak: 1,
+      lastActiveDaysAgo: 0,
+    },
+  },
+];
+
+// The local learner: 250 XP across all three published courses and a 4-day
+// streak last extended yesterday, with Functional Groups in progress (the
+// Continue card). Atoms & Bonding is complete but its quiz has no attempt, so
+// passing that quiz during the demo still awards XP and extends the streak.
+const LEARNER_PLAN: ActivityPlan = {
+  completed: [
+    { course: OC, node: "Atoms & Bonding", viaQuiz: false },
+    { course: PHY, node: "Kinematics" },
+    { course: PHY, node: "Newton's Laws" },
+    { course: BIO, node: "The Cell Membrane" },
+  ],
+  inProgress: [{ course: OC, node: "Functional Groups" }],
+  streak: 4,
+  longestStreak: 9,
+  lastActiveDaysAgo: 1,
+};
+
+// Mid-afternoon UTC `daysAgo` days back; "today" is a few minutes ago.
+function dayAt(daysAgo: number): Date {
+  if (daysAgo <= 0) return new Date(Date.now() - 5 * 60 * 1000);
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  d.setUTCHours(16, 0, 0, 0);
+  return d;
+}
+
+// Same bucketing as awardXp (apps/api/src/services/xp.ts): Monday, UTC.
+function weekKey(date: Date): string {
+  const day = date.getUTCDay();
+  const weekStart = new Date(date);
+  weekStart.setUTCDate(date.getUTCDate() - (day === 0 ? 6 : day - 1));
+  return weekStart.toISOString().slice(0, 10);
+}
+
+function lookupNode(content: SeededContent, course: string, node: string): SeededNode {
+  const found = content.get(course)?.get(node);
+  if (!found) throw new Error(`Demo activity references unknown node "${course} / ${node}"`);
+  return found;
+}
+
+// Writes progress, quiz attempts, XP events, UserXp and UserStreak for one
+// user, the way the API would have recorded them.
+async function seedUserActivity(userId: string, plan: ActivityPlan, content: SeededContent) {
+  const events: { amount: number; at: Date }[] = [];
+  const total = plan.completed.length;
+  const streakRun = Math.min(plan.streak, total);
+
+  for (let i = 0; i < total; i++) {
+    const { course, node: title, viaQuiz } = plan.completed[i];
+    const node = lookupNode(content, course, title);
+
+    const fromNewest = total - 1 - i;
+    const daysAgo =
+      plan.lastActiveDaysAgo +
+      (fromNewest < streakRun ? fromNewest : streakRun + (fromNewest - streakRun + 1) * 2);
+    const at = dayAt(daysAgo);
+
+    await prisma.userNodeProgress.create({
+      data: {
+        userId,
+        nodeId: node.id,
+        status: ProgressStatus.COMPLETED,
+        completedAt: at,
+        createdAt: at,
+        updatedAt: at,
+      },
+    });
+
+    if (node.quiz && (viaQuiz ?? node.quiz.required)) {
+      await prisma.quizAttempt.create({
+        data: {
+          quizId: node.quiz.id,
+          userId,
+          passed: true,
+          takenAt: at,
+          answers: {
+            create: node.quiz.questions.map((q) => ({
+              questionId: q.id,
+              answer:
+                q.type === QuestionType.FILL
+                  ? { text: (q.canonicalAnswer ?? "").trim() }
+                  : { selectedOptionIds: q.correctOptionIds },
+              isCorrect: true,
+            })),
+          },
+        },
+      });
+      await prisma.xpEvent.create({
+        data: {
+          userId,
+          amount: QUIZ_PASS_XP,
+          reason: "quiz_pass",
+          rewardKey: node.quiz.id,
+          metadata: { quizId: node.quiz.id },
+          createdAt: at,
+        },
+      });
+      events.push({ amount: QUIZ_PASS_XP, at });
+    } else {
+      await prisma.xpEvent.create({
+        data: {
+          userId,
+          amount: node.xpReward,
+          reason: "node_completion",
+          rewardKey: node.id,
+          metadata: { nodeId: node.id },
+          createdAt: at,
+        },
+      });
+      events.push({ amount: node.xpReward, at });
+    }
+  }
+
+  for (const { course, node: title } of plan.inProgress ?? []) {
+    const at = dayAt(plan.lastActiveDaysAgo);
+    await prisma.userNodeProgress.create({
+      data: {
+        userId,
+        nodeId: lookupNode(content, course, title).id,
+        status: ProgressStatus.IN_PROGRESS,
+        createdAt: at,
+        updatedAt: at,
+      },
+    });
+  }
+
+  if (events.length === 0) return 0;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const weeklyXp: Record<string, number> = {};
+  for (const e of events) weeklyXp[weekKey(e.at)] = (weeklyXp[weekKey(e.at)] ?? 0) + e.amount;
+  const totalXp = events.reduce((sum, e) => sum + e.amount, 0);
+  const latest = events.reduce((a, b) => (b.at > a.at ? b : a)).at;
+
+  await prisma.userXp.create({
+    data: {
+      userId,
+      totalXp,
+      todayXp: events
+        .filter((e) => e.at.toISOString().slice(0, 10) === today)
+        .reduce((sum, e) => sum + e.amount, 0),
+      todayAsOf: latest,
+      weeklyXp,
+    },
+  });
+  await prisma.userStreak.create({
+    data: {
+      userId,
+      currentDays: plan.streak,
+      longestDays: Math.max(plan.longestStreak, plan.streak),
+      lastActive: latest,
+    },
+  });
+
+  return totalXp;
+}
+
+async function seedDemoActivity(content: SeededContent) {
+  // Classmates: remove and recreate (cascades to their progress, XP, streaks).
+  await prisma.user.deleteMany({ where: { id: { startsWith: DEMO_LEARNER_ID_PREFIX } } });
+  for (const c of DEMO_CLASSMATES) {
+    const user = await prisma.user.create({
+      data: {
+        id: `${DEMO_LEARNER_ID_PREFIX}${c.slug}`,
+        email: `${c.slug}.demo@local.dev`,
+        name: c.name,
+        role: Role.USER,
+        interests: c.interests,
+        dailyGoalMinutes: 15,
+        onboardingComplete: true,
+      },
+    });
+    const xp = await seedUserActivity(user.id, c.plan, content);
+    console.log(`   • classmate ${c.name}: ${xp} XP, ${c.plan.streak}-day streak`);
+  }
+
+  const learner = await prisma.user.findUnique({ where: { email: LEARNER_EMAIL } });
+  if (!learner) {
+    console.log(
+      `   • (skipped learner activity — run 'pnpm db:seed:local-users' first to create ${LEARNER_EMAIL})`,
+    );
+    return;
+  }
+
+  // Reset the learner's gamification state so re-runs give the same starting
+  // point (their progress and quiz attempts on demo content were already
+  // removed with the old demo courses).
+  await prisma.xpEvent.deleteMany({ where: { userId: learner.id } });
+  await prisma.userXp.deleteMany({ where: { userId: learner.id } });
+  await prisma.userStreak.deleteMany({ where: { userId: learner.id } });
+  await prisma.user.update({
+    where: { id: learner.id },
+    data: {
+      interests: ["Chemistry", "Physics", "Biology"],
+      dailyGoalMinutes: 15,
+      onboardingComplete: true,
+    },
+  });
+
+  const xp = await seedUserActivity(learner.id, LEARNER_PLAN, content);
+  console.log(`   • ${LEARNER_EMAIL}: ${xp} XP, ${LEARNER_PLAN.streak}-day streak`);
+}
+
 async function main() {
   console.log("➡️  Seeding demo content…");
 
@@ -313,8 +726,9 @@ async function main() {
   const removed = await prisma.course.deleteMany({ where: { authorId: author.id } });
   if (removed.count) console.log(`   cleaned ${removed.count} existing demo course(s)`);
 
-  // Collect the node ids of the flagship course so we can seed learner progress.
-  let flagshipNodeIds: string[] = [];
+  // Everything created below, keyed by course title then node title, so the
+  // activity seed (step 3) can reference real ids.
+  const seeded = new Map<string, Map<string, SeededNode>>();
 
   for (const c of COURSES) {
     const course = await prisma.course.create({
@@ -335,9 +749,12 @@ async function main() {
       data: { courseId: course.id, title: c.tree.title, description: c.tree.description },
     });
 
-    // Create nodes first (so prerequisites can reference real ids), with
-    // distinct posX/posY to satisfy @@unique([treeId, posX, posY]).
+    // Create nodes first (so prerequisites can reference real ids). posX/posY
+    // are percentages (0-100) of the builder canvas, laid out on a 5% grid and
+    // kept in bounds. Distinct per (orderInStep, step), which satisfies
+    // @@unique([treeId, posX, posY]).
     const nodeIds: string[] = [];
+    const seededNodes = new Map<string, SeededNode>();
     for (const n of c.tree.nodes) {
       const node = await prisma.skillNode.create({
         data: {
@@ -345,11 +762,13 @@ async function main() {
           title: n.title,
           step: n.step,
           orderInStep: n.orderInStep,
-          posX: n.orderInStep * 200,
-          posY: n.step * 200,
+          posX: Math.min(90, 20 + n.orderInStep * 20),
+          posY: Math.min(90, 15 + n.step * 15),
         },
       });
       nodeIds.push(node.id);
+      const seededNode: SeededNode = { id: node.id, xpReward: node.xpReward ?? 50 };
+      seededNodes.set(n.title, seededNode);
 
       // Lessons
       await prisma.lessonBlocks.createMany({
@@ -369,20 +788,36 @@ async function main() {
         const quiz = await prisma.quiz.create({
           data: { nodeId: node.id, title: n.quiz.title, required: n.quiz.required ?? false },
         });
+        seededNode.quiz = { id: quiz.id, required: quiz.required, questions: [] };
         for (let qi = 0; qi < n.quiz.questions.length; qi++) {
           const q = n.quiz.questions[qi];
           const question = await prisma.quizQuestion.create({
-            data: { quizId: quiz.id, type: q.type, prompt: q.prompt, order: qi },
+            data: {
+              quizId: quiz.id,
+              type: q.type,
+              prompt: q.prompt,
+              explanation: q.explanation,
+              canonicalAnswer: q.canonicalAnswer ?? null,
+              order: qi,
+            },
           });
+          let correctOptionIds: string[] = [];
           if (q.options?.length) {
-            await prisma.quizOption.createMany({
+            const options = await prisma.quizOption.createManyAndReturn({
               data: q.options.map((o) => ({
                 questionId: question.id,
                 text: o.text,
                 isCorrect: o.isCorrect ?? false,
               })),
             });
+            correctOptionIds = options.filter((o) => o.isCorrect).map((o) => o.id);
           }
+          seededNode.quiz.questions.push({
+            id: question.id,
+            type: q.type,
+            correctOptionIds,
+            canonicalAnswer: q.canonicalAnswer ?? null,
+          });
         }
       }
     }
@@ -396,39 +831,13 @@ async function main() {
       }
     }
 
-    if (c.title === "Organic Chemistry") flagshipNodeIds = nodeIds;
+    seeded.set(c.title, seededNodes);
     console.log(`   • ${c.title} (${c.status}) — ${c.tree.nodes.length} node(s)`);
   }
 
-  // 3. Seed a little progress for the real local learner (if it exists), so the
-  //    "Recommended next" carousel and progress have realistic data on login.
-  const learner = await prisma.user.findUnique({ where: { email: LEARNER_EMAIL } });
-  if (learner && flagshipNodeIds.length >= 2) {
-    await prisma.userNodeProgress.upsert({
-      where: { userId_nodeId: { userId: learner.id, nodeId: flagshipNodeIds[0] } },
-      update: { status: ProgressStatus.COMPLETED, completedAt: new Date() },
-      create: {
-        userId: learner.id,
-        nodeId: flagshipNodeIds[0],
-        status: ProgressStatus.COMPLETED,
-        completedAt: new Date(),
-      },
-    });
-    await prisma.userNodeProgress.upsert({
-      where: { userId_nodeId: { userId: learner.id, nodeId: flagshipNodeIds[1] } },
-      update: { status: ProgressStatus.IN_PROGRESS },
-      create: {
-        userId: learner.id,
-        nodeId: flagshipNodeIds[1],
-        status: ProgressStatus.IN_PROGRESS,
-      },
-    });
-    console.log(`   • seeded progress for ${LEARNER_EMAIL}`);
-  } else {
-    console.log(
-      `   • (skipped learner progress — run 'pnpm db:seed:local-users' first to create ${LEARNER_EMAIL})`,
-    );
-  }
+  // 3. Learner activity: demo classmates (so the leaderboard has a field) and
+  //    progress / XP / streak for the real local learner.
+  await seedDemoActivity(seeded);
 
   console.log("✅ Demo content seeded.");
 }

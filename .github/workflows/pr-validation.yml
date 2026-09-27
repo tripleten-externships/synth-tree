@@ -35,12 +35,25 @@ jobs:
           filters: |
             infra:
               - 'apps/infra/**'
+            # Root workspace/config files and this workflow affect every app,
+            # so changes to them must run the api and frontend jobs too.
             api:
               - 'apps/api/**'
               - 'packages/api-types/**'
+              - '.github/workflows/pr-validation.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig*.json'
             frontend:
               - 'apps/admin-dashboard/**'
+              - 'apps/client-frontend/**'
               - 'packages/**'
+              - '.github/workflows/pr-validation.yml'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig*.json'
             ui:
               - 'packages/ui/**'
               - 'packages/theme/**'
@@ -81,13 +94,23 @@ jobs:
       - name: Run ESLint
         run: |
           echo "Running ESLint..."
-          pnpm run lint || true
+          pnpm run lint
           echo "✅ Linting complete"
+
+      # @synth-tree/theme and @synth-tree/ui resolve their types from dist/,
+      # so they must be built before ui and admin-dashboard can type-check.
+      - name: Build theme library
+        working-directory: packages/theme
+        run: pnpm build
+
+      - name: Build component library
+        working-directory: packages/ui
+        run: pnpm build
 
       - name: Run TypeScript type check
         run: |
           echo "Running TypeScript type check..."
-          pnpm run type-check || pnpm exec tsc --noEmit || true
+          pnpm run type-check
           echo "✅ Type check complete"
 
   test-api:
@@ -95,6 +118,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.api == 'true'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: synthtree
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d synthtree"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/synthtree?schema=public
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,11 +154,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Apply database migrations
+        working-directory: apps/api
+        run: pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma
+
       - name: Run API tests
         working-directory: apps/api
         run: |
           echo "Running API tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          pnpm test
 
   build-api:
     name: Build API
@@ -203,6 +249,19 @@ jobs:
           fi
 
           echo "✅ Frontend build successful"
+
+      - name: Build client frontend
+        working-directory: apps/client-frontend
+        run: |
+          echo "Building client frontend..."
+          pnpm build
+
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Client frontend build failed"
+            exit 1
+          fi
+
+          echo "✅ Client frontend build successful"
 
       - name: Check bundle size
         working-directory: apps/admin-dashboard
@@ -301,13 +360,14 @@ jobs:
         working-directory: apps/infra
         run: |
           echo "Running infrastructure tests..."
-          pnpm test || echo "⚠️ No tests configured"
+          pnpm test
 
   summary:
     name: PR Validation Summary
     runs-on: ubuntu-latest
     needs:
       [
+        changes,
         lint-and-typecheck,
         test-api,
         build-api,
@@ -318,9 +378,15 @@ jobs:
     if: always()
     steps:
       - name: Check results
+        env:
+          # Skipped jobs (path filter didn't match) are fine; a failed or
+          # cancelled job — including Detect Changes, which would otherwise
+          # silently skip everything downstream — fails the summary.
+          ANY_FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
         run: |
           echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Detect Changes: ${{ needs.changes.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Lint & Type Check: ${{ needs.lint-and-typecheck.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- API Tests: ${{ needs.test-api.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- API Build: ${{ needs.build-api.result }}" >> $GITHUB_STEP_SUMMARY
@@ -328,15 +394,9 @@ jobs:
           echo "- Storybook Build: ${{ needs.build-storybook.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Infrastructure Validation: ${{ needs.validate-infra.result }}" >> $GITHUB_STEP_SUMMARY
 
-          # Check if any job failed
-          if [[ "${{ needs.lint-and-typecheck.result }}" == "failure" ]] || \
-             [[ "${{ needs.test-api.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-api.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-frontend.result }}" == "failure" ]] || \
-             [[ "${{ needs.build-storybook.result }}" == "failure" ]] || \
-             [[ "${{ needs.validate-infra.result }}" == "failure" ]]; then
+          if [[ "$ANY_FAILED" == "true" ]]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "❌ Some validation checks failed. Please review the errors above." >> $GITHUB_STEP_SUMMARY
+            echo "❌ Some validation checks failed or were cancelled. Please review the errors above." >> $GITHUB_STEP_SUMMARY
             exit 1
           else
             echo "" >> $GITHUB_STEP_SUMMARY

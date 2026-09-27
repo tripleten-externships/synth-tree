@@ -81,7 +81,8 @@ async function main() {
     await prisma.user.upsert({
       where: { id: uid },
       update: { email: u.email, name: u.name, role: u.role },
-      create: { id: uid, email: u.email, name: u.name, role: u.role },
+      // Seeded accounts skip signup, so mark onboarding done (SYN-47).
+      create: { id: uid, email: u.email, name: u.name, role: u.role, onboardingComplete: true },
     });
     console.log(`   ✅ ${u.email} (${u.role})`);
   }

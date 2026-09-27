@@ -1,4 +1,5 @@
 import { builder } from "@graphql/builder";
+import { isUuid } from "@lib/uuid";
 
 builder.queryFields((t) => ({
   courseForLearner: t.prismaField({
@@ -11,6 +12,9 @@ builder.queryFields((t) => ({
     },
     resolve: async (_query, _parent, args, ctx) => {
       ctx.auth.requireAuth();
+
+      // A malformed id can't match any course; don't let Postgres reject it.
+      if (!isUuid(args.id)) return null;
 
       // Manual include (rather than spreading `query`) so we can filter out
       // soft-deleted trees and nodes; per-node viewer status is resolved by the

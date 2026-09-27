@@ -469,4 +469,75 @@ describe("Course CRUD", () => {
       expect(res.data.adminCourse).toBeNull();
     });
   });
+  // Route-supplied ids (e.g. /courses/1 from a placeholder card) must resolve to
+  // "not found" instead of a Postgres "invalid UUID" error.
+  describe("learner lookups with a malformed id", () => {
+    const COURSE_FOR_LEARNER = `
+      query CourseForLearner($id: ID!) {
+        courseForLearner(id: $id) { id title }
+      }
+    `;
+    const PUBLIC_COURSE = `
+      query PublicCourse($id: ID!) {
+        publicCourse(id: $id) { id }
+      }
+    `;
+    const LESSON_BLOCKS = `
+      query LessonBlocksByNode($nodeId: ID!) {
+        lessonBlocksByNode(nodeId: $nodeId) { id }
+      }
+    `;
+
+    it("courseForLearner returns null", async () => {
+      const res = singleResult(
+        await server.executeOperation(
+          { query: COURSE_FOR_LEARNER, variables: { id: "1" } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.courseForLearner).toBeNull();
+    });
+
+    it("courseForLearner still finds a published course by a real id", async () => {
+      const course = await prisma.course.create({
+        data: { title: "Published", status: "PUBLISHED", authorId: ADMIN_USER_ID },
+      });
+
+      const res = singleResult(
+        await server.executeOperation(
+          { query: COURSE_FOR_LEARNER, variables: { id: course.id } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.courseForLearner.id).toBe(course.id);
+    });
+
+    it("publicCourse returns null", async () => {
+      const res = singleResult(
+        await server.executeOperation(
+          { query: PUBLIC_COURSE, variables: { id: "1" } },
+          { contextValue: makeUnauthContext(prisma) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.publicCourse).toBeNull();
+    });
+
+    it("lessonBlocksByNode returns no blocks", async () => {
+      const res = singleResult(
+        await server.executeOperation(
+          { query: LESSON_BLOCKS, variables: { nodeId: "not-a-uuid" } },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.lessonBlocksByNode).toEqual([]);
+    });
+  });
 });

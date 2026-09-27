@@ -26,6 +26,16 @@ export const ADMIN_COURSE_QUERY = gql`
       title
       description
       status
+      trees(orderBy: [{ createdAt: asc }, { id: asc }]) {
+        id
+        title
+        nodes {
+          id
+          title
+          posX
+          posY
+        }
+      }
     }
   }
 `;
