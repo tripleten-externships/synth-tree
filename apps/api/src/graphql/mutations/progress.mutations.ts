@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
 import { awardXp } from "../../services/xp";
 import { completeNodeForUser } from "src/services/progress";
-import { updateUserStreak } from "../../services/streak";
+import { getUserStreakDays } from "../../services/streak";
 import { checkAndAwardAchievements } from "../../services/achievements";
 
 builder.mutationFields((t) => ({
@@ -94,7 +94,7 @@ builder.mutationFields((t) => ({
           tx,
         );
 
-        const streakDays = await updateUserStreak(userId, tx);
+        const streakDays = await getUserStreakDays(userId, tx);
 
         const nodeCompletedCount = await tx.userNodeProgress.count({
           where: { userId, status: "COMPLETED" },
@@ -104,6 +104,7 @@ builder.mutationFields((t) => ({
           userId,
           lessonCompletedCount: nodeCompletedCount,
           streakDays,
+          completedNodeId: nodeId,
           tx,
         });
       });

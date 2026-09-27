@@ -1,10 +1,13 @@
 import { Prisma } from "@prisma/client";
 
-export async function updateUserStreak(
+export async function getUserStreakDays(
   userId: string,
   tx: Prisma.TransactionClient,
 ): Promise<number> {
-  // TEMP placeholder logic so your API compiles
-  // Replace with real SYN‑41 logic later
-  return 1;
+  const streak = await tx.userStreak.findUnique({
+    where: { userId },
+    select: { currentDays: true },
+  });
+
+  return streak?.currentDays ?? 0;
 }

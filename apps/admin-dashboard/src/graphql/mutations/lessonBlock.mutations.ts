@@ -8,7 +8,7 @@ builder.mutationField("completeLesson", (t) =>
       lessonId: t.arg.string({ required: true }),
     },
     resolve: async (_, { lessonId }, ctx) => {
-      const userId = ctx.user.id;
+      const userId = ctx.auth.requireAuth();
 
       return await prisma.$transaction(async (tx) => {
         // 1. Mark lesson as completed

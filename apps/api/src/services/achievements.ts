@@ -17,6 +17,8 @@ export async function checkAndAwardAchievements(ctx: {
   lessonCompletedCount?: number; // How many lessons the user has completed
   streakDays?: number; // Current streak length
   quizPerfect?: boolean; // Whether the user got a perfect quiz score
+  quizCompleted?: boolean;
+  completedNodeId?: string;
   tx: Prisma.TransactionClient; // Transaction client (required for atomic writes)
 }) {
   // We collect all achievement triggers the user qualifies for
@@ -52,6 +54,60 @@ export async function checkAndAwardAchievements(ctx: {
    */
   if (ctx.quizPerfect) {
     triggers.push("quiz_perfect"); // "Perfect Quiz"
+  }
+
+  if (ctx.quizCompleted) {
+    const [quizCount, completedQuizAttempts] = await Promise.all([
+      ctx.tx.quiz.count({ where: { deletedAt: null } }),
+      ctx.tx.quizAttempt.findMany({
+        where: { userId: ctx.userId, passed: true, quiz: { deletedAt: null } },
+        distinct: ["quizId"],
+        select: { quizId: true },
+      }),
+    ]);
+
+    if (quizCount > 0 && completedQuizAttempts.length >= quizCount) {
+      triggers.push("all_quizzes_completed");
+    }
+  }
+
+  if (ctx.completedNodeId) {
+    const completedNode = await ctx.tx.skillNode.findFirst({
+      where: { id: ctx.completedNodeId, deletedAt: null },
+      select: { treeId: true },
+    });
+
+    if (completedNode) {
+      const [branchNodeCount, completedBranchNodeCount, completedNodes] = await Promise.all([
+        ctx.tx.skillNode.count({
+          where: { treeId: completedNode.treeId, deletedAt: null },
+        }),
+        ctx.tx.userNodeProgress.count({
+          where: {
+            userId: ctx.userId,
+            status: "COMPLETED",
+            node: { treeId: completedNode.treeId, deletedAt: null },
+          },
+        }),
+        ctx.tx.userNodeProgress.findMany({
+          where: {
+            userId: ctx.userId,
+            status: "COMPLETED",
+            node: { deletedAt: null },
+          },
+          select: { node: { select: { treeId: true } } },
+        }),
+      ]);
+
+      if (branchNodeCount > 0 && completedBranchNodeCount >= branchNodeCount) {
+        triggers.push("branch_completed");
+      }
+
+      const completedTreeIds = new Set(completedNodes.map(({ node }) => node.treeId));
+      if (completedTreeIds.size >= 3) {
+        triggers.push("branches_completed:3");
+      }
+    }
   }
 
   // If no triggers matched, user earns nothing

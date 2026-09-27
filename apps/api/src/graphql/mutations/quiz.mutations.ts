@@ -7,6 +7,8 @@ import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import { completeNodeForUser } from "src/services/progress";
 import { awardXp } from "../../services/xp";
+import { getUserStreakDays } from "../../services/streak";
+import { checkAndAwardAchievements } from "../../services/achievements";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput } from "../inputs/quiz.inputs";
 
@@ -464,14 +466,22 @@ builder.mutationFields((t) => ({
         if (summary.passed === true) {
           await completeNodeForUser(tx, userId, existing.nodeId);
 
-          await awardXp(
-            ctx.prisma,
+          await awardXp(ctx.prisma, userId, QUIZ_PASS_XP, "quiz_pass", { quizId }, tx);
+
+          const streakDays = await getUserStreakDays(userId, tx);
+          const lessonCompletedCount = await tx.userNodeProgress.count({
+            where: { userId, status: "COMPLETED" },
+          });
+
+          await checkAndAwardAchievements({
             userId,
-            QUIZ_PASS_XP,
-            "quiz_pass",
-            { quizId },
+            lessonCompletedCount,
+            streakDays,
+            quizPerfect: summary.correctCount === summary.totalQuestions,
+            quizCompleted: true,
+            completedNodeId: existing.nodeId,
             tx,
-          );
+          });
         }
 
         return {
