@@ -3,14 +3,6 @@ import { useNavigate } from "react-router-dom";
 import RecommendedNextCarousel from "../components/RecommendedNextCarousel";
 import CourseCard from "../components/CourseCard";
 
-// Placeholder courses shown when the database has nothing published yet.
-// Once seed/admin-created courses exist, the API result wins automatically.
-const placeholderCourses = [
-  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
-  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
-  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
-];
-
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
   // navigate() lets us send the user to a different page when they click something
@@ -19,8 +11,7 @@ export default function Home() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const apiCourses = data?.publicGetAllCourses ?? [];
-  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
+  const courses = data?.publicGetAllCourses ?? [];
 
   return (
     <div className="flex flex-col items-center text-center gap-6">
@@ -33,15 +24,21 @@ export default function Home() {
 
       <RecommendedNextCarousel />
 
-      <div className="mt-12 grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3">
-        {courses.map((course) => (
-          <CourseCard
-            key={course.id}
-            id={course.id}
-            title={course.title}
-            description={course.description ?? ""}
-          />
-        ))}
+      <div className="mt-12 w-full max-w-5xl">
+        {courses.length === 0 ? (
+          <p className="text-gray-500">No courses yet</p>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                description={course.description ?? ""}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* "Browse catalog" card — clicking it takes the user to the full course catalog page.
