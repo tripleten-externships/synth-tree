@@ -78,7 +78,7 @@ export default function LeaderboardPage() {
        */}
       <table className="w-full border-collapse">
         <thead>
-          <tr className="text-left border-b">
+          <tr className="text-left border-b border-border">
             <th className="py-2">Rank</th>
             <th>Name</th>
             <th>XP</th>
@@ -94,7 +94,7 @@ export default function LeaderboardPage() {
             return (
               <tr
                 key={entry.userId}
-                className={`border-b ${isCurrentUser ? "bg-yellow-100 font-semibold" : ""}`}
+                className={`border-b border-border ${isCurrentUser ? "bg-accent font-semibold" : ""}`}
               >
                 {/* Rank */}
                 <td className="py-2">{entry.rank}</td>
@@ -123,7 +123,7 @@ export default function LeaderboardPage() {
                      */}
                     <span
                       aria-hidden="true"
-                      className={`h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm ${
+                      className={`h-8 w-8 items-center justify-center rounded-full bg-muted text-sm ${
                         entry.avatar ? "hidden" : "flex"
                       }`}
                     >
@@ -151,7 +151,7 @@ export default function LeaderboardPage() {
        * Always shown — even if the user is outside the top 100.
        * Uses the new API field currentUserRank.
        */}
-      <div className="mt-8 p-4 bg-blue-50 border rounded">
+      <div className="mt-8 p-4 bg-accent border border-border rounded">
         <h2 className="font-bold">Your Rank</h2>
         <p>You are ranked #{currentUserRank} globally.</p>
       </div>
