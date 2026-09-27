@@ -5,6 +5,13 @@ export const COMPLETE_NODE_PROGRESS = gql`
     completeNodeProgress(nodeId: $nodeId) {
       id
       status
+      awardedAchievements {
+        id
+        name
+        description
+        icon
+        color
+      }
     }
   }
 `;

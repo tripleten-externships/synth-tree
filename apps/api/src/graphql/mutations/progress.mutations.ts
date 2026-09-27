@@ -2,6 +2,8 @@ import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
 import { awardXp } from "../../services/xp";
 import { completeNodeForUser } from "src/services/progress";
+import { updateUserStreak } from "../../services/streak";
+import { checkAndAwardAchievements } from "../../services/achievements";
 
 builder.mutationFields((t) => ({
   startNodeProgress: t.prismaField({
@@ -9,7 +11,6 @@ builder.mutationFields((t) => ({
     args: {
       nodeId: t.arg.id({ required: true }),
     },
-
     resolve: async (query, _root, { nodeId }, ctx) => {
       const userId = ctx.auth.requireAuth();
 
@@ -25,16 +26,15 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Node not found");
       }
 
-      const existingProgress =
-        await ctx.prisma.userNodeProgress.findUnique({
-          ...query,
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId,
-            },
+      const existingProgress = await ctx.prisma.userNodeProgress.findUnique({
+        ...query,
+        where: {
+          userId_nodeId: {
+            userId,
+            nodeId,
           },
-        });
+        },
+      });
 
       if (existingProgress) {
         return existingProgress;
@@ -59,17 +59,9 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, { nodeId }, ctx) => {
       const userId = ctx.auth.requireAuth();
 
-      // Look up existence + XP reward up front so we can award XP alongside
-      // the shared completion policy.
       const nodeExists = await ctx.prisma.skillNode.findFirst({
-        where: {
-          id: nodeId,
-          deletedAt: null,
-        },
-        select: {
-          id: true,
-          xpReward: true,
-        },
+        where: { id: nodeId, deletedAt: null },
+        select: { id: true, xpReward: true },
       });
 
       if (!nodeExists) {
@@ -77,32 +69,19 @@ builder.mutationFields((t) => ({
       }
 
       const existingProgress = await ctx.prisma.userNodeProgress.findUnique({
-        where: {
-          userId_nodeId: {
-            userId,
-            nodeId,
-          },
-        },
+        where: { userId_nodeId: { userId, nodeId } },
         select: { status: true },
       });
 
-      // Early return on already-completed: no duplicate work or XP.
       if (existingProgress?.status === "COMPLETED") {
         return ctx.prisma.userNodeProgress.findUniqueOrThrow({
           ...query,
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId,
-            },
-          },
+          where: { userId_nodeId: { userId, nodeId } },
         });
       }
 
-      // Atomic: shared completion policy (existence check + required-quiz gate +
-      // idempotency + LESSON_COMPLETED daily-quest increment) AND the XP award
-      // commit together, so a failing award can't leave a COMPLETED node with
-      // no XP.
+      let awardedAchievements: any[] = [];
+
       await ctx.prisma.$transaction(async (tx) => {
         await completeNodeForUser(tx, userId, nodeId);
 
@@ -114,17 +93,30 @@ builder.mutationFields((t) => ({
           { nodeId },
           tx,
         );
+
+        const streakDays = await updateUserStreak(userId, tx);
+
+        const nodeCompletedCount = await tx.userNodeProgress.count({
+          where: { userId, status: "COMPLETED" },
+        });
+
+        awardedAchievements = await checkAndAwardAchievements({
+          userId,
+          lessonCompletedCount: nodeCompletedCount,
+          streakDays,
+          tx,
+        });
       });
 
-      return ctx.prisma.userNodeProgress.findUniqueOrThrow({
+      const progress = await ctx.prisma.userNodeProgress.findUniqueOrThrow({
         ...query,
-        where: {
-          userId_nodeId: {
-            userId,
-            nodeId,
-          },
-        },
+        where: { userId_nodeId: { userId, nodeId } },
       });
+
+      return {
+        ...progress,
+        awardedAchievements,
+      };
     },
   }),
 }));

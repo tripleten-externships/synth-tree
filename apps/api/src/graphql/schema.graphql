@@ -1,6 +1,214 @@
-"""Batch payloads from prisma."""
+type Achievement {
+  color: String!
+  description: String!
+  icon: String!
+  id: ID!
+  name: String!
+  trigger: String!
+  userAchievements(
+    cursor: UserAchievementWhereUniqueInput
+    distinct: [UserAchievementScalarFieldEnum!]
+    orderBy: [UserAchievementOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: UserAchievementWhereInput
+  ): [UserAchievement!]!
+}
+
+input AchievementCountOrderByAggregateInput {
+  color: SortOrder
+  description: SortOrder
+  icon: SortOrder
+  id: SortOrder
+  name: SortOrder
+  trigger: SortOrder
+}
+
+input AchievementCreateInput {
+  color: String!
+  description: String!
+  icon: String!
+  id: String!
+  name: String!
+  trigger: String!
+  userAchievements: UserAchievementCreateNestedManyWithoutAchievementInput
+}
+
+input AchievementCreateManyInput {
+  color: String!
+  description: String!
+  icon: String!
+  id: String!
+  name: String!
+  trigger: String!
+}
+
+input AchievementCreateNestedOneWithoutUserAchievementsInput {
+  connect: AchievementWhereUniqueInput
+  connectOrCreate: AchievementCreateOrConnectWithoutUserAchievementsInput
+  create: AchievementCreateWithoutUserAchievementsInput
+}
+
+input AchievementCreateOrConnectWithoutUserAchievementsInput {
+  create: AchievementCreateWithoutUserAchievementsInput!
+  where: AchievementWhereUniqueInput!
+}
+
+input AchievementCreateWithoutUserAchievementsInput {
+  color: String!
+  description: String!
+  icon: String!
+  id: String!
+  name: String!
+  trigger: String!
+}
+
+input AchievementMaxOrderByAggregateInput {
+  color: SortOrder
+  description: SortOrder
+  icon: SortOrder
+  id: SortOrder
+  name: SortOrder
+  trigger: SortOrder
+}
+
+input AchievementMinOrderByAggregateInput {
+  color: SortOrder
+  description: SortOrder
+  icon: SortOrder
+  id: SortOrder
+  name: SortOrder
+  trigger: SortOrder
+}
+
+input AchievementOrderByWithAggregationInput {
+  _count: AchievementCountOrderByAggregateInput
+  _max: AchievementMaxOrderByAggregateInput
+  _min: AchievementMinOrderByAggregateInput
+  color: SortOrder
+  description: SortOrder
+  icon: SortOrder
+  id: SortOrder
+  name: SortOrder
+  trigger: SortOrder
+}
+
+input AchievementOrderByWithRelationInput {
+  color: SortOrder
+  description: SortOrder
+  icon: SortOrder
+  id: SortOrder
+  name: SortOrder
+  trigger: SortOrder
+  userAchievements: UserAchievementOrderByRelationAggregateInput
+}
+
+enum AchievementScalarFieldEnum {
+  color
+  description
+  icon
+  id
+  name
+  trigger
+}
+
+input AchievementScalarRelationFilter {
+  is: AchievementWhereInput
+  isNot: AchievementWhereInput
+}
+
+input AchievementScalarWhereWithAggregatesInput {
+  AND: [AchievementScalarWhereWithAggregatesInput!]
+  NOT: [AchievementScalarWhereWithAggregatesInput!]
+  OR: [AchievementScalarWhereWithAggregatesInput!]
+  color: StringWithAggregatesFilter
+  description: StringWithAggregatesFilter
+  icon: StringWithAggregatesFilter
+  id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  trigger: StringWithAggregatesFilter
+}
+
+input AchievementUpdateInput {
+  color: StringFieldUpdateOperationsInput
+  description: StringFieldUpdateOperationsInput
+  icon: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  trigger: StringFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutAchievementNestedInput
+}
+
+input AchievementUpdateManyMutationInput {
+  color: StringFieldUpdateOperationsInput
+  description: StringFieldUpdateOperationsInput
+  icon: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  trigger: StringFieldUpdateOperationsInput
+}
+
+input AchievementUpdateOneRequiredWithoutUserAchievementsNestedInput {
+  connect: AchievementWhereUniqueInput
+  connectOrCreate: AchievementCreateOrConnectWithoutUserAchievementsInput
+  create: AchievementCreateWithoutUserAchievementsInput
+  update: AchievementUpdateToOneWithWhereWithoutUserAchievementsInput
+  upsert: AchievementUpsertWithoutUserAchievementsInput
+}
+
+input AchievementUpdateToOneWithWhereWithoutUserAchievementsInput {
+  data: AchievementUpdateWithoutUserAchievementsInput!
+  where: AchievementWhereInput
+}
+
+input AchievementUpdateWithoutUserAchievementsInput {
+  color: StringFieldUpdateOperationsInput
+  description: StringFieldUpdateOperationsInput
+  icon: StringFieldUpdateOperationsInput
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  trigger: StringFieldUpdateOperationsInput
+}
+
+input AchievementUpsertWithoutUserAchievementsInput {
+  create: AchievementCreateWithoutUserAchievementsInput!
+  update: AchievementUpdateWithoutUserAchievementsInput!
+  where: AchievementWhereInput
+}
+
+input AchievementWhereInput {
+  AND: [AchievementWhereInput!]
+  NOT: [AchievementWhereInput!]
+  OR: [AchievementWhereInput!]
+  color: StringFilter
+  description: StringFilter
+  icon: StringFilter
+  id: StringFilter
+  name: StringFilter
+  trigger: StringFilter
+  userAchievements: UserAchievementListRelationFilter
+}
+
+input AchievementWhereUniqueInput {
+  AND: [AchievementWhereInput!]
+  NOT: [AchievementWhereInput!]
+  OR: [AchievementWhereInput!]
+  color: StringFilter
+  description: StringFilter
+  icon: StringFilter
+  id: String
+  name: StringFilter
+  trigger: StringFilter
+  userAchievements: UserAchievementListRelationFilter
+}
+
+"""
+Batch payloads from prisma.
+"""
 type BatchPayload {
-  """Prisma Batch Payload"""
+  """
+  Prisma Batch Payload
+  """
   count: Int!
 }
 
@@ -51,7 +259,14 @@ type Course {
   id: ID!
   status: CourseStatus!
   title: String!
-  trees(cursor: SkillTreeWhereUniqueInput, distinct: [SkillTreeScalarFieldEnum!], orderBy: [SkillTreeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillTreeWhereInput): [SkillTree!]!
+  trees(
+    cursor: SkillTreeWhereUniqueInput
+    distinct: [SkillTreeScalarFieldEnum!]
+    orderBy: [SkillTreeOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: SkillTreeWhereInput
+  ): [SkillTree!]!
   updatedAt: DateTime!
 }
 
@@ -1124,7 +1339,13 @@ type Mutation {
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
   createQuiz(nodeId: String!, required: Boolean!, title: String!): Quiz
   createQuizOption(isCorrect: Boolean, questionId: String!, text: String!): QuizOption
-  createQuizQuestion(canonicalAnswer: String, order: Int, prompt: String!, quizId: String!, type: QuestionType!): QuizQuestion
+  createQuizQuestion(
+    canonicalAnswer: String
+    order: Int
+    prompt: String!
+    quizId: String!
+    type: QuestionType!
+  ): QuizQuestion
   createSkillNodeBelow(input: CreateSkillNodeBelowInput!): SkillNode
   createSkillNodeToRight(input: CreateSkillNodeToRightInput!): SkillNode
   createSkillTree(input: CreateSkillTreeInput!): SkillTree
@@ -1155,7 +1376,9 @@ type Mutation {
   updateSkillTree(id: ID!, input: UpdateSkillTreeInput!): SkillTree
 }
 
-"""Never fill this, its created for inputs that dont have fields"""
+"""
+Never fill this, its created for inputs that dont have fields
+"""
 scalar NEVER
 
 input NestedBoolFilter {
@@ -1617,13 +1840,27 @@ enum QuestionType {
 }
 
 type Quiz {
-  attempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
+  attempts(
+    cursor: QuizAttemptWhereUniqueInput
+    distinct: [QuizAttemptScalarFieldEnum!]
+    orderBy: [QuizAttemptOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizAttemptWhereInput
+  ): [QuizAttempt!]!
   createdAt: DateTime!
   deletedAt: DateTime
   id: ID!
   node: SkillNode!
   nodeId: String!
-  questions(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
+  questions(
+    cursor: QuizQuestionWhereUniqueInput
+    distinct: [QuizQuestionScalarFieldEnum!]
+    orderBy: [QuizQuestionOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizQuestionWhereInput
+  ): [QuizQuestion!]!
   required: Boolean!
   title: String
   updatedAt: DateTime!
@@ -1636,7 +1873,14 @@ input QuizAnswerInput {
 }
 
 type QuizAttempt {
-  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  answers(
+    cursor: QuizAttemptAnswerWhereUniqueInput
+    distinct: [QuizAttemptAnswerScalarFieldEnum!]
+    orderBy: [QuizAttemptAnswerOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizAttemptAnswerWhereInput
+  ): [QuizAttemptAnswer!]!
   id: ID!
   passed: Boolean
   quiz: Quiz!
@@ -2654,12 +2898,26 @@ input QuizOrderByWithRelationInput {
 }
 
 type QuizQuestion {
-  answers(cursor: QuizAttemptAnswerWhereUniqueInput, distinct: [QuizAttemptAnswerScalarFieldEnum!], orderBy: [QuizAttemptAnswerOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptAnswerWhereInput): [QuizAttemptAnswer!]!
+  answers(
+    cursor: QuizAttemptAnswerWhereUniqueInput
+    distinct: [QuizAttemptAnswerScalarFieldEnum!]
+    orderBy: [QuizAttemptAnswerOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizAttemptAnswerWhereInput
+  ): [QuizAttemptAnswer!]!
   canonicalAnswer: String
   createdAt: DateTime!
   explanation: String
   id: ID!
-  options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
+  options(
+    cursor: QuizOptionWhereUniqueInput
+    distinct: [QuizOptionScalarFieldEnum!]
+    orderBy: [QuizOptionOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizOptionWhereInput
+  ): [QuizOption!]!
   order: Int!
   prompt: String!
   quiz: Quiz!
@@ -3262,15 +3520,43 @@ type SkillNode {
   createdAt: DateTime!
   deletedAt: DateTime
   id: ID!
-  lessons(cursor: LessonBlocksWhereUniqueInput, distinct: [LessonBlocksScalarFieldEnum!], orderBy: [LessonBlocksOrderByWithRelationInput!], skip: Int, take: Int, where: LessonBlocksWhereInput): [LessonBlocks!]!
+  lessons(
+    cursor: LessonBlocksWhereUniqueInput
+    distinct: [LessonBlocksScalarFieldEnum!]
+    orderBy: [LessonBlocksOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: LessonBlocksWhereInput
+  ): [LessonBlocks!]!
   orderInStep: Int!
   posX: Int
   posY: Int
-  prerequisites(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  prerequisites(
+    cursor: SkillNodePrerequisiteWhereUniqueInput
+    distinct: [SkillNodePrerequisiteScalarFieldEnum!]
+    orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: SkillNodePrerequisiteWhereInput
+  ): [SkillNodePrerequisite!]!
   progressForViewer: UserNodeProgress
-  progresses(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
+  progresses(
+    cursor: UserNodeProgressWhereUniqueInput
+    distinct: [UserNodeProgressScalarFieldEnum!]
+    orderBy: [UserNodeProgressOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: UserNodeProgressWhereInput
+  ): [UserNodeProgress!]!
   quiz: Quiz
-  requiredFor(cursor: SkillNodePrerequisiteWhereUniqueInput, distinct: [SkillNodePrerequisiteScalarFieldEnum!], orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodePrerequisiteWhereInput): [SkillNodePrerequisite!]!
+  requiredFor(
+    cursor: SkillNodePrerequisiteWhereUniqueInput
+    distinct: [SkillNodePrerequisiteScalarFieldEnum!]
+    orderBy: [SkillNodePrerequisiteOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: SkillNodePrerequisiteWhereInput
+  ): [SkillNodePrerequisite!]!
   step: Int!
   title: String!
   tree: SkillTree!
@@ -4228,7 +4514,14 @@ type SkillTree {
   deletedAt: DateTime
   description: String
   id: ID!
-  nodes(cursor: SkillNodeWhereUniqueInput, distinct: [SkillNodeScalarFieldEnum!], orderBy: [SkillNodeOrderByWithRelationInput!], skip: Int, take: Int, where: SkillNodeWhereInput): [SkillNode!]!
+  nodes(
+    cursor: SkillNodeWhereUniqueInput
+    distinct: [SkillNodeScalarFieldEnum!]
+    orderBy: [SkillNodeOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: SkillNodeWhereInput
+  ): [SkillNode!]!
   title: String!
   updatedAt: DateTime!
 }
@@ -4644,26 +4937,69 @@ input UpdateSkillTreeInput {
 }
 
 type User {
-  coursesAuthored(cursor: CourseWhereUniqueInput, distinct: [CourseScalarFieldEnum!], orderBy: [CourseOrderByWithRelationInput!], skip: Int, take: Int, where: CourseWhereInput): [Course!]!
+  coursesAuthored(
+    cursor: CourseWhereUniqueInput
+    distinct: [CourseScalarFieldEnum!]
+    orderBy: [CourseOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: CourseWhereInput
+  ): [Course!]!
   createdAt: DateTime!
   dailyGoalMinutes: Int
-  dailyQuests(cursor: UserDailyQuestWhereUniqueInput, distinct: [UserDailyQuestScalarFieldEnum!], orderBy: [UserDailyQuestOrderByWithRelationInput!], skip: Int, take: Int, where: UserDailyQuestWhereInput): [UserDailyQuest!]!
+  dailyQuests(
+    cursor: UserDailyQuestWhereUniqueInput
+    distinct: [UserDailyQuestScalarFieldEnum!]
+    orderBy: [UserDailyQuestOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: UserDailyQuestWhereInput
+  ): [UserDailyQuest!]!
   email: String!
   hearts: UserHearts
   id: ID!
   interests: [String!]!
   name: String
-  nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
+  nodeProgress(
+    cursor: UserNodeProgressWhereUniqueInput
+    distinct: [UserNodeProgressScalarFieldEnum!]
+    orderBy: [UserNodeProgressOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: UserNodeProgressWhereInput
+  ): [UserNodeProgress!]!
   onboardingComplete: Boolean!
   photoUrl: String
-  quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
+  quizAttempts(
+    cursor: QuizAttemptWhereUniqueInput
+    distinct: [QuizAttemptScalarFieldEnum!]
+    orderBy: [QuizAttemptOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: QuizAttemptWhereInput
+  ): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
   timezone: String!
   updatedAt: DateTime!
+  userAchievements(
+    cursor: UserAchievementWhereUniqueInput
+    distinct: [UserAchievementScalarFieldEnum!]
+    orderBy: [UserAchievementOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: UserAchievementWhereInput
+  ): [UserAchievement!]!
   xp: UserXp
-  xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
+  xpEvents(
+    cursor: XpEventWhereUniqueInput
+    distinct: [XpEventScalarFieldEnum!]
+    orderBy: [XpEventOrderByWithRelationInput!]
+    skip: Int
+    take: Int
+    where: XpEventWhereInput
+  ): [XpEvent!]!
 }
 
 input UserAvgOrderByAggregateInput {
@@ -4702,6 +5038,7 @@ input UserCreateInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4756,6 +5093,12 @@ input UserCreateNestedOneWithoutStreakInput {
   create: UserCreateWithoutStreakInput
 }
 
+input UserCreateNestedOneWithoutUserAchievementsInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutUserAchievementsInput
+  create: UserCreateWithoutUserAchievementsInput
+}
+
 input UserCreateNestedOneWithoutXpEventsInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutXpEventsInput
@@ -4798,6 +5141,11 @@ input UserCreateOrConnectWithoutStreakInput {
   where: UserWhereUniqueInput!
 }
 
+input UserCreateOrConnectWithoutUserAchievementsInput {
+  create: UserCreateWithoutUserAchievementsInput!
+  where: UserWhereUniqueInput!
+}
+
 input UserCreateOrConnectWithoutXpEventsInput {
   create: UserCreateWithoutXpEventsInput!
   where: UserWhereUniqueInput!
@@ -4825,6 +5173,7 @@ input UserCreateWithoutCoursesAuthoredInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4846,6 +5195,7 @@ input UserCreateWithoutDailyQuestsInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4867,6 +5217,7 @@ input UserCreateWithoutHeartsInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4888,6 +5239,7 @@ input UserCreateWithoutNodeProgressInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4909,6 +5261,7 @@ input UserCreateWithoutQuizAttemptsInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
@@ -4929,6 +5282,26 @@ input UserCreateWithoutStreakInput {
   quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
   role: Role
   timezone: String
+  updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
+  xp: UserXpCreateNestedOneWithoutUserInput
+  xpEvents: XpEventCreateNestedManyWithoutUserInput
+}
+
+input UserCreateWithoutUserAchievementsInput {
+  coursesAuthored: CourseCreateNestedManyWithoutAuthorInput
+  createdAt: DateTime
+  dailyQuests: UserDailyQuestCreateNestedManyWithoutUserInput
+  email: String!
+  hearts: UserHeartsCreateNestedOneWithoutUserInput
+  id: String!
+  interests: [String!]
+  name: String
+  nodeProgress: UserNodeProgressCreateNestedManyWithoutUserInput
+  photoUrl: String
+  quizAttempts: QuizAttemptCreateNestedManyWithoutUserInput
+  role: Role
+  streak: UserStreakCreateNestedOneWithoutUserInput
   updatedAt: DateTime
   xp: UserXpCreateNestedOneWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
@@ -4952,6 +5325,7 @@ input UserCreateWithoutXpEventsInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xp: UserXpCreateNestedOneWithoutUserInput
 }
 
@@ -4973,6 +5347,7 @@ input UserCreateWithoutXpInput {
   streak: UserStreakCreateNestedOneWithoutUserInput
   timezone: String
   updatedAt: DateTime
+  userAchievements: UserAchievementCreateNestedManyWithoutUserInput
   xpEvents: XpEventCreateNestedManyWithoutUserInput
 }
 
@@ -5787,6 +6162,7 @@ input UserOrderByWithRelationInput {
   streak: UserStreakOrderByWithRelationInput
   timezone: SortOrder
   updatedAt: SortOrder
+  userAchievements: UserAchievementOrderByRelationAggregateInput
   xp: UserXpOrderByWithRelationInput
   xpEvents: XpEventOrderByRelationAggregateInput
 }
@@ -6023,6 +6399,7 @@ input UserUpdateInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6089,6 +6466,14 @@ input UserUpdateOneRequiredWithoutStreakNestedInput {
   upsert: UserUpsertWithoutStreakInput
 }
 
+input UserUpdateOneRequiredWithoutUserAchievementsNestedInput {
+  connect: UserWhereUniqueInput
+  connectOrCreate: UserCreateOrConnectWithoutUserAchievementsInput
+  create: UserCreateWithoutUserAchievementsInput
+  update: UserUpdateToOneWithWhereWithoutUserAchievementsInput
+  upsert: UserUpsertWithoutUserAchievementsInput
+}
+
 input UserUpdateOneRequiredWithoutXpEventsNestedInput {
   connect: UserWhereUniqueInput
   connectOrCreate: UserCreateOrConnectWithoutXpEventsInput
@@ -6135,6 +6520,11 @@ input UserUpdateToOneWithWhereWithoutStreakInput {
   where: UserWhereInput
 }
 
+input UserUpdateToOneWithWhereWithoutUserAchievementsInput {
+  data: UserUpdateWithoutUserAchievementsInput!
+  where: UserWhereInput
+}
+
 input UserUpdateToOneWithWhereWithoutXpEventsInput {
   data: UserUpdateWithoutXpEventsInput!
   where: UserWhereInput
@@ -6162,6 +6552,7 @@ input UserUpdateWithoutCoursesAuthoredInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6183,6 +6574,7 @@ input UserUpdateWithoutDailyQuestsInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6204,6 +6596,7 @@ input UserUpdateWithoutHeartsInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6225,6 +6618,7 @@ input UserUpdateWithoutNodeProgressInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6246,6 +6640,7 @@ input UserUpdateWithoutQuizAttemptsInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
@@ -6266,6 +6661,26 @@ input UserUpdateWithoutStreakInput {
   quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
   role: EnumRoleFieldUpdateOperationsInput
   timezone: StringFieldUpdateOperationsInput
+  updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
+  xp: UserXpUpdateOneWithoutUserNestedInput
+  xpEvents: XpEventUpdateManyWithoutUserNestedInput
+}
+
+input UserUpdateWithoutUserAchievementsInput {
+  coursesAuthored: CourseUpdateManyWithoutAuthorNestedInput
+  createdAt: DateTimeFieldUpdateOperationsInput
+  dailyQuests: UserDailyQuestUpdateManyWithoutUserNestedInput
+  email: StringFieldUpdateOperationsInput
+  hearts: UserHeartsUpdateOneWithoutUserNestedInput
+  id: StringFieldUpdateOperationsInput
+  interests: [String!]
+  name: NullableStringFieldUpdateOperationsInput
+  nodeProgress: UserNodeProgressUpdateManyWithoutUserNestedInput
+  photoUrl: NullableStringFieldUpdateOperationsInput
+  quizAttempts: QuizAttemptUpdateManyWithoutUserNestedInput
+  role: EnumRoleFieldUpdateOperationsInput
+  streak: UserStreakUpdateOneWithoutUserNestedInput
   updatedAt: DateTimeFieldUpdateOperationsInput
   xp: UserXpUpdateOneWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
@@ -6289,6 +6704,7 @@ input UserUpdateWithoutXpEventsInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xp: UserXpUpdateOneWithoutUserNestedInput
 }
 
@@ -6310,6 +6726,7 @@ input UserUpdateWithoutXpInput {
   streak: UserStreakUpdateOneWithoutUserNestedInput
   timezone: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
+  userAchievements: UserAchievementUpdateManyWithoutUserNestedInput
   xpEvents: XpEventUpdateManyWithoutUserNestedInput
 }
 
@@ -6354,6 +6771,12 @@ input UserUpsertWithoutStreakInput {
   where: UserWhereInput
 }
 
+input UserUpsertWithoutUserAchievementsInput {
+  create: UserCreateWithoutUserAchievementsInput!
+  update: UserUpdateWithoutUserAchievementsInput!
+  where: UserWhereInput
+}
+
 input UserUpsertWithoutXpEventsInput {
   create: UserCreateWithoutXpEventsInput!
   update: UserUpdateWithoutXpEventsInput!
@@ -6387,6 +6810,7 @@ input UserWhereInput {
   streak: UserStreakWhereInput
   timezone: StringFilter
   updatedAt: DateTimeFilter
+  userAchievements: UserAchievementListRelationFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter
 }
@@ -6412,6 +6836,7 @@ input UserWhereUniqueInput {
   streak: UserStreakWhereInput
   timezone: StringFilter
   updatedAt: DateTimeFilter
+  userAchievements: UserAchievementListRelationFilter
   xp: UserXpWhereInput
   xpEvents: XpEventListRelationFilter
 }

@@ -19,38 +19,44 @@ import { UserStreakObject } from "@graphql/__generated__/UserStreak";
 import { UserHeartsObject } from "@graphql/__generated__/UserHearts";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
 import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
+import { AchievementObject } from "@graphql/__generated__/Achievement";
+import { UserAchievementObject } from "@graphql/__generated__/UserAchievement";
 
-// We are not using the auto crud from pothos. Utilize the prisma models. Inputs types and other types will still need to be manually created.
-// Can break this file into multiple. Used one now for brevity.
-
+// -----------------------------
+// User
+// -----------------------------
 builder.prismaObject("User", {
   ...UserObject,
   fields: (t) => ({
     ...UserObject.fields(t),
 
+    achievements: t.prismaField({
+      type: ["Achievement"],
+      resolve: async (_query, parent, _args, ctx) => {
+        const rows = await ctx.prisma.userAchievement.findMany({
+          where: { userId: parent.id },
+          include: { achievement: true },
+        });
+
+        return rows.map((row) => row.achievement);
+      },
+    }),
+
     recommendedNext: t.prismaField({
       type: ["SkillNode"],
       args: {
-        limit: t.arg.int({
-          required: false,
-          defaultValue: 6,
-        }),
+        limit: t.arg.int({ required: false, defaultValue: 6 }),
       },
       resolve: async (query, parent, args, context) => {
         const rawLimit = args.limit ?? 6;
         const limit = Math.min(Math.max(rawLimit, 1), 6);
 
         const completedProgress = await context.prisma.userNodeProgress.findMany({
-          where: {
-            userId: parent.id,
-            status: "COMPLETED",
-          },
-          select: {
-            nodeId: true,
-          },
+          where: { userId: parent.id, status: "COMPLETED" },
+          select: { nodeId: true },
         });
 
-        const completedNodeIds = completedProgress.map((progress) => progress.nodeId);
+        const completedNodeIds = completedProgress.map((p) => p.nodeId);
 
         return context.prisma.skillNode.findMany({
           ...query,
@@ -58,59 +64,52 @@ builder.prismaObject("User", {
             progresses: {
               none: {
                 userId: parent.id,
-                status: {
-                  in: ["COMPLETED", "IN_PROGRESS"],
-                },
+                status: { in: ["COMPLETED", "IN_PROGRESS"] },
               },
             },
             prerequisites: {
-              every: {
-                dependsOnNodeId: {
-                  in: completedNodeIds,
-                },
-              },
+              every: { dependsOnNodeId: { in: completedNodeIds } },
             },
           },
           take: limit,
-          orderBy: {
-            step: "asc",
-          },
+          orderBy: { step: "asc" },
         });
       },
     }),
   }),
 });
+
+// -----------------------------
+// Core Models
+// -----------------------------
 builder.prismaObject("Course", CourseObject);
 builder.prismaObject("SkillTree", SkillTreeObject);
+
 builder.prismaObject("SkillNode", {
   ...SkillNodeObject,
   fields: (t) => ({
     ...SkillNodeObject.fields(t),
 
-    // The authenticated viewer's progress row for this node, or null if they
-    // have no progress record yet. Lets the learner tree query surface per-node
-    // status (NOT_STARTED / IN_PROGRESS / COMPLETED) without a second round-trip.
     progressForViewer: t.prismaField({
       type: "UserNodeProgress",
       nullable: true,
       resolve: async (query, parent, _args, ctx) => {
         const userId = ctx.auth.requireAuth();
-
         return ctx.prisma.userNodeProgress.findUnique({
           ...query,
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId: parent.id,
-            },
-          },
+          where: { userId_nodeId: { userId, nodeId: parent.id } },
         });
       },
     }),
   }),
 });
+
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
+
+// -----------------------------
+// Quiz Models
+// -----------------------------
 builder.prismaObject("Quiz", QuizObject);
 // Answer keys (FILL canonicalAnswer, explanations) are only visible to admins
 // or to a learner who has already submitted an attempt for the quiz.
@@ -156,10 +155,6 @@ builder.prismaObject("QuizOption", {
   fields: (t) => ({
     ...QuizOptionObject.fields(t),
 
-    // Answer-key guard. isCorrect is only revealed to admins, or to a learner
-    // who has already submitted an attempt for this option's quiz. Otherwise it
-    // resolves to null, so a hand-crafted query can't read correct answers
-    // before submitting. The results screen reads it post-submit (allowed).
     isCorrect: t.boolean({
       nullable: true,
       resolve: async (parent, _args, ctx) => {
@@ -184,16 +179,38 @@ builder.prismaObject("QuizOption", {
     }),
   }),
 });
+
 builder.prismaObject("QuizAttempt", QuizAttemptObject);
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
-builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
-// XP / streak models (added in #75). The User object exposes relations to these,
-// so the schema build requires them to be implemented here.
+
+// -----------------------------
+// UserNodeProgress
+// -----------------------------
+builder.prismaObject("UserNodeProgress", {
+  ...UserNodeProgressObject,
+  fields: (t) => ({
+    ...UserNodeProgressObject.fields(t),
+  }),
+});
+
+// -----------------------------
+// XP / Streak / Hearts / Events / DailyQuest
+// -----------------------------
 builder.prismaObject("UserXp", UserXpObject);
 builder.prismaObject("UserStreak", UserStreakObject);
 builder.prismaObject("UserHearts", UserHeartsObject);
 builder.prismaObject("XpEvent", XpEventObject);
 builder.prismaObject("UserDailyQuest", UserDailyQuestObject);
+
+// -----------------------------
+// Achievements
+// -----------------------------
+builder.prismaObject("Achievement", AchievementObject);
+builder.prismaObject("UserAchievement", UserAchievementObject);
+
+// -----------------------------
+// CourseProgress Shape
+// -----------------------------
 export type CourseProgressShape = {
   courseId: string;
   totalNodes: number;
