@@ -10,6 +10,12 @@ import {
 } from "@graphql/inputs/skillNode.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
+import {
+  COLUMN_GAP,
+  FIRST_NODE_POSITION,
+  ROW_GAP,
+  findFreePosition,
+} from "src/services/skillNode/placeSkillNode";
 
 builder.mutationFields((t) => ({
   // ===== SkillNodes (structural & gating) =====
@@ -51,14 +57,15 @@ builder.mutationFields((t) => ({
           );
         }
 
+        const position = await findFreePosition(tx, treeId, FIRST_NODE_POSITION);
+
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step: 1,
             orderInStep: 1,
-            posX: 1,
-            posY: 1,
+            ...position,
           },
         });
 
@@ -110,14 +117,21 @@ builder.mutationFields((t) => ({
 
         const newOrderInStep = (lastNodeInStep?.orderInStep ?? 0) + 1;
 
+        // Canvas spot: right of the row's last node (the one that gates the
+        // new node), so the row reads left to right in orderInStep order.
+        const anchor = lastNodeInStep ?? ref;
+        const position = await findFreePosition(tx, treeId, {
+          posX: (anchor.posX ?? 0) + COLUMN_GAP,
+          posY: anchor.posY ?? 0,
+        });
+
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step,
             orderInStep: newOrderInStep,
-            posX: newOrderInStep,
-            posY: step,
+            ...position,
           },
         });
 
@@ -195,14 +209,19 @@ builder.mutationFields((t) => ({
           throw new GraphQLError("No nodes found in the row above to gate from");
         }
 
+        // Canvas spot: straight under the node the author added it from.
+        const position = await findFreePosition(tx, treeId, {
+          posX: ref.posX ?? 0,
+          posY: (ref.posY ?? 0) + ROW_GAP,
+        });
+
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step: newStep,
             orderInStep: 1, // first node in the new row
-            posX: 1,
-            posY: newStep,
+            ...position,
           },
         });
 
