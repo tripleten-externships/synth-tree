@@ -15,6 +15,7 @@ import {
   FIRST_NODE_POSITION,
   ROW_GAP,
   findFreePosition,
+  isOnCanvas,
 } from "src/services/skillNode/placeSkillNode";
 
 builder.mutationFields((t) => ({
@@ -57,15 +58,14 @@ builder.mutationFields((t) => ({
           );
         }
 
-        const position = await findFreePosition(tx, treeId, FIRST_NODE_POSITION);
-
+        // The tree is empty, so the first spot is always free.
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step: 1,
             orderInStep: 1,
-            ...position,
+            ...FIRST_NODE_POSITION,
           },
         });
 
@@ -254,7 +254,7 @@ builder.mutationFields((t) => ({
       requireAdmin(ctx);
 
       // posX/posY are percentages of the canvas (0-100).
-      const outOfRange = (v: number | null | undefined) => v != null && (v < 0 || v > 100);
+      const outOfRange = (v: number | null | undefined) => v != null && !isOnCanvas(v);
       if (outOfRange(input.posX) || outOfRange(input.posY)) {
         throw new GraphQLError("posX and posY must be between 0 and 100", {
           extensions: { code: "BAD_USER_INPUT" },
