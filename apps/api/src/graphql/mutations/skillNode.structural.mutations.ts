@@ -253,6 +253,14 @@ builder.mutationFields((t) => ({
       ctx.auth.requireAuth();
       requireAdmin(ctx);
 
+      // posX/posY are percentages of the canvas (0-100).
+      const outOfRange = (v: number | null | undefined) => v != null && (v < 0 || v > 100);
+      if (outOfRange(input.posX) || outOfRange(input.posY)) {
+        throw new GraphQLError("posX and posY must be between 0 and 100", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
+
       return ctx.prisma.$transaction(async (tx) => {
         const node = await tx.skillNode.findUnique({
           where: { id },

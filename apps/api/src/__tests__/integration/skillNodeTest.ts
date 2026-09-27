@@ -196,4 +196,26 @@ describe("SkillNode positions", () => {
       ]);
     });
   });
+
+  describe("updateSkillNode range check", () => {
+    it.each([
+      ["posX above 100", { posX: 101 }],
+      ["posY below 0", { posY: -5 }],
+    ])("rejects %s", async (_label, input) => {
+      const a = await createFirst();
+
+      const res = await run(UPDATE_NODE, { id: a.id, input });
+
+      expect(res.errors).toBeDefined();
+      expect(res.errors[0].extensions.code).toBe("BAD_USER_INPUT");
+      const stored = await prisma.skillNode.findUniqueOrThrow({ where: { id: a.id } });
+      expect(positionOf(stored as any)).toEqual(positionOf(a));
+    });
+
+    it("accepts the edges of the canvas", async () => {
+      const a = await createFirst();
+      const moved = await moveNode(a.id, 0, 100);
+      expect(positionOf(moved)).toEqual({ posX: 0, posY: 100 });
+    });
+  });
 });
