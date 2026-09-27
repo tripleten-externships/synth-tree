@@ -16,10 +16,12 @@ export default function LeaderboardPage() {
    * entries → the list of leaderboard rows returned by the API
    * currentUserRank → the user's global rank (even if outside top 100)
    * loading → controls the loading state while fetching data
+   * error → true when the request failed, so we don't show the empty state
    */
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [currentUserRank, setCurrentUserRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Firebase authenticated user (contains uid, displayName, etc.)
   const { user } = useAuth();
@@ -43,6 +45,9 @@ export default function LeaderboardPage() {
 
         // Store the user's global rank
         setCurrentUserRank(data.currentUserRank);
+      } catch (err) {
+        console.error("Failed to load leaderboard", err);
+        setError(true);
       } finally {
         // Stop showing the loading state
         setLoading(false);
@@ -57,6 +62,18 @@ export default function LeaderboardPage() {
    */
   if (loading) {
     return <div className="p-8">Loading leaderboard...</div>;
+  }
+
+  /**
+   * If the request failed, say so instead of showing the empty state.
+   */
+  if (error) {
+    return (
+      <div className="p-8" role="alert">
+        <p className="font-semibold">Couldn't load the leaderboard.</p>
+        <p className="text-muted-foreground">Please refresh the page to try again.</p>
+      </div>
+    );
   }
 
   /**
