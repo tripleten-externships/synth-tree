@@ -83,7 +83,10 @@ describe("SkillNode positions", () => {
     return res.data.updateSkillNode;
   };
 
-  const positionOf = (n: { posX: number; posY: number }) => ({ posX: n.posX, posY: n.posY });
+  const positionOf = (n: { posX: number | null; posY: number | null }) => ({
+    posX: n.posX,
+    posY: n.posY,
+  });
 
   beforeAll(async () => {
     server = await getTestServer();
@@ -189,7 +192,7 @@ describe("SkillNode positions", () => {
         orderBy: { orderInStep: "asc" },
       });
       expect(
-        after.map((n) => ({ id: n.id, orderInStep: n.orderInStep, ...positionOf(n as any) })),
+        after.map((n) => ({ id: n.id, orderInStep: n.orderInStep, ...positionOf(n) })),
       ).toEqual([
         { id: a.id, orderInStep: 1, posX: 10, posY: 10 },
         { id: c.id, orderInStep: 2, posX: 50, posY: 10 },
@@ -209,7 +212,7 @@ describe("SkillNode positions", () => {
       expect(res.errors).toBeDefined();
       expect(res.errors[0].extensions.code).toBe("BAD_USER_INPUT");
       const stored = await prisma.skillNode.findUniqueOrThrow({ where: { id: a.id } });
-      expect(positionOf(stored as any)).toEqual(positionOf(a));
+      expect(positionOf(stored)).toEqual(positionOf(a));
     });
 
     it("accepts the edges of the canvas", async () => {
