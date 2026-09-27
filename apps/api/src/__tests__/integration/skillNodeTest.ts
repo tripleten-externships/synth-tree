@@ -145,36 +145,40 @@ describe("SkillNode positions", () => {
       expect(positionOf(c)).toEqual({ posX: 70, posY: 40 });
     });
 
-    it("moves to the nearest free cell when the preferred one is taken", async () => {
+    it("moves along the row when another node is in the way", async () => {
       const a = await createFirst();
       const below = await createBelow(a.id, "Below A");
       // Park the step-2 node exactly where the next node in row 1 would go.
       await moveNode(below.id, 30, 10);
 
       const b = await createRight(a.id, "B");
-
-      expect(positionOf(b)).not.toEqual({ posX: 30, posY: 10 });
-      expect(positionOf(b)).not.toEqual({ posX: 10, posY: 10 });
-      expect(b.posX % 5).toBe(0);
-      expect(b.posY % 5).toBe(0);
-      expect(Math.max(Math.abs(b.posX - 30), Math.abs(b.posY - 10))).toBe(5);
+      expect(positionOf(b)).toEqual({ posX: 50, posY: 10 });
     });
 
-    it("keeps nodes on the canvas when a row runs past the right edge", async () => {
+    it("wraps a full row onto the next line without overlapping or leaving the canvas", async () => {
       const a = await createFirst();
       const nodes = [a];
       for (let i = 0; i < 6; i++) {
         nodes.push(await createRight(a.id, `N${i}`));
       }
 
-      const cells = nodes.map((n) => `${n.posX},${n.posY}`);
-      expect(new Set(cells).size).toBe(nodes.length);
-      for (const n of nodes) {
-        expect(n.posX).toBeGreaterThanOrEqual(0);
-        expect(n.posX).toBeLessThanOrEqual(100);
-        expect(n.posY).toBeGreaterThanOrEqual(0);
-        expect(n.posY).toBeLessThanOrEqual(100);
-      }
+      expect(nodes.map(positionOf)).toEqual([
+        { posX: 10, posY: 10 },
+        { posX: 30, posY: 10 },
+        { posX: 50, posY: 10 },
+        { posX: 70, posY: 10 },
+        { posX: 90, posY: 10 },
+        { posX: 90, posY: 25 },
+        { posX: 70, posY: 25 },
+      ]);
+    });
+
+    it("treats a node with no stored position as sitting at 0", async () => {
+      const a = await createFirst();
+      await prisma.skillNode.update({ where: { id: a.id }, data: { posX: null, posY: null } });
+
+      const b = await createRight(a.id, "B");
+      expect(positionOf(b)).toEqual({ posX: 20, posY: 10 });
     });
   });
 
