@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
+import QuizSingle from "./QuizSingle";
+import QuizMulti from "./QuizMulti";
 
 type QuizOption = {
   id: string;
@@ -8,11 +11,14 @@ type QuizOption = {
   isCorrect?: boolean;
 };
 
-type QuizQuestion = {
+export type QuizQuestion = {
   id: string;
   prompt: string;
-  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION
+  explanation?: string | null;
+  type: string; // SINGLE_CHOICE | MULTIPLE_CHOICE | OPEN_QUESTION | FILL
   options: QuizOption[];
+  // FILL only; revealed post-submit by the server's answer-key guard.
+  canonicalAnswer?: string | null;
 };
 
 export type QuizForRunner = {
@@ -43,13 +49,73 @@ type SubmitResult = {
   submitQuizAttempt: QuizAttemptResult | null;
 };
 
+// Question types answered with free text; every other type is answered by
+// selecting options.
+const TEXT_ANSWER_TYPES = new Set(["OPEN_QUESTION", "FILL"]);
+const isTextAnswer = (type: string) => TEXT_ANSWER_TYPES.has(type);
+
+function ResultSummary({ result }: { result: QuizAttemptResult }) {
+  const incorrectCount = result.answers.filter((answer) => answer.isCorrect === false).length;
+  const isPendingReview = result.passed === null;
+
+  return (
+    <div
+      className={`rounded-2xl p-5 ${
+        isPendingReview
+          ? "bg-[hsl(var(--warning)/0.1)]"
+          : result.passed
+            ? "bg-[hsl(var(--success)/0.1)]"
+            : "bg-[hsl(var(--destructive)/0.1)]"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold uppercase tracking-wide ${
+          isPendingReview ? "text-warning" : result.passed ? "text-success" : "text-destructive"
+        }`}
+      >
+        Quiz submitted
+      </p>
+
+      <h3 className="mt-1 text-2xl font-bold text-foreground">
+        {isPendingReview ? "Waiting for review" : result.passed ? "You passed!" : "Keep practicing"}
+      </h3>
+
+      {isPendingReview ? (
+        <p className="mt-2 text-sm text-warning">
+          Your written answer was submitted and is waiting for manual review.
+        </p>
+      ) : result.passed ? (
+        <p className="mt-2 text-sm text-success">You have completed this quiz.</p>
+      ) : (
+        <p className="mt-2 text-sm text-foreground">
+          Review the questions above, then retry when you are ready.
+        </p>
+      )}
+
+      {result.passed === false && incorrectCount > 0 && (
+        <p className="mt-2 text-sm text-muted-foreground">
+          {incorrectCount} question
+          {incorrectCount === 1 ? " was" : "s were"} incorrect.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   const [choice, setChoice] = useState<Record<string, string[]>>({});
   const [text, setText] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
+  const [showAnswerError, setShowAnswerError] = useState(false);
 
-  const [submit, { loading, error }] =
-    useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
+  const submitted = !!result;
+  const isPendingReview = result?.passed === null;
+
+  const allQuestionsAnswered = quiz.questions.every((q) =>
+    isTextAnswer(q.type) ? !!text[q.id]?.trim() : (choice[q.id] ?? []).length > 0,
+  );
+
+  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
 
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {
@@ -58,9 +124,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       if (multiple) {
         return {
           ...prev,
-          [qId]: cur.includes(optId)
-            ? cur.filter((x) => x !== optId)
-            : [...cur, optId],
+          [qId]: cur.includes(optId) ? cur.filter((x) => x !== optId) : [...cur, optId],
         };
       }
 
@@ -72,12 +136,18 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!allQuestionsAnswered) {
+      setShowAnswerError(true);
+      return;
+    }
+
+    setShowAnswerError(false);
 
     // Structured answers for the typed QuizAnswerInput (SYN-33); the results
-    // card is driven by the returned attempt (SYN-58).
+    // summary and per-question feedback are driven by the returned attempt.
     const answers = quiz.questions.map((q) => ({
       questionId: q.id,
-      ...(q.type === "OPEN_QUESTION"
+      ...(isTextAnswer(q.type)
         ? { text: text[q.id] ?? "" }
         : { selectedOptionIds: choice[q.id] ?? [] }),
     }));
@@ -96,230 +166,150 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     setChoice({});
     setText({});
     setResult(null);
+    setShowAnswerError(false);
   };
 
-  if (result) {
-    const incorrectAnswers = result.answers.filter(
-      (answer) => answer.isCorrect === false,
-    );
-    const isPendingReview = result.passed === null;
-
-    return (
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div
-          className={`mb-6 rounded-2xl p-5 ${
-            isPendingReview ? "bg-amber-50" : result.passed ? "bg-emerald-50" : "bg-red-50"
-          }`}
-        >
-          <p
-            className={`text-sm font-semibold uppercase tracking-wide ${
-              isPendingReview
-                ? "text-amber-700"
-                : result.passed
-                  ? "text-emerald-700"
-                  : "text-red-700"
-            }`}
-          >
-            Quiz submitted
-          </p>
-
-          <h2 className="mt-1 text-2xl font-bold text-gray-900">
-            {isPendingReview
-              ? "Waiting for review"
-              : result.passed
-                ? "You passed!"
-                : "Keep practicing"}
-          </h2>
-
-          {isPendingReview ? (
-            <p className="mt-2 text-sm text-amber-800">
-              Your written answer was submitted and is waiting for manual review.
+  const renderQuestion = (q: QuizQuestion, questionNumber: number, correctOptionIds: string[]) => {
+    switch (q.type) {
+      case "OPEN_QUESTION":
+        return (
+          <>
+            <p className="mb-2 font-medium text-foreground">
+              {questionNumber}. {q.prompt}
             </p>
-          ) : result.passed ? (
-            <p className="mt-2 text-sm text-emerald-800">
-              You have completed this quiz.
+            <textarea
+              value={text[q.id] ?? ""}
+              onChange={(e) =>
+                setText((p) => ({
+                  ...p,
+                  [q.id]: e.target.value,
+                }))
+              }
+              rows={3}
+              disabled={submitted}
+              placeholder="Your answer…"
+              className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none"
+            />
+          </>
+        );
+      case "FILL":
+        return (
+          <>
+            <p className="mb-2 font-medium text-foreground">
+              {questionNumber}. {q.prompt}
             </p>
-          ) : (
-            <p className="mt-2 text-sm text-gray-700">
-              Review the questions below, then retry when you are ready.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-4">
-          {result.answers.map((answer, index) => {
-            const selectedOptionIds =
-              answer.answer?.selectedOptionIds ?? [];
-
-            const selectedOptions = answer.question.options.filter((option) =>
-              selectedOptionIds.includes(option.id),
-            );
-
-            const correctOptions = answer.question.options.filter(
-              (option) => option.isCorrect,
-            );
-
-            const isIncorrect = answer.isCorrect === false;
-            const isNotGraded =
-              answer.isCorrect === null ||
-              answer.isCorrect === undefined;
-
-            return (
-              <div
-                key={answer.id}
-                className={`rounded-2xl border p-4 ${
-                  isIncorrect
-                    ? "border-red-200 bg-red-50"
-                    : isNotGraded
-                      ? "border-gray-200 bg-gray-50"
-                      : "border-emerald-200 bg-emerald-50"
-                }`}
-              >
-                <div className="mb-2 flex items-center justify-between gap-3">
-                  <p className="font-medium text-gray-900">
-                    {index + 1}. {answer.question.prompt}
-                  </p>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      isIncorrect
-                        ? "bg-red-100 text-red-700"
-                        : isNotGraded
-                          ? "bg-gray-200 text-gray-700"
-                          : "bg-emerald-100 text-emerald-700"
-                    }`}
-                  >
-                    {isIncorrect
-                      ? "Incorrect"
-                      : isNotGraded
-                        ? "Not graded"
-                        : "Correct"}
-                  </span>
-                </div>
-
-                {answer.question.type === "OPEN_QUESTION" ? (
-                  <p className="text-sm text-gray-700">
-                    Your answer:{" "}
-                    {answer.answer?.text || "No answer provided"}
-                  </p>
-                ) : (
-                  <div className="space-y-1 text-sm text-gray-700">
-                    <p>
-                      Your answer:{" "}
-                      {selectedOptions.length > 0
-                        ? selectedOptions
-                            .map((option) => option.text)
-                            .join(", ")
-                        : "No answer selected"}
-                    </p>
-
-                    {isIncorrect && (
-                      <p>
-                        Correct answer:{" "}
-                        {correctOptions.length > 0
-                          ? correctOptions
-                              .map((option) => option.text)
-                              .join(", ")
-                          : "Not available"}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {result.passed === false && incorrectAnswers.length > 0 && (
-          <p className="mt-4 text-sm text-gray-600">
-            {incorrectAnswers.length} question
-            {incorrectAnswers.length === 1 ? " was" : "s were"} incorrect.
-          </p>
-        )}
-
-        {/* No retry while an attempt is awaiting manual review. */}
-        {!isPendingReview && (
-          <button
-            type="button"
-            onClick={onRetry}
-            className="mt-6 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        )}
-      </section>
-    );
-  }
+            <Input
+              type="text"
+              value={text[q.id] ?? ""}
+              onChange={(e) =>
+                setText((p) => ({
+                  ...p,
+                  [q.id]: e.target.value,
+                }))
+              }
+              disabled={submitted}
+              placeholder="Your answer…"
+            />
+          </>
+        );
+      case "SINGLE_CHOICE":
+        return (
+          <QuizSingle
+            question={q}
+            questionNumber={questionNumber}
+            choice={choice[q.id] ?? []}
+            onToggle={(optionId) => toggle(q.id, optionId, false)}
+            submitted={submitted}
+            correctOptionIds={correctOptionIds}
+          />
+        );
+      case "MULTIPLE_CHOICE":
+        return (
+          <QuizMulti
+            question={q}
+            questionNumber={questionNumber}
+            choice={choice[q.id] ?? []}
+            onToggle={(optionId) => toggle(q.id, optionId, true)}
+            submitted={submitted}
+            correctOptionIds={correctOptionIds}
+          />
+        );
+      default:
+        return <p>Unknown question type</p>;
+    }
+  };
 
   return (
-    <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold text-gray-900">
+    <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <h2 className="mb-4 text-xl font-semibold text-foreground">
         {quiz.title ?? "Quiz"}
         {quiz.required ? " · required" : ""}
       </h2>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
-        {quiz.questions.map((q, i) => (
-          <div key={q.id}>
-            <p className="mb-2 font-medium text-gray-800">
-              {i + 1}. {q.prompt}
-            </p>
+        {quiz.questions.map((q, i) => {
+          const submittedAnswer = result?.answers.find((answer) => answer.questionId === q.id);
+          const correctOptionIds =
+            submittedAnswer?.question.options
+              .filter((option) => option.isCorrect)
+              .map((option) => option.id) ?? [];
 
-            {q.type === "OPEN_QUESTION" ? (
-              <textarea
-                value={text[q.id] ?? ""}
-                onChange={(e) =>
-                  setText((p) => ({
-                    ...p,
-                    [q.id]: e.target.value,
-                  }))
-                }
-                rows={3}
-                placeholder="Your answer…"
-                className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:border-blue-500 focus:outline-none"
-              />
-            ) : (
-              <div className="flex flex-col gap-2">
-                {q.options.map((o) => {
-                  const multiple = q.type === "MULTIPLE_CHOICE";
+          return (
+            <div key={q.id}>
+              {renderQuestion(q, i + 1, correctOptionIds)}
 
-                  return (
-                    <label
-                      key={o.id}
-                      className="flex items-center gap-2 text-sm text-gray-700"
-                    >
-                      <input
-                        type={multiple ? "checkbox" : "radio"}
-                        name={q.id}
-                        checked={(choice[q.id] ?? []).includes(o.id)}
-                        onChange={() =>
-                          toggle(q.id, o.id, multiple)
-                        }
-                      />
+              {/* Open questions are graded manually, so they get no inline feedback. */}
+              {submitted && q.type !== "OPEN_QUESTION" && (
+                <div
+                  className={`mt-4 rounded-xl px-4 py-4 ${
+                    submittedAnswer?.isCorrect
+                      ? "bg-[hsl(var(--success)/0.1)]"
+                      : "bg-[hsl(var(--destructive)/0.1)]"
+                  }`}
+                >
+                  <strong>{submittedAnswer?.isCorrect ? "Correct." : "Incorrect."}</strong>{" "}
+                  {q.type === "FILL" && !submittedAnswer?.isCorrect && (
+                    <>
+                      Correct answer:{" "}
+                      {submittedAnswer?.question.canonicalAnswer?.trim() || "Not available"}.{" "}
+                    </>
+                  )}
+                  {submittedAnswer?.question.explanation}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
-                      {o.text}
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        ))}
+        {result && <ResultSummary result={result} />}
 
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            disabled={loading}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            disabled={loading || submitted}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Submitting…" : "Submit quiz"}
           </button>
 
-          {error && (
-            <span className="text-sm text-red-600">
-              Could not submit.
+          {showAnswerError && (
+            <span className="rounded-xl bg-[hsl(var(--destructive)/0.1)] px-4 py-4">
+              Please answer all questions
             </span>
           )}
+
+          {/* No retry while an attempt is awaiting manual review. */}
+          {submitted && !isPendingReview && (
+            <button
+              type="button"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+              onClick={onRetry}
+            >
+              Retry
+            </button>
+          )}
+
+          {error && <span className="text-sm text-destructive">Could not submit.</span>}
         </div>
       </form>
     </section>

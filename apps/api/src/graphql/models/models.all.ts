@@ -1,5 +1,6 @@
 // src/graphql/models.all.ts
 import { builder } from "@graphql/builder";
+import type { GraphQLContext } from "@graphql/context";
 
 import { UserObject } from "@graphql/__generated__/User";
 import { CourseObject } from "@graphql/__generated__/Course";
@@ -15,7 +16,9 @@ import { QuizAttemptAnswerObject } from "@graphql/__generated__/QuizAttemptAnswe
 import { UserNodeProgressObject } from "@graphql/__generated__/UserNodeProgress";
 import { UserXpObject } from "@graphql/__generated__/UserXp";
 import { UserStreakObject } from "@graphql/__generated__/UserStreak";
+import { UserHeartsObject } from "@graphql/__generated__/UserHearts";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
+import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
 
 // We are not using the auto crud from pothos. Utilize the prisma models. Inputs types and other types will still need to be manually created.
 // Can break this file into multiple. Used one now for brevity.
@@ -109,7 +112,45 @@ builder.prismaObject("SkillNode", {
 builder.prismaObject("SkillNodePrerequisite", SkillNodePrerequisiteObject);
 builder.prismaObject("LessonBlocks", LessonBlocksObject);
 builder.prismaObject("Quiz", QuizObject);
-builder.prismaObject("QuizQuestion", QuizQuestionObject);
+// Answer keys (FILL canonicalAnswer, explanations) are only visible to admins
+// or to a learner who has already submitted an attempt for the quiz.
+async function canSeeQuizAnswers(quizId: string, ctx: GraphQLContext): Promise<boolean> {
+  if (ctx.auth.isAdmin()) return true;
+
+  const userId = ctx.auth.getUserId();
+  if (!userId) return false;
+
+  const attempt = await ctx.prisma.quizAttempt.findFirst({
+    where: { quizId, userId },
+    select: { id: true },
+  });
+  return attempt !== null;
+}
+
+builder.prismaObject("QuizQuestion", {
+  ...QuizQuestionObject,
+  fields: (t) => ({
+    ...QuizQuestionObject.fields(t),
+
+    // Answer-key guard for FILL questions. canonicalAnswer is only revealed to
+    // admins, or to a learner who has already submitted an attempt for this
+    // question's quiz. Otherwise it resolves to null, so a hand-crafted query
+    // can't read the expected answer before submitting. The results screen
+    // reads it post-submit (allowed).
+    canonicalAnswer: t.string({
+      nullable: true,
+      resolve: async (parent, _args, ctx) =>
+        (await canSeeQuizAnswers(parent.quizId, ctx)) ? parent.canonicalAnswer : null,
+    }),
+
+    // Same guard for explanations: they usually give the answer away.
+    explanation: t.string({
+      nullable: true,
+      resolve: async (parent, _args, ctx) =>
+        (await canSeeQuizAnswers(parent.quizId, ctx)) ? parent.explanation : null,
+    }),
+  }),
+});
 builder.prismaObject("QuizOption", {
   ...QuizOptionObject,
   fields: (t) => ({
@@ -150,8 +191,9 @@ builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
 // so the schema build requires them to be implemented here.
 builder.prismaObject("UserXp", UserXpObject);
 builder.prismaObject("UserStreak", UserStreakObject);
+builder.prismaObject("UserHearts", UserHeartsObject);
 builder.prismaObject("XpEvent", XpEventObject);
-
+builder.prismaObject("UserDailyQuest", UserDailyQuestObject);
 export type CourseProgressShape = {
   courseId: string;
   totalNodes: number;

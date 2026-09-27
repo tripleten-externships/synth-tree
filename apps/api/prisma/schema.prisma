@@ -17,10 +17,10 @@ generator pothosCrud {
   // The environment variable will override the path hardcoded here.
 }
 
-// Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information  
-// The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models. 
-//Rewards and Gamification intentionally not implemented yet.  
-// Leaving comments in the schema file. Request removal if the team does not want this. 
+// Refer to branch: ST-13-design-minimal-viable-database-schema for more in-depth information
+// The ST-13 branch database-schema.md document also has a show case for using the prisma orm and these models.
+//Rewards and Gamification intentionally not implemented yet.
+// Leaving comments in the schema file. Request removal if the team does not want this.
 
 datasource db {
   provider = "postgresql"
@@ -36,6 +36,7 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   OPEN_QUESTION
+  FILL
 }
 
 enum ContentType {
@@ -43,6 +44,7 @@ enum ContentType {
   VIDEO
   EMBED
   HTML
+  PAGE_BREAK // page boundary marker: splits a lesson into pages; carries no url/html
 }
 
 enum LessonStatus {
@@ -62,13 +64,17 @@ enum ProgressStatus {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
-  name      String?
-  photoUrl  String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id
+  email              String   @unique
+  timezone           String   @default("UTC")
+  name               String?
+  photoUrl           String?
+  role               Role     @default(USER)
+  interests          String[] @default([]) // subjects picked during onboarding (SYN-46)
+  dailyGoalMinutes   Int? // minutes/day picked during onboarding (SYN-47)
+  onboardingComplete Boolean  @default(false) // flipped true at signup step 3 (SYN-47)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
@@ -79,6 +85,8 @@ model User {
   xp           UserXp?
   streak       UserStreak?
   xpEvents     XpEvent[]
+  hearts       UserHearts?
+  dailyQuests  UserDailyQuest[]
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -140,6 +148,7 @@ model SkillNode {
   title       String
   step        Int       @default(1) // logical level/layer (e.g., column)
   orderInStep Int       @default(0) // order within the step
+  xpReward    Int?      @default(50)
   posX        Int?      @default(0) // optional: UI layout
   posY        Int?      @default(0) // optional: UI layout
   createdAt   DateTime  @default(now())
@@ -210,8 +219,8 @@ model LessonBlocks {
 // Quiz
 // - At most one quiz per node (nodeId is unique).
 // - `required` means the quiz must be taken for completion logic,
-//   but grading uses only booleans in v1 (no numeric scores). 
-// Rewards can be used later on and completed lessons result in points or unit of choice. 
+//   but grading uses only booleans in v1 (no numeric scores).
+// Rewards can be used later on and completed lessons result in points or unit of choice.
 // ================================================================
 model Quiz {
   id        String    @id @default(uuid()) @db.Uuid
@@ -233,13 +242,19 @@ model Quiz {
 // - Keep ordering stable for rendering.
 // ================================================================
 model QuizQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  quizId    String       @db.Uuid
-  type      QuestionType
-  prompt    String
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id              String       @id @default(uuid()) @db.Uuid
+  quizId          String       @db.Uuid
+  type            QuestionType
+  prompt          String
+  explanation     String?
+  // Expected answer for FILL questions; null for other types. Graded
+  // case-insensitively and whitespace-trimmed. Hidden from learners until
+  // they submit an attempt (see QuizQuestion object guard in models.all.ts).
+  /// @Pothos.omit(where, orderBy)
+  canonicalAnswer String?      @db.Text
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION
@@ -257,6 +272,7 @@ model QuizOption {
   id         String   @id @default(uuid()) @db.Uuid
   questionId String   @db.Uuid
   text       String
+  /// @Pothos.omit(where, orderBy)
   isCorrect  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -340,6 +356,8 @@ model UserXp {
   weeklyXp  Json     @default("{}")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXp]) // leaderboard sorts and counts on totalXp
 }
 
 model UserStreak {
@@ -351,15 +369,39 @@ model UserStreak {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model UserHearts {
+  userId         String   @id
+  currentHearts  Int      @default(5)
+  lastRefilledAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserDailyQuest {
+  userId    String
+  questKey  String
+  date      DateTime
+  goal      Int
+  current   Int      @default(0)
+  completed Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questKey, date])
+  @@index([userId, date])
+}
+
 model XpEvent {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String
   amount    Int
   reason    String
+  rewardKey String?
   metadata  Json?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, reason, rewardKey])
   @@index([userId, createdAt])
 }
