@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 // IMPORTANT: your project uses the React-specific Apollo entrypoint
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { SYNC_CURRENT_USER } from "../graphql/queries/currentUser";
 import type { SyncCurrentUserResponse } from "../graphql/queries/currentUser";
+import { MY_PROGRESS_QUERY } from "../graphql/queries/myProgress";
 import useAuth from "../hooks/useAuth";
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-
 
 // Shape of the user returned by syncCurrentUser
 interface User {
@@ -16,39 +16,48 @@ interface User {
   email: string;
   photoUrl: string;
   role: string;
-  stats?: {
-    courses: number;
-    nodes: number;
-    quizzes: number;
-  };
+  quizAttempts: {
+    id: string;
+    passed: boolean | null;
+  }[];
+}
+
+interface MyProgressData {
+  myProgress: {
+    id: string;
+    status: string;
+    node: {
+      tree: {
+        course: {
+          id: string;
+        };
+      };
+    };
+  }[];
 }
 
 export default function ProfilePage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+
   // ------------------------------------------------------------
   // 1) Apollo mutation used for BOTH loading and saving the user
   //    Your backend does not have GET_CURRENT_USER, so this is
   //    the only operation that returns the current user.
   // ------------------------------------------------------------
   const [syncUser, { data, loading, error }] =
-  useMutation<SyncCurrentUserResponse>(SYNC_CURRENT_USER);
+    useMutation<SyncCurrentUserResponse>(SYNC_CURRENT_USER);
 
   // ------------------------------------------------------------
-  // 2) Mock fallback data (used until backend returns real data)
+  // 2) Load real learner progress for profile stats
   // ------------------------------------------------------------
-  const mockUser: User = {
-    id: "mock",
-    name: "Jane Doe",
-    email: "jane@example.com",
-    photoUrl: "", // empty string so avatar initial fallback shows
-    role: "Student",
-    stats: {
-      courses: 3,
-      nodes: 42,
-      quizzes: 12,
-    },
-  };
+  const {
+    data: progressData,
+    loading: progressLoading,
+    error: progressError,
+  } = useQuery<MyProgressData>(MY_PROGRESS_QUERY, {
+    fetchPolicy: "network-only",
+  });
 
   // ------------------------------------------------------------
   // 3) Load the user on first render
@@ -65,18 +74,20 @@ export default function ProfilePage() {
       // Firebase has finished checking — user logged in or not
       setFirebaseLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
+
   // ------------------------------------------------------------
-  // 4) Real user or fallback
+  // 4) Use the real synced user
   // ------------------------------------------------------------
-  const user: User = data?.syncCurrentUser || mockUser;
+  const user: User | undefined = data?.syncCurrentUser;
 
   // ------------------------------------------------------------
   // 5) Editable fields (name + photo)
   // ------------------------------------------------------------
-  const [name, setName] = useState(user.name ?? "");
-  const [photoUrl, setPhotoUrl] = useState(user.photoUrl ?? "");
+  const [name, setName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
 
   // ------------------------------------------------------------
   // 6) When real data arrives, update the form fields
@@ -88,24 +99,30 @@ export default function ProfilePage() {
     }
   }, [data]);
 
- // ------------------------------------------------------------
+  // ------------------------------------------------------------
   // 7) Save handler — updates the user profile
   // ------------------------------------------------------------
   const handleSave = () => {
     const currentUser = auth.currentUser;
+
     if (!currentUser) {
       // No Firebase session — send them to login via the router (origin-agnostic,
       // so it works in any deployed environment, not just local dev).
       navigate("/auth/login", { replace: true });
       return;
     }
+
     syncUser({ variables: { name, photoUrl } });
   };
 
   // ------------------------------------------------------------
   // 8) Loading + Error states
   // ------------------------------------------------------------
-  if (firebaseLoading || (loading && !data)) {
+  if (
+    firebaseLoading ||
+    (loading && !data) ||
+    (progressLoading && !progressData)
+  ) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-muted-foreground">Loading profile...</p>
@@ -113,7 +130,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (error) {
+  if (error || progressError || !user) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-destructive">Error loading profile.</p>
@@ -122,7 +139,24 @@ export default function ProfilePage() {
   }
 
   // ------------------------------------------------------------
-  // 9) Main UI
+  // 9) Calculate real profile stats
+  // ------------------------------------------------------------
+  const progress = progressData?.myProgress ?? [];
+
+  const coursesStarted = new Set(
+    progress.map((item) => item.node.tree.course.id),
+  ).size;
+
+  const nodesCompleted = progress.filter(
+    (item) => item.status === "COMPLETED",
+  ).length;
+
+  const quizzesPassed = user.quizAttempts.filter(
+    (attempt) => attempt.passed === true,
+  ).length;
+
+  // ------------------------------------------------------------
+  // 10) Main UI
   // ------------------------------------------------------------
   return (
     <div className="min-h-screen">
@@ -140,13 +174,18 @@ export default function ProfilePage() {
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
-              {user.name?.charAt(0)?.toUpperCase() ?? user.email?.charAt(0)?.toUpperCase() ?? "?"}
+              {user.name?.charAt(0)?.toUpperCase() ??
+                user.email?.charAt(0)?.toUpperCase() ??
+                "?"}
             </div>
           )}
+
           <div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>
             <p className="text-muted-foreground">{user.email}</p>
-            <p className="text-sm text-muted-foreground">Role: {user.role}</p>
+            <p className="text-sm text-muted-foreground">
+              Role: {user.role}
+            </p>
           </div>
         </section>
 
@@ -154,7 +193,7 @@ export default function ProfilePage() {
         <section className="bg-card p-6 rounded-lg shadow space-y-4 mt-6">
           <h3 className="text-xl font-semibold">Edit Profile</h3>
 
-           <label className="block">
+          <label className="block">
             <span className="text-foreground">Name</span>
             {/* defaultValue + key so input resets when real data loads.
                 onFocus selects all text for easy replacement.
@@ -195,22 +234,27 @@ export default function ProfilePage() {
         {/* Stats */}
         <section className="grid grid-cols-3 gap-4 mt-6">
           <div className="bg-card p-4 rounded shadow text-center">
-            <p className="text-2xl font-bold">{user.stats?.courses ?? 0}</p>
+            <p className="text-2xl font-bold">{coursesStarted}</p>
             <p className="text-muted-foreground">Courses</p>
           </div>
 
           <div className="bg-card p-4 rounded shadow text-center">
-            <p className="text-2xl font-bold">{user.stats?.nodes ?? 0}</p>
+            <p className="text-2xl font-bold">{nodesCompleted}</p>
             <p className="text-muted-foreground">Nodes</p>
           </div>
 
           <div className="bg-card p-4 rounded shadow text-center">
-            <p className="text-2xl font-bold">{user.stats?.quizzes ?? 0}</p>
+            <p className="text-2xl font-bold">{quizzesPassed}</p>
             <p className="text-muted-foreground">Quizzes</p>
           </div>
         </section>
 
-        <button onClick={logout} className="text-destructive underline mt-6">Logout</button>
+        <button
+          onClick={logout}
+          className="text-destructive underline mt-6"
+        >
+          Logout
+        </button>
       </main>
     </div>
   );

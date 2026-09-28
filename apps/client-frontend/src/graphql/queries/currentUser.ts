@@ -8,12 +8,10 @@ export const SYNC_CURRENT_USER = gql`
       name
       photoUrl
       role
-      # stats will work once backend supports it
-      # stats {
-      #   courses
-      #   nodes
-      #   quizzes
-      # }
+      quizAttempts {
+        id
+        passed
+      }
     }
   }
 `;
@@ -25,10 +23,9 @@ export interface SyncCurrentUserResponse {
     name: string;
     photoUrl: string;
     role: string;
-    stats?: {
-      courses: number;
-      nodes: number;
-      quizzes: number;
-    };
+    quizAttempts: {
+      id: string;
+      passed: boolean | null;
+    }[];
   };
 }
