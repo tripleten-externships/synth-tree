@@ -1819,7 +1819,7 @@ type Quiz {
   id: ID!
   node: SkillNode!
   nodeId: String!
-  questions(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
+  questions(cursor: QuizQuestionWhereUniqueInput, orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
   required: Boolean!
   title: String
   updatedAt: DateTime!
@@ -2837,7 +2837,6 @@ input QuizOrderByWithAggregationInput {
 }
 
 input QuizOrderByWithRelationInput {
-  attempts: QuizAttemptOrderByRelationAggregateInput
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -2855,7 +2854,7 @@ type QuizQuestion {
   createdAt: DateTime!
   explanation: String
   id: ID!
-  options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
+  options(cursor: QuizOptionWhereUniqueInput, orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
   order: Int!
   prompt: String!
   quiz: Quiz!
@@ -3036,7 +3035,6 @@ input QuizQuestionOrderByWithAggregationInput {
   _min: QuizQuestionMinOrderByAggregateInput
   _sum: QuizQuestionSumOrderByAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   order: SortOrder
   prompt: SortOrder
@@ -3046,9 +3044,7 @@ input QuizQuestionOrderByWithAggregationInput {
 }
 
 input QuizQuestionOrderByWithRelationInput {
-  answers: QuizAttemptAnswerOrderByRelationAggregateInput
   createdAt: SortOrder
-  explanation: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
   order: SortOrder
@@ -3246,9 +3242,7 @@ input QuizQuestionWhereInput {
   AND: [QuizQuestionWhereInput!]
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
-  answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3263,9 +3257,7 @@ input QuizQuestionWhereUniqueInput {
   AND: [QuizQuestionWhereInput!]
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
-  answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
-  explanation: StringNullableFilter
   id: String
   options: QuizOptionListRelationFilter
   order: IntFilter
@@ -3421,7 +3413,6 @@ input QuizWhereInput {
   AND: [QuizWhereInput!]
   NOT: [QuizWhereInput!]
   OR: [QuizWhereInput!]
-  attempts: QuizAttemptListRelationFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: UuidFilter
@@ -3437,7 +3428,6 @@ input QuizWhereUniqueInput {
   AND: [QuizWhereInput!]
   NOT: [QuizWhereInput!]
   OR: [QuizWhereInput!]
-  attempts: QuizAttemptListRelationFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: String
@@ -3457,6 +3447,7 @@ enum Role {
 type SkillNode {
   createdAt: DateTime!
   deletedAt: DateTime
+  derivedStatus: UnlockedStatus!
   id: ID!
   lessons(cursor: LessonBlocksWhereUniqueInput, distinct: [LessonBlocksScalarFieldEnum!], orderBy: [LessonBlocksOrderByWithRelationInput!], skip: Int, take: Int, where: LessonBlocksWhereInput): [LessonBlocks!]!
   orderInStep: Int!
@@ -4822,6 +4813,13 @@ enum TransactionIsolationLevel {
   Serializable
 }
 
+enum UnlockedStatus {
+  COMPLETED
+  IN_PROGRESS
+  LOCKED
+  UNLOCKED
+}
+
 input UpdateCourseInput {
   description: String
   status: CourseStatus
@@ -4845,19 +4843,19 @@ type User {
   createdAt: DateTime!
   dailyGoalMinutes: Int
   dailyQuests(cursor: UserDailyQuestWhereUniqueInput, distinct: [UserDailyQuestScalarFieldEnum!], orderBy: [UserDailyQuestOrderByWithRelationInput!], skip: Int, take: Int, where: UserDailyQuestWhereInput): [UserDailyQuest!]!
-  email: String!
+  email: String
   hearts: UserHearts
   id: ID!
   interests: [String!]!
   name: String
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
-  onboardingComplete: Boolean!
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
-  timezone: String!
+  timezone: String
   updatedAt: DateTime!
   xp: UserXp
   xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
@@ -6269,7 +6267,6 @@ input UserOrderByWithRelationInput {
   nodeProgress: UserNodeProgressOrderByRelationAggregateInput
   onboardingComplete: SortOrder
   photoUrl: SortOrder
-  quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
   streak: UserStreakOrderByWithRelationInput
   timezone: SortOrder
@@ -6920,7 +6917,6 @@ input UserWhereInput {
   nodeProgress: UserNodeProgressListRelationFilter
   onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
-  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
   timezone: StringFilter
@@ -6946,7 +6942,6 @@ input UserWhereUniqueInput {
   nodeProgress: UserNodeProgressListRelationFilter
   onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
-  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
   timezone: StringFilter
