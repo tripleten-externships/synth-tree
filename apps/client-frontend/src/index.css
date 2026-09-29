@@ -27,6 +27,16 @@
   animation: pop 400ms ease-out 200ms both;
 }
 
+/* Respect reduced-motion: skip the pop entirely. With no animation the
+   fill-mode never applies, so elements render at their end state (visible,
+   full size) immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop,
+  .animate-pop-delayed {
+    animation: none;
+  }
+}
+
 /* Read-mode lesson text (SYN-32). Lesson HTML is authored as plain
    headings / paragraphs / lists; Tailwind's preflight strips their default
    styles, so restore readable typography here using theme tokens. */
