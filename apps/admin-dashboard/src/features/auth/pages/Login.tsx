@@ -72,11 +72,9 @@ export function Login() {
 
       toast("Success!", {
         description: "Logging you in...",
-        onAutoClose: () => {
-          setIsLoading(false);
-          navigate("/dashboard");
-        },
       });
+      setIsLoading(false);
+      navigate("/courses");
     });
   };
 
@@ -95,7 +93,7 @@ export function Login() {
   };
 
   const loginToGoogle = async () => {
-    signInWithPopup(auth, provider)
+    return signInWithPopup(auth, provider)
       .then(loginWithCredential)
       .catch((err) => {
         if (err.code == "auth/multi-factor-auth-required") {
@@ -135,7 +133,7 @@ export function Login() {
   };
 
   const loginWithPassword = async (data: LoginFormInputs) => {
-    login(data.email, data.password)
+    return login(data.email, data.password)
       .then(loginWithCredential)
       .catch((err) => {
         if (err.code == "auth/multi-factor-auth-required") {
