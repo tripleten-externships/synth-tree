@@ -124,9 +124,7 @@ describe("achievements (resolver level)", () => {
     }
 
     it("myAchievements returns only safe fields for the viewer's own rows", async () => {
-      const res = await runAsLearner(
-        clientDocument("queries/myAchievements.ts"),
-      );
+      const res = await runAsLearner(clientDocument("queries/myAchievements.ts"));
 
       expect(res.errors).toBeUndefined();
       expect(res.data.myAchievements).toHaveLength(1);
