@@ -105,8 +105,6 @@ builder.mutationFields((t) => ({
       // idempotency + LESSON_COMPLETED daily-quest increment) AND the XP award
       // commit together, so a failing award can't leave a COMPLETED node with
       // no XP.
-      let awardedAchievements: any[] = [];
-
       await ctx.prisma.$transaction(async (tx) => {
         await completeNodeForUser(tx, userId, nodeId);
 
@@ -125,7 +123,7 @@ builder.mutationFields((t) => ({
           where: { userId, status: "COMPLETED" },
         });
 
-        awardedAchievements = await checkAndAwardAchievements({
+        await checkAndAwardAchievements({
           userId,
           lessonCompletedCount: nodeCompletedCount,
           streakDays,
@@ -134,7 +132,7 @@ builder.mutationFields((t) => ({
         });
       });
 
-      const progress = await ctx.prisma.userNodeProgress.findUniqueOrThrow({
+      return ctx.prisma.userNodeProgress.findUniqueOrThrow({
         ...query,
         where: {
           userId_nodeId: {
@@ -143,11 +141,6 @@ builder.mutationFields((t) => ({
           },
         },
       });
-
-      return {
-        ...progress,
-        awardedAchievements,
-      };
     },
   }),
 }));

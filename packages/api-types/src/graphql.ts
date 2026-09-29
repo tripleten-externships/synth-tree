@@ -21,6 +21,213 @@ export type Scalars = {
   NEVER: { input: any; output: any; }
 };
 
+export type Achievement = {
+  __typename?: 'Achievement';
+  color: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  icon: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  trigger: Scalars['String']['output'];
+  userAchievements: Array<UserAchievement>;
+};
+
+
+export type AchievementUserAchievementsArgs = {
+  cursor?: InputMaybe<UserAchievementWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserAchievementScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserAchievementOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserAchievementWhereInput>;
+};
+
+export type AchievementCountOrderByAggregateInput = {
+  color?: InputMaybe<SortOrder>;
+  description?: InputMaybe<SortOrder>;
+  icon?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  trigger?: InputMaybe<SortOrder>;
+};
+
+export type AchievementCreateInput = {
+  color: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  trigger: Scalars['String']['input'];
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutAchievementInput>;
+};
+
+export type AchievementCreateManyInput = {
+  color: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  trigger: Scalars['String']['input'];
+};
+
+export type AchievementCreateNestedOneWithoutUserAchievementsInput = {
+  connect?: InputMaybe<AchievementWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<AchievementCreateOrConnectWithoutUserAchievementsInput>;
+  create?: InputMaybe<AchievementCreateWithoutUserAchievementsInput>;
+};
+
+export type AchievementCreateOrConnectWithoutUserAchievementsInput = {
+  create: AchievementCreateWithoutUserAchievementsInput;
+  where: AchievementWhereUniqueInput;
+};
+
+export type AchievementCreateWithoutUserAchievementsInput = {
+  color: Scalars['String']['input'];
+  description: Scalars['String']['input'];
+  icon: Scalars['String']['input'];
+  id: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  trigger: Scalars['String']['input'];
+};
+
+export type AchievementMaxOrderByAggregateInput = {
+  color?: InputMaybe<SortOrder>;
+  description?: InputMaybe<SortOrder>;
+  icon?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  trigger?: InputMaybe<SortOrder>;
+};
+
+export type AchievementMinOrderByAggregateInput = {
+  color?: InputMaybe<SortOrder>;
+  description?: InputMaybe<SortOrder>;
+  icon?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  trigger?: InputMaybe<SortOrder>;
+};
+
+export type AchievementOrderByWithAggregationInput = {
+  _count?: InputMaybe<AchievementCountOrderByAggregateInput>;
+  _max?: InputMaybe<AchievementMaxOrderByAggregateInput>;
+  _min?: InputMaybe<AchievementMinOrderByAggregateInput>;
+  color?: InputMaybe<SortOrder>;
+  description?: InputMaybe<SortOrder>;
+  icon?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  trigger?: InputMaybe<SortOrder>;
+};
+
+export type AchievementOrderByWithRelationInput = {
+  color?: InputMaybe<SortOrder>;
+  description?: InputMaybe<SortOrder>;
+  icon?: InputMaybe<SortOrder>;
+  id?: InputMaybe<SortOrder>;
+  name?: InputMaybe<SortOrder>;
+  trigger?: InputMaybe<SortOrder>;
+  userAchievements?: InputMaybe<UserAchievementOrderByRelationAggregateInput>;
+};
+
+export type AchievementScalarFieldEnum =
+  | 'color'
+  | 'description'
+  | 'icon'
+  | 'id'
+  | 'name'
+  | 'trigger';
+
+export type AchievementScalarRelationFilter = {
+  is?: InputMaybe<AchievementWhereInput>;
+  isNot?: InputMaybe<AchievementWhereInput>;
+};
+
+export type AchievementScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<AchievementScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<AchievementScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<AchievementScalarWhereWithAggregatesInput>>;
+  color?: InputMaybe<StringWithAggregatesFilter>;
+  description?: InputMaybe<StringWithAggregatesFilter>;
+  icon?: InputMaybe<StringWithAggregatesFilter>;
+  id?: InputMaybe<StringWithAggregatesFilter>;
+  name?: InputMaybe<StringWithAggregatesFilter>;
+  trigger?: InputMaybe<StringWithAggregatesFilter>;
+};
+
+export type AchievementUpdateInput = {
+  color?: InputMaybe<StringFieldUpdateOperationsInput>;
+  description?: InputMaybe<StringFieldUpdateOperationsInput>;
+  icon?: InputMaybe<StringFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<StringFieldUpdateOperationsInput>;
+  trigger?: InputMaybe<StringFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutAchievementNestedInput>;
+};
+
+export type AchievementUpdateManyMutationInput = {
+  color?: InputMaybe<StringFieldUpdateOperationsInput>;
+  description?: InputMaybe<StringFieldUpdateOperationsInput>;
+  icon?: InputMaybe<StringFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<StringFieldUpdateOperationsInput>;
+  trigger?: InputMaybe<StringFieldUpdateOperationsInput>;
+};
+
+export type AchievementUpdateOneRequiredWithoutUserAchievementsNestedInput = {
+  connect?: InputMaybe<AchievementWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<AchievementCreateOrConnectWithoutUserAchievementsInput>;
+  create?: InputMaybe<AchievementCreateWithoutUserAchievementsInput>;
+  update?: InputMaybe<AchievementUpdateToOneWithWhereWithoutUserAchievementsInput>;
+  upsert?: InputMaybe<AchievementUpsertWithoutUserAchievementsInput>;
+};
+
+export type AchievementUpdateToOneWithWhereWithoutUserAchievementsInput = {
+  data: AchievementUpdateWithoutUserAchievementsInput;
+  where?: InputMaybe<AchievementWhereInput>;
+};
+
+export type AchievementUpdateWithoutUserAchievementsInput = {
+  color?: InputMaybe<StringFieldUpdateOperationsInput>;
+  description?: InputMaybe<StringFieldUpdateOperationsInput>;
+  icon?: InputMaybe<StringFieldUpdateOperationsInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  name?: InputMaybe<StringFieldUpdateOperationsInput>;
+  trigger?: InputMaybe<StringFieldUpdateOperationsInput>;
+};
+
+export type AchievementUpsertWithoutUserAchievementsInput = {
+  create: AchievementCreateWithoutUserAchievementsInput;
+  update: AchievementUpdateWithoutUserAchievementsInput;
+  where?: InputMaybe<AchievementWhereInput>;
+};
+
+export type AchievementWhereInput = {
+  AND?: InputMaybe<Array<AchievementWhereInput>>;
+  NOT?: InputMaybe<Array<AchievementWhereInput>>;
+  OR?: InputMaybe<Array<AchievementWhereInput>>;
+  color?: InputMaybe<StringFilter>;
+  description?: InputMaybe<StringFilter>;
+  icon?: InputMaybe<StringFilter>;
+  id?: InputMaybe<StringFilter>;
+  name?: InputMaybe<StringFilter>;
+  trigger?: InputMaybe<StringFilter>;
+  userAchievements?: InputMaybe<UserAchievementListRelationFilter>;
+};
+
+export type AchievementWhereUniqueInput = {
+  AND?: InputMaybe<Array<AchievementWhereInput>>;
+  NOT?: InputMaybe<Array<AchievementWhereInput>>;
+  OR?: InputMaybe<Array<AchievementWhereInput>>;
+  color?: InputMaybe<StringFilter>;
+  description?: InputMaybe<StringFilter>;
+  icon?: InputMaybe<StringFilter>;
+  id?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<StringFilter>;
+  trigger?: InputMaybe<StringFilter>;
+  userAchievements?: InputMaybe<UserAchievementListRelationFilter>;
+};
+
 /** Batch payloads from prisma. */
 export type BatchPayload = {
   __typename?: 'BatchPayload';
@@ -1812,6 +2019,7 @@ export type Query = {
   lessonBlock?: Maybe<LessonBlocks>;
   lessonBlocks?: Maybe<Array<LessonBlocks>>;
   lessonBlocksByNode?: Maybe<Array<LessonBlocks>>;
+  myAchievements?: Maybe<Array<UserAchievement>>;
   myDailyQuests?: Maybe<Array<UserDailyQuest>>;
   myHearts?: Maybe<UserHearts>;
   myProgress?: Maybe<Array<UserNodeProgress>>;
@@ -5133,6 +5341,7 @@ export type UpdateSkillTreeInput = {
 
 export type User = {
   __typename?: 'User';
+  achievements?: Maybe<Array<Achievement>>;
   coursesAuthored: Array<Course>;
   createdAt: Scalars['DateTime']['output'];
   dailyGoalMinutes?: Maybe<Scalars['Int']['output']>;
@@ -5151,6 +5360,7 @@ export type User = {
   streak?: Maybe<UserStreak>;
   timezone: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
+  userAchievements: Array<UserAchievement>;
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
 };
@@ -5201,6 +5411,16 @@ export type UserRecommendedNextArgs = {
 };
 
 
+export type UserUserAchievementsArgs = {
+  cursor?: InputMaybe<UserAchievementWhereUniqueInput>;
+  distinct?: InputMaybe<Array<UserAchievementScalarFieldEnum>>;
+  orderBy?: InputMaybe<Array<UserAchievementOrderByWithRelationInput>>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<UserAchievementWhereInput>;
+};
+
+
 export type UserXpEventsArgs = {
   cursor?: InputMaybe<XpEventWhereUniqueInput>;
   distinct?: InputMaybe<Array<XpEventScalarFieldEnum>>;
@@ -5208,6 +5428,257 @@ export type UserXpEventsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
   where?: InputMaybe<XpEventWhereInput>;
+};
+
+export type UserAchievement = {
+  __typename?: 'UserAchievement';
+  achievement: Achievement;
+  achievementId: Scalars['String']['output'];
+  earnedAt: Scalars['DateTime']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type UserAchievementCountOrderByAggregateInput = {
+  achievementId?: InputMaybe<SortOrder>;
+  earnedAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementCreateInput = {
+  achievement: AchievementCreateNestedOneWithoutUserAchievementsInput;
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  user: UserCreateNestedOneWithoutUserAchievementsInput;
+};
+
+export type UserAchievementCreateManyAchievementInput = {
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+export type UserAchievementCreateManyAchievementInputEnvelope = {
+  data: Array<UserAchievementCreateManyAchievementInput>;
+  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type UserAchievementCreateManyInput = {
+  achievementId: Scalars['String']['input'];
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userId: Scalars['String']['input'];
+};
+
+export type UserAchievementCreateManyUserInput = {
+  achievementId: Scalars['String']['input'];
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type UserAchievementCreateManyUserInputEnvelope = {
+  data: Array<UserAchievementCreateManyUserInput>;
+  skipDuplicates?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type UserAchievementCreateNestedManyWithoutAchievementInput = {
+  connect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserAchievementCreateOrConnectWithoutAchievementInput>>;
+  create?: InputMaybe<Array<UserAchievementCreateWithoutAchievementInput>>;
+  createMany?: InputMaybe<UserAchievementCreateManyAchievementInputEnvelope>;
+};
+
+export type UserAchievementCreateNestedManyWithoutUserInput = {
+  connect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserAchievementCreateOrConnectWithoutUserInput>>;
+  create?: InputMaybe<Array<UserAchievementCreateWithoutUserInput>>;
+  createMany?: InputMaybe<UserAchievementCreateManyUserInputEnvelope>;
+};
+
+export type UserAchievementCreateOrConnectWithoutAchievementInput = {
+  create: UserAchievementCreateWithoutAchievementInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementCreateOrConnectWithoutUserInput = {
+  create: UserAchievementCreateWithoutUserInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementCreateWithoutAchievementInput = {
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  user: UserCreateNestedOneWithoutUserAchievementsInput;
+};
+
+export type UserAchievementCreateWithoutUserInput = {
+  achievement: AchievementCreateNestedOneWithoutUserAchievementsInput;
+  earnedAt?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+export type UserAchievementListRelationFilter = {
+  every?: InputMaybe<UserAchievementWhereInput>;
+  none?: InputMaybe<UserAchievementWhereInput>;
+  some?: InputMaybe<UserAchievementWhereInput>;
+};
+
+export type UserAchievementMaxOrderByAggregateInput = {
+  achievementId?: InputMaybe<SortOrder>;
+  earnedAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementMinOrderByAggregateInput = {
+  achievementId?: InputMaybe<SortOrder>;
+  earnedAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementOrderByRelationAggregateInput = {
+  _count?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementOrderByWithAggregationInput = {
+  _count?: InputMaybe<UserAchievementCountOrderByAggregateInput>;
+  _max?: InputMaybe<UserAchievementMaxOrderByAggregateInput>;
+  _min?: InputMaybe<UserAchievementMinOrderByAggregateInput>;
+  achievementId?: InputMaybe<SortOrder>;
+  earnedAt?: InputMaybe<SortOrder>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementOrderByWithRelationInput = {
+  achievement?: InputMaybe<AchievementOrderByWithRelationInput>;
+  achievementId?: InputMaybe<SortOrder>;
+  earnedAt?: InputMaybe<SortOrder>;
+  user?: InputMaybe<UserOrderByWithRelationInput>;
+  userId?: InputMaybe<SortOrder>;
+};
+
+export type UserAchievementScalarFieldEnum =
+  | 'achievementId'
+  | 'earnedAt'
+  | 'userId';
+
+export type UserAchievementScalarWhereInput = {
+  AND?: InputMaybe<Array<UserAchievementScalarWhereInput>>;
+  NOT?: InputMaybe<Array<UserAchievementScalarWhereInput>>;
+  OR?: InputMaybe<Array<UserAchievementScalarWhereInput>>;
+  achievementId?: InputMaybe<StringFilter>;
+  earnedAt?: InputMaybe<DateTimeFilter>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserAchievementScalarWhereWithAggregatesInput = {
+  AND?: InputMaybe<Array<UserAchievementScalarWhereWithAggregatesInput>>;
+  NOT?: InputMaybe<Array<UserAchievementScalarWhereWithAggregatesInput>>;
+  OR?: InputMaybe<Array<UserAchievementScalarWhereWithAggregatesInput>>;
+  achievementId?: InputMaybe<StringWithAggregatesFilter>;
+  earnedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+  userId?: InputMaybe<StringWithAggregatesFilter>;
+};
+
+export type UserAchievementUpdateInput = {
+  achievement?: InputMaybe<AchievementUpdateOneRequiredWithoutUserAchievementsNestedInput>;
+  earnedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  user?: InputMaybe<UserUpdateOneRequiredWithoutUserAchievementsNestedInput>;
+};
+
+export type UserAchievementUpdateManyMutationInput = {
+  earnedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserAchievementUpdateManyWithWhereWithoutAchievementInput = {
+  data: UserAchievementUpdateManyMutationInput;
+  where: UserAchievementScalarWhereInput;
+};
+
+export type UserAchievementUpdateManyWithWhereWithoutUserInput = {
+  data: UserAchievementUpdateManyMutationInput;
+  where: UserAchievementScalarWhereInput;
+};
+
+export type UserAchievementUpdateManyWithoutAchievementNestedInput = {
+  connect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserAchievementCreateOrConnectWithoutAchievementInput>>;
+  create?: InputMaybe<Array<UserAchievementCreateWithoutAchievementInput>>;
+  createMany?: InputMaybe<UserAchievementCreateManyAchievementInputEnvelope>;
+  delete?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  deleteMany?: InputMaybe<Array<UserAchievementScalarWhereInput>>;
+  disconnect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  set?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  update?: InputMaybe<Array<UserAchievementUpdateWithWhereUniqueWithoutAchievementInput>>;
+  updateMany?: InputMaybe<Array<UserAchievementUpdateManyWithWhereWithoutAchievementInput>>;
+  upsert?: InputMaybe<Array<UserAchievementUpsertWithWhereUniqueWithoutAchievementInput>>;
+};
+
+export type UserAchievementUpdateManyWithoutUserNestedInput = {
+  connect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  connectOrCreate?: InputMaybe<Array<UserAchievementCreateOrConnectWithoutUserInput>>;
+  create?: InputMaybe<Array<UserAchievementCreateWithoutUserInput>>;
+  createMany?: InputMaybe<UserAchievementCreateManyUserInputEnvelope>;
+  delete?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  deleteMany?: InputMaybe<Array<UserAchievementScalarWhereInput>>;
+  disconnect?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  set?: InputMaybe<Array<UserAchievementWhereUniqueInput>>;
+  update?: InputMaybe<Array<UserAchievementUpdateWithWhereUniqueWithoutUserInput>>;
+  updateMany?: InputMaybe<Array<UserAchievementUpdateManyWithWhereWithoutUserInput>>;
+  upsert?: InputMaybe<Array<UserAchievementUpsertWithWhereUniqueWithoutUserInput>>;
+};
+
+export type UserAchievementUpdateWithWhereUniqueWithoutAchievementInput = {
+  data: UserAchievementUpdateWithoutAchievementInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementUpdateWithWhereUniqueWithoutUserInput = {
+  data: UserAchievementUpdateWithoutUserInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementUpdateWithoutAchievementInput = {
+  earnedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  user?: InputMaybe<UserUpdateOneRequiredWithoutUserAchievementsNestedInput>;
+};
+
+export type UserAchievementUpdateWithoutUserInput = {
+  achievement?: InputMaybe<AchievementUpdateOneRequiredWithoutUserAchievementsNestedInput>;
+  earnedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+};
+
+export type UserAchievementUpsertWithWhereUniqueWithoutAchievementInput = {
+  create: UserAchievementCreateWithoutAchievementInput;
+  update: UserAchievementUpdateWithoutAchievementInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementUpsertWithWhereUniqueWithoutUserInput = {
+  create: UserAchievementCreateWithoutUserInput;
+  update: UserAchievementUpdateWithoutUserInput;
+  where: UserAchievementWhereUniqueInput;
+};
+
+export type UserAchievementUserIdAchievementIdCompoundUniqueInput = {
+  achievementId: Scalars['String']['input'];
+  userId: Scalars['String']['input'];
+};
+
+export type UserAchievementWhereInput = {
+  AND?: InputMaybe<Array<UserAchievementWhereInput>>;
+  NOT?: InputMaybe<Array<UserAchievementWhereInput>>;
+  OR?: InputMaybe<Array<UserAchievementWhereInput>>;
+  achievement?: InputMaybe<AchievementWhereInput>;
+  achievementId?: InputMaybe<StringFilter>;
+  earnedAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+};
+
+export type UserAchievementWhereUniqueInput = {
+  AND?: InputMaybe<Array<UserAchievementWhereInput>>;
+  NOT?: InputMaybe<Array<UserAchievementWhereInput>>;
+  OR?: InputMaybe<Array<UserAchievementWhereInput>>;
+  achievement?: InputMaybe<AchievementWhereInput>;
+  achievementId?: InputMaybe<StringFilter>;
+  earnedAt?: InputMaybe<DateTimeFilter>;
+  user?: InputMaybe<UserWhereInput>;
+  userId?: InputMaybe<StringFilter>;
+  userId_achievementId?: InputMaybe<UserAchievementUserIdAchievementIdCompoundUniqueInput>;
 };
 
 export type UserAvgOrderByAggregateInput = {
@@ -5246,6 +5717,7 @@ export type UserCreateInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5300,6 +5772,12 @@ export type UserCreateNestedOneWithoutStreakInput = {
   create?: InputMaybe<UserCreateWithoutStreakInput>;
 };
 
+export type UserCreateNestedOneWithoutUserAchievementsInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutUserAchievementsInput>;
+  create?: InputMaybe<UserCreateWithoutUserAchievementsInput>;
+};
+
 export type UserCreateNestedOneWithoutXpEventsInput = {
   connect?: InputMaybe<UserWhereUniqueInput>;
   connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutXpEventsInput>;
@@ -5342,6 +5820,11 @@ export type UserCreateOrConnectWithoutStreakInput = {
   where: UserWhereUniqueInput;
 };
 
+export type UserCreateOrConnectWithoutUserAchievementsInput = {
+  create: UserCreateWithoutUserAchievementsInput;
+  where: UserWhereUniqueInput;
+};
+
 export type UserCreateOrConnectWithoutXpEventsInput = {
   create: UserCreateWithoutXpEventsInput;
   where: UserWhereUniqueInput;
@@ -5369,6 +5852,7 @@ export type UserCreateWithoutCoursesAuthoredInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5390,6 +5874,7 @@ export type UserCreateWithoutDailyQuestsInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5411,6 +5896,7 @@ export type UserCreateWithoutHeartsInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5432,6 +5918,7 @@ export type UserCreateWithoutNodeProgressInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5453,6 +5940,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
@@ -5472,6 +5960,29 @@ export type UserCreateWithoutStreakInput = {
   photoUrl?: InputMaybe<Scalars['String']['input']>;
   quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
   role?: InputMaybe<Role>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
+  updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
+  xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
+  xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
+};
+
+export type UserCreateWithoutUserAchievementsInput = {
+  coursesAuthored?: InputMaybe<CourseCreateNestedManyWithoutAuthorInput>;
+  createdAt?: InputMaybe<Scalars['DateTime']['input']>;
+  dailyGoalMinutes?: InputMaybe<Scalars['Int']['input']>;
+  dailyQuests?: InputMaybe<UserDailyQuestCreateNestedManyWithoutUserInput>;
+  email: Scalars['String']['input'];
+  hearts?: InputMaybe<UserHeartsCreateNestedOneWithoutUserInput>;
+  id: Scalars['String']['input'];
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  nodeProgress?: InputMaybe<UserNodeProgressCreateNestedManyWithoutUserInput>;
+  onboardingComplete?: InputMaybe<Scalars['Boolean']['input']>;
+  photoUrl?: InputMaybe<Scalars['String']['input']>;
+  quizAttempts?: InputMaybe<QuizAttemptCreateNestedManyWithoutUserInput>;
+  role?: InputMaybe<Role>;
+  streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
@@ -5496,6 +6007,7 @@ export type UserCreateWithoutXpEventsInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xp?: InputMaybe<UserXpCreateNestedOneWithoutUserInput>;
 };
 
@@ -5517,6 +6029,7 @@ export type UserCreateWithoutXpInput = {
   streak?: InputMaybe<UserStreakCreateNestedOneWithoutUserInput>;
   timezone?: InputMaybe<Scalars['String']['input']>;
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAchievements?: InputMaybe<UserAchievementCreateNestedManyWithoutUserInput>;
   xpEvents?: InputMaybe<XpEventCreateNestedManyWithoutUserInput>;
 };
 
@@ -6331,6 +6844,7 @@ export type UserOrderByWithRelationInput = {
   streak?: InputMaybe<UserStreakOrderByWithRelationInput>;
   timezone?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
+  userAchievements?: InputMaybe<UserAchievementOrderByRelationAggregateInput>;
   xp?: InputMaybe<UserXpOrderByWithRelationInput>;
   xpEvents?: InputMaybe<XpEventOrderByRelationAggregateInput>;
 };
@@ -6566,6 +7080,7 @@ export type UserUpdateInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6632,6 +7147,14 @@ export type UserUpdateOneRequiredWithoutStreakNestedInput = {
   upsert?: InputMaybe<UserUpsertWithoutStreakInput>;
 };
 
+export type UserUpdateOneRequiredWithoutUserAchievementsNestedInput = {
+  connect?: InputMaybe<UserWhereUniqueInput>;
+  connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutUserAchievementsInput>;
+  create?: InputMaybe<UserCreateWithoutUserAchievementsInput>;
+  update?: InputMaybe<UserUpdateToOneWithWhereWithoutUserAchievementsInput>;
+  upsert?: InputMaybe<UserUpsertWithoutUserAchievementsInput>;
+};
+
 export type UserUpdateOneRequiredWithoutXpEventsNestedInput = {
   connect?: InputMaybe<UserWhereUniqueInput>;
   connectOrCreate?: InputMaybe<UserCreateOrConnectWithoutXpEventsInput>;
@@ -6678,6 +7201,11 @@ export type UserUpdateToOneWithWhereWithoutStreakInput = {
   where?: InputMaybe<UserWhereInput>;
 };
 
+export type UserUpdateToOneWithWhereWithoutUserAchievementsInput = {
+  data: UserUpdateWithoutUserAchievementsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
 export type UserUpdateToOneWithWhereWithoutXpEventsInput = {
   data: UserUpdateWithoutXpEventsInput;
   where?: InputMaybe<UserWhereInput>;
@@ -6705,6 +7233,7 @@ export type UserUpdateWithoutCoursesAuthoredInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6726,6 +7255,7 @@ export type UserUpdateWithoutDailyQuestsInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6747,6 +7277,7 @@ export type UserUpdateWithoutHeartsInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6768,6 +7299,7 @@ export type UserUpdateWithoutNodeProgressInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6789,6 +7321,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
@@ -6808,6 +7341,29 @@ export type UserUpdateWithoutStreakInput = {
   photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
   quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
   role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
+  updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
+  xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
+  xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
+};
+
+export type UserUpdateWithoutUserAchievementsInput = {
+  coursesAuthored?: InputMaybe<CourseUpdateManyWithoutAuthorNestedInput>;
+  createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  dailyGoalMinutes?: InputMaybe<NullableIntFieldUpdateOperationsInput>;
+  dailyQuests?: InputMaybe<UserDailyQuestUpdateManyWithoutUserNestedInput>;
+  email?: InputMaybe<StringFieldUpdateOperationsInput>;
+  hearts?: InputMaybe<UserHeartsUpdateOneWithoutUserNestedInput>;
+  id?: InputMaybe<StringFieldUpdateOperationsInput>;
+  interests?: InputMaybe<Array<Scalars['String']['input']>>;
+  name?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  nodeProgress?: InputMaybe<UserNodeProgressUpdateManyWithoutUserNestedInput>;
+  onboardingComplete?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  photoUrl?: InputMaybe<NullableStringFieldUpdateOperationsInput>;
+  quizAttempts?: InputMaybe<QuizAttemptUpdateManyWithoutUserNestedInput>;
+  role?: InputMaybe<EnumRoleFieldUpdateOperationsInput>;
+  streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
@@ -6832,6 +7388,7 @@ export type UserUpdateWithoutXpEventsInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xp?: InputMaybe<UserXpUpdateOneWithoutUserNestedInput>;
 };
 
@@ -6853,6 +7410,7 @@ export type UserUpdateWithoutXpInput = {
   streak?: InputMaybe<UserStreakUpdateOneWithoutUserNestedInput>;
   timezone?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
+  userAchievements?: InputMaybe<UserAchievementUpdateManyWithoutUserNestedInput>;
   xpEvents?: InputMaybe<XpEventUpdateManyWithoutUserNestedInput>;
 };
 
@@ -6897,6 +7455,12 @@ export type UserUpsertWithoutStreakInput = {
   where?: InputMaybe<UserWhereInput>;
 };
 
+export type UserUpsertWithoutUserAchievementsInput = {
+  create: UserCreateWithoutUserAchievementsInput;
+  update: UserUpdateWithoutUserAchievementsInput;
+  where?: InputMaybe<UserWhereInput>;
+};
+
 export type UserUpsertWithoutXpEventsInput = {
   create: UserCreateWithoutXpEventsInput;
   update: UserUpdateWithoutXpEventsInput;
@@ -6930,6 +7494,7 @@ export type UserWhereInput = {
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
+  userAchievements?: InputMaybe<UserAchievementListRelationFilter>;
   xp?: InputMaybe<UserXpWhereInput>;
   xpEvents?: InputMaybe<XpEventListRelationFilter>;
 };
@@ -6955,6 +7520,7 @@ export type UserWhereUniqueInput = {
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
+  userAchievements?: InputMaybe<UserAchievementListRelationFilter>;
   xp?: InputMaybe<UserXpWhereInput>;
   xpEvents?: InputMaybe<XpEventListRelationFilter>;
 };
@@ -7624,6 +8190,11 @@ export type LessonBlocksByNodeQueryVariables = Exact<{
 
 
 export type LessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, type: ContentType, html?: string | null, url?: string | null, caption?: string | null, order: number }> | null };
+
+export type MyAchievementsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyAchievementsQuery = { __typename?: 'Query', myAchievements?: Array<{ __typename?: 'UserAchievement', earnedAt: any, achievement: { __typename?: 'Achievement', id: string, name: string, description: string, icon: string, color: string } }> | null };
 
 export type MyProgressQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8600,6 +9171,46 @@ export function useLessonBlocksByNodeLazyQuery(baseOptions?: ApolloReactHooks.La
         }
 export type LessonBlocksByNodeQueryHookResult = ReturnType<typeof useLessonBlocksByNodeQuery>;
 export type LessonBlocksByNodeLazyQueryHookResult = ReturnType<typeof useLessonBlocksByNodeLazyQuery>;
+export const MyAchievementsDocument = gql`
+    query MyAchievements {
+  myAchievements {
+    earnedAt
+    achievement {
+      id
+      name
+      description
+      icon
+      color
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyAchievementsQuery__
+ *
+ * To run a query within a React component, call `useMyAchievementsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyAchievementsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyAchievementsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMyAchievementsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MyAchievementsQuery, MyAchievementsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MyAchievementsQuery, MyAchievementsQueryVariables>(MyAchievementsDocument, options);
+      }
+export function useMyAchievementsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MyAchievementsQuery, MyAchievementsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MyAchievementsQuery, MyAchievementsQueryVariables>(MyAchievementsDocument, options);
+        }
+export type MyAchievementsQueryHookResult = ReturnType<typeof useMyAchievementsQuery>;
+export type MyAchievementsLazyQueryHookResult = ReturnType<typeof useMyAchievementsLazyQuery>;
 export const MyProgressDocument = gql`
     query MyProgress {
   myProgress {
