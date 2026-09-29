@@ -9,6 +9,7 @@ function node(overrides: Partial<RawSkillNode>): RawSkillNode {
     orderInStep: 0,
     posX: 50,
     posY: 50,
+    derivedStatus: "UNLOCKED",
     prerequisites: [],
     progressForViewer: null,
     ...overrides,
@@ -20,6 +21,7 @@ const done = (updatedAt = "2026-01-01") => ({
   completedAt: updatedAt,
   updatedAt,
 });
+
 const started = (updatedAt: string) => ({
   status: "IN_PROGRESS" as const,
   completedAt: null,
@@ -33,18 +35,46 @@ function summarize(raw: RawSkillNode[]) {
 describe("summarizeCourseProgress", () => {
   it("computes completed / total and a rounded percent", () => {
     const summary = summarize([
-      node({ id: "a", progressForViewer: done() }),
-      node({ id: "b", step: 2, prerequisites: [{ dependsOnNodeId: "a" }] }),
-      node({ id: "c", step: 3, prerequisites: [{ dependsOnNodeId: "b" }] }),
+      node({
+        id: "a",
+        derivedStatus: "COMPLETED",
+        progressForViewer: done(),
+      }),
+      node({
+        id: "b",
+        step: 2,
+        derivedStatus: "UNLOCKED",
+        prerequisites: [{ dependsOnNodeId: "a" }],
+      }),
+      node({
+        id: "c",
+        step: 3,
+        derivedStatus: "LOCKED",
+        prerequisites: [{ dependsOnNodeId: "b" }],
+      }),
     ]);
 
-    expect(summary).toMatchObject({ completed: 1, total: 3, percent: 33, allComplete: false });
+    expect(summary).toMatchObject({
+      completed: 1,
+      total: 3,
+      percent: 33,
+      allComplete: false,
+    });
   });
 
   it("continues with the most recently updated in-progress node", () => {
     const summary = summarize([
-      node({ id: "a", progressForViewer: started("2026-01-01T10:00:00Z") }),
-      node({ id: "b", orderInStep: 1, progressForViewer: started("2026-01-02T10:00:00Z") }),
+      node({
+        id: "a",
+        derivedStatus: "IN_PROGRESS",
+        progressForViewer: started("2026-01-01T10:00:00Z"),
+      }),
+      node({
+        id: "b",
+        orderInStep: 1,
+        derivedStatus: "IN_PROGRESS",
+        progressForViewer: started("2026-01-02T10:00:00Z"),
+      }),
     ]);
 
     expect(summary.continueNodeId).toBe("b");
@@ -52,10 +82,31 @@ describe("summarizeCourseProgress", () => {
 
   it("falls back to the first unlocked node in tree order", () => {
     const summary = summarize([
-      node({ id: "a", progressForViewer: done() }),
-      node({ id: "c", step: 2, orderInStep: 1, prerequisites: [{ dependsOnNodeId: "a" }] }),
-      node({ id: "b", step: 2, orderInStep: 0, prerequisites: [{ dependsOnNodeId: "a" }] }),
-      node({ id: "d", step: 3, prerequisites: [{ dependsOnNodeId: "b" }] }),
+      node({
+        id: "a",
+        derivedStatus: "COMPLETED",
+        progressForViewer: done(),
+      }),
+      node({
+        id: "c",
+        step: 2,
+        orderInStep: 1,
+        derivedStatus: "UNLOCKED",
+        prerequisites: [{ dependsOnNodeId: "a" }],
+      }),
+      node({
+        id: "b",
+        step: 2,
+        orderInStep: 0,
+        derivedStatus: "UNLOCKED",
+        prerequisites: [{ dependsOnNodeId: "a" }],
+      }),
+      node({
+        id: "d",
+        step: 3,
+        derivedStatus: "LOCKED",
+        prerequisites: [{ dependsOnNodeId: "b" }],
+      }),
     ]);
 
     expect(summary.continueNodeId).toBe("b");
@@ -66,13 +117,23 @@ describe("summarizeCourseProgress", () => {
       node({
         id: "b",
         step: 2,
+        derivedStatus: "COMPLETED",
         progressForViewer: done(),
         prerequisites: [{ dependsOnNodeId: "a" }],
       }),
-      node({ id: "a", step: 1, progressForViewer: done() }),
+      node({
+        id: "a",
+        step: 1,
+        derivedStatus: "COMPLETED",
+        progressForViewer: done(),
+      }),
     ]);
 
-    expect(summary).toMatchObject({ allComplete: true, percent: 100, continueNodeId: "a" });
+    expect(summary).toMatchObject({
+      allComplete: true,
+      percent: 100,
+      continueNodeId: "a",
+    });
   });
 
   it("handles a course with no nodes", () => {
