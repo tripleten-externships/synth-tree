@@ -117,7 +117,12 @@ function Step1Credentials({
   syncUser,
 }: {
   onSuccess: () => void;
-  syncUser: (variables: { variables: { name: string } }) => Promise<unknown>;
+  syncUser: (variables: {
+    variables: {
+      name: string;
+      timezone: string;
+    };
+  }) => Promise<unknown>;
 }) {
   const [fields, setFields] = useState<Step1Fields>({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -133,7 +138,7 @@ function Step1Credentials({
       setError(null);
       setSyncError(false);
     },
-    []
+    [],
   );
 
   const handleEmailBlur = useCallback(() => {
@@ -154,7 +159,12 @@ function Step1Credentials({
       await createUserWithEmailAndPassword(auth, fields.email.trim(), fields.password);
       firebaseUserCreated = true;
       await updateProfile(auth.currentUser!, { displayName: fields.name.trim() });
-      await syncUser({ variables: { name: fields.name.trim() } });
+      await syncUser({
+        variables: {
+          name: fields.name.trim(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
       onSuccess();
     } catch (err: unknown) {
       if (err instanceof FirebaseError) {
@@ -178,12 +188,10 @@ function Step1Credentials({
         setSyncError(true);
         setError(
           "Your account was created but we couldn't finish setting it up. " +
-            "Please try signing in — we'll complete setup automatically."
+            "Please try signing in — we'll complete setup automatically.",
         );
       } else {
-        setError(
-          err instanceof Error ? err.message : "Something went wrong. Please try again."
-        );
+        setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -202,9 +210,7 @@ function Step1Credentials({
       <h1 className="text-[22px] font-bold text-slate-900 tracking-tight mb-1">
         Create your account
       </h1>
-      <p className="text-[13px] text-slate-400 font-medium mb-7">
-        Step 1 of 3 — Your credentials
-      </p>
+      <p className="text-[13px] text-slate-400 font-medium mb-7">Step 1 of 3 — Your credentials</p>
 
       <div className="flex flex-col gap-[18px] mb-2">
         {/* Name */}
@@ -331,7 +337,11 @@ function Step1Credentials({
         className="mt-6 w-full h-11 rounded-[10px] bg-blue-600 hover:bg-blue-700 active:scale-[0.98] disabled:opacity-45 disabled:cursor-not-allowed text-white text-[15px] font-semibold flex items-center justify-center gap-2 transition"
       >
         {loading && <Spinner />}
-        {loading && <span className="sr-only" role="status">Creating account…</span>}
+        {loading && (
+          <span className="sr-only" role="status">
+            Creating account…
+          </span>
+        )}
         {loading ? null : "Continue"}
       </button>
 
@@ -350,7 +360,9 @@ function Step1Credentials({
 function Step2Stub() {
   return (
     <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">🛠</span>
+      <span className="text-4xl leading-none" aria-hidden="true">
+        🛠
+      </span>
       <h2 className="text-xl font-bold text-slate-900 tracking-tight m-0">Profile setup</h2>
       <p className="text-sm text-slate-500 leading-relaxed m-0 max-w-[300px]">
         This step is coming soon (SYN-23). Your account was created successfully.
@@ -364,7 +376,9 @@ function Step2Stub() {
 function Step3Stub() {
   return (
     <div className="flex flex-col items-center text-center pt-5 pb-2 gap-3">
-      <span className="text-4xl leading-none" aria-hidden="true">⚙️</span>
+      <span className="text-4xl leading-none" aria-hidden="true">
+        ⚙️
+      </span>
       <h2 className="text-xl font-bold text-slate-900 tracking-tight m-0">Preferences</h2>
       <p className="text-sm text-slate-500 leading-relaxed m-0 max-w-[300px]">
         This step is coming soon (SYN-24).
@@ -388,7 +402,7 @@ export default function SignUpPage() {
     (next: Step) => {
       setSearchParams({ step: String(next) }, { replace: false });
     },
-    [setSearchParams]
+    [setSearchParams],
   );
 
   return (

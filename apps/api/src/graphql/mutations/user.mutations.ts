@@ -3,11 +3,22 @@ import { builder } from "@graphql/builder";
 import { Role as PrismaRole } from "@prisma/client";
 import { Role as RoleEnum } from "@graphql/__generated__/inputs";
 import { requireAdmin } from "@graphql/auth/requireAuth";
-import logger from '@lib/logger'; // Structured logger for tracking user sync and account events
+import logger from "@lib/logger"; // Structured logger for tracking user sync and account events
 
 // Sync current User.
 // A token will be sent in the headers of the Apollo Client from the frontend when a User signs up through the firebase sdk
 // This function creates a user in our postgres database and hence makes it an official prisma model.
+function isValidTimezone(timezone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 builder.mutationFields((t) => ({
   syncCurrentUser: t.prismaField({
@@ -16,29 +27,31 @@ builder.mutationFields((t) => ({
       // Allow the user to send in name and photoUrl from frontend.
       name: t.arg.string(),
       photoUrl: t.arg.string(),
+      timezone: t.arg.string(),
     },
     resolve: async (query, _parent, args, context) => {
       const firebaseUid = context.auth.requireAuth();
-      logger.debug({ userId: firebaseUid }, 'Syncing current user'); // Debug-level log to trace user sync flow during development
+      logger.debug({ userId: firebaseUid }, "Syncing current user"); // Debug-level log to trace user sync flow during development
       const ctxUser = context.user;
 
       const email = ctxUser?.email ?? null;
       if (!email) {
         throw new GraphQLError(
           "Authenticated Firebase user has no email; cannot sync user record",
-          { extensions: { code: "UNAUTHENTICATED" } }
+          { extensions: { code: "UNAUTHENTICATED" } },
         );
       }
+
+      const timezone = args.timezone && isValidTimezone(args.timezone) ? args.timezone : "UTC";
 
       const existingByEmail = await context.prisma.user.findUnique({
         where: { email },
       });
 
       if (existingByEmail && existingByEmail.id !== firebaseUid) {
-        throw new GraphQLError(
-          "Email is already associated with a different user account",
-          { extensions: { code: "BAD_USER_INPUT" } }
-        );
+        throw new GraphQLError("Email is already associated with a different user account", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
       }
 
       const user = await context.prisma.user.upsert({
@@ -49,16 +62,20 @@ builder.mutationFields((t) => ({
           email,
           name: args.name ?? null,
           photoUrl: args.photoUrl ?? null,
+          timezone,
           role: PrismaRole.USER, // use Prisma enum
         },
         update: {
-        email,
-        ...(args.name !== null && args.name !== undefined ? { name: args.name } : {}),
-        ...(args.photoUrl !== null && args.photoUrl !== undefined ? { photoUrl: args.photoUrl } : {}),
+          email,
+          ...(args.name !== null && args.name !== undefined ? { name: args.name } : {}),
+          ...(args.photoUrl !== null && args.photoUrl !== undefined
+            ? { photoUrl: args.photoUrl }
+            : {}),
+          timezone,
         },
       });
 
-      logger.info({ userId: user.id, email: user.email }, 'User synced'); // High-level audit log for successful user creation/update
+      logger.info({ userId: user.id, email: user.email }, "User synced"); // High-level audit log for successful user creation/update
       return user;
     },
   }),

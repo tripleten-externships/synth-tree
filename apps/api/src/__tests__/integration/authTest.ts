@@ -2,11 +2,7 @@ import { ApolloServer } from "@apollo/server";
 import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { getTestServer, stopTestServer } from "./server";
-import {
-  makeAdminContext,
-  makeUserContext,
-  makeUnauthContext,
-} from "./context";
+import { makeAdminContext, makeUserContext, makeUnauthContext } from "./context";
 import { seedUsers, cleanAll, ADMIN_USER_ID, REGULAR_USER_ID } from "./seed";
 
 const prisma = new PrismaClient();
@@ -119,6 +115,43 @@ describe("authentication and authorization", () => {
       );
       expect(res.errors).toBeUndefined();
       expect(res.data.createCourse.title).toBe("Auth Test Course");
+    });
+  });
+
+  describe("syncCurrentUser", () => {
+    it("saves the user's timezone", async () => {
+      const res = singleResult(
+        await server.executeOperation(
+          {
+            query: `
+            mutation {
+              syncCurrentUser(
+                name: "Test User"
+                timezone: "America/New_York"
+              ) {
+                id
+                email
+                timezone
+              }
+            }
+          `,
+          },
+          {
+            contextValue: makeUserContext(prisma, REGULAR_USER_ID),
+          },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.syncCurrentUser.timezone).toBe("America/New_York");
+
+      const user = await prisma.user.findUnique({
+        where: {
+          id: REGULAR_USER_ID,
+        },
+      });
+
+      expect(user?.timezone).toBe("America/New_York");
     });
   });
 });
