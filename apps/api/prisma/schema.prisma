@@ -246,6 +246,7 @@ model QuizQuestion {
   quizId          String       @db.Uuid
   type            QuestionType
   prompt          String
+  /// @Pothos.omit(where, orderBy)
   explanation     String?
   // Expected answer for FILL questions; null for other types. Graded
   // case-insensitively and whitespace-trimmed. Hidden from learners until
