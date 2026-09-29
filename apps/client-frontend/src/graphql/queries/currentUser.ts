@@ -1,5 +1,31 @@
 import { gql } from "@apollo/client";
 
+export const CURRENT_USER_STATS_QUERY = gql`
+  query CurrentUserStats {
+    currentUser {
+      id
+      xp {
+        totalXp
+      }
+      streak {
+        currentDays
+      }
+    }
+  }
+`;
+
+export interface CurrentUserStatsResponse {
+  currentUser: {
+    id: string;
+    xp: {
+      totalXp: number;
+    } | null;
+    streak: {
+      currentDays: number;
+    } | null;
+  } | null;
+}
+
 export const SYNC_CURRENT_USER = gql`
   mutation SyncCurrentUser($name: String, $photoUrl: String) {
     syncCurrentUser(name: $name, photoUrl: $photoUrl) {
