@@ -1623,7 +1623,7 @@ type Quiz {
   id: ID!
   node: SkillNode!
   nodeId: String!
-  questions(cursor: QuizQuestionWhereUniqueInput, distinct: [QuizQuestionScalarFieldEnum!], orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
+  questions(cursor: QuizQuestionWhereUniqueInput, orderBy: [QuizQuestionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizQuestionWhereInput): [QuizQuestion!]!
   required: Boolean!
   title: String
   updatedAt: DateTime!
@@ -2641,7 +2641,6 @@ input QuizOrderByWithAggregationInput {
 }
 
 input QuizOrderByWithRelationInput {
-  attempts: QuizAttemptOrderByRelationAggregateInput
   createdAt: SortOrder
   deletedAt: SortOrder
   id: SortOrder
@@ -2659,7 +2658,7 @@ type QuizQuestion {
   createdAt: DateTime!
   explanation: String
   id: ID!
-  options(cursor: QuizOptionWhereUniqueInput, distinct: [QuizOptionScalarFieldEnum!], orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
+  options(cursor: QuizOptionWhereUniqueInput, orderBy: [QuizOptionOrderByWithRelationInput!], skip: Int, take: Int, where: QuizOptionWhereInput): [QuizOption!]!
   order: Int!
   prompt: String!
   quiz: Quiz!
@@ -2849,7 +2848,6 @@ input QuizQuestionOrderByWithAggregationInput {
 }
 
 input QuizQuestionOrderByWithRelationInput {
-  answers: QuizAttemptAnswerOrderByRelationAggregateInput
   createdAt: SortOrder
   id: SortOrder
   options: QuizOptionOrderByRelationAggregateInput
@@ -3048,7 +3046,6 @@ input QuizQuestionWhereInput {
   AND: [QuizQuestionWhereInput!]
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
-  answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
   id: UuidFilter
   options: QuizOptionListRelationFilter
@@ -3064,7 +3061,6 @@ input QuizQuestionWhereUniqueInput {
   AND: [QuizQuestionWhereInput!]
   NOT: [QuizQuestionWhereInput!]
   OR: [QuizQuestionWhereInput!]
-  answers: QuizAttemptAnswerListRelationFilter
   createdAt: DateTimeFilter
   id: String
   options: QuizOptionListRelationFilter
@@ -3221,7 +3217,6 @@ input QuizWhereInput {
   AND: [QuizWhereInput!]
   NOT: [QuizWhereInput!]
   OR: [QuizWhereInput!]
-  attempts: QuizAttemptListRelationFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: UuidFilter
@@ -3237,7 +3232,6 @@ input QuizWhereUniqueInput {
   AND: [QuizWhereInput!]
   NOT: [QuizWhereInput!]
   OR: [QuizWhereInput!]
-  attempts: QuizAttemptListRelationFilter
   createdAt: DateTimeFilter
   deletedAt: DateTimeNullableFilter
   id: String
@@ -5778,7 +5772,6 @@ input UserOrderByWithRelationInput {
   nodeProgress: UserNodeProgressOrderByRelationAggregateInput
   onboardingComplete: SortOrder
   photoUrl: SortOrder
-  quizAttempts: QuizAttemptOrderByRelationAggregateInput
   role: SortOrder
   streak: UserStreakOrderByWithRelationInput
   timezone: SortOrder
@@ -6378,7 +6371,6 @@ input UserWhereInput {
   nodeProgress: UserNodeProgressListRelationFilter
   onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
-  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
   timezone: StringFilter
@@ -6403,7 +6395,6 @@ input UserWhereUniqueInput {
   nodeProgress: UserNodeProgressListRelationFilter
   onboardingComplete: BoolFilter
   photoUrl: StringNullableFilter
-  quizAttempts: QuizAttemptListRelationFilter
   role: EnumRoleFilter
   streak: UserStreakWhereInput
   timezone: StringFilter
