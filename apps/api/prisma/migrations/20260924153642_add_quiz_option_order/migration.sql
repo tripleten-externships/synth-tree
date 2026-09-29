@@ -9,7 +9,7 @@ SET "order" = numbered.position
 FROM (
   SELECT
     id,
-    ROW_NUMBER() OVER (PARTITION BY "questionId" ORDER BY "createdAt", id) - 1 AS position
+    ROW_NUMBER() OVER (PARTITION BY "questionId" ORDER BY "createdAt", ctid) - 1 AS position
   FROM "QuizOption"
 ) AS numbered
 WHERE o.id = numbered.id;
