@@ -7609,7 +7609,7 @@ export type CourseDetailProgressQueryVariables = Exact<{
 }>;
 
 
-export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
+export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, inProgressNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -8483,6 +8483,7 @@ export const CourseDetailProgressDocument = gql`
   courseProgress(courseId: $courseId) {
     courseId
     totalNodes
+    inProgressNodes
     completedNodes
     completionPercentage
     xpEarned

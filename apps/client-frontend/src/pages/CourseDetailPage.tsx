@@ -26,7 +26,7 @@ export default function CourseDetailPage() {
     // Refetch on every visit so node states reflect lessons finished since.
     fetchPolicy: "cache-and-network",
   });
-    // SYN-38: course-level aggregate (progress bar, chapters passed, XP earned)
+  // SYN-38: course-level aggregate (progress bar, chapters passed, XP earned)
   // comes from the API rather than client-side counts.
   const { data: progressData } = useCourseDetailProgressQuery({
     variables: { courseId: courseId ?? "" },
@@ -78,15 +78,13 @@ export default function CourseDetailPage() {
           <div>
             <div className="mb-1.5 flex items-baseline justify-between">
               <span className="text-sm font-medium text-foreground">Course progress</span>
-              <span className="text-sm font-semibold tabular-nums text-primary">
-                {percent}%
-              </span>
+              <span className="text-sm font-semibold tabular-nums text-primary">{percent}%</span>
             </div>
             <Progress value={percent} />
           </div>
 
           <Card className="p-4">
-                       <StatRow label="Chapters passed" value={`${completed}/${total}`} />
+            <StatRow label="Chapters passed" value={`${completed}/${total}`} />
             <StatRow label="XP earned" value={xpEarned === undefined ? "—" : String(xpEarned)} />
             {/* Time per course isn't tracked yet (SYN-78). */}
             <StatRow label="Time spent" value="—" />

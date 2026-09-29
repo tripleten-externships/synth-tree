@@ -1,4 +1,4 @@
-import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
+import { useCourseDetailProgressQuery, usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
 import { useNavigate } from "react-router-dom";
 import RecommendedNextCarousel from "../components/RecommendedNextCarousel";
 import CourseCard from "../components/CourseCard";
@@ -36,6 +36,29 @@ const placeholderCourses = [
   { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
 ];
 
+type HomeCourse = { id: string; title: string; description?: string | null };
+
+// SYN-38: the Home grid uses the same server aggregate as the course page.
+// The bar only appears once the learner has started the course; while the
+// query loads, or if it errors, the card renders without it.
+function CourseCardWithProgress({ course }: { course: HomeCourse }) {
+  const { data } = useCourseDetailProgressQuery({
+    variables: { courseId: course.id },
+    fetchPolicy: "cache-and-network",
+  });
+  const stats = data?.courseProgress;
+  const started = (stats?.inProgressNodes ?? 0) + (stats?.completedNodes ?? 0) > 0;
+
+  return (
+    <CourseCard
+      id={course.id}
+      title={course.title}
+      description={course.description ?? ""}
+      progress={started ? (stats?.completionPercentage ?? 0) : undefined}
+    />
+  );
+}
+
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
   // navigate() lets us send the user to a different page when they click something
@@ -52,8 +75,8 @@ export default function Home() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
+  // Placeholder ids aren't real courses, so only API courses get a progress lookup.
   const apiCourses = data?.publicGetAllCourses ?? [];
-  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
   const inProgressLesson = progressData?.myProgress?.find(
     (progress) => progress.status === "IN_PROGRESS",
   );
@@ -115,14 +138,16 @@ export default function Home() {
           Courses
         </h2>
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={course.title}
-              description={course.description ?? ""}
-            />
-          ))}
+          {apiCourses.length > 0
+            ? apiCourses.map((course) => <CourseCardWithProgress key={course.id} course={course} />)
+            : placeholderCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  description={course.description}
+                />
+              ))}
         </div>
       </section>
     </div>
