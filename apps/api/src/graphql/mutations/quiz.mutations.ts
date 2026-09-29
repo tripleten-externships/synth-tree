@@ -466,7 +466,14 @@ builder.mutationFields((t) => ({
         if (summary.passed === true) {
           await completeNodeForUser(tx, userId, existing.nodeId);
 
-          await awardXp(ctx.prisma, userId, QUIZ_PASS_XP, "quiz_pass", { quizId }, tx);
+          await awardXp(
+            ctx.prisma,
+            userId,
+            QUIZ_PASS_XP,
+            "quiz_pass",
+            { quizId },
+            tx,
+          );
 
           const streakDays = await getUserStreakDays(userId, tx);
           const lessonCompletedCount = await tx.userNodeProgress.count({
