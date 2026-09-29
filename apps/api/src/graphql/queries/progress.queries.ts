@@ -151,13 +151,44 @@ builder.queryFields((t) => ({
          ? 0
          : Math.round((completedNodes / totalNodes) * 100);
 
-     return {
+         // Node IDs and Quiz IDs in this course — XpEvent.rewardKey can be
+     // either, depending on whether XP came from node_completion or
+     // quiz_pass (see apps/api/src/services/xp.ts).
+     const courseNodes = await ctx.prisma.skillNode.findMany({
+       where: {
+         deletedAt: null,
+         tree: { courseId: args.courseId, deletedAt: null },
+       },
+       select: {
+         id: true,
+         quiz: { select: { id: true } },
+       },
+     });
+
+     const nodeIds = courseNodes.map((n) => n.id);
+     const quizIds = courseNodes.filter((n) => n.quiz).map((n) => n.quiz!.id);
+
+     const xpAggregate = await ctx.prisma.xpEvent.aggregate({
+       where: {
+         userId: targetUserId,
+         OR: [
+           { reason: "node_completion", rewardKey: { in: nodeIds } },
+           { reason: "quiz_pass", rewardKey: { in: quizIds } },
+         ],
+       },
+       _sum: { amount: true },
+     });
+
+     const xpEarned = xpAggregate._sum.amount ?? 0;
+
+          return {
        courseId: args.courseId,
        totalNodes,
        inProgressNodes,
        completedNodes,
        notStartedNodes,
        completionPercentage,
+       xpEarned,
      };
    },
  }),

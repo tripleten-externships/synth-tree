@@ -215,6 +215,7 @@ type CourseProgress {
   inProgressNodes: Int
   notStartedNodes: Int
   totalNodes: Int
+  xpEarned: Int
 }
 
 enum CourseScalarFieldEnum {
