@@ -30,6 +30,48 @@ import { UserStreakObject } from "@graphql/__generated__/UserStreak";
 import { UserHeartsObject } from "@graphql/__generated__/UserHearts";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
 import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
+import {
+  UserCoursesAuthoredFieldObject,
+  UserDailyQuestsFieldObject,
+  UserNodeProgressFieldObject,
+  UserXpEventsFieldObject,
+} from "@graphql/__generated__/User";
+import { CourseStatus, type Prisma } from "@prisma/client";
+
+// A user's private data (email, onboarding answers, timezone, progress, XP,
+// streak, hearts, daily quests, unpublished courses) is only visible to that
+// user or an admin. Other viewers reach User through relations such as
+// Course.author, UserNodeProgress.user and QuizAttempt.user, and only get the
+// public profile (id, name, photoUrl, role) that the leaderboard and author
+// bylines need.
+function canSeePrivateUserData(userId: string, ctx: GraphQLContext): boolean {
+  return ctx.auth.isAdmin() || ctx.auth.getUserId() === userId;
+}
+
+// Filter for per-user rows: every row for an admin, the viewer's own rows
+// otherwise, none for a signed-out viewer. Relation `query` callbacks don't get
+// the parent, but the relation is already scoped to the parent user, so the
+// list comes back empty unless the parent is the viewer.
+function viewerOwnRowsFilter(ctx: GraphQLContext): { userId?: { in: string[] } } {
+  if (ctx.auth.isAdmin()) return {};
+
+  const userId = ctx.auth.getUserId();
+  return { userId: { in: userId ? [userId] : [] } };
+}
+
+// Another author's unpublished or deleted courses stay hidden; the author and
+// admins still see all of them.
+function viewerCoursesFilter(ctx: GraphQLContext): Prisma.CourseWhereInput {
+  if (ctx.auth.isAdmin()) return {};
+
+  const userId = ctx.auth.getUserId();
+  return {
+    OR: [
+      ...(userId ? [{ authorId: userId }] : []),
+      { status: CourseStatus.PUBLISHED, deletedAt: null },
+    ],
+  };
+}
 
 const UnlockedStatusEnum = builder.enumType("UnlockedStatus", {
   values: ["COMPLETED", "IN_PROGRESS", "UNLOCKED", "LOCKED"] as const,
@@ -82,6 +124,9 @@ builder.prismaObject("User", {
         }),
       },
       resolve: async (query, parent, args, context) => {
+        // Recommendations are derived from this user's progress.
+        if (!canSeePrivateUserData(parent.id, context)) return [];
+
         const rawLimit = args.limit ?? 6;
         const limit = Math.min(Math.max(rawLimit, 1), 6);
 
@@ -128,6 +173,108 @@ builder.prismaObject("User", {
           },
         });
       },
+    }),
+
+    // Private profile fields: null (or empty) unless the viewer is this user
+    // or an admin.
+    email: t.string({
+      nullable: true,
+      resolve: (parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx) ? parent.email : null,
+    }),
+    timezone: t.string({
+      nullable: true,
+      resolve: (parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx) ? parent.timezone : null,
+    }),
+    interests: t.stringList({
+      nullable: false,
+      resolve: (parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx) ? parent.interests : [],
+    }),
+    dailyGoalMinutes: t.int({
+      nullable: true,
+      resolve: (parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx) ? parent.dailyGoalMinutes : null,
+    }),
+    onboardingComplete: t.boolean({
+      nullable: true,
+      resolve: (parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx) ? parent.onboardingComplete : null,
+    }),
+
+    // Per-user rows: empty unless the viewer is this user or an admin.
+    nodeProgress: t.relation("nodeProgress", {
+      ...UserNodeProgressFieldObject(t),
+      query: (args, ctx) => ({
+        where: { AND: [args.where || {}, viewerOwnRowsFilter(ctx)] },
+        cursor: args.cursor || undefined,
+        take: args.take || undefined,
+        distinct: args.distinct || undefined,
+        skip: args.skip || undefined,
+        orderBy: args.orderBy || undefined,
+      }),
+    }),
+    xpEvents: t.relation("xpEvents", {
+      ...UserXpEventsFieldObject(t),
+      query: (args, ctx) => ({
+        where: { AND: [args.where || {}, viewerOwnRowsFilter(ctx)] },
+        cursor: args.cursor || undefined,
+        take: args.take || undefined,
+        distinct: args.distinct || undefined,
+        skip: args.skip || undefined,
+        orderBy: args.orderBy || undefined,
+      }),
+    }),
+    dailyQuests: t.relation("dailyQuests", {
+      ...UserDailyQuestsFieldObject(t),
+      query: (args, ctx) => ({
+        where: { AND: [args.where || {}, viewerOwnRowsFilter(ctx)] },
+        cursor: args.cursor || undefined,
+        take: args.take || undefined,
+        distinct: args.distinct || undefined,
+        skip: args.skip || undefined,
+        orderBy: args.orderBy || undefined,
+      }),
+    }),
+    coursesAuthored: t.relation("coursesAuthored", {
+      ...UserCoursesAuthoredFieldObject(t),
+      query: (args, ctx) => ({
+        where: { AND: [args.where || {}, viewerCoursesFilter(ctx)] },
+        cursor: args.cursor || undefined,
+        take: args.take || undefined,
+        distinct: args.distinct || undefined,
+        skip: args.skip || undefined,
+        orderBy: args.orderBy || undefined,
+      }),
+    }),
+
+    // To-one private relations. These use prismaField rather than t.relation so
+    // the check always runs; a t.relation resolver is skipped when the parent
+    // query has already preloaded the relation.
+    xp: t.prismaField({
+      type: "UserXp",
+      nullable: true,
+      resolve: (query, parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx)
+          ? ctx.prisma.userXp.findUnique({ ...query, where: { userId: parent.id } })
+          : null,
+    }),
+    streak: t.prismaField({
+      type: "UserStreak",
+      nullable: true,
+      resolve: (query, parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx)
+          ? ctx.prisma.userStreak.findUnique({ ...query, where: { userId: parent.id } })
+          : null,
+    }),
+    hearts: t.prismaField({
+      type: "UserHearts",
+      nullable: true,
+      resolve: (query, parent, _args, ctx) =>
+        canSeePrivateUserData(parent.id, ctx)
+          ? ctx.prisma.userHearts.findUnique({ ...query, where: { userId: parent.id } })
+          : null,
     }),
   }),
 });
