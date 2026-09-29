@@ -128,7 +128,8 @@ RUN echo '{\n\
     "baseUrl": ".",\n\
     "paths": {\n\
       "@graphql/*": ["./dist/graphql/*"],\n\
-      "@lib/*": ["./dist/lib/*"]\n\
+      "@lib/*": ["./dist/lib/*"],\n\
+      "src/*": ["./dist/*"]\n\
     }\n\
   }\n\
 }' > /app/apps/api/tsconfig.runtime.json

@@ -1,0 +1,190 @@
+name: Deploy Admin Dashboard
+
+# Deploys apps/admin-dashboard to S3 + CloudFront:
+#   dev  -> admin.dev.synth-tree.com
+#   prod -> admin.synth-tree.com
+# Reusable + manual only. Auto-deploys run through deploy-orchestrator.yml
+# (push to development -> dev, push to main -> prod). Manual runs from the
+# Actions tab are gated to code owners by the require-codeowner action.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy (dev or prod)"
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-admin-${{ inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+
+jobs:
+  deploy:
+    name: Deploy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    # Binds the GitHub Environment named dev/prod so its environment-scoped
+    # secrets (AWS keys) resolve. This is NOT an approval gate on its own —
+    # keep the environment free of required reviewers for no-approval deploys.
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Restrict manual runs to code owners
+        uses: ./.github/actions/require-codeowner
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build theme library
+        working-directory: packages/theme
+        run: pnpm build
+
+      - name: Reinstall dependencies (after building libs)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build UI package
+        working-directory: packages/ui
+        run: pnpm build
+
+      - name: Build admin dashboard
+        working-directory: apps/admin-dashboard
+        env:
+          VITE_API_URL: ${{ inputs.environment == 'prod' && 'https://api.synth-tree.com/graphql' || 'https://api.dev.synth-tree.com/graphql' }}
+          VITE_ENVIRONMENT: ${{ inputs.environment }}
+          # Auth-critical — required (build throws without these).
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          # Optional — the apps use Auth only; these fall back to inert defaults
+          # if the secrets are unset. Set them if a Storage/Messaging/Analytics
+          # SDK is ever added.
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+        run: |
+          echo "Building admin dashboard for ${{ inputs.environment }}..."
+          pnpm build
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "❌ Build failed - dist directory is empty"
+            exit 1
+          fi
+          echo "✅ Build completed successfully"
+          ls -lah dist/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_KEY_ID_PROD || secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ inputs.environment == 'prod' && secrets.AWS_SECRET_ACCESS_KEY_PROD || secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get S3 bucket and CloudFront distribution
+        id: infra
+        run: |
+          BUCKET=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-admin-BucketName'].Value" \
+            --output text)
+          DIST_ID=$(aws cloudformation list-exports \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-admin-DistributionId'].Value" \
+            --output text)
+
+          if [ -z "$BUCKET" ] || [ "$BUCKET" = "None" ] || \
+             [ -z "$DIST_ID" ] || [ "$DIST_ID" = "None" ]; then
+            echo "::error::Could not resolve admin exports for ${{ inputs.environment }}. Has the ${{ inputs.environment }} Admin stack been deployed?"
+            exit 1
+          fi
+
+          echo "bucket=$BUCKET" >> $GITHUB_OUTPUT
+          echo "distribution=$DIST_ID" >> $GITHUB_OUTPUT
+          echo "S3 Bucket: $BUCKET"
+          echo "CloudFront Distribution: $DIST_ID"
+
+      - name: Sync to S3
+        working-directory: apps/admin-dashboard
+        env:
+          BUCKET: ${{ steps.infra.outputs.bucket }}
+        run: |
+          echo "Syncing static assets to S3..."
+          aws s3 sync dist/ s3://$BUCKET/ \
+            --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" \
+            --exclude "*.map"
+          aws s3 cp dist/index.html s3://$BUCKET/index.html \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --content-type "text/html"
+          echo "✅ Files synced to S3"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Creating CloudFront invalidation..."
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id $DIST_ID \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          echo "Invalidation ID: $INVALIDATION_ID"
+          echo "✅ CloudFront cache invalidated"
+
+      - name: Verify deployment
+        env:
+          DIST_ID: ${{ steps.infra.outputs.distribution }}
+        run: |
+          echo "Waiting for invalidation to complete..."
+          sleep 10
+          DOMAIN=$(aws cloudfront get-distribution \
+            --id $DIST_ID \
+            --query 'Distribution.DomainName' \
+            --output text)
+          echo "CloudFront Domain: $DOMAIN"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://$DOMAIN || echo "000")
+          if [ "$STATUS" == "200" ] || [ "$STATUS" == "304" ]; then
+            echo "✅ Deployment verified (status: $STATUS)"
+          else
+            echo "⚠️ Verification returned status: $STATUS"
+          fi

@@ -1,360 +1,100 @@
 # GitHub Actions Workflows
 
-This directory contains automated CI/CD workflows for the Synth Tree monorepo. All workflows are based on the comprehensive CI/CD guide at [`apps/infra/CI_CD.md`](../../apps/infra/CI_CD.md).
-
-## 📋 Overview
-
-| Workflow                                                   | Purpose                                    | Triggers                                     | Environments |
-| ---------------------------------------------------------- | ------------------------------------------ | -------------------------------------------- | ------------ |
-| [`deploy-infrastructure.yml`](./deploy-infrastructure.yml) | Deploy AWS infrastructure via CDK          | PR (diff only), Push to main, Manual         | dev, prod    |
-| [`deploy-api.yml`](./deploy-api.yml)                       | Build & deploy API to ECS                  | Push to main (when API changes), Manual      | dev, prod    |
-| [`deploy-frontend.yml`](./deploy-frontend.yml)             | Build & deploy React app to S3/CloudFront  | Push to main (when frontend changes), Manual | dev, prod    |
-| [`deploy-storybook.yml`](./deploy-storybook.yml)           | Build & deploy Storybook to S3/CloudFront  | Push to main (when UI changes), Manual       | dev, prod    |
-| [`pr-validation.yml`](./pr-validation.yml)                 | Validate PRs (lint, test, build, CDK diff) | Pull requests to main                        | N/A          |
-
-## 🚀 Deployment Strategy
-
-### Automatic Deployments
-
-- **Dev Environment**: Automatically deploys when code is merged to `main`
-- **Prod Environment**: Requires manual approval (configured in GitHub environment settings)
-
-### Manual Deployments
-
-All deployment workflows support manual triggering via GitHub Actions UI:
-
-1. Go to Actions tab
-2. Select the workflow
-3. Click "Run workflow"
-4. Choose environment (dev/prod)
-
-### Deployment Flow
-
-```
-PR Created → PR Validation (lint, test, build)
-     ↓
-PR Approved & Merged to main
-     ↓
-Deploy to Dev (automatic)
-     ↓
-Manual Approval for Prod
-     ↓
-Deploy to Prod
-```
-
-## 🔐 Required GitHub Secrets
-
-Configure these secrets in: **Settings → Secrets and variables → Actions**
-
-### Environment-Agnostic Secrets
-
-These secrets are used by workflows but can be stored at the repository level:
-
-| Secret Name                  | Description                          | Required For                             |
-| ---------------------------- | ------------------------------------ | ---------------------------------------- |
-| `AWS_ACCESS_KEY_ID_DEV`      | AWS access key for dev environment   | Infrastructure, API, Frontend, Storybook |
-| `AWS_SECRET_ACCESS_KEY_DEV`  | AWS secret key for dev environment   | Infrastructure, API, Frontend, Storybook |
-| `AWS_ACCESS_KEY_ID_PROD`     | AWS access key for prod environment  | Infrastructure, API, Frontend, Storybook |
-| `AWS_SECRET_ACCESS_KEY_PROD` | AWS secret key for prod environment  | Infrastructure, API, Frontend, Storybook |
-| `AWS_ACCOUNT_ID_DEV`         | AWS account ID for dev (optional)    | Infrastructure                           |
-| `AWS_ACCOUNT_ID_PROD`        | AWS account ID for prod (optional)   | Infrastructure                           |
-| `FIREBASE_API_KEY`           | Firebase API key                     | Frontend                                 |
-| `FIREBASE_AUTH_DOMAIN`       | Firebase auth domain                 | Frontend                                 |
-| `FIREBASE_PROJECT_ID`        | Firebase project ID                  | Frontend, API                            |
-| `FIREBASE_PRIVATE_KEY`       | Firebase service account private key | API                                      |
-| `FIREBASE_CLIENT_EMAIL`      | Firebase service account email       | API                                      |
-
-### Optional Secrets
-
-| Secret Name       | Description                                                   | Required For   |
-| ----------------- | ------------------------------------------------------------- | -------------- |
-| `BASTION_SSH_KEY` | SSH key for bastion host (if using SSH tunnel for migrations) | API migrations |
-
-## 🌍 Environment Configuration
-
-### Setting Up GitHub Environments
-
-1. Go to **Settings → Environments**
-2. Create two environments: `dev` and `prod`
-
-#### Dev Environment
-
-```yaml
-Environment name: dev
-Protection rules: None (auto-deploy on merge)
-Environment secrets: None (use repository secrets)
-```
-
-#### Prod Environment
-
-```yaml
-Environment name: prod
-Protection rules:
-  ✓ Required reviewers: 1-2 people
-  ✓ Deployment branches: main only
-  ✓ Wait timer: 5 minutes (optional)
-Environment secrets: None (use repository secrets)
-```
-
-## 📦 Workflow Details
-
-### 1. Infrastructure Deployment (`deploy-infrastructure.yml`)
-
-**What it does:**
-
-- Runs CDK diff on PRs to preview infrastructure changes
-- Deploys all CDK stacks (Network, Database, API, Frontend, Storybook)
-- Handles stack dependencies and deployment order
-- Includes drift detection capability
-
-**Key Features:**
-
-- ✅ CDK bootstrap verification
-- ✅ Parallel stack deployment (concurrency: 3)
-- ✅ CloudFormation output capture
-- ✅ Drift detection (optional)
-
-**Stack Deployment Order:**
-
-1. NetworkStack
-2. DatabaseStack
-3. ApiStack (depends on Network, Database)
-4. FrontendStack, StorybookStack (independent)
-
-### 2. API Deployment (`deploy-api.yml`)
-
-**What it does:**
-
-- Builds Docker image with multi-stage builds
-- Pushes to ECR with git SHA and latest tags
-- Runs Prisma migrations (can be skipped)
-- Updates ECS service with zero-downtime deployment
-- Performs health checks and automatic rollback on failure
-
-**Key Features:**
-
-- ✅ Docker layer caching
-- ✅ Prisma migration deployment
-- ✅ ECS blue-green deployment
-- ✅ Health check validation
-- ✅ Automatic rollback on failure
-
-**Health Check Endpoints:**
-
-- Dev: `https://api.dev.synth-tree.com/health`
-- Prod: `https://api.synth-tree.com/health`
-
-### 3. Frontend Deployment (`deploy-frontend.yml`)
-
-**What it does:**
-
-- Builds Vite React application with environment-specific configs
-- Syncs to S3 with optimized cache headers
-- Invalidates CloudFront distribution
-- Verifies deployment
-
-**Key Features:**
-
-- ✅ Environment-specific builds (dev/prod)
-- ✅ Optimized cache headers (long cache for assets, no cache for index.html)
-- ✅ CloudFront cache invalidation
-- ✅ Deployment verification
-
-**Build Environment Variables:**
-
-- `VITE_API_URL`: API endpoint URL
-- `VITE_ENVIRONMENT`: dev or prod
-- `VITE_FIREBASE_*`: Firebase configuration
-
-### 4. Storybook Deployment (`deploy-storybook.yml`)
-
-**What it does:**
-
-- Builds Storybook static site
-- Syncs to S3
-- Invalidates CloudFront cache
-- Independent from main application deployment
-
-**Key Features:**
-
-- ✅ Static site generation
-- ✅ Independent deployment cycle
-- ✅ CloudFront cache invalidation
-
-**Deployment URLs:**
-
-- Dev: CloudFront distribution URL
-- Prod: `https://storybook.synth-tree.com`
-
-### 5. PR Validation (`pr-validation.yml`)
-
-**What it does:**
-
-- Detects which parts of the monorepo changed
-- Runs appropriate validation checks
-- Provides CDK diff commentary on PRs
-- Prevents broken code from being merged
-
-**Validation Checks:**
-
-- ✅ Lint and type checking
-- ✅ API tests and Prisma validation
-- ✅ API Docker build
-- ✅ Frontend build
-- ✅ Storybook build
-- ✅ Infrastructure CDK diff and synth
-
-**Smart Path Detection:**
-Uses `dorny/paths-filter` to only run checks for changed code:
-
-- `apps/infra/**` → Infrastructure validation
-- `apps/api/**` → API tests and build
-- `apps/admin-dashboard/**` → Frontend build
-- `packages/ui/**` → Storybook build
-
-## 🔧 Workflow Customization
-
-### Modifying Deployment Behavior
-
-#### Skip Migrations (API)
-
-When deploying API manually, you can skip database migrations:
-
-```yaml
-inputs:
-  skip_migrations: true
-```
-
-#### Change Node/PNPM Versions
-
-Update environment variables in each workflow:
-
-```yaml
-env:
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10"
-```
-
-#### Adjust ECS Desired Count
-
-Modify the `--desired-count` in API deployment steps:
-
-```bash
-aws ecs update-service \
-  --desired-count 2  # Change this value
-```
-
-### Adding New Workflows
-
-When adding new workflows, follow these conventions:
-
-1. Use descriptive names: `deploy-[component].yml`
-2. Include concurrency control
-3. Set appropriate permissions (least privilege)
-4. Cache dependencies (pnpm store)
-5. Add environment-specific configuration
-6. Include proper error handling and rollback
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**CDK Bootstrap Required**
-
-```
-Error: CDKToolkit stack not found
-Solution: Run `npx cdk bootstrap` in apps/infra/
-```
-
-**ECR Repository Not Found**
-
-```
-Error: Repository not found
-Solution: Infrastructure must be deployed first (creates ECR repositories)
-```
-
-**CloudFormation Stack Not Found**
-
-```
-Error: Could not resolve synth-tree-dev-frontend-BucketName export
-Solution: Deploy infrastructure before deploying applications
-
-App-deploy workflows look up resources by CloudFormation **export name**
-(e.g. `synth-tree-dev-ClusterName`, `synth-tree-dev-frontend-BucketName`)
-rather than by stack name. The exports are defined in `apps/infra/lib/`
-and stay stable across stack restructures. Drift-detection and
-deployment-outputs workflows do query by stack name — the names are
-predictable (`synth-tree-{env}-{Network|Database|Api|Frontend|Storybook}`),
-one top-level CloudFormation stack per domain.
-```
-
-**Health Check Failed**
-
-```
-Error: Health check returned 000 or non-200 status
-Solution: Check ECS service logs, verify security groups, and service configuration
-```
-
-### Viewing Logs
-
-**GitHub Actions Logs:**
-
-- Go to Actions tab
-- Select the workflow run
-- Expand job steps to view logs
-
-**AWS CloudWatch Logs:**
-
-```bash
-# API logs (CloudWatch log group as defined by the API stack)
-aws logs tail /ecs/synth-tree-dev/api --follow
-
-# ECS deployment events
-aws ecs describe-services \
-  --cluster synth-tree-dev-api-cluster \
-  --services synth-tree-dev-api-service
-```
-
-## 📚 Additional Resources
-
-- [CI/CD Guide](../../apps/infra/CI_CD.md) - Comprehensive CI/CD documentation
-- [Deployment Guide](../../apps/infra/DEPLOYMENT.md) - Manual deployment procedures
-- [Operations Guide](../../apps/infra/OPERATIONS.md) - Monitoring and operations
-- [Developer Guide](../../apps/infra/DEVELOPER_GUIDE.md) - Development workflows
-
-## 🔄 Workflow Maintenance
-
-### Regular Tasks
-
-**Weekly:**
-
-- Review failed workflow runs
-- Check for workflow updates in dependencies
-
-**Monthly:**
-
-- Rotate AWS credentials
-- Review and update Node.js/PNPM versions
-- Update GitHub Actions to latest versions
-
-**Quarterly:**
-
-- Audit secrets and permissions
-- Review and optimize workflow performance
-- Update documentation
-
-### Updating Actions Versions
-
-Periodically update action versions in workflows:
-
-```yaml
-- uses: actions/checkout@v4 # Check for v5
-- uses: actions/setup-node@v4 # Check for updates
-- uses: aws-actions/configure-aws-credentials@v4
-- uses: pnpm/action-setup@v2
-- uses: actions/cache@v4
-```
-
----
-
-**For questions or issues, refer to the [CI/CD Guide](../../apps/infra/CI_CD.md) or contact the DevOps team.**
+CI/CD for the Synth Tree monorepo. Deploys are orchestrated from a single
+push-triggered workflow; the per-service workflows are reusable building blocks
+that also run manually.
+
+## Branch → environment
+
+| Branch        | Deploys to | How code lands on it                   |
+| ------------- | ---------- | -------------------------------------- |
+| `development` | **dev**    | merge feature branches → `development` |
+| `main`        | **prod**   | merge `development` → `main` (release) |
+
+`development` is the default branch. Feature PRs target `development`
+(auto-deploys to dev on merge); releases are a `development` → `main` merge
+(auto-deploys to prod). Nothing deploys from any other branch.
+
+## Workflows
+
+| Workflow                                                   | Purpose                                                     | Triggers                                             |
+| ---------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| [`deploy-orchestrator.yml`](./deploy-orchestrator.yml)     | The only auto-deployer. Detects changed services and calls the reusable deploy workflows for the right environment. | Push to `development`/`main`; manual (`workflow_dispatch`) |
+| [`deploy-infrastructure.yml`](./deploy-infrastructure.yml) | Deploy AWS infra via CDK (`cdk deploy --all`)               | Reusable (`workflow_call`) + manual                  |
+| [`deploy-api.yml`](./deploy-api.yml)                       | Build & deploy the API image to ECS                         | Reusable + manual                                    |
+| [`deploy-frontend.yml`](./deploy-frontend.yml)             | Build & deploy **client-frontend** to S3/CloudFront         | Reusable + manual                                    |
+| [`deploy-admin.yml`](./deploy-admin.yml)                   | Build & deploy **admin-dashboard** to S3/CloudFront         | Reusable + manual                                    |
+| [`deploy-storybook.yml`](./deploy-storybook.yml)           | Build & deploy Storybook to S3/CloudFront                   | Reusable + manual                                    |
+| [`drift-detection.yml`](./drift-detection.yml)             | Weekly CloudFormation drift check (both envs)               | Schedule + manual                                    |
+| [`pr-validation.yml`](./pr-validation.yml)                 | Lint, test, build, CDK diff on PRs                          | PRs into `development` and `main`                    |
+
+Each service is a static site or service mapped to a CDK stack:
+
+| Service     | App                    | Dev URL                          | Prod URL                     |
+| ----------- | ---------------------- | -------------------------------- | ---------------------------- |
+| Client      | `apps/client-frontend` | `dev.synth-tree.com`             | `app.synth-tree.com`         |
+| Admin       | `apps/admin-dashboard` | `admin.dev.synth-tree.com`       | `admin.synth-tree.com`       |
+| API         | `apps/api`             | `api.dev.synth-tree.com/graphql` | `api.synth-tree.com/graphql` |
+| Storybook   | `packages/ui`          | `storybook.dev.synth-tree.com`   | `storybook.synth-tree.com`   |
+
+## How deploys run
+
+### Automatic (via the orchestrator)
+
+On a push to `development` (→ dev) or `main` (→ prod), the orchestrator:
+
+1. Resolves the target environment from the branch.
+2. Path-diffs the pushed commits to decide which services changed.
+3. Calls each changed service's reusable workflow with `environment: dev|prod`
+   and `secrets: inherit`, in dependency order — infrastructure first, then API,
+   then the client frontend; admin and storybook wait only on infrastructure.
+
+A service whose files didn't change is skipped; downstream services still run
+(a skipped dependency counts as satisfied).
+
+### Manual (individual workflows)
+
+Every `deploy-*.yml` can be run on its own from the **Actions** tab
+(`workflow_dispatch`), choosing `dev` or `prod`. Manual runs are **restricted to
+code owners** — the first step ([`.github/actions/require-codeowner`](../actions/require-codeowner/action.yml))
+fails the run if the triggering user isn't a global owner in
+[`CODEOWNERS`](../CODEOWNERS). This guard only applies to manual runs; it's a
+no-op when the orchestrator calls the workflow.
+
+### Manual full-stack deploy
+
+Run **Deploy Orchestrator** from the Actions tab, pick the environment, and
+optionally toggle `deploy_all` to redeploy every service (e.g. to push a feature
+branch to dev). Without `deploy_all` it deploys only what the last commit changed.
+
+## Environments & prod approval
+
+Each deploy job binds the GitHub **Environment** named `dev` or `prod`
+(`environment: ${{ inputs.environment }}`). That binding exists only so the
+environment-scoped AWS secrets resolve — it is **not** an approval gate by
+itself. AWS keys live as environment secrets:
+
+- `dev` environment: `AWS_ACCESS_KEY_ID_DEV` / `AWS_SECRET_ACCESS_KEY_DEV`
+- `prod` environment: `AWS_ACCESS_KEY_ID_PROD` / `AWS_SECRET_ACCESS_KEY_PROD`
+
+(Alternatively define these at repo level — either resolves.)
+
+There is no in-workflow approval step. To keep prod deploys automatic on a merge
+to `main`, the `prod` Environment must have **no required reviewers / wait
+timer** (Settings → Environments → `prod`). Add required reviewers there only if
+you later want a manual prod gate.
+
+## Required repository secrets
+
+AWS credentials per environment, and Firebase config injected into the frontend
+builds:
+
+- `AWS_ACCESS_KEY_ID_DEV` / `AWS_SECRET_ACCESS_KEY_DEV`
+- `AWS_ACCESS_KEY_ID_PROD` / `AWS_SECRET_ACCESS_KEY_PROD`
+- **Required:** `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`
+  — the auth-critical values. The shared Firebase init throws if any are
+  missing (which renders a blank page).
+- **Optional:** `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`,
+  `FIREBASE_APP_ID` — the apps use Firebase **Auth only**, so these are unused
+  and fall back to inert defaults when unset. Set them only if a Cloud Storage /
+  Messaging / Analytics SDK is ever added.

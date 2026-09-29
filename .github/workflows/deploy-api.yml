@@ -1,13 +1,16 @@
 name: Deploy API
 
+# Reusable + manual only. Auto-deploys run through deploy-orchestrator.yml
+# (push to development -> dev, push to main -> prod). Manual runs from the
+# Actions tab are gated to code owners by the require-codeowner action.
+
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "apps/api/**"
-      - "packages/**"
-      - ".github/workflows/deploy-api.yml"
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to deploy (dev or prod)"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       environment:
@@ -17,44 +20,38 @@ on:
         options:
           - dev
           - prod
-      skip_migrations:
-        description: "Skip database migrations"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: deploy-api-${{ github.event.inputs.environment || 'auto' }}
+  group: deploy-api-${{ inputs.environment }}
   cancel-in-progress: false
 
 env:
   AWS_REGION: us-east-1
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10"
 
 jobs:
-  deploy-dev:
-    name: Deploy to Dev
+  deploy:
+    name: Deploy (${{ inputs.environment }})
     runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
-    environment: dev
-    outputs:
-      image-uri: ${{ steps.image.outputs.uri }}
+    # Binds the GitHub Environment named dev/prod so its environment-scoped
+    # secrets (AWS keys) resolve. This is NOT an approval gate on its own —
+    # keep the environment free of required reviewers for no-approval deploys.
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Restrict manual runs to code owners
+        uses: ./.github/actions/require-codeowner
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+          aws-access-key-id: ${{ inputs.environment == 'prod' && secrets.AWS_ACCESS_KEY_ID_PROD || secrets.AWS_ACCESS_KEY_ID_DEV }}
+          aws-secret-access-key: ${{ inputs.environment == 'prod' && secrets.AWS_SECRET_ACCESS_KEY_PROD || secrets.AWS_SECRET_ACCESS_KEY_DEV }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -68,10 +65,9 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: synth-tree-dev-api
+          ECR_REPOSITORY: synth-tree-${{ inputs.environment }}-api
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Build with cache from monorepo root
           docker buildx build \
             --platform linux/amd64 \
             --file apps/api/Dockerfile \
@@ -81,7 +77,6 @@ jobs:
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --push \
             .
-
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Output image URI
@@ -91,20 +86,20 @@ jobs:
       - name: Get ECS cluster and service info
         id: ecs-info
         run: |
-          # Use CloudFormation exports (stable names) rather than stack
-          # names: CDK puts the API stack in a nested stack whose physical
-          # name has an auto-generated hash suffix that changes between
-          # deploys. The export names defined in api-stack.ts are stable.
+          # Use CloudFormation exports (stable names) rather than stack names:
+          # CDK puts the API stack in a nested stack whose physical name has an
+          # auto-generated hash suffix that changes between deploys. The export
+          # names defined in api-stack.ts are stable.
           CLUSTER=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-dev-ClusterName'].Value" \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-ClusterName'].Value" \
             --output text)
           SERVICE=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-dev-ServiceName'].Value" \
+            --query "Exports[?Name=='synth-tree-${{ inputs.environment }}-ServiceName'].Value" \
             --output text)
 
           if [ -z "$CLUSTER" ] || [ "$CLUSTER" = "None" ] || \
              [ -z "$SERVICE" ] || [ "$SERVICE" = "None" ]; then
-            echo "::error::Could not resolve synth-tree-dev-ClusterName / -ServiceName exports. Has the dev infra been deployed?"
+            echo "::error::Could not resolve synth-tree-${{ inputs.environment }}-ClusterName / -ServiceName exports. Has the ${{ inputs.environment }} infra been deployed?"
             exit 1
           fi
 
@@ -117,7 +112,6 @@ jobs:
           IMAGE_URI: ${{ steps.image.outputs.uri }}
           CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
         run: |
-          # Get current task definition
           TASK_DEF_ARN=$(aws ecs describe-services \
             --cluster $CLUSTER \
             --services ${{ steps.ecs-info.outputs.service }} \
@@ -128,12 +122,10 @@ jobs:
             --task-definition $TASK_DEF_ARN \
             --query 'taskDefinition')
 
-          # Update container image
           NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "$IMAGE_URI" \
-            '.containerDefinitions[0].image = $IMAGE | 
+            '.containerDefinitions[0].image = $IMAGE |
              del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
 
-          # Register new task definition
           NEW_TASK_ARN=$(aws ecs register-task-definition \
             --cli-input-json "$NEW_TASK_DEF" \
             --query 'taskDefinition.taskDefinitionArn' \
@@ -155,7 +147,6 @@ jobs:
             --task-definition $TASK_DEF \
             --force-new-deployment \
             --desired-count 2
-
           echo "✅ ECS service update initiated"
 
       - name: Wait for deployment to stabilize
@@ -167,7 +158,6 @@ jobs:
           aws ecs wait services-stable \
             --cluster $CLUSTER \
             --services $SERVICE
-
           echo "✅ Service is stable"
 
       - name: Verify deployment health
@@ -175,15 +165,12 @@ jobs:
         run: |
           echo "Waiting for new tasks to be healthy..."
           sleep 30
-
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://api.dev.synth-tree.com/health || echo "000")
-
+          HEALTH_URL="${{ inputs.environment == 'prod' && 'https://api.synth-tree.com/health' || 'https://api.dev.synth-tree.com/health' }}"
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
           if [ "$HEALTH_STATUS" != "200" ]; then
-            echo "❌ Health check failed with status: $HEALTH_STATUS"
+            echo "❌ Health check failed with status: $HEALTH_STATUS ($HEALTH_URL)"
             exit 1
           fi
-
           echo "✅ Health check passed (status: $HEALTH_STATUS)"
 
       - name: Rollback on failure
@@ -193,194 +180,17 @@ jobs:
           SERVICE: ${{ steps.ecs-info.outputs.service }}
         run: |
           echo "⚠️ Rolling back to previous task definition..."
-
-          # Get previous task definition
           PREV_TASK=$(aws ecs describe-services \
             --cluster $CLUSTER \
             --services $SERVICE \
             --query 'services[0].deployments[1].taskDefinition' \
             --output text)
-
           if [ "$PREV_TASK" != "None" ] && [ -n "$PREV_TASK" ]; then
             aws ecs update-service \
               --cluster $CLUSTER \
               --service $SERVICE \
               --task-definition $PREV_TASK \
               --force-new-deployment
-            
-            echo "✅ Rollback initiated to: $PREV_TASK"
-          else
-            echo "⚠️ No previous task definition found"
-          fi
-
-  deploy-prod:
-    name: Deploy to Prod
-    runs-on: ubuntu-latest
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
-    needs: deploy-dev
-    environment: prod
-    outputs:
-      image-uri: ${{ steps.image.outputs.uri }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build, tag, and push image to ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: synth-tree-prod-api
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          # Build with cache from monorepo root
-          docker buildx build \
-            --platform linux/amd64 \
-            --file apps/api/Dockerfile \
-            --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache \
-            --cache-to type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:cache,mode=max \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            --push \
-            .
-
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-      - name: Output image URI
-        id: image
-        run: echo "uri=${{ steps.build-image.outputs.image }}" >> $GITHUB_OUTPUT
-
-      - name: Get ECS cluster and service info
-        id: ecs-info
-        run: |
-          CLUSTER=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-prod-ClusterName'].Value" \
-            --output text)
-          SERVICE=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='synth-tree-prod-ServiceName'].Value" \
-            --output text)
-
-          if [ -z "$CLUSTER" ] || [ "$CLUSTER" = "None" ] || \
-             [ -z "$SERVICE" ] || [ "$SERVICE" = "None" ]; then
-            echo "::error::Could not resolve synth-tree-prod-ClusterName / -ServiceName exports. Has the prod infra been deployed?"
-            exit 1
-          fi
-
-          echo "cluster=$CLUSTER" >> $GITHUB_OUTPUT
-          echo "service=$SERVICE" >> $GITHUB_OUTPUT
-
-      - name: Update ECS task definition
-        id: task-def
-        env:
-          IMAGE_URI: ${{ steps.image.outputs.uri }}
-          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
-        run: |
-          # Get current task definition
-          TASK_DEF_ARN=$(aws ecs describe-services \
-            --cluster $CLUSTER \
-            --services ${{ steps.ecs-info.outputs.service }} \
-            --query 'services[0].taskDefinition' \
-            --output text)
-
-          TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition $TASK_DEF_ARN \
-            --query 'taskDefinition')
-
-          # Update container image
-          NEW_TASK_DEF=$(echo $TASK_DEF | jq --arg IMAGE "$IMAGE_URI" \
-            '.containerDefinitions[0].image = $IMAGE | 
-             del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
-
-          # Register new task definition
-          NEW_TASK_ARN=$(aws ecs register-task-definition \
-            --cli-input-json "$NEW_TASK_DEF" \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-
-          echo "task-definition=$NEW_TASK_ARN" >> $GITHUB_OUTPUT
-          echo "✅ New task definition registered: $NEW_TASK_ARN"
-
-      - name: Deploy to ECS
-        env:
-          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
-          SERVICE: ${{ steps.ecs-info.outputs.service }}
-          TASK_DEF: ${{ steps.task-def.outputs.task-definition }}
-        run: |
-          echo "Updating ECS service..."
-          aws ecs update-service \
-            --cluster $CLUSTER \
-            --service $SERVICE \
-            --task-definition $TASK_DEF \
-            --force-new-deployment \
-            --desired-count 2
-
-          echo "✅ ECS service update initiated"
-
-      - name: Wait for deployment to stabilize
-        env:
-          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
-          SERVICE: ${{ steps.ecs-info.outputs.service }}
-        run: |
-          echo "Waiting for service to stabilize..."
-          aws ecs wait services-stable \
-            --cluster $CLUSTER \
-            --services $SERVICE
-
-          echo "✅ Service is stable"
-
-      - name: Verify deployment health
-        id: verify
-        run: |
-          echo "Waiting for new tasks to be healthy..."
-          sleep 30
-
-          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://api.synth-tree.com/health || echo "000")
-
-          if [ "$HEALTH_STATUS" != "200" ]; then
-            echo "❌ Health check failed with status: $HEALTH_STATUS"
-            exit 1
-          fi
-
-          echo "✅ Health check passed (status: $HEALTH_STATUS)"
-
-      - name: Rollback on failure
-        if: failure() && steps.verify.outcome == 'failure'
-        env:
-          CLUSTER: ${{ steps.ecs-info.outputs.cluster }}
-          SERVICE: ${{ steps.ecs-info.outputs.service }}
-        run: |
-          echo "⚠️ Rolling back to previous task definition..."
-
-          # Get previous task definition
-          PREV_TASK=$(aws ecs describe-services \
-            --cluster $CLUSTER \
-            --services $SERVICE \
-            --query 'services[0].deployments[1].taskDefinition' \
-            --output text)
-
-          if [ "$PREV_TASK" != "None" ] && [ -n "$PREV_TASK" ]; then
-            aws ecs update-service \
-              --cluster $CLUSTER \
-              --service $SERVICE \
-              --task-definition $PREV_TASK \
-              --force-new-deployment
-            
             echo "✅ Rollback initiated to: $PREV_TASK"
           else
             echo "⚠️ No previous task definition found"

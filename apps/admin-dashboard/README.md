@@ -2,6 +2,11 @@
 
 This is the host application that composes all features and shared libraries.
 
+**Deployed at** `admin.dev.synth-tree.com` (dev) and `admin.synth-tree.com` (prod)
+— its own subdomain, separate from the learner client app, deployed by
+[`deploy-admin.yml`](../../.github/workflows/deploy-admin.yml). Locally it runs at
+<http://localhost:5173>.
+
 ## Getting Started
 
 ```bash

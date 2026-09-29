@@ -1,0 +1,32 @@
+name: Require code owner
+description: >
+  Fail the run unless the triggering actor is a global code owner (the handles
+  on the last matching `*` rule in .github/CODEOWNERS). Only enforces on
+  workflow_dispatch — when a workflow is called by the orchestrator
+  (workflow_call, originating from a push) this is a no-op. Requires the repo to
+  be checked out first. Only individual `@user` owners are matched; `@org/team`
+  entries are not expanded.
+
+runs:
+  using: composite
+  steps:
+    - name: Verify actor is a code owner
+      if: github.event_name == 'workflow_dispatch'
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ ! -f .github/CODEOWNERS ]; then
+          echo "::error::.github/CODEOWNERS not found; refusing manual deploy."
+          exit 1
+        fi
+        # Global owners are the handles on the LAST matching '*' rule.
+        OWNERS=$(grep -E '^\*[[:space:]]' .github/CODEOWNERS | tail -n1 | tr -s '[:space:]' ' ' | cut -d' ' -f2-)
+        echo "Global code owners: ${OWNERS:-<none>}"
+        for owner in $OWNERS; do
+          if [ "${owner#@}" = "${{ github.actor }}" ]; then
+            echo "✅ @${{ github.actor }} is a code owner — manual deploy allowed."
+            exit 0
+          fi
+        done
+        echo "::error::@${{ github.actor }} is not a global code owner in .github/CODEOWNERS. Manual deploys are restricted to code owners."
+        exit 1

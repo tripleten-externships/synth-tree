@@ -4,8 +4,15 @@ import { GraphQLError } from "graphql";
 import { QuestionType } from "../__generated__/inputs";
 import { QuestionType as PrismaQuestionType } from "@prisma/client";
 import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
-import logger from '@lib/logger'; // Structured logger used for tracking quiz-related events
+import { incrementDailyQuestProgress } from "src/services/dailyQuests";
+import { completeNodeForUser } from "src/services/progress";
 import { awardXp } from "../../services/xp";
+import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
+import { QuizAnswerInput } from "../inputs/quiz.inputs";
+
+// SYN-40: passing a quiz awards a dedicated, fixed XP amount (distinct from a
+// node's own completion reward).
+const QUIZ_PASS_XP = 100;
 
 builder.mutationFields((t) => ({
   createQuiz: t.prismaField({
@@ -120,10 +127,20 @@ builder.mutationFields((t) => ({
         required: true,
       }),
       prompt: t.arg.string({ required: true }), //actual question
+      canonicalAnswer: t.arg.string(), // required for FILL; rejected for other types
       order: t.arg.int(),
     },
-    resolve: async (query, _root, { quizId, type, prompt, order }, ctx) => {
+    resolve: async (query, _root, { quizId, type, prompt, canonicalAnswer, order }, ctx) => {
       ctx.auth.requireAuth();
+
+      // canonicalAnswer is the graded answer key for FILL questions only.
+      if (type === "FILL") {
+        if (!canonicalAnswer || canonicalAnswer.trim() === "") {
+          throw new GraphQLError("A FILL question requires a canonicalAnswer");
+        }
+      } else if (canonicalAnswer !== undefined && canonicalAnswer !== null) {
+        throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+      }
 
       const existing = await ctx.prisma.quiz.findUnique({
         where: { id: quizId },
@@ -144,6 +161,7 @@ builder.mutationFields((t) => ({
           quizId: quizId,
           type: type,
           prompt: prompt,
+          ...(type === "FILL" && { canonicalAnswer }),
           ...(order !== undefined && order !== null && { order }),
         },
       });
@@ -157,9 +175,10 @@ builder.mutationFields((t) => ({
     args: {
       id: t.arg.id({ required: true }),
       prompt: t.arg.string(),
+      canonicalAnswer: t.arg.string(), // only valid for FILL questions
       order: t.arg.int(),
     },
-    resolve: async (query, _root, { id, prompt, order }, ctx) => {
+    resolve: async (query, _root, { id, prompt, canonicalAnswer, order }, ctx) => {
       ctx.auth.requireAuth();
 
       const existing = await ctx.prisma.quizQuestion.findUnique({
@@ -175,11 +194,23 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
+      if (canonicalAnswer !== undefined && canonicalAnswer !== null) {
+        if (existing.type !== PrismaQuestionType.FILL) {
+          throw new GraphQLError("canonicalAnswer is only valid for FILL questions");
+        }
+        // Same rule as createQuizQuestion: a blank key would grade an empty
+        // submission as correct.
+        if (canonicalAnswer.trim() === "") {
+          throw new GraphQLError("A FILL question requires a canonicalAnswer");
+        }
+      }
+
       const quizQuestion = await ctx.prisma.quizQuestion.update({
         ...query,
         where: { id },
         data: {
           ...(prompt !== undefined && prompt !== null && { prompt }),
+          ...(canonicalAnswer !== undefined && canonicalAnswer !== null && { canonicalAnswer }),
           ...(order !== undefined && order !== null && { order }),
         },
       });
@@ -244,9 +275,12 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.quiz.nodeId);
 
-      if (existing.type === PrismaQuestionType.OPEN_QUESTION) {
+      if (
+        existing.type === PrismaQuestionType.OPEN_QUESTION ||
+        existing.type === PrismaQuestionType.FILL
+      ) {
         throw new GraphQLError(
-          "You cannot have Quiz Options for an open ended question",
+          "You cannot have Quiz Options for an open ended or fill-in-the-blank question",
         );
       }
 
@@ -302,15 +336,9 @@ builder.mutationFields((t) => ({
 
       await assertNodeOwnership(ctx, existing.question.quiz.nodeId);
 
-      if (
-        existing.question.type === PrismaQuestionType.SINGLE_CHOICE &&
-        isCorrect
-      ) {
+      if (existing.question.type === PrismaQuestionType.SINGLE_CHOICE && isCorrect) {
         for (let i = 0; i < existing.question.options.length; i++) {
-          if (
-            existing.question.options[i].isCorrect &&
-            existing.question.options[i].id != id
-          ) {
+          if (existing.question.options[i].isCorrect && existing.question.options[i].id != id) {
             throw new GraphQLError(
               "You cannot have multiple correct answers in a single choice question",
             );
@@ -365,7 +393,10 @@ builder.mutationFields((t) => ({
     type: "QuizAttempt",
     args: {
       quizId: t.arg.id({ required: true }),
-      answers: t.arg.stringList({ required: true }),
+      answers: t.arg({
+        type: [QuizAnswerInput],
+        required: true,
+      }),
     },
     resolve: async (query, _root, { quizId, answers }, ctx) => {
       const userId = ctx.auth.requireAuth(); // Capture userId for logging and audit purposes
@@ -375,11 +406,6 @@ builder.mutationFields((t) => ({
         select: {
           id: true,
           nodeId: true,
-          node: {
-            select: {
-              xpReward:true
-            },
-          },
         },
       });
 
@@ -387,78 +413,83 @@ builder.mutationFields((t) => ({
         throw new GraphQLError("Quiz not found");
       }
 
-      const parsedAnswers = answers.map(
-        (a) =>
-          JSON.parse(a) as {
-            questionId: string;
-            answer: { selectedOptionIds?: string[]; text?: string };
-          },
-      );
-
-      const quizAttempt = await ctx.prisma.quizAttempt.create({
-        ...query,
-        data: {
-          quizId,
-          userId: ctx.user!.uid,
-          passed: false, //auto grader changes this later.
-          answers: {
-            create: parsedAnswers.map(({ questionId, answer }) => ({
-              questionId,
-              answer,
-            })),
+      const progress = await ctx.prisma.userNodeProgress.findUnique({
+        where: {
+          userId_nodeId: {
+            userId: userId,
+            nodeId: existing.nodeId,
           },
         },
       });
 
-      const summary = await gradeQuizAttempt(ctx.prisma, quizAttempt.id);
-
-      if (summary.passed === true) {
-        const existingProgress = await ctx.prisma.userNodeProgress.findUnique({
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId: existing.nodeId,
-            },
-          },
-        });
-
-        if (existingProgress?.status === "COMPLETED") {
-
-        } else {
-        await ctx.prisma.userNodeProgress.upsert({
-          where: {
-            userId_nodeId: {
-              userId,
-              nodeId: existing.nodeId,
-            },
-          },
-          update: {
-            status: "COMPLETED",
-            completedAt: new Date(),
-          },
-          create: {
-            userId,
-            nodeId: existing.nodeId,
-            status:"COMPLETED",
-            completedAt: new Date(),
-          },
-        });
-
-        await awardXp(
-          ctx.prisma,
-          userId,
-          existing.node.xpReward ?? 50,
-          "quiz_pass",
-          { quizId },
-        );
+      if (!progress) {
+        throw new GraphQLError("No progress found for this quiz node");
       }
-    }
 
-      logger.info({ userId, quizId, passed: summary.passed }, 'Quiz attempt submitted'); // Log quiz submission outcome for analytics + debugging
+      const parsedAnswers = answers.map((a) => ({
+        questionId: a.questionId,
+        answer:
+          a.text !== undefined && a.text !== null
+            ? { text: a.text }
+            : { selectedOptionIds: a.selectedOptionIds ?? [] },
+      }));
+
+      const result = await ctx.prisma.$transaction(async (tx) => {
+        const quizAttempt = await tx.quizAttempt.create({
+          ...query,
+          data: {
+            quizId,
+            userId,
+            passed: false,
+            answers: {
+              create: parsedAnswers.map(({ questionId, answer }) => ({
+                questionId,
+                answer,
+              })),
+            },
+          },
+        });
+
+        const summary = await gradeQuizAttempt(tx, quizAttempt.id);
+
+        // SYN-36 / SYN-40: on a pass, mark the node complete AND award the
+        // quiz-pass XP in the SAME transaction as the graded attempt, so a
+        // failure can't leave a passed attempt / COMPLETED node without XP.
+        //
+        // - completeNodeForUser is the shared, idempotent completion helper
+        //   (required-quiz gate satisfied because the passing attempt was just
+        //   persisted) and feeds the LESSON_COMPLETED daily-quest hook.
+        // - awardXp keeps its own idempotency guard (rewardKey), so repeat
+        //   passes don't double-award.
+        if (summary.passed === true) {
+          await completeNodeForUser(tx, userId, existing.nodeId);
+
+          await awardXp(
+            ctx.prisma,
+            userId,
+            QUIZ_PASS_XP,
+            "quiz_pass",
+            { quizId },
+            tx,
+          );
+        }
+
+        return {
+          quizAttempt,
+          summary,
+        };
+      });
+
+      const { summary } = result;
+      if (summary.passed === true && summary.correctCount === summary.totalQuestions) {
+        await incrementDailyQuestProgress(ctx.prisma, userId, "PERFECT_QUIZ");
+      }
+
+      logger.info({ userId, quizId, passed: summary.passed }, "Quiz attempt submitted");
 
       return ctx.prisma.quizAttempt.findUniqueOrThrow({
         ...query,
-        where: { id: quizAttempt.id },
+        where: { id: result.quizAttempt.id },
       });
     },
   }),

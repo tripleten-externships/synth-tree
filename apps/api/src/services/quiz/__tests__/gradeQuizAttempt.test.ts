@@ -110,6 +110,10 @@ describe("gradeQuizAttempt", () => {
     expect(result.correctCount).toBe(0);
     expect(result.passed).toBe(true); // SYN-54: open-only quiz passes
     expect(result.message).toBe("Passed");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt3" },
+      data: { passed: true },
+    });
   });
   // MULTIPLE_CHOICE partially correct (includes incorrect option)
   it("fails when MULTIPLE_CHOICE answer is partially correct", async () => {
@@ -224,11 +228,51 @@ describe("gradeQuizAttempt", () => {
     mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
     const result = await gradeQuizAttempt(mockTx as any, "attempt7");
-    expect(result.correctCount).toBe(2); // Only auto-gradable questions
-    expect(result.passed).toBe(null); // Pending manual review
-    expect(result.message).toBe(
-      "Passed pending manual review of open question(s)",
-    );
+    // Mixed quizzes with all auto-gradable answers correct should remain
+    // pending until the open question is manually reviewed.
+    expect(result.correctCount).toBe(2);
+    expect(result.passed).toBeNull();
+    expect(result.message).toBe("Passed pending manual review of open question(s)");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt7" },
+      data: { passed: null },
+    });
+  });
+
+  it("fails a mixed quiz when the open answer is omitted", async () => {
+    const mockQuiz = {
+      questions: [
+        {
+          type: "SINGLE_CHOICE",
+          options: [{ id: "opt1", isCorrect: true }],
+        },
+        {
+          type: "OPEN_QUESTION",
+          options: [],
+        },
+      ],
+    };
+    const mockAttempt = {
+      quizId: "quiz10",
+      answers: [
+        {
+          id: "answer10",
+          question: mockQuiz.questions[0],
+          answer: { selectedOptionIds: ["opt1"] },
+        },
+      ],
+    };
+    mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+    mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+    const result = await gradeQuizAttempt(mockTx as any, "attempt10");
+
+    expect(result.passed).toBe(false);
+    expect(result.message).toBe("Not passed: all questions must be answered");
+    expect(mockTx.quizAttempt.update).toHaveBeenCalledWith({
+      where: { id: "attempt10" },
+      data: { passed: false },
+    });
   });
 });
 
@@ -282,11 +326,49 @@ it("handles a quiz with all types and an incorrect auto-gradable answer", async 
   mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
   const result = await gradeQuizAttempt(mockTx as any, "attempt8");
-  expect(result.correctCount).toBe(1); // Only one auto-gradable correct
-  expect(result.passed).toBe(false); // Still pending manual review
+  // A wrong auto-gradable answer fails even while the open answer is pending.
+  expect(result.correctCount).toBe(1);
+  expect(result.passed).toBe(false);
   expect(result.message).toBe(
     "Not passed: some answers are incorrect; open question(s) pending review",
   );
+});
+// Mixed quiz where the open answer is present but an auto-gradable question
+// was skipped: that's incomplete, not incorrect — the message must say so.
+it("reports incomplete (not incorrect) when an auto question is skipped but the open answer is present", async () => {
+  const mockQuiz = {
+    questions: [
+      {
+        type: "SINGLE_CHOICE",
+        options: [
+          { id: "opt1", isCorrect: true },
+          { id: "opt2", isCorrect: false },
+        ],
+      },
+      {
+        type: "OPEN_QUESTION",
+        options: [],
+      },
+    ],
+  };
+  const mockAttempt = {
+    quizId: "quiz8b",
+    answers: [
+      // SINGLE_CHOICE is skipped (no answer submitted)
+      {
+        id: "answer8b-open",
+        question: mockQuiz.questions[1],
+        answer: { text: "Open answer" },
+        isCorrect: null,
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attempt8b");
+  expect(result.passed).toBe(false);
+  expect(result.message).toBe("Not passed: all questions must be answered");
 });
 // Quiz with a skipped question (not all auto-gradable answered)
 it("handles a quiz where a question is skipped (no answer submitted)", async () => {
@@ -331,9 +413,7 @@ it("handles a quiz where a question is skipped (no answer submitted)", async () 
 // No answers submitted
 it("throws an error if no answers are found for the attempt", async () => {
   const mockQuiz = {
-    questions: [
-      { type: "SINGLE_CHOICE", options: [{ id: "opt1", isCorrect: true }] },
-    ],
+    questions: [{ type: "SINGLE_CHOICE", options: [{ id: "opt1", isCorrect: true }] }],
   };
   const mockAttempt = {
     quizId: "quizNoAnswers",
@@ -342,9 +422,9 @@ it("throws an error if no answers are found for the attempt", async () => {
   mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
   mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
 
-  await expect(
-    gradeQuizAttempt(mockTx as any, "attemptNoAnswers"),
-  ).rejects.toThrow("No answers found for this attempt");
+  await expect(gradeQuizAttempt(mockTx as any, "attemptNoAnswers")).rejects.toThrow(
+    "No answers found for this attempt",
+  );
 });
 // Empty quiz
 it("throws an error if the quiz has no questions", async () => {
@@ -366,4 +446,135 @@ it("throws an error if the quiz attempt is not found", async () => {
   await expect(gradeQuizAttempt(mockTx as any, "attemptEmpty")).rejects.toThrow(
     "Quiz attempt not found",
   );
+});
+
+// FILL is auto-graded: trimmed + case-insensitive comparison (SYN-53).
+// Acceptance: "sp" matches a canonical answer of "SP ".
+it("grades a FILL question correctly ignoring case and surrounding whitespace", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "SP ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFill",
+    answers: [
+      {
+        id: "answerFill",
+        question: mockQuiz.questions[0],
+        answer: { text: "sp" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFill");
+
+  expect(result.correctCount).toBe(1);
+  expect(result.passed).toBe(true);
+  expect(result.message).toBe("Passed");
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFill" },
+    data: { isCorrect: true },
+  });
+});
+
+// FILL with a wrong answer fails and is marked incorrect.
+it("marks a FILL question incorrect when the text does not match", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "SP ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFillWrong",
+    answers: [
+      {
+        id: "answerFillWrong",
+        question: mockQuiz.questions[0],
+        answer: { text: "sp3" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFillWrong");
+
+  expect(result.correctCount).toBe(0);
+  expect(result.passed).toBe(false);
+  expect(result.message).toBe("Not passed");
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFillWrong" },
+    data: { isCorrect: false },
+  });
+});
+
+// FILL mixes with choice questions and is counted as auto-gradable.
+it("grades a mixed FILL + SINGLE_CHOICE quiz", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [
+      { type: "FILL", canonicalAnswer: "SP ", options: [] },
+      {
+        type: "SINGLE_CHOICE",
+        options: [
+          { id: "opt1", isCorrect: true },
+          { id: "opt2", isCorrect: false },
+        ],
+      },
+    ],
+  };
+  const mockAttempt = {
+    quizId: "quizMixedFill",
+    answers: [
+      {
+        id: "answerMixedFill",
+        question: mockQuiz.questions[0],
+        answer: { text: "SP" },
+      },
+      {
+        id: "answerMixedChoice",
+        question: mockQuiz.questions[1],
+        answer: { selectedOptionIds: ["opt1"] },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptMixedFill");
+
+  expect(result.correctCount).toBe(2);
+  expect(result.passed).toBe(true);
+  expect(result.message).toBe("Passed");
+});
+
+// A whitespace-only answer key must never match (an empty submission would
+// otherwise normalize to "" and be graded correct).
+it("never grades a FILL question correct against a blank canonical answer", async () => {
+  jest.clearAllMocks();
+  const mockQuiz = {
+    questions: [{ type: "FILL", canonicalAnswer: "   ", options: [] }],
+  };
+  const mockAttempt = {
+    quizId: "quizFillBlankKey",
+    answers: [
+      {
+        id: "answerFillBlankKey",
+        question: mockQuiz.questions[0],
+        answer: { text: "" },
+      },
+    ],
+  };
+  mockTx.quiz.findUnique.mockResolvedValue(mockQuiz);
+  mockTx.quizAttempt.findUnique.mockResolvedValue(mockAttempt);
+
+  const result = await gradeQuizAttempt(mockTx as any, "attemptFillBlankKey");
+
+  expect(result.correctCount).toBe(0);
+  expect(result.passed).toBe(false);
+  expect(mockTx.quizAttemptAnswer.update).toHaveBeenCalledWith({
+    where: { id: "answerFillBlankKey" },
+    data: { isCorrect: false },
+  });
 });

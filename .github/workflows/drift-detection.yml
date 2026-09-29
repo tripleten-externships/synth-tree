@@ -1,0 +1,74 @@
+name: Drift Detection
+
+# CloudFormation drift detection for both environments. Split out of
+# deploy-infrastructure.yml when that became a reusable deploy-only workflow.
+# Runs on a weekly schedule and on demand.
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Mondays 08:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  drift-detection:
+    name: Drift Detection
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    # Bind the dev/prod GitHub Environment so its scoped AWS secrets resolve.
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ matrix.environment == 'dev' && secrets.AWS_ACCESS_KEY_ID_DEV || secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ matrix.environment == 'dev' && secrets.AWS_SECRET_ACCESS_KEY_DEV || secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Detect stack drift
+        run: |
+          PREFIX="synth-tree-${{ matrix.environment }}"
+          STACKS="$PREFIX-Network $PREFIX-Database $PREFIX-Api $PREFIX-Frontend $PREFIX-Admin $PREFIX-Storybook"
+
+          for stack in $STACKS; do
+            echo "Checking drift for $stack..."
+
+            if ! aws cloudformation describe-stacks --stack-name "$stack" > /dev/null 2>&1; then
+              echo "⚠️ Stack $stack does not exist - skipping"
+              continue
+            fi
+
+            DRIFT_ID=$(aws cloudformation detect-stack-drift \
+              --stack-name "$stack" \
+              --query StackDriftDetectionId \
+              --output text)
+
+            # Poll until drift detection finishes (up to ~3 minutes).
+            for i in $(seq 1 18); do
+              DETECTION_STATUS=$(aws cloudformation describe-stack-drift-detection-status \
+                --stack-drift-detection-id "$DRIFT_ID" \
+                --query DetectionStatus --output text)
+              if [ "$DETECTION_STATUS" != "DETECTION_IN_PROGRESS" ]; then
+                break
+              fi
+              sleep 10
+            done
+
+            STATUS=$(aws cloudformation describe-stack-drift-detection-status \
+              --stack-drift-detection-id "$DRIFT_ID" \
+              --query StackDriftStatus --output text)
+
+            if [ "$STATUS" != "IN_SYNC" ]; then
+              echo "::warning::Drift detected in $stack - Status: $STATUS"
+            else
+              echo "✅ $stack is in sync"
+            fi
+          done

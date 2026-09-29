@@ -5,25 +5,36 @@ import { type Auth, connectAuthEmulator, getAuth } from "firebase/auth";
  * Reads Firebase configuration from `import.meta.env.VITE_FIREBASE_*`.
  * The keys are inlined at build time by Vite, so each consuming app gets
  * its own values without having to pass them through.
+ *
+ * Only `apiKey`, `authDomain`, and `projectId` are required — these drive
+ * Firebase Auth, which is the only Firebase product these apps use. The
+ * remaining fields (`storageBucket`, `messagingSenderId`, `appId`) are only
+ * read by Cloud Storage / Cloud Messaging / Analytics respectively; none of
+ * those SDKs are initialized here, so we fall back to inert placeholders and
+ * skip requiring build-time env vars for them. If a Storage/Messaging/Analytics
+ * SDK is ever added, set the real values (and move the field back to `required`).
  */
 export function getFirebaseConfig(): FirebaseOptions {
   const config: FirebaseOptions = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    // Unused by Auth — inert defaults so a missing env var doesn't break the build.
+    storageBucket:
+      import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "unused.appspot.com",
+    messagingSenderId:
+      import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "000000000000",
+    appId:
+      import.meta.env.VITE_FIREBASE_APP_ID || "1:000000000000:web:0000000000000000",
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
   };
 
+  // Auth-critical fields: fail loudly if these are missing rather than booting
+  // with broken sign-in.
   const required: Array<keyof FirebaseOptions> = [
     "apiKey",
     "authDomain",
     "projectId",
-    "storageBucket",
-    "messagingSenderId",
-    "appId",
   ];
   const missing = required.filter((key) => !config[key]);
   if (missing.length > 0) {

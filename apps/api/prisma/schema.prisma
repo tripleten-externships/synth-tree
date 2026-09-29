@@ -36,6 +36,7 @@ enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
   OPEN_QUESTION
+  FILL
 }
 
 enum ContentType {
@@ -43,6 +44,7 @@ enum ContentType {
   VIDEO
   EMBED
   HTML
+  PAGE_BREAK // page boundary marker: splits a lesson into pages; carries no url/html
 }
 
 enum LessonStatus {
@@ -62,14 +64,17 @@ enum ProgressStatus {
 }
 
 model User {
-  id        String   @id
-  email     String   @unique
-  timezone  String   @default("UTC")
-  name      String?
-  photoUrl  String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id
+  email              String   @unique
+  timezone           String   @default("UTC")
+  name               String?
+  photoUrl           String?
+  role               Role     @default(USER)
+  interests          String[] @default([]) // subjects picked during onboarding (SYN-46)
+  dailyGoalMinutes   Int? // minutes/day picked during onboarding (SYN-47)
+  onboardingComplete Boolean  @default(false) // flipped true at signup step 3 (SYN-47)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Authoring:
   coursesAuthored Course[] @relation("CourseAuthor")
@@ -80,6 +85,8 @@ model User {
   xp           UserXp?
   streak       UserStreak?
   xpEvents     XpEvent[]
+  hearts       UserHearts?
+  dailyQuests  UserDailyQuest[]
 
   // NOTE: If we later separate "Author" and "Learner" personas,
   // Role can gate UI while the schema stays the same.
@@ -235,13 +242,19 @@ model Quiz {
 // - Keep ordering stable for rendering.
 // ================================================================
 model QuizQuestion {
-  id        String       @id @default(uuid()) @db.Uuid
-  quizId    String       @db.Uuid
-  type      QuestionType
-  prompt    String
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id              String       @id @default(uuid()) @db.Uuid
+  quizId          String       @db.Uuid
+  type            QuestionType
+  prompt          String
+  explanation     String?
+  // Expected answer for FILL questions; null for other types. Graded
+  // case-insensitively and whitespace-trimmed. Hidden from learners until
+  // they submit an attempt (see QuizQuestion object guard in models.all.ts).
+  /// @Pothos.omit(where, orderBy)
+  canonicalAnswer String?      @db.Text
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options QuizOption[] // SINGLE/MULTIPLE; optional for OPEN_QUESTION
@@ -259,6 +272,7 @@ model QuizOption {
   id         String   @id @default(uuid()) @db.Uuid
   questionId String   @db.Uuid
   text       String
+  /// @Pothos.omit(where, orderBy)
   isCorrect  Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -270,15 +284,15 @@ model QuizOption {
 
 // ================================================================
 // QuizAttempt
-// - v1 grading is boolean: passed/failed, no numeric score.
-// - Application logic determines "passed" by checking that all
-//   auto-gradable answers are correct (or true if none exist).
+// - Grading has three states: passed, failed, or pending manual review.
+// - Open-only quizzes pass automatically. Mixed quizzes stay pending
+//   when their choice answers pass but an open answer still needs review.
 // ================================================================
 model QuizAttempt {
   id      String   @id @default(uuid()) @db.Uuid
   quizId  String   @db.Uuid
   userId  String
-  passed  Boolean
+  passed  Boolean?
   takenAt DateTime @default(now())
 
   quiz    Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -342,6 +356,8 @@ model UserXp {
   weeklyXp  Json     @default("{}")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXp]) // leaderboard sorts and counts on totalXp
 }
 
 model UserStreak {
@@ -351,6 +367,28 @@ model UserStreak {
   lastActive  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserHearts {
+  userId         String   @id
+  currentHearts  Int      @default(5)
+  lastRefilledAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserDailyQuest {
+  userId    String
+  questKey  String
+  date      DateTime
+  goal      Int
+  current   Int      @default(0)
+  completed Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questKey, date])
+  @@index([userId, date])
 }
 
 model XpEvent {
@@ -364,6 +402,6 @@ model XpEvent {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, createdAt])
   @@unique([userId, reason, rewardKey])
+  @@index([userId, createdAt])
 }

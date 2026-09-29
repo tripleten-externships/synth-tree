@@ -1,5 +1,6 @@
 import { builder } from "@graphql/builder";
 import "@graphql/models/models.all";
+import "@graphql/types/leaderboardEntry";
 // AutoCrud Deleted. Used the fundamental GraphQL Models created by Pothos
 import "@graphql/queries";
 import "@graphql/mutations";
