@@ -7603,6 +7603,11 @@ export type CompleteOnboardingMutationVariables = Exact<{
 
 export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete: boolean } | null };
 
+export type CurrentUserStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CurrentUserStatsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, xp?: { __typename?: 'UserXp', totalXp: number } | null, streak?: { __typename?: 'UserStreak', currentDays: number } | null } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -8470,6 +8475,45 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
+export const CurrentUserStatsDocument = gql`
+    query CurrentUserStats {
+  currentUser {
+    id
+    xp {
+      totalXp
+    }
+    streak {
+      currentDays
+    }
+  }
+}
+    `;
+
+/**
+ * __useCurrentUserStatsQuery__
+ *
+ * To run a query within a React component, call `useCurrentUserStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentUserStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrentUserStatsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCurrentUserStatsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>(CurrentUserStatsDocument, options);
+      }
+export function useCurrentUserStatsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>(CurrentUserStatsDocument, options);
+        }
+export type CurrentUserStatsQueryHookResult = ReturnType<typeof useCurrentUserStatsQuery>;
+export type CurrentUserStatsLazyQueryHookResult = ReturnType<typeof useCurrentUserStatsLazyQuery>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl) {
