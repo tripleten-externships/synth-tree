@@ -18,7 +18,7 @@ interface User {
   role: string;
   quizAttempts: {
     id: string;
-    passed: boolean | null;
+    quizId: string;
   }[];
 }
 
@@ -118,11 +118,7 @@ export default function ProfilePage() {
   // ------------------------------------------------------------
   // 8) Loading + Error states
   // ------------------------------------------------------------
-  if (
-    firebaseLoading ||
-    (loading && !data) ||
-    (progressLoading && !progressData)
-  ) {
+  if (firebaseLoading || (loading && !data) || (progressLoading && !progressData)) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-muted-foreground">Loading profile...</p>
@@ -143,17 +139,13 @@ export default function ProfilePage() {
   // ------------------------------------------------------------
   const progress = progressData?.myProgress ?? [];
 
-  const coursesStarted = new Set(
-    progress.map((item) => item.node.tree.course.id),
-  ).size;
+  const coursesStarted = new Set(progress.map((item) => item.node.tree.course.id)).size;
 
-  const nodesCompleted = progress.filter(
-    (item) => item.status === "COMPLETED",
-  ).length;
+  const nodesCompleted = progress.filter((item) => item.status === "COMPLETED").length;
 
-  const quizzesPassed = user.quizAttempts.filter(
-    (attempt) => attempt.passed === true,
-  ).length;
+  // quizAttempts is already filtered to passed attempts, one per quiz;
+  // count distinct quizIds so retakes never double-count.
+  const quizzesPassed = new Set(user.quizAttempts.map((attempt) => attempt.quizId)).size;
 
   // ------------------------------------------------------------
   // 10) Main UI
@@ -174,18 +166,14 @@ export default function ProfilePage() {
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground">
-              {user.name?.charAt(0)?.toUpperCase() ??
-                user.email?.charAt(0)?.toUpperCase() ??
-                "?"}
+              {user.name?.charAt(0)?.toUpperCase() ?? user.email?.charAt(0)?.toUpperCase() ?? "?"}
             </div>
           )}
 
           <div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>
             <p className="text-muted-foreground">{user.email}</p>
-            <p className="text-sm text-muted-foreground">
-              Role: {user.role}
-            </p>
+            <p className="text-sm text-muted-foreground">Role: {user.role}</p>
           </div>
         </section>
 
@@ -249,10 +237,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        <button
-          onClick={logout}
-          className="text-destructive underline mt-6"
-        >
+        <button onClick={logout} className="text-destructive underline mt-6">
           Logout
         </button>
       </main>

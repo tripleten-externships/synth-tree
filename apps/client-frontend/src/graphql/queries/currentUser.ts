@@ -8,9 +8,10 @@ export const SYNC_CURRENT_USER = gql`
       name
       photoUrl
       role
-      quizAttempts {
+      # One passed attempt per quiz, so retakes aren't double-counted.
+      quizAttempts(where: { passed: { equals: true } }, distinct: [quizId]) {
         id
-        passed
+        quizId
       }
     }
   }
@@ -25,7 +26,7 @@ export interface SyncCurrentUserResponse {
     role: string;
     quizAttempts: {
       id: string;
-      passed: boolean | null;
+      quizId: string;
     }[];
   };
 }
