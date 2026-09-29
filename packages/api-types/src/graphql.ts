@@ -5137,19 +5137,19 @@ export type User = {
   createdAt: Scalars['DateTime']['output'];
   dailyGoalMinutes?: Maybe<Scalars['Int']['output']>;
   dailyQuests: Array<UserDailyQuest>;
-  email: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
   interests: Array<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
-  onboardingComplete: Scalars['Boolean']['output'];
+  onboardingComplete?: Maybe<Scalars['Boolean']['output']>;
   photoUrl?: Maybe<Scalars['String']['output']>;
   quizAttempts: Array<QuizAttempt>;
   recommendedNext?: Maybe<Array<SkillNode>>;
   role: Role;
   streak?: Maybe<UserStreak>;
-  timezone: Scalars['String']['output'];
+  timezone?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
@@ -7601,7 +7601,7 @@ export type CompleteOnboardingMutationVariables = Exact<{
 }>;
 
 
-export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete: boolean } | null };
+export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -7609,7 +7609,7 @@ export type SyncCurrentUserMutationVariables = Exact<{
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
@@ -7633,7 +7633,7 @@ export type MyProgressQuery = { __typename?: 'Query', myProgress?: Array<{ __typ
 export type OnboardingStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete: boolean } | null };
+export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete?: boolean | null } | null };
 
 export type SavedInterestsQueryVariables = Exact<{ [key: string]: never; }>;
 

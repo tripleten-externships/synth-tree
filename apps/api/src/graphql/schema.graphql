@@ -4648,19 +4648,19 @@ type User {
   createdAt: DateTime!
   dailyGoalMinutes: Int
   dailyQuests(cursor: UserDailyQuestWhereUniqueInput, distinct: [UserDailyQuestScalarFieldEnum!], orderBy: [UserDailyQuestOrderByWithRelationInput!], skip: Int, take: Int, where: UserDailyQuestWhereInput): [UserDailyQuest!]!
-  email: String!
+  email: String
   hearts: UserHearts
   id: ID!
   interests: [String!]!
   name: String
   nodeProgress(cursor: UserNodeProgressWhereUniqueInput, distinct: [UserNodeProgressScalarFieldEnum!], orderBy: [UserNodeProgressOrderByWithRelationInput!], skip: Int, take: Int, where: UserNodeProgressWhereInput): [UserNodeProgress!]!
-  onboardingComplete: Boolean!
+  onboardingComplete: Boolean
   photoUrl: String
   quizAttempts(cursor: QuizAttemptWhereUniqueInput, distinct: [QuizAttemptScalarFieldEnum!], orderBy: [QuizAttemptOrderByWithRelationInput!], skip: Int, take: Int, where: QuizAttemptWhereInput): [QuizAttempt!]!
   recommendedNext(limit: Int = 6): [SkillNode!]
   role: Role!
   streak: UserStreak
-  timezone: String!
+  timezone: String
   updatedAt: DateTime!
   xp: UserXp
   xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
