@@ -1,10 +1,22 @@
+import type { Prisma } from "@prisma/client";
 import { builder } from "@graphql/builder";
+import type { GraphQLContext } from "@graphql/context";
+import { visibleNodeWhere } from "@graphql/auth/visibility";
 import { isUuid } from "@lib/uuid";
 
 // get all users for admin
 // At least one root level query is required.
 
 // Pagination included use limit and offset. They make to prisma skip and take.
+
+// Blocks a viewer may read: admins see all of them; anyone else only sees
+// live blocks whose node is visible to them (see visibleNodeWhere). Block
+// `status` is not checked: the admin editor saves blocks as DRAFT and never
+// publishes them, so the course's status is what gates learner access.
+function visibleBlocksFilter(ctx: GraphQLContext): Prisma.LessonBlocksWhereInput {
+  if (ctx.auth.isAdmin()) return {};
+  return { deletedAt: null, node: visibleNodeWhere(ctx) };
+}
 
 builder.queryFields((t) => ({
   lessonBlock: t.prismaField({
@@ -14,8 +26,11 @@ builder.queryFields((t) => ({
     },
     resolve: (_query, _parent, { id }, context) => {
       context.auth.requireAuth();
-      return context.prisma.lessonBlocks.findUniqueOrThrow({
-        where: { id },
+      // A malformed id can't match any block; don't let Postgres reject it.
+      if (!isUuid(id)) return null;
+
+      return context.prisma.lessonBlocks.findFirst({
+        where: { id, ...visibleBlocksFilter(context) },
       });
     },
   }),
@@ -43,6 +58,7 @@ builder.queryFields((t) => ({
 
       return context.prisma.lessonBlocks.findMany({
         ...query,
+        where: visibleBlocksFilter(context),
         skip: offset,
         take: limit,
         orderBy: {
@@ -60,7 +76,7 @@ builder.queryFields((t) => ({
       context.auth.requireAuth();
       if (!isUuid(nodeId)) return [];
       return context.prisma.lessonBlocks.findMany({
-        where: { nodeId },
+        where: { nodeId, ...visibleBlocksFilter(context) },
         orderBy: [{ order: "asc" }],
       });
     },
