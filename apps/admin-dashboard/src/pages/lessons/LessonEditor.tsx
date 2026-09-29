@@ -268,6 +268,14 @@ function LessonEditor() {
   // The server copy the draft was last built from, so a repeat of the same data
   // does not overwrite unsaved edits.
   const lastSyncedQuiz = useRef<string | null>(null);
+  // True once the quiz query has succeeded and the draft reflects the server.
+  // Until then the quiz section shows a loading or error state and Save leaves
+  // the quiz alone: treating "not loaded yet" as "no quiz" would let an author
+  // add a fresh quiz that replaces, and deletes, the saved questions.
+  const [quizLoaded, setQuizLoaded] = useState(false);
+  // Set when the author edits or removes the quiz, cleared once Save writes it.
+  // A server copy arriving while the draft is dirty does not replace the draft.
+  const quizDirty = useRef(false);
 
   const {
     data: titleData,
@@ -290,7 +298,11 @@ function LessonEditor() {
     },
   });
 
-  const { data: quizData, refetch: refetchQuiz } = useAdminLessonQuizQuery({
+  const {
+    data: quizData,
+    error: quizError,
+    refetch: refetchQuiz,
+  } = useAdminLessonQuizQuery({
     variables: { nodeId: nodeId ?? "" },
     skip: !nodeId,
   });
@@ -370,19 +382,24 @@ function LessonEditor() {
     try {
       // 0. Persist the quiz first. The API validates the whole quiz, so an
       // invalid one stops the save here instead of after the lesson is written.
-      if (removedQuizId) {
-        await deleteQuiz({ variables: { id: removedQuizId } });
-        setRemovedQuizId(null);
-      } else if (quizDraft) {
-        await saveQuiz({
-          variables: {
-            nodeId,
-            input: toSaveQuizInput(quizDraft),
-          },
-        });
-      }
+      // Skipped until the quiz has loaded, since the draft is not the server's
+      // quiz yet and saving it could overwrite the real one.
+      if (quizLoaded) {
+        if (removedQuizId) {
+          await deleteQuiz({ variables: { id: removedQuizId } });
+          setRemovedQuizId(null);
+        } else if (quizDraft) {
+          await saveQuiz({
+            variables: {
+              nodeId,
+              input: toSaveQuizInput(quizDraft),
+            },
+          });
+        }
 
-      await refetchQuiz();
+        quizDirty.current = false;
+        await refetchQuiz();
+      }
 
       // 1. Persist the lesson title.
       await saveLessonTitle({
@@ -482,18 +499,21 @@ function LessonEditor() {
   };
 
   // Re-sync the quiz draft when the server copy changes, which is on load and
-  // after each save. Apollo can hand the same quiz back again when something
-  // else writes to the cache, and rebuilding the draft then would throw away
-  // whatever the author has typed since, so unchanged data is ignored.
+  // after each save. Apollo can hand the same or a newer quiz back when
+  // something else writes to the cache, and rebuilding the draft then would
+  // throw away whatever the author has typed since, so unchanged data, and any
+  // data that arrives while there are unsaved quiz edits, is ignored.
   useEffect(() => {
     if (!quizData) {
       return;
     }
 
+    setQuizLoaded(true);
+
     const quiz = quizData.adminSkillNode?.quiz ?? null;
     const serverQuiz = JSON.stringify(quiz);
 
-    if (serverQuiz === lastSyncedQuiz.current) {
+    if (serverQuiz === lastSyncedQuiz.current || quizDirty.current) {
       return;
     }
 
@@ -528,6 +548,7 @@ function LessonEditor() {
   // yet no longer applies. Without this, adding a quiz back after removing one
   // would save the deletion and drop the new questions.
   const handleQuizChange = (draft: QuizDraft) => {
+    quizDirty.current = true;
     setQuizDraft(draft);
     setRemovedQuizId(null);
   };
@@ -546,6 +567,7 @@ function LessonEditor() {
       return;
     }
 
+    quizDirty.current = true;
     setQuizDraft(null);
     setRemovedQuizId(savedQuizId);
   };
@@ -715,7 +737,29 @@ function LessonEditor() {
         })()}
       </div>
 
-      <QuizEditor draft={quizDraft} onChange={handleQuizChange} onRemove={handleQuizRemove} />
+      {quizLoaded ? (
+        <QuizEditor draft={quizDraft} onChange={handleQuizChange} onRemove={handleQuizRemove} />
+      ) : (
+        <div className="mt-8 flex flex-col items-center gap-3 border-t border-border pt-8 text-sm text-muted-foreground">
+          {quizError ? (
+            <>
+              <p>Unable to load this lesson&apos;s quiz.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => {
+                  refetchQuiz().catch(() => undefined);
+                }}
+              >
+                Try again
+              </Button>
+            </>
+          ) : (
+            <p>Loading quiz...</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
