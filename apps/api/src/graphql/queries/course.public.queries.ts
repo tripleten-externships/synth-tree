@@ -16,6 +16,7 @@ builder.queryFields((t) => ({
       limit: t.arg.int({ required: false }),
     },
     resolve: async (query, _root, args, ctx) => {
+
       const { search, page = 1, limit = 20 } = args;
 
       return ctx.prisma.course.findMany({

@@ -28,6 +28,14 @@ type MyProgressData = {
   myProgress: ProgressItem[];
 };
 
+// Placeholder courses shown when the database has nothing published yet.
+// Once seed/admin-created courses exist, the API result wins automatically.
+const placeholderCourses = [
+  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
+  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
+  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
+];
+
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
   // navigate() lets us send the user to a different page when they click something
@@ -45,6 +53,7 @@ export default function Home() {
   if (error) return <div>Error: {error.message}</div>;
 
   const apiCourses = data?.publicGetAllCourses ?? [];
+  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
   const inProgressLesson = progressData?.myProgress?.find(
     (progress) => progress.status === "IN_PROGRESS",
   );
@@ -106,7 +115,7 @@ export default function Home() {
           Courses
         </h2>
         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {apiCourses.map((course) => (
+          {courses.map((course) => (
             <CourseCard
               key={course.id}
               id={course.id}
