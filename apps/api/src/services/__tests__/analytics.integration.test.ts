@@ -6,7 +6,10 @@ import { graphql, GraphQLError } from "graphql";
 import { schema } from "../../schema";
 import { calculateAdminAnalytics, type AnalyticsRange } from "../analytics";
 
-const integration = process.env.TEST_DATABASE_URL ? describe : describe.skip;
+// Prefer a dedicated TEST_DATABASE_URL, falling back to DATABASE_URL like the other DB tests
+// (CI sets only DATABASE_URL). The suite still runs in its own throwaway schema on localhost.
+const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
+const integration = databaseUrl ? describe : describe.skip;
 const now = new Date("2026-09-25T12:00:00Z");
 const at = (days: number) => new Date(now.getTime() - days * 86400000);
 const query = `query Analytics($range: AnalyticsRange!) {
@@ -25,9 +28,11 @@ integration("admin analytics integration (isolated seeded database)", () => {
   let schemaCreated = false;
 
   beforeAll(async () => {
-    const url = new URL(process.env.TEST_DATABASE_URL!);
+    const url = new URL(databaseUrl!);
     if (!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) {
-      throw new Error("Analytics integration tests require a local TEST_DATABASE_URL");
+      throw new Error(
+        "Analytics integration tests require a local TEST_DATABASE_URL or DATABASE_URL",
+      );
     }
     url.searchParams.set("schema", schemaName);
     db = new PrismaClient({ datasources: { db: { url: url.toString() } } });
