@@ -1,5 +1,4 @@
 // src/graphql/models.all.ts
-import type { Prisma } from "@prisma/client";
 import { builder } from "@graphql/builder";
 import type { GraphQLContext } from "@graphql/context";
 
