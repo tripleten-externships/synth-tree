@@ -10,6 +10,13 @@ import {
 } from "@graphql/inputs/skillNode.inputs";
 import { assertCourseOwnership } from "@graphql/auth/permissions";
 import { GraphQLError } from "graphql";
+import {
+  COLUMN_GAP,
+  FIRST_NODE_POSITION,
+  ROW_GAP,
+  findFreePosition,
+  isOnCanvas,
+} from "src/services/skillNode/placeSkillNode";
 
 builder.mutationFields((t) => ({
   // ===== SkillNodes (structural & gating) =====
@@ -47,18 +54,18 @@ builder.mutationFields((t) => ({
 
         if (existingNode) {
           throw new GraphQLError(
-            "This tree already has nodes. Use createSkillNodeToRight or createSkillNodeBelow instead."
+            "This tree already has nodes. Use createSkillNodeToRight or createSkillNodeBelow instead.",
           );
         }
 
+        // The tree is empty, so the first spot is always free.
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step: 1,
             orderInStep: 1,
-            posX: 1,
-            posY: 1,
+            ...FIRST_NODE_POSITION,
           },
         });
 
@@ -110,14 +117,21 @@ builder.mutationFields((t) => ({
 
         const newOrderInStep = (lastNodeInStep?.orderInStep ?? 0) + 1;
 
+        // Canvas spot: right of the row's last node (the one that gates the
+        // new node), so the row reads left to right in orderInStep order.
+        const anchor = lastNodeInStep ?? ref;
+        const position = await findFreePosition(tx, treeId, {
+          posX: (anchor.posX ?? 0) + COLUMN_GAP,
+          posY: anchor.posY ?? 0,
+        });
+
         const newNode = await tx.skillNode.create({
           data: {
             treeId,
             title,
             step,
             orderInStep: newOrderInStep,
-            posX: newOrderInStep,
-            posY: step,
+            ...position,
           },
         });
 
@@ -181,7 +195,7 @@ builder.mutationFields((t) => ({
         if (existingInRow) {
           // You *can* relax this later, but for now we enforce "one node per row created via 'below'"
           throw new GraphQLError(
-            "A node already exists in the next row. Use createSkillNodeToRight to add more nodes to that row."
+            "A node already exists in the next row. Use createSkillNodeToRight to add more nodes to that row.",
           );
         }
 
@@ -192,10 +206,14 @@ builder.mutationFields((t) => ({
         });
 
         if (!lastNodeAbove) {
-          throw new GraphQLError(
-            "No nodes found in the row above to gate from"
-          );
+          throw new GraphQLError("No nodes found in the row above to gate from");
         }
+
+        // Canvas spot: straight under the node the author added it from.
+        const position = await findFreePosition(tx, treeId, {
+          posX: ref.posX ?? 0,
+          posY: (ref.posY ?? 0) + ROW_GAP,
+        });
 
         const newNode = await tx.skillNode.create({
           data: {
@@ -203,8 +221,7 @@ builder.mutationFields((t) => ({
             title,
             step: newStep,
             orderInStep: 1, // first node in the new row
-            posX: 1,
-            posY: newStep,
+            ...position,
           },
         });
 
@@ -235,6 +252,14 @@ builder.mutationFields((t) => ({
     resolve: async (query, _root, { id, input }, ctx) => {
       ctx.auth.requireAuth();
       requireAdmin(ctx);
+
+      // posX/posY are percentages of the canvas (0-100).
+      const outOfRange = (v: number | null | undefined) => v != null && !isOnCanvas(v);
+      if (outOfRange(input.posX) || outOfRange(input.posY)) {
+        throw new GraphQLError("posX and posY must be between 0 and 100", {
+          extensions: { code: "BAD_USER_INPUT" },
+        });
+      }
 
       return ctx.prisma.$transaction(async (tx) => {
         const node = await tx.skillNode.findUnique({

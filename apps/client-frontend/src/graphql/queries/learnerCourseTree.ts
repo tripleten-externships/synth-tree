@@ -16,6 +16,7 @@ export const LEARNER_COURSE_QUERY = gql`
           orderInStep
           posX
           posY
+          derivedStatus
           prerequisites {
             dependsOnNodeId
           }

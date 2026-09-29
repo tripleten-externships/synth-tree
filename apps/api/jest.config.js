@@ -9,6 +9,7 @@ module.exports = {
     ...tsJestTransformCfg,
   },
   setupFiles: ["dotenv/config"],
+  globalSetup: "<rootDir>/jest.globalSetup.js",
   moduleNameMapper: {
     "^@graphql/(.*)$": "<rootDir>/src/graphql/$1",
     "^@lib/(.*)$": "<rootDir>/src/lib/$1",
@@ -19,5 +20,8 @@ module.exports = {
     "**/__tests__/**/*Test.[jt]s?(x)",
     "**/?(*.)+(spec|test).[jt]s?(x)",
   ],
+  // `pnpm build` compiles the tests into dist/ too; only run the sources.
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  modulePathIgnorePatterns: ["<rootDir>/dist/"],
   maxWorkers: 1,
 };
