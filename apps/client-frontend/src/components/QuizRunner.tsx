@@ -117,8 +117,9 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   );
 
   const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT, {
+    // Refresh navbar XP/streak in the background; not awaited so a failed
+    // stats refetch can't reject (and falsely fail) the mutation itself.
     refetchQueries: [CurrentUserStatsDocument],
-    awaitRefetchQueries: true,
   });
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {

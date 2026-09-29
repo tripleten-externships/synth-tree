@@ -23,8 +23,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
   const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS, {
+    // Refresh navbar XP/streak in the background; not awaited so a failed
+    // stats refetch can't reject (and falsely fail) the mutation itself.
     refetchQueries: [CurrentUserStatsDocument],
-    awaitRefetchQueries: true,
   });
   const [finishing, setFinishing] = useState(false);
 
