@@ -100,6 +100,12 @@ builder.prismaObject("User", {
         return context.prisma.skillNode.findMany({
           ...query,
           where: {
+            // Only nodes a learner can open: published course, nothing soft-deleted.
+            deletedAt: null,
+            tree: {
+              deletedAt: null,
+              course: { status: "PUBLISHED", deletedAt: null },
+            },
             progresses: {
               none: {
                 userId: parent.id,
