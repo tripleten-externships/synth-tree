@@ -1143,7 +1143,7 @@ type Mutation {
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
-  syncCurrentUser(name: String, photoUrl: String): User
+  syncCurrentUser(name: String, photoUrl: String, timezone: String): User
   unpublishCourse(id: ID!): Course
   updateCourse(id: ID!, input: UpdateCourseInput!): Course
   updateLessonBlock(input: LessonBlocksUpdateInput!): LessonBlocks
