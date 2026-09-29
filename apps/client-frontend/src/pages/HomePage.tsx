@@ -28,17 +28,9 @@ type MyProgressData = {
   myProgress: ProgressItem[];
 };
 
-// Placeholder courses shown when the database has nothing published yet.
-// Once seed/admin-created courses exist, the API result wins automatically.
-const placeholderCourses = [
-  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
-  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
-  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
-];
-
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
-  // navigate() lets us send the user to a different page when they click something
+
   const {
     data: progressData,
     loading: progressLoading,
@@ -52,8 +44,8 @@ export default function Home() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const apiCourses = data?.publicGetAllCourses ?? [];
-  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
+  const courses = data?.publicGetAllCourses ?? [];
+
   const inProgressLesson = progressData?.myProgress?.find(
     (progress) => progress.status === "IN_PROGRESS",
   );
@@ -64,6 +56,7 @@ export default function Home() {
         <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Welcome to Synth<span className="text-primary">Tree</span>
         </h1>
+
         <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           A collection of courses on organic chemistry and more, organised into a clear study path
           with theory and quizzes built in.
@@ -72,17 +65,17 @@ export default function Home() {
 
       <section className="w-full">
         {progressLoading ? (
-          // Skeleton placeholder that mirrors the ContinueCard shape so the
-          // empty state never flashes before the progress query settles.
           <div
             aria-hidden="true"
             className="flex w-full animate-pulse items-center gap-6 rounded-3xl border border-border bg-card px-6 py-5 shadow-sm"
           >
             <div className="h-20 w-20 shrink-0 rounded-2xl bg-muted" />
+
             <div className="min-w-0 flex-1 space-y-3">
               <div className="h-4 w-1/3 rounded bg-muted" />
               <div className="h-6 w-2/3 rounded bg-muted" />
             </div>
+
             <div className="h-12 w-28 shrink-0 rounded-2xl bg-muted" />
           </div>
         ) : inProgressLesson ? (
@@ -114,16 +107,21 @@ export default function Home() {
         <h2 className="mb-4 text-left text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Courses
         </h2>
-        <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={course.title}
-              description={course.description ?? ""}
-            />
-          ))}
-        </div>
+
+        {courses.length === 0 ? (
+          <p className="text-muted-foreground">No courses yet</p>
+        ) : (
+          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={course.title}
+                description={course.description ?? ""}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
