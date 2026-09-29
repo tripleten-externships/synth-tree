@@ -7608,7 +7608,7 @@ export type HomeXpWidgetsQueryVariables = Exact<{
 }>;
 
 
-export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone: string, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
+export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone?: string | null, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
