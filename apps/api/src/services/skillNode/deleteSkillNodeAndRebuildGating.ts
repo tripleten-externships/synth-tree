@@ -13,7 +13,7 @@ import { GraphQLError } from "graphql";
 export async function deleteSkillNodeAndRebuildGating(
   tx: Prisma.TransactionClient,
   treeId: string,
-  nodeId: string
+  nodeId: string,
 ): Promise<void> {
   // 1. Ensure node exists in this tree
   const node = await tx.skillNode.findFirst({
@@ -59,7 +59,8 @@ export async function deleteSkillNodeAndRebuildGating(
 
   const steps = Array.from(nodesByStep.keys()).sort((a, b) => a - b);
 
-  // 5. Normalize orderInStep (and posX/posY if you want) per row
+  // 5. Normalize orderInStep per row. posX/posY are left alone: they are the
+  //    author's canvas layout (0-100 percentages), not derived from the order.
   for (const step of steps) {
     const rowNodes = nodesByStep
       .get(step)!
@@ -71,26 +72,14 @@ export async function deleteSkillNodeAndRebuildGating(
       const newOrderInStep = i + 1;
 
       // Only update if changed (avoid noisy writes)
-      if (
-        n.orderInStep !== newOrderInStep ||
-        n.posX !== newOrderInStep ||
-        n.posY !== step
-      ) {
+      if (n.orderInStep !== newOrderInStep) {
         await tx.skillNode.update({
           where: { id: n.id },
-          data: {
-            orderInStep: newOrderInStep,
-            posX: newOrderInStep, // keep simple grid: x = order, y = step
-            posY: step,
-          },
+          data: { orderInStep: newOrderInStep },
         });
 
         // Update local copy so we use correct values below if needed
         n.orderInStep = newOrderInStep;
-        // @ts-ignore
-        n.posX = newOrderInStep;
-        // @ts-ignore
-        n.posY = step;
       }
     }
   }

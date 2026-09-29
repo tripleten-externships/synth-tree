@@ -2041,7 +2041,6 @@ export type QuizAttemptsArgs = {
 
 export type QuizQuestionsArgs = {
   cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -3098,7 +3097,6 @@ export type QuizOrderByWithAggregationInput = {
 };
 
 export type QuizOrderByWithRelationInput = {
-  attempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   deletedAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
@@ -3139,7 +3137,6 @@ export type QuizQuestionAnswersArgs = {
 
 export type QuizQuestionOptionsArgs = {
   cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -3327,7 +3324,6 @@ export type QuizQuestionOrderByWithAggregationInput = {
 };
 
 export type QuizQuestionOrderByWithRelationInput = {
-  answers?: InputMaybe<QuizAttemptAnswerOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   options?: InputMaybe<QuizOptionOrderByRelationAggregateInput>;
@@ -3525,7 +3521,6 @@ export type QuizQuestionWhereInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
@@ -3541,7 +3536,6 @@ export type QuizQuestionWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
@@ -3697,7 +3691,6 @@ export type QuizWhereInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<UuidFilter>;
@@ -3713,7 +3706,6 @@ export type QuizWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
@@ -3753,6 +3745,7 @@ export type SkillNode = {
   __typename?: 'SkillNode';
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  derivedStatus: UnlockedStatus;
   id: Scalars['ID']['output'];
   lessons: Array<LessonBlocks>;
   orderInStep: Scalars['Int']['output'];
@@ -5165,6 +5158,12 @@ export type TransactionIsolationLevel =
   | 'RepeatableRead'
   | 'Serializable';
 
+export type UnlockedStatus =
+  | 'COMPLETED'
+  | 'IN_PROGRESS'
+  | 'LOCKED'
+  | 'UNLOCKED';
+
 export type UpdateCourseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<CourseStatus>;
@@ -5188,19 +5187,19 @@ export type User = {
   createdAt: Scalars['DateTime']['output'];
   dailyGoalMinutes?: Maybe<Scalars['Int']['output']>;
   dailyQuests: Array<UserDailyQuest>;
-  email: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
   interests: Array<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
-  onboardingComplete: Scalars['Boolean']['output'];
+  onboardingComplete?: Maybe<Scalars['Boolean']['output']>;
   photoUrl?: Maybe<Scalars['String']['output']>;
   quizAttempts: Array<QuizAttempt>;
   recommendedNext?: Maybe<Array<SkillNode>>;
   role: Role;
   streak?: Maybe<UserStreak>;
-  timezone: Scalars['String']['output'];
+  timezone?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
@@ -6377,7 +6376,6 @@ export type UserOrderByWithRelationInput = {
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
   onboardingComplete?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
-  quizAttempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   role?: InputMaybe<SortOrder>;
   streak?: InputMaybe<UserStreakOrderByWithRelationInput>;
   timezone?: InputMaybe<SortOrder>;
@@ -6976,7 +6974,6 @@ export type UserWhereInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
@@ -7001,7 +6998,6 @@ export type UserWhereUniqueInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
@@ -7674,7 +7670,7 @@ export type CompleteOnboardingMutationVariables = Exact<{
 }>;
 
 
-export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete: boolean } | null };
+export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
 
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
@@ -7682,14 +7678,14 @@ export type SyncCurrentUserMutationVariables = Exact<{
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
 }>;
 
 
-export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
+export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, derivedStatus: UnlockedStatus, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7706,7 +7702,7 @@ export type MyProgressQuery = { __typename?: 'Query', myProgress?: Array<{ __typ
 export type OnboardingStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete: boolean } | null };
+export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete?: boolean | null } | null };
 
 export type SavedInterestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8720,6 +8716,7 @@ export const LearnerCourseTreeDocument = gql`
         orderInStep
         posX
         posY
+        derivedStatus
         prerequisites {
           dependsOnNodeId
         }

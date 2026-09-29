@@ -8,6 +8,12 @@ Auth-related setup (Firebase service account, env vars, creating test users) is 
 
 For the full repo quickstart, see the [root README](../../README.md).
 
+## Error responses
+
+Clients only see messages from errors thrown on purpose (`GraphQLError`) and GraphQL's own request errors (parse, validation, bad variables). Any other error, such as a Prisma error, comes back as `Internal server error` with code `INTERNAL_SERVER_ERROR`, and the original is logged. Stack traces are never sent. This applies in every environment, whatever `NODE_ENV` is (see `src/lib/formatError.ts`).
+
+To see full errors and stack traces in responses while debugging locally, set `EXPOSE_INTERNAL_ERRORS=true` in `apps/api/.env`. Never set it in a deployed environment.
+
 ## Running tests
 
 Integration tests need a running Postgres. The repo's `docker-compose.yml` provides one.
