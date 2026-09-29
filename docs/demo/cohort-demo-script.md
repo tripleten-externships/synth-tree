@@ -272,9 +272,10 @@ Narrate this, or use a slide. The dev GraphQL sandbox needs a Firebase token, so
 `pnpm db:seed:demo` (`apps/api/scripts/seedDemoContent.ts`) can be re-run, and it doubles as a
 reset button. It:
 
+- creates or updates the eight achievement definitions;
 - deletes and recreates all demo courses, so any admin edits are undone and **the IDs change**;
-- recreates the seven classmates;
-- resets `learner@local.dev`'s progress, XP and streak to the starting state above.
+- recreates the seven classmates, with the achievements their activity earns;
+- resets `learner@local.dev`'s progress, XP, streak and achievements to the starting state above.
 
 It only touches Postgres; Firebase accounts are unaffected. It **does not** remove learner accounts
 created during a signup rehearsal. Those are harmless.
@@ -324,8 +325,10 @@ missing, the seed skips the learner's progress. It's recreated when the dev API 
 psql "$DATABASE_URL" -c "select email, role from \"User\" where email in ('admin@local.dev','learner@local.dev');"
 ```
 
-**5. Run the seed** from the repo root. It should list the courses, then seven `classmate …` lines,
-then `learner@local.dev: 250 XP, 4-day streak`, then `✅ Demo content seeded.`
+**5. Run the seed** from the repo root. It should print `8 achievement definitions`, list the
+courses, then seven `classmate …` lines, then
+`learner@local.dev: 250 XP, 4-day streak, achievements: first-step, week-streak, perfect-quiz, polyglot`,
+then `✅ Demo content seeded.`
 
 ```bash
 cd apps/api && pnpm db:seed:demo

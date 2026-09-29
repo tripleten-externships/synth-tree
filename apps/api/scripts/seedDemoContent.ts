@@ -17,11 +17,19 @@
  *
  * It also seeds learner ACTIVITY so the app looks lived-in:
  *   - seven synthetic classmates (ids "demo-learner-*", no Firebase accounts)
- *     with progress, quiz attempts, XP and streaks, so the leaderboard has a field;
+ *     with progress, quiz attempts, XP, streaks and achievements, so the
+ *     leaderboard has a field;
  *   - if learner@local.dev exists: progress across all three published courses,
- *     250 XP and a 4-day streak. Its XP/streak are RESET on every run. Atoms &
- *     Bonding is left without a quiz pass, so passing that quiz in a demo still
- *     awards +100 XP, extends the streak and moves the learner up a rank.
+ *     250 XP, a 4-day streak and matching achievements. Its XP, streak and
+ *     achievements are RESET on every run. Atoms & Bonding is left without a
+ *     quiz pass, so passing that quiz in a demo still awards +100 XP, extends
+ *     the streak and moves the learner up a rank.
+ *
+ * Achievements: the catalog (src/services/achievementDefinitions.ts, shared with
+ * `pnpm prisma:seed:achievements`) is upserted, so definition edits propagate.
+ * Each seeded user is then awarded what their seeded history would have earned
+ * (seedUserAchievements). Achievements carry no XP, so XP and ranks are
+ * unaffected.
  */
 
 import "dotenv/config";
@@ -36,6 +44,10 @@ import {
 } from "@prisma/client";
 
 import { prisma } from "../src/lib/prisma";
+import {
+  ACHIEVEMENT_DEFINITIONS,
+  seedAchievementDefinitions,
+} from "../src/services/achievementDefinitions";
 
 // Stable id for the synthetic author so re-runs are idempotent (delete-by-author).
 const DEMO_AUTHOR_ID = "demo-author";
@@ -661,6 +673,90 @@ async function seedUserActivity(userId: string, plan: ActivityPlan, content: See
   return totalXp;
 }
 
+// Awards the achievements a user with this seeded history would have earned,
+// reading the rows seedUserActivity wrote. Follows the rules in
+// apps/api/src/services/achievements.ts, but treats the count and streak
+// thresholds as "reached at some point" (>=) rather than "hit exactly now"
+// (===), and uses the longest streak since the seed has no day-by-day history.
+// earnedAt is when the threshold was crossed. No XP is attached.
+async function seedUserAchievements(userId: string): Promise<string[]> {
+  const [completions, attempts, streak, quizCount] = await Promise.all([
+    prisma.userNodeProgress.findMany({
+      where: { userId, status: ProgressStatus.COMPLETED },
+      select: { completedAt: true, node: { select: { treeId: true, deletedAt: true } } },
+      orderBy: { completedAt: "asc" },
+    }),
+    prisma.quizAttempt.findMany({
+      where: { userId, passed: true, quiz: { deletedAt: null } },
+      select: { quizId: true, takenAt: true, answers: { select: { isCorrect: true } } },
+      orderBy: { takenAt: "asc" },
+    }),
+    prisma.userStreak.findUnique({ where: { userId } }),
+    prisma.quiz.count({ where: { deletedAt: null } }),
+  ]);
+
+  const earned = new Map<string, Date>();
+  const at = (d: Date | null | undefined) => d ?? new Date();
+
+  // lesson_completed_count:N counts every COMPLETED progress row.
+  if (completions.length >= 1) {
+    earned.set("lesson_completed_count:1", at(completions[0].completedAt));
+  }
+  if (completions.length >= 10) {
+    earned.set("lesson_completed_count:10", at(completions[9].completedAt));
+  }
+
+  const longest = Math.max(streak?.longestDays ?? 0, streak?.currentDays ?? 0);
+  if (longest >= 7) earned.set("streak_days:7", at(streak?.lastActive));
+  if (longest >= 30) earned.set("streak_days:30", at(streak?.lastActive));
+
+  const perfect = attempts.find((a) => a.answers.length > 0 && a.answers.every((x) => x.isCorrect));
+  if (perfect) earned.set("quiz_perfect", perfect.takenAt);
+
+  const passedQuizzes = new Set<string>();
+  for (const a of attempts) {
+    passedQuizzes.add(a.quizId);
+    if (quizCount > 0 && passedQuizzes.size >= quizCount) {
+      earned.set("all_quizzes_completed", a.takenAt);
+      break;
+    }
+  }
+
+  // Branch = skill tree. Only non-deleted nodes count, as in the award rules.
+  const live = completions.filter((c) => c.node.deletedAt === null);
+  const treeIds = [...new Set(live.map((c) => c.node.treeId))];
+  const treeSizes = await prisma.skillNode.groupBy({
+    by: ["treeId"],
+    where: { treeId: { in: treeIds }, deletedAt: null },
+    _count: { _all: true },
+  });
+  const seen = new Map<string, number>();
+  const treesTouched = new Set<string>();
+  for (const c of live) {
+    const done = (seen.get(c.node.treeId) ?? 0) + 1;
+    seen.set(c.node.treeId, done);
+    const size = treeSizes.find((t) => t.treeId === c.node.treeId)?._count._all ?? 0;
+    if (size > 0 && done >= size && !earned.has("branch_completed")) {
+      earned.set("branch_completed", at(c.completedAt));
+    }
+    treesTouched.add(c.node.treeId);
+    if (treesTouched.size >= 3 && !earned.has("branches_completed:3")) {
+      earned.set("branches_completed:3", at(c.completedAt));
+    }
+  }
+
+  const awards = ACHIEVEMENT_DEFINITIONS.filter((a) => earned.has(a.trigger));
+  await prisma.userAchievement.createMany({
+    data: awards.map((a) => ({ userId, achievementId: a.id, earnedAt: earned.get(a.trigger) })),
+    skipDuplicates: true,
+  });
+  return awards.map((a) => a.id);
+}
+
+function describeAchievements(ids: string[]): string {
+  return ids.length ? `achievements: ${ids.join(", ")}` : "no achievements";
+}
+
 async function seedDemoActivity(content: SeededContent) {
   // Classmates: remove and recreate (cascades to their progress, XP, streaks).
   await prisma.user.deleteMany({ where: { id: { startsWith: DEMO_LEARNER_ID_PREFIX } } });
@@ -677,7 +773,10 @@ async function seedDemoActivity(content: SeededContent) {
       },
     });
     const xp = await seedUserActivity(user.id, c.plan, content);
-    console.log(`   • classmate ${c.name}: ${xp} XP, ${c.plan.streak}-day streak`);
+    const achievements = await seedUserAchievements(user.id);
+    console.log(
+      `   • classmate ${c.name}: ${xp} XP, ${c.plan.streak}-day streak, ${describeAchievements(achievements)}`,
+    );
   }
 
   const learner = await prisma.user.findUnique({ where: { email: LEARNER_EMAIL } });
@@ -694,6 +793,7 @@ async function seedDemoActivity(content: SeededContent) {
   await prisma.xpEvent.deleteMany({ where: { userId: learner.id } });
   await prisma.userXp.deleteMany({ where: { userId: learner.id } });
   await prisma.userStreak.deleteMany({ where: { userId: learner.id } });
+  await prisma.userAchievement.deleteMany({ where: { userId: learner.id } });
   await prisma.user.update({
     where: { id: learner.id },
     data: {
@@ -704,7 +804,10 @@ async function seedDemoActivity(content: SeededContent) {
   });
 
   const xp = await seedUserActivity(learner.id, LEARNER_PLAN, content);
-  console.log(`   • ${LEARNER_EMAIL}: ${xp} XP, ${LEARNER_PLAN.streak}-day streak`);
+  const achievements = await seedUserAchievements(learner.id);
+  console.log(
+    `   • ${LEARNER_EMAIL}: ${xp} XP, ${LEARNER_PLAN.streak}-day streak, ${describeAchievements(achievements)}`,
+  );
 }
 
 async function main() {
@@ -721,6 +824,10 @@ async function main() {
       role: Role.ADMIN,
     },
   });
+
+  // Achievement catalog (created or updated in place; step 3 awards from it).
+  const definitions = await seedAchievementDefinitions(prisma);
+  console.log(`   • ${definitions} achievement definitions`);
 
   // 2. Clean any prior demo content (cascades to trees/nodes/lessons/quizzes/progress).
   const removed = await prisma.course.deleteMany({ where: { authorId: author.id } });
