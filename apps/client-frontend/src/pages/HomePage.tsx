@@ -29,17 +29,9 @@ type MyProgressData = {
   myProgress: ProgressItem[];
 };
 
-// Placeholder courses shown when the database has nothing published yet.
-// Once seed/admin-created courses exist, the API result wins automatically.
-const placeholderCourses = [
-  { id: "1", title: "Organic Chemistry", description: "Learn the basics of organic chemistry" },
-  { id: "2", title: "Basics of Physics", description: "Introduction to physics concepts" },
-  { id: "3", title: "Advanced Geometry", description: "Deep dive into geometric principles" },
-];
-
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
-  // navigate() lets us send the user to a different page when they click something
+
   const {
     data: progressData,
     loading: progressLoading,
@@ -53,8 +45,8 @@ export default function Home() {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const apiCourses = data?.publicGetAllCourses ?? [];
-  const courses = apiCourses.length > 0 ? apiCourses : placeholderCourses;
+  const courses = data?.publicGetAllCourses ?? [];
+
   const inProgressLesson = progressData?.myProgress?.find(
     (progress) => progress.status === "IN_PROGRESS",
   );
@@ -118,18 +110,22 @@ export default function Home() {
           <h2 className="mb-4 text-left text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Courses
           </h2>
-          {/* Two columns next to the right rail, as in the design; three got
-              too narrow (about 180px a card at 1024px). */}
-          <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
-            {courses.map((course) => (
-              <CourseCard
-                key={course.id}
-                id={course.id}
-                title={course.title}
-                description={course.description ?? ""}
-              />
-            ))}
-          </div>
+          {courses.length === 0 ? (
+            <p className="text-muted-foreground">No courses yet</p>
+          ) : (
+            // Two columns next to the right rail, as in the design; three got
+            // too narrow (about 180px a card at 1024px).
+            <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  id={course.id}
+                  title={course.title}
+                  description={course.description ?? ""}
+                />
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
