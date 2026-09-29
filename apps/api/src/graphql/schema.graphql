@@ -4,8 +4,6 @@ type Achievement {
   icon: String!
   id: ID!
   name: String!
-  trigger: String!
-  userAchievements(cursor: UserAchievementWhereUniqueInput, distinct: [UserAchievementScalarFieldEnum!], orderBy: [UserAchievementOrderByWithRelationInput!], skip: Int, take: Int, where: UserAchievementWhereInput): [UserAchievement!]!
 }
 
 input AchievementCountOrderByAggregateInput {
@@ -4861,17 +4859,13 @@ type User {
   streak: UserStreak
   timezone: String!
   updatedAt: DateTime!
-  userAchievements(cursor: UserAchievementWhereUniqueInput, distinct: [UserAchievementScalarFieldEnum!], orderBy: [UserAchievementOrderByWithRelationInput!], skip: Int, take: Int, where: UserAchievementWhereInput): [UserAchievement!]!
   xp: UserXp
   xpEvents(cursor: XpEventWhereUniqueInput, distinct: [XpEventScalarFieldEnum!], orderBy: [XpEventOrderByWithRelationInput!], skip: Int, take: Int, where: XpEventWhereInput): [XpEvent!]!
 }
 
 type UserAchievement {
   achievement: Achievement!
-  achievementId: String!
   earnedAt: DateTime!
-  user: User!
-  userId: String!
 }
 
 input UserAchievementCountOrderByAggregateInput {

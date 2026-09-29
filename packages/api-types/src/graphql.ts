@@ -28,18 +28,6 @@ export type Achievement = {
   icon: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  trigger: Scalars['String']['output'];
-  userAchievements: Array<UserAchievement>;
-};
-
-
-export type AchievementUserAchievementsArgs = {
-  cursor?: InputMaybe<UserAchievementWhereUniqueInput>;
-  distinct?: InputMaybe<Array<UserAchievementScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<UserAchievementOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<UserAchievementWhereInput>;
 };
 
 export type AchievementCountOrderByAggregateInput = {
@@ -5360,7 +5348,6 @@ export type User = {
   streak?: Maybe<UserStreak>;
   timezone: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
-  userAchievements: Array<UserAchievement>;
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
 };
@@ -5411,16 +5398,6 @@ export type UserRecommendedNextArgs = {
 };
 
 
-export type UserUserAchievementsArgs = {
-  cursor?: InputMaybe<UserAchievementWhereUniqueInput>;
-  distinct?: InputMaybe<Array<UserAchievementScalarFieldEnum>>;
-  orderBy?: InputMaybe<Array<UserAchievementOrderByWithRelationInput>>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-  where?: InputMaybe<UserAchievementWhereInput>;
-};
-
-
 export type UserXpEventsArgs = {
   cursor?: InputMaybe<XpEventWhereUniqueInput>;
   distinct?: InputMaybe<Array<XpEventScalarFieldEnum>>;
@@ -5433,10 +5410,7 @@ export type UserXpEventsArgs = {
 export type UserAchievement = {
   __typename?: 'UserAchievement';
   achievement: Achievement;
-  achievementId: Scalars['String']['output'];
   earnedAt: Scalars['DateTime']['output'];
-  user: User;
-  userId: Scalars['String']['output'];
 };
 
 export type UserAchievementCountOrderByAggregateInput = {

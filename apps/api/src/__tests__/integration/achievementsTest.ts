@@ -5,7 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { getTestServer } from "./server";
 import { makeUserContext } from "./context";
-import { seedUsers, cleanAll, REGULAR_USER_ID } from "./seed";
+import { seedUsers, cleanAll, REGULAR_USER_ID, SECOND_REGULAR_USER_ID } from "./seed";
 
 const prisma = new PrismaClient();
 
@@ -100,5 +100,86 @@ describe("achievements (resolver level)", () => {
       },
     });
     expect(earned).not.toBeNull();
+  });
+
+  describe("privacy: another learner's email is not reachable", () => {
+    const OTHER_EMAIL = "user2@test.com";
+
+    beforeEach(async () => {
+      await prisma.userAchievement.createMany({
+        data: [
+          { userId: REGULAR_USER_ID, achievementId: FIRST_STEP_ID },
+          { userId: SECOND_REGULAR_USER_ID, achievementId: FIRST_STEP_ID },
+        ],
+      });
+    });
+
+    async function runAsLearner(query: string) {
+      return singleResult(
+        await server.executeOperation(
+          { query },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+    }
+
+    it("myAchievements returns only safe fields for the viewer's own rows", async () => {
+      const res = await runAsLearner(
+        clientDocument("queries/myAchievements.ts"),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.myAchievements).toHaveLength(1);
+      expect(res.data.myAchievements[0].achievement).toEqual({
+        id: FIRST_STEP_ID,
+        name: "First Step",
+        description: "Complete your first lesson",
+        icon: "footsteps",
+        color: "primary",
+      });
+    });
+
+    it.each([
+      [
+        "Achievement.userAchievements -> user",
+        `query { myAchievements { achievement { userAchievements { user { id email } } } } }`,
+      ],
+      ["UserAchievement.user", `query { myAchievements { user { id email } } }`],
+      ["Achievement.trigger", `query { myAchievements { achievement { trigger } } }`],
+      [
+        "User.userAchievements via Course.author",
+        `query { publicGetAllCourses { author { userAchievements { user { email } } } } }`,
+      ],
+    ])("rejects %s", async (_label, query) => {
+      await prisma.course.create({
+        data: { title: "Other's Course", status: "PUBLISHED", authorId: SECOND_REGULAR_USER_ID },
+      });
+
+      const res = await runAsLearner(query);
+
+      expect(res.errors?.[0]?.extensions?.code).toBe("GRAPHQL_VALIDATION_FAILED");
+      expect(res.data).toBeUndefined();
+      expect(JSON.stringify(res)).not.toContain(OTHER_EMAIL);
+    });
+
+    it("User.achievements is empty for another user and populated for self", async () => {
+      await prisma.course.createMany({
+        data: [
+          { title: "Other's Course", status: "PUBLISHED", authorId: SECOND_REGULAR_USER_ID },
+          { title: "My Course", status: "PUBLISHED", authorId: REGULAR_USER_ID },
+        ],
+      });
+
+      const res = await runAsLearner(
+        `query { publicGetAllCourses { authorId author { achievements { id } } } }`,
+      );
+
+      expect(res.errors).toBeUndefined();
+      const byAuthor = Object.fromEntries(
+        res.data.publicGetAllCourses.map((c: any) => [c.authorId, c.author.achievements]),
+      );
+      expect(byAuthor[SECOND_REGULAR_USER_ID]).toEqual([]);
+      expect(byAuthor[REGULAR_USER_ID]).toEqual([{ id: FIRST_STEP_ID }]);
+    });
   });
 });

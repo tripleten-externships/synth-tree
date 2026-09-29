@@ -19,20 +19,40 @@ import { UserStreakObject } from "@graphql/__generated__/UserStreak";
 import { UserHeartsObject } from "@graphql/__generated__/UserHearts";
 import { XpEventObject } from "@graphql/__generated__/XpEvent";
 import { UserDailyQuestObject } from "@graphql/__generated__/UserDailyQuest";
-import { AchievementObject } from "@graphql/__generated__/Achievement";
-import { UserAchievementObject } from "@graphql/__generated__/UserAchievement";
+import {
+  AchievementIdFieldObject,
+  AchievementNameFieldObject,
+  AchievementDescriptionFieldObject,
+  AchievementIconFieldObject,
+  AchievementColorFieldObject,
+} from "@graphql/__generated__/Achievement";
+import {
+  UserAchievementEarnedAtFieldObject,
+  UserAchievementAchievementFieldObject,
+} from "@graphql/__generated__/UserAchievement";
 
 // We are not using the auto crud from pothos. Utilize the prisma models. Inputs types and other types will still need to be manually created.
 // Can break this file into multiple. Used one now for brevity.
 
+// User.userAchievements is not exposed: User objects are reachable for other
+// people (e.g. Course.author), and the raw rows lead back to their earners.
+// Earned achievements are read via User.achievements (self/admin only) or the
+// viewer-scoped myAchievements query.
+const withoutUserAchievements = <T extends { userAchievements: unknown }>({
+  userAchievements: _userAchievements,
+  ...fields
+}: T) => fields;
+
 builder.prismaObject("User", {
   ...UserObject,
   fields: (t) => ({
-    ...UserObject.fields(t),
+    ...withoutUserAchievements(UserObject.fields(t)),
 
     achievements: t.prismaField({
       type: ["Achievement"],
       resolve: async (_query, parent, _args, ctx) => {
+        if (parent.id !== ctx.auth.getUserId() && !ctx.auth.isAdmin()) return [];
+
         const rows = await ctx.prisma.userAchievement.findMany({
           where: { userId: parent.id },
           include: { achievement: true },
@@ -208,8 +228,25 @@ builder.prismaObject("UserStreak", UserStreakObject);
 builder.prismaObject("UserHearts", UserHeartsObject);
 builder.prismaObject("XpEvent", XpEventObject);
 builder.prismaObject("UserDailyQuest", UserDailyQuestObject);
-builder.prismaObject("Achievement", AchievementObject);
-builder.prismaObject("UserAchievement", UserAchievementObject);
+// Achievements use explicit field lists instead of the generated spreads:
+// `trigger` is internal award logic, and the Achievement.userAchievements /
+// UserAchievement.user back-relations would let any learner walk from their
+// own achievements to every other earner's User (email included).
+builder.prismaObject("Achievement", {
+  fields: (t) => ({
+    id: t.field(AchievementIdFieldObject),
+    name: t.field(AchievementNameFieldObject),
+    description: t.field(AchievementDescriptionFieldObject),
+    icon: t.field(AchievementIconFieldObject),
+    color: t.field(AchievementColorFieldObject),
+  }),
+});
+builder.prismaObject("UserAchievement", {
+  fields: (t) => ({
+    earnedAt: t.field(UserAchievementEarnedAtFieldObject),
+    achievement: t.relation("achievement", UserAchievementAchievementFieldObject),
+  }),
+});
 export type CourseProgressShape = {
   courseId: string;
   totalNodes: number;
