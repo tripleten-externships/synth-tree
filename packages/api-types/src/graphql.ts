@@ -7601,7 +7601,7 @@ export type SyncCurrentUserMutationVariables = Exact<{
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role, quizAttempts: Array<{ __typename?: 'QuizAttempt', id: string, quizId: string }> } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
@@ -8470,6 +8470,10 @@ export const SyncCurrentUserDocument = gql`
     name
     photoUrl
     role
+    quizAttempts(where: {passed: {equals: true}}, distinct: [quizId]) {
+      id
+      quizId
+    }
   }
 }
     `;
