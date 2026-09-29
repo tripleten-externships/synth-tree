@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
 import { requireAdmin } from "@graphql/auth/requireAuth";
+import { isUuid } from "@lib/uuid";
 import { GraphQLContext } from "@graphql/context";
 import { CourseProgressShape, CourseProgress } from "@graphql/models/models.all";
 
@@ -97,6 +98,10 @@ builder.queryFields((t) => ({
    resolve: async (_parent, args, ctx): Promise<CourseProgressShape> => {
      const targetUserId = resolveTargetUserId(ctx, args.userId);
 
+     // The course page sends the URL courseId straight here; a malformed id
+     // would make Prisma throw on the UUID column, so treat it as not found.
+     if (!isUuid(args.courseId)) throw new GraphQLError("Course not found");
+
      // validate course
      const courseExists = await ctx.prisma.course.findFirst({
        where: { id: args.courseId, deletedAt: null },
@@ -151,6 +156,36 @@ builder.queryFields((t) => ({
          ? 0
          : Math.round((completedNodes / totalNodes) * 100);
 
+     // Node IDs and Quiz IDs in this course — XpEvent.rewardKey can be
+     // either, depending on whether XP came from node_completion or
+     // quiz_pass (see apps/api/src/services/xp.ts).
+     const courseNodes = await ctx.prisma.skillNode.findMany({
+       where: {
+         deletedAt: null,
+         tree: { courseId: args.courseId, deletedAt: null },
+       },
+       select: {
+         id: true,
+         quiz: { select: { id: true } },
+       },
+     });
+
+     const nodeIds = courseNodes.map((n) => n.id);
+     const quizIds = courseNodes.filter((n) => n.quiz).map((n) => n.quiz!.id);
+
+     const xpAggregate = await ctx.prisma.xpEvent.aggregate({
+       where: {
+         userId: targetUserId,
+         OR: [
+           { reason: "node_completion", rewardKey: { in: nodeIds } },
+           { reason: "quiz_pass", rewardKey: { in: quizIds } },
+         ],
+       },
+       _sum: { amount: true },
+     });
+
+     const xpEarned = xpAggregate._sum.amount ?? 0;
+
      return {
        courseId: args.courseId,
        totalNodes,
@@ -158,6 +193,7 @@ builder.queryFields((t) => ({
        completedNodes,
        notStartedNodes,
        completionPercentage,
+       xpEarned,
      };
    },
  }),

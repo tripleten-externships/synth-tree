@@ -250,6 +250,7 @@ export type CourseProgress = {
   inProgressNodes?: Maybe<Scalars['Int']['output']>;
   notStartedNodes?: Maybe<Scalars['Int']['output']>;
   totalNodes?: Maybe<Scalars['Int']['output']>;
+  xpEarned?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CourseScalarFieldEnum =
@@ -7595,6 +7596,13 @@ export type CompleteOnboardingMutationVariables = Exact<{
 
 export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
 
+export type CourseDetailProgressQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, inProgressNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -8469,6 +8477,45 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
+export const CourseDetailProgressDocument = gql`
+    query CourseDetailProgress($courseId: ID!) {
+  courseProgress(courseId: $courseId) {
+    courseId
+    totalNodes
+    inProgressNodes
+    completedNodes
+    completionPercentage
+    xpEarned
+  }
+}
+    `;
+
+/**
+ * __useCourseDetailProgressQuery__
+ *
+ * To run a query within a React component, call `useCourseDetailProgressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCourseDetailProgressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCourseDetailProgressQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useCourseDetailProgressQuery(baseOptions: ApolloReactHooks.QueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables> & ({ variables: CourseDetailProgressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+      }
+export function useCourseDetailProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+        }
+export type CourseDetailProgressQueryHookResult = ReturnType<typeof useCourseDetailProgressQuery>;
+export type CourseDetailProgressLazyQueryHookResult = ReturnType<typeof useCourseDetailProgressLazyQuery>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl) {

@@ -453,6 +453,7 @@ export type CourseProgressShape = {
   completedNodes: number;
   notStartedNodes: number;
   completionPercentage: number;
+  xpEarned: number;
 };
 
 export const CourseProgress = builder.objectRef<CourseProgressShape>("CourseProgress").implement({
@@ -463,5 +464,6 @@ export const CourseProgress = builder.objectRef<CourseProgressShape>("CourseProg
     completedNodes: t.exposeInt("completedNodes"),
     notStartedNodes: t.exposeInt("notStartedNodes"),
     completionPercentage: t.exposeInt("completionPercentage"),
+    xpEarned: t.exposeInt("xpEarned"),
   }),
 });

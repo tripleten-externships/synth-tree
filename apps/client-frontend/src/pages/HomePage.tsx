@@ -1,4 +1,4 @@
-import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
+import { useCourseDetailProgressQuery, usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
 import { useNavigate } from "react-router-dom";
 import RecommendedNextCarousel from "../components/RecommendedNextCarousel";
 import CourseCard from "../components/CourseCard";
@@ -28,6 +28,29 @@ type ProgressItem = {
 type MyProgressData = {
   myProgress: ProgressItem[];
 };
+
+type HomeCourse = { id: string; title: string; description?: string | null };
+
+// SYN-38: the Home grid uses the same server aggregate as the course page.
+// The bar only appears once the learner has started the course; while the
+// query loads, or if it errors, the card renders without it.
+function CourseCardWithProgress({ course }: { course: HomeCourse }) {
+  const { data } = useCourseDetailProgressQuery({
+    variables: { courseId: course.id },
+    fetchPolicy: "cache-and-network",
+  });
+  const stats = data?.courseProgress;
+  const started = (stats?.inProgressNodes ?? 0) + (stats?.completedNodes ?? 0) > 0;
+
+  return (
+    <CourseCard
+      id={course.id}
+      title={course.title}
+      description={course.description ?? ""}
+      progress={started ? (stats?.completionPercentage ?? 0) : undefined}
+    />
+  );
+}
 
 export default function Home() {
   const { data, loading, error } = usePublicGetAllCoursesQuery();
@@ -117,12 +140,7 @@ export default function Home() {
             // too narrow (about 180px a card at 1024px).
             <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2">
               {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  id={course.id}
-                  title={course.title}
-                  description={course.description ?? ""}
-                />
+                <CourseCardWithProgress key={course.id} course={course} />
               ))}
             </div>
           )}
