@@ -111,7 +111,7 @@ Transition: _"Let's start where every learner starts."_
 3. **Step 3, daily goal.** Pick **15 minutes a day** and finish signup. You land on Home. (#121)
    - _"A brand-new learner has no progress yet,"_ so there's no Continue card. Point out the
      **Browse catalog** button and the published course grid.
-4. Click **Browse catalog** to show the catalog grid.
+4. Click **Browse catalog** to show the catalog grid (the top-nav _Catalog_ link goes there too).
 5. _Optional:_ if a learner leaves partway through signup, they're sent back to finish it the next
    time they sign in. (#121)
 
@@ -165,7 +165,7 @@ This is the core of the demo, and everything in it is new since the last one.
 7. **Profile.** Edit the display name → **Save**. Stay on light mode. If you want to show dark mode,
    toggle it on Home, not on the leaderboard.
 8. _Optional, mobile:_ press Cmd+Shift+M in DevTools. Show the hamburger menu and the bottom tab
-   bar (Home / Profile).
+   bar (Home / Catalog / Profile); tap **Catalog** to open the course grid.
 
 **Answer key: Atoms & Bonding quick check**
 
