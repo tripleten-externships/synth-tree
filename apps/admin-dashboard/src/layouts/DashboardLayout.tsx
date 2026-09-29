@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDensity } from "@synth-tree/theme";
 import { Badge, useColorMode } from "@synth-tree/ui";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@synth-tree/ui";
 import useAuth from "../hooks/useAuth";
 import GenericAvatar from "../assets/avatar-generic.svg";
-import {Sun, Moon, LayoutList} from "lucide-react";
+import { Sun, Moon, LayoutList } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
   const { density, setDensity } = useDensity();
-  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex flex-col text-foreground">
       <nav
@@ -36,7 +36,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </span>
           </span>
         </div>
-        {/* RIGHT: Courses link, avatar + admin badge container*/}
+
+        {/* RIGHT: Courses link, avatar + admin badge container */}
         <div className="flex items-center gap-8">
           {/* TODO: Update the "Courses" link when the actual route is implemented */}
           <Link to="/courses" className="font-medium">
@@ -45,6 +46,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link to="/analytics" className="font-medium">
             Analytics
           </Link>
+
           {/* Color mode toggle */}
           <button
             className="p-2 rounded-[10px] hover:bg-muted"
@@ -53,6 +55,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             {colorMode === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </button>
+
           {/* Density */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -60,6 +63,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <LayoutList className="h-5 w-5" />
               </button>
             </DropdownMenuTrigger>
+
             <DropdownMenuContent align="center">
               {(["compact", "regular", "comfy"] as const).map((option) => (
                 <button
@@ -67,15 +71,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   onClick={() => setDensity(option)}
                   className={`px-2 py-1 text-xs rounded-md capitalize ${
                     density === option
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                 >
-                {option}
+                  {option}
                 </button>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
           <div className="flex items-center gap-1">
             {/* avatar + admin badge container */}
             <DropdownMenu>
@@ -91,14 +96,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   />
                 </button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent className="p-4 mr-8">
-                {/* TODO: Add navigation links/actions for Profile and Logout */}
-                 <DropdownMenuItem onClick={() => navigate("/profile")}>
-      Profile
-    </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
             <Badge>
               admin
               {/* TODO: Add interactivity or link if required by design */}

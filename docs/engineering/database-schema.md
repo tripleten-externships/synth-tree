@@ -61,6 +61,7 @@ Prerequisites → SkillNodePrerequisite maps “Node B requires Node A.”
 ### SkillNode
 
 - **Key Fields:** `id`, `treeId`, `title`, logical ordering (`step`, `orderInStep`), optional layout coordinates (`posX`, `posY`).
+- **Layout coordinates:** `posX` / `posY` are integer percentages (0-100) of the canvas, on the 5% grid the admin builder snaps to. Both the admin canvas and the learner `SkillTreeCanvas` read them this way. The create mutations place new nodes on this grid (see `services/skillNode/placeSkillNode.ts`), and `updateSkillNode` rejects values outside 0-100.
 - **Relationships:** Parent for `LessonBlocks`, optional single `Quiz`, prerequisite edges via `SkillNodePrerequisite`, and learner progress via `UserNodeProgress`.
 
 ### SkillNodePrerequisite

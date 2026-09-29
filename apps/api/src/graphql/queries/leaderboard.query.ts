@@ -2,6 +2,15 @@ import { builder } from "@graphql/builder";
 import { prisma } from "@lib/prisma";
 import { LeaderboardEntry, LeaderboardEntryRef } from "@graphql/types/leaderboardEntry";
 
+// Shown for users without a display name (null, or blank after clearing it on
+// Profile). Deliberately not derived from their email, since every signed-in
+// learner can see the leaderboard.
+const FALLBACK_DISPLAY_NAME = "Learner";
+
+function displayNameOf(name: string | null | undefined): string {
+  return name?.trim() || FALLBACK_DISPLAY_NAME;
+}
+
 // Wrapper type: contains the list + the current user's global rank
 export const LeaderboardPayloadRef = builder.objectRef<{
   entries: Array<LeaderboardEntry>;
@@ -48,18 +57,15 @@ builder.queryField("leaderboard", (t) =>
       // 2. Get current user's Firebase UID
       const currentUserUid = ctx.auth.requireAuth();
 
-      // 3. Fetch current user's XP record
-      const currentUserXp = await prisma.userXp.findUnique({
-        where: { userId: currentUserUid },
-        include: {
-          user: {
-            include: { streak: true },
-          },
-        },
+      // 3. Fetch the current user with their XP. Loading the User row (not the
+      //    UserXp row) keeps their name and avatar even before they earn XP.
+      const currentUser = await prisma.user.findUnique({
+        where: { id: currentUserUid },
+        include: { xp: true, streak: true },
       });
 
       // If user has no XP yet, treat them as 0 XP
-      const currentUserTotalXp = currentUserXp?.totalXp ?? 0;
+      const currentUserTotalXp = currentUser?.xp?.totalXp ?? 0;
 
       // 4. Calculate global rank
       const currentUserRank =
@@ -70,10 +76,10 @@ builder.queryField("leaderboard", (t) =>
       // 5. Build current user's leaderboard entry
       const currentUserEntry = {
         userId: currentUserUid,
-        displayName: currentUserXp?.user.name ?? "Anonymous",
-        avatar: currentUserXp?.user.photoUrl ?? null,
+        displayName: displayNameOf(currentUser?.name),
+        avatar: currentUser?.photoUrl ?? null,
         totalXp: currentUserTotalXp,
-        streak: currentUserXp?.user.streak?.currentDays ?? 0,
+        streak: currentUser?.streak?.currentDays ?? 0,
         rank: currentUserRank,
       };
 
@@ -91,7 +97,7 @@ builder.queryField("leaderboard", (t) =>
         previousRank = rank;
         return {
           userId: u.userId,
-          displayName: u.user.name ?? "Anonymous",
+          displayName: displayNameOf(u.user.name),
           avatar: u.user.photoUrl ?? null,
           totalXp: u.totalXp,
           streak: u.user.streak?.currentDays ?? 0,
