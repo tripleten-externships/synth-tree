@@ -59,7 +59,11 @@ builder.mutationFields((t) => ({
         );
       }
 
-      const timezone = args.timezone && isValidTimezone(args.timezone) ? args.timezone : "UTC";
+      // Only a valid IANA zone counts as supplied. A missing or invalid one never
+      // overwrites a saved zone on update (profile re-syncs omit it); new users
+      // fall back to UTC.
+      const suppliedTimezone =
+        args.timezone && isValidTimezone(args.timezone) ? args.timezone : null;
 
       const existingByEmail = await context.prisma.user.findUnique({
         where: { email },
@@ -79,7 +83,7 @@ builder.mutationFields((t) => ({
           email,
           name: args.name ?? null,
           photoUrl: args.photoUrl ?? null,
-          timezone,
+          timezone: suppliedTimezone ?? "UTC",
           role: PrismaRole.USER, // use Prisma enum
         },
         update: {
@@ -88,7 +92,7 @@ builder.mutationFields((t) => ({
           ...(args.photoUrl !== null && args.photoUrl !== undefined
             ? { photoUrl: args.photoUrl }
             : {}),
-          timezone,
+          ...(suppliedTimezone !== null ? { timezone: suppliedTimezone } : {}),
         },
       });
 

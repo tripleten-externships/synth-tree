@@ -153,5 +153,47 @@ describe("authentication and authorization", () => {
 
       expect(user?.timezone).toBe("America/New_York");
     });
+
+    it("keeps a saved timezone when syncing without one", async () => {
+      await prisma.user.update({
+        where: { id: REGULAR_USER_ID },
+        data: { timezone: "Europe/Berlin" },
+      });
+
+      // Mirrors ProfilePage, which re-syncs with only name/photoUrl.
+      const res = singleResult(
+        await server.executeOperation(
+          { query: `mutation { syncCurrentUser(name: "Renamed") { id name timezone } }` },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.syncCurrentUser.name).toBe("Renamed");
+      expect(res.data.syncCurrentUser.timezone).toBe("Europe/Berlin");
+
+      const user = await prisma.user.findUnique({ where: { id: REGULAR_USER_ID } });
+      expect(user?.timezone).toBe("Europe/Berlin");
+    });
+
+    it("ignores an invalid timezone without overwriting a saved one", async () => {
+      await prisma.user.update({
+        where: { id: REGULAR_USER_ID },
+        data: { timezone: "Asia/Tokyo" },
+      });
+
+      const res = singleResult(
+        await server.executeOperation(
+          { query: `mutation { syncCurrentUser(timezone: "Not/AZone") { id timezone } }` },
+          { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        ),
+      );
+
+      expect(res.errors).toBeUndefined();
+      expect(res.data.syncCurrentUser.timezone).toBe("Asia/Tokyo");
+
+      const user = await prisma.user.findUnique({ where: { id: REGULAR_USER_ID } });
+      expect(user?.timezone).toBe("Asia/Tokyo");
+    });
   });
 });
