@@ -2,19 +2,15 @@ import { useState } from "react";
 import { useColorMode } from "@synth-tree/theme";
 import Navigation from "./Navigation";
 import useAuth from "../hooks/useAuth";
-import { useQuery } from "@apollo/client/react";
+import { useCurrentUserStatsQuery } from "@synth-tree/api-types";
 import StatPill from "./StatPill";
-import {
-  CURRENT_USER_STATS_QUERY,
-  type CurrentUserStatsResponse,
-} from "../graphql/queries/currentUser";
 
 export default function Navbar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const { logout } = useAuth();
   const { isDark, toggleColorMode } = useColorMode();
 
-  const { data } = useQuery<CurrentUserStatsResponse>(CURRENT_USER_STATS_QUERY);
+  const { data } = useCurrentUserStatsQuery();
 
   const xp = data?.currentUser?.xp?.totalXp ?? 0;
   const streak = data?.currentUser?.streak?.currentDays ?? 0;

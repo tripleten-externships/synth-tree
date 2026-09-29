@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
+import { CurrentUserStatsDocument, useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
 import { Button, toast } from "@synth-tree/ui";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { COMPLETE_NODE_PROGRESS } from "../graphql/mutations/completeNodeProgress";
-import { CURRENT_USER_STATS_QUERY } from "../graphql/queries/currentUser";
 import { splitLessonPages } from "../lib/splitLessonPages";
 import LessonReadBlocks from "./LessonReadBlocks";
 import QuizRunner from "./QuizRunner";
@@ -24,7 +23,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
   const [completeNodeProgress] = useMutation(COMPLETE_NODE_PROGRESS, {
-    refetchQueries: [CURRENT_USER_STATS_QUERY],
+    refetchQueries: [CurrentUserStatsDocument],
     awaitRefetchQueries: true,
   });
   const [finishing, setFinishing] = useState(false);

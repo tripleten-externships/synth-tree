@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CurrentUserStatsDocument } from "@synth-tree/api-types";
 import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
-import { CURRENT_USER_STATS_QUERY } from "../graphql/queries/currentUser";
 import QuizSingle from "./QuizSingle";
 import QuizMulti from "./QuizMulti";
 
@@ -117,7 +117,7 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
   );
 
   const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT, {
-    refetchQueries: [CURRENT_USER_STATS_QUERY],
+    refetchQueries: [CurrentUserStatsDocument],
     awaitRefetchQueries: true,
   });
   const toggle = (qId: string, optId: string, multiple: boolean) =>
