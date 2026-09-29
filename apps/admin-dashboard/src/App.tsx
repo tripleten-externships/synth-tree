@@ -28,7 +28,11 @@ function App() {
                     <Route path="/" element={<Navigate to="/courses" replace />} />
                     <Route
                       path="/analytics"
-                      element={<DashboardLayout><AnalyticsPage /></DashboardLayout>}
+                      element={
+                        <DashboardLayout>
+                          <AnalyticsPage />
+                        </DashboardLayout>
+                      }
                     />
                     <Route
                       path="/courses"
