@@ -27,6 +27,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   // When set, the lesson is complete and we show the finish screen (SYN-61)
   // instead of navigating away, so the learner sees the XP they just earned.
   const [xpEarned, setXpEarned] = useState<number | null>(null);
+  // XP granted by quiz submissions in this lesson. Passing the quiz completes
+  // the node and awards quiz-pass XP server-side, so the later completeNodeProgress
+  // call grants 0 — the finish screen adds this in so the reward still shows.
+  const [quizXp, setQuizXp] = useState(0);
 
   async function handleFinish() {
     setFinishing(true);
@@ -36,8 +40,8 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
     try {
       const { data } = await completeNodeProgress({ variables: { nodeId } });
       // Completed: show the finish screen with the XP just awarded (SYN-61)
-      // instead of navigating away.
-      setXpEarned(data?.completeNodeProgress?.xpAwarded ?? 0);
+      // instead of navigating away — node-completion XP plus any quiz-pass XP.
+      setXpEarned((data?.completeNodeProgress?.xpAwarded ?? 0) + quizXp);
     } catch {
       // Node stays IN_PROGRESS; the quiz-pass path will complete it later.
       if (quiz?.required) {
@@ -56,6 +60,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   const [currentPage, setCurrentPage] = useState(0);
   useEffect(() => {
     setCurrentPage(0);
+    setQuizXp(0);
   }, [nodeId]);
 
   // Start each page at the top, like turning a page.
@@ -132,7 +137,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
 
       <LessonReadBlocks blocks={currentBlocks} />
 
-      {isQuizPage && quiz && <QuizRunner quiz={quiz} />}
+      {isQuizPage && quiz && (
+        <QuizRunner quiz={quiz} onXpAwarded={(xp) => setQuizXp((prev) => prev + xp)} />
+      )}
 
       <div className="mt-4 flex items-center justify-between gap-4 border-t border-border pt-6">
         <Button

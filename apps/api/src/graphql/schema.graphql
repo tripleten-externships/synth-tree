@@ -1649,6 +1649,7 @@ type QuizAttempt {
   takenAt: DateTime!
   user: User!
   userId: String!
+  xpAwarded: Int!
 }
 
 type QuizAttemptAnswer {

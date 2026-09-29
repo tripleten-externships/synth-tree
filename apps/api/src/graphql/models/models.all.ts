@@ -184,7 +184,32 @@ builder.prismaObject("QuizOption", {
     }),
   }),
 });
-builder.prismaObject("QuizAttempt", QuizAttemptObject);
+builder.prismaObject("QuizAttempt", {
+  ...QuizAttemptObject,
+  fields: (t) => ({
+    ...QuizAttemptObject.fields(t),
+
+    // SYN-61: XP granted by THIS attempt (the quiz-pass reward), so the
+    // lesson-finish screen can show it. submitQuizAttempt tags the quiz_pass
+    // XpEvent with the attemptId that earned it; awardXp is idempotent per quiz,
+    // so a repeat pass creates no new event and this resolves to 0.
+    xpAwarded: t.int({
+      nullable: false,
+      resolve: async (parent, _args, ctx) => {
+        const event = await ctx.prisma.xpEvent.findFirst({
+          where: {
+            userId: parent.userId,
+            reason: "quiz_pass",
+            rewardKey: parent.quizId,
+            metadata: { path: ["attemptId"], equals: parent.id },
+          },
+          select: { amount: true },
+        });
+        return event?.amount ?? 0;
+      },
+    }),
+  }),
+});
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
 // Captured + exported (unlike the other prismaObject registrations) so the
 // completeNodeProgress payload type can reference UserNodeProgress as a nested
