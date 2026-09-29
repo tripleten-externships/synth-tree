@@ -1324,6 +1324,7 @@ export type MutationSubmitQuizAttemptArgs = {
 export type MutationSyncCurrentUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -7598,10 +7599,11 @@ export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboar
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, timezone?: string | null, role: Role } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
@@ -8463,12 +8465,13 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
 export const SyncCurrentUserDocument = gql`
-    mutation SyncCurrentUser($name: String, $photoUrl: String) {
-  syncCurrentUser(name: $name, photoUrl: $photoUrl) {
+    mutation SyncCurrentUser($name: String, $photoUrl: String, $timezone: String) {
+  syncCurrentUser(name: $name, photoUrl: $photoUrl, timezone: $timezone) {
     id
     email
     name
     photoUrl
+    timezone
     role
   }
 }
@@ -8489,6 +8492,7 @@ export const SyncCurrentUserDocument = gql`
  *   variables: {
  *      name: // value for 'name'
  *      photoUrl: // value for 'photoUrl'
+ *      timezone: // value for 'timezone'
  *   },
  * });
  */
