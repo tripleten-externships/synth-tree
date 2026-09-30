@@ -35,6 +35,17 @@ import {
   UserNodeProgressFieldObject,
   UserXpEventsFieldObject,
 } from "@graphql/__generated__/User";
+import {
+  AchievementIdFieldObject,
+  AchievementNameFieldObject,
+  AchievementDescriptionFieldObject,
+  AchievementIconFieldObject,
+  AchievementColorFieldObject,
+} from "@graphql/__generated__/Achievement";
+import {
+  UserAchievementEarnedAtFieldObject,
+  UserAchievementAchievementFieldObject,
+} from "@graphql/__generated__/UserAchievement";
 import { CourseStatus, type Prisma } from "@prisma/client";
 
 // A user's private data (email, onboarding answers, timezone, progress, XP,
@@ -96,10 +107,34 @@ function viewerAttemptsFilter(ctx: GraphQLContext): Prisma.QuizAttemptWhereInput
 const { distinct: _questionsDistinct, ...quizQuestionsArgs } = QuizQuestionsFieldArgs;
 const { distinct: _optionsDistinct, ...questionOptionsArgs } = QuizQuestionOptionsFieldArgs;
 
+// User.userAchievements is not exposed: User objects are reachable for other
+// people (e.g. Course.author), and the raw rows lead back to their earners.
+// Earned achievements are read via User.achievements (self/admin only) or the
+// viewer-scoped myAchievements query.
+const withoutUserAchievements = <T extends { userAchievements: unknown }>({
+  userAchievements: _userAchievements,
+  ...fields
+}: T) => fields;
+
 builder.prismaObject("User", {
   ...UserObject,
   fields: (t) => ({
-    ...UserObject.fields(t),
+    ...withoutUserAchievements(UserObject.fields(t)),
+
+    // Earned achievements: empty unless the viewer is this user or an admin.
+    achievements: t.prismaField({
+      type: ["Achievement"],
+      resolve: async (_query, parent, _args, ctx) => {
+        if (!canSeePrivateUserData(parent.id, ctx)) return [];
+
+        const rows = await ctx.prisma.userAchievement.findMany({
+          where: { userId: parent.id },
+          include: { achievement: true },
+        });
+
+        return rows.map((row) => row.achievement);
+      },
+    }),
 
     // Another user's attempts come back empty unless the viewer is an admin.
     quizAttempts: t.relation("quizAttempts", {
@@ -476,6 +511,25 @@ builder.prismaObject("UserStreak", UserStreakObject);
 builder.prismaObject("UserHearts", UserHeartsObject);
 builder.prismaObject("XpEvent", XpEventObject);
 builder.prismaObject("UserDailyQuest", UserDailyQuestObject);
+// Achievements use explicit field lists instead of the generated spreads:
+// `trigger` is internal award logic, and the Achievement.userAchievements /
+// UserAchievement.user back-relations would let any learner walk from their
+// own achievements to every other earner's User (email included).
+builder.prismaObject("Achievement", {
+  fields: (t) => ({
+    id: t.field(AchievementIdFieldObject),
+    name: t.field(AchievementNameFieldObject),
+    description: t.field(AchievementDescriptionFieldObject),
+    icon: t.field(AchievementIconFieldObject),
+    color: t.field(AchievementColorFieldObject),
+  }),
+});
+builder.prismaObject("UserAchievement", {
+  fields: (t) => ({
+    earnedAt: t.field(UserAchievementEarnedAtFieldObject),
+    achievement: t.relation("achievement", UserAchievementAchievementFieldObject),
+  }),
+});
 export type CourseProgressShape = {
   courseId: string;
   totalNodes: number;

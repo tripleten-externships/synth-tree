@@ -2,6 +2,8 @@ import { GraphQLError } from "graphql";
 import { builder } from "@graphql/builder";
 import { awardXp } from "../../services/xp";
 import { completeNodeForUser } from "src/services/progress";
+import { getUserStreakDays } from "../../services/streak";
+import { checkAndAwardAchievements } from "../../services/achievements";
 import type { UserNodeProgress } from "@prisma/client";
 // Ref handle for the UserNodeProgress prisma object (see models.all.ts). Needed
 // because a plain objectRef field can't reference a Prisma model by string name.
@@ -135,6 +137,20 @@ builder.mutationFields((t) => ({
       await ctx.prisma.$transaction(async (tx) => {
         await completeNodeForUser(tx, userId, nodeId);
         await awardXp(ctx.prisma, userId, xpAwarded, "node_completion", { nodeId }, tx);
+
+        const streakDays = await getUserStreakDays(userId, tx);
+
+        const nodeCompletedCount = await tx.userNodeProgress.count({
+          where: { userId, status: "COMPLETED" },
+        });
+
+        await checkAndAwardAchievements({
+          userId,
+          lessonCompletedCount: nodeCompletedCount,
+          streakDays,
+          completedNodeId: nodeId,
+          tx,
+        });
       });
 
       const progress = await ctx.prisma.userNodeProgress.findUniqueOrThrow({

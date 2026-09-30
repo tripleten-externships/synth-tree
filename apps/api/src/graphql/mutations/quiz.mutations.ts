@@ -7,6 +7,8 @@ import { gradeQuizAttempt } from "src/services/quiz/gradeQuizAttempt";
 import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import { completeNodeForUser } from "src/services/progress";
 import { awardXp } from "../../services/xp";
+import { getUserStreakDays } from "../../services/streak";
+import { checkAndAwardAchievements } from "../../services/achievements";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
 import { QuizAnswerInput, SaveQuizInput } from "../inputs/quiz.inputs";
 import {
@@ -520,6 +522,21 @@ builder.mutationFields((t) => ({
             { quizId, attemptId: quizAttempt.id },
             tx,
           );
+
+          const streakDays = await getUserStreakDays(userId, tx);
+          const lessonCompletedCount = await tx.userNodeProgress.count({
+            where: { userId, status: "COMPLETED" },
+          });
+
+          await checkAndAwardAchievements({
+            userId,
+            lessonCompletedCount,
+            streakDays,
+            quizPerfect: summary.correctCount === summary.totalQuestions,
+            quizCompleted: true,
+            completedNodeId: existing.nodeId,
+            tx,
+          });
         }
 
         return {

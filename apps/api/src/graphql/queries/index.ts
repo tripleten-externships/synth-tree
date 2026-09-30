@@ -1,5 +1,6 @@
 // Side-effect imports — each module registers its query fields with the
 // shared Pothos builder. Keep this list alphabetized by domain.
+import "./achievement.queries";
 import "./course.admin.queries";
 import "./course.owner.queries";
 import "./course.public.queries";

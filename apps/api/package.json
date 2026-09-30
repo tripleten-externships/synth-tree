@@ -22,6 +22,7 @@
     "db:seed:analytics": "ts-node scripts/analyticsDemo.ts seed",
     "db:cleanup:analytics": "ts-node scripts/analyticsDemo.ts cleanup",
     "db:seed:leaderboard": "ts-node -r tsconfig-paths/register prisma/seed.ts",
+    "prisma:seed:achievements": "ts-node -r tsconfig-paths/register scripts/seedAchievements.ts",
     "test": "jest",
     "test:integration": "jest --testPathPattern=integration",
     "type-check": "tsc -p tsconfig.json --noEmit"
