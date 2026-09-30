@@ -223,6 +223,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Run client frontend tests
+        working-directory: apps/client-frontend
+        run: |
+          echo "Running client frontend tests..."
+          pnpm test
+          echo "✅ Client frontend tests passed"
+
       - name: Build theme library
         working-directory: packages/theme
         run: pnpm build

@@ -43,6 +43,8 @@ type SubmittedAnswer = {
 type QuizAttemptResult = {
   id: string;
   passed: boolean | null;
+  // XP granted by this attempt (quiz-pass reward); 0 on a fail or repeat pass.
+  xpAwarded: number;
   answers: SubmittedAnswer[];
 };
 
@@ -103,7 +105,15 @@ function ResultSummary({ result }: { result: QuizAttemptResult }) {
   );
 }
 
-export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
+export default function QuizRunner({
+  quiz,
+  onXpAwarded,
+}: {
+  quiz: QuizForRunner;
+  // Reports XP granted by a submitted attempt, so the lesson-finish screen can
+  // include it (SYN-61). Only called when the attempt actually granted XP.
+  onXpAwarded?: (xp: number) => void;
+}) {
   const [choice, setChoice] = useState<Record<string, string[]>>({});
   const [text, setText] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
@@ -163,7 +173,11 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       },
     });
 
-    setResult(res.data?.submitQuizAttempt ?? null);
+    const attempt = res.data?.submitQuizAttempt ?? null;
+    setResult(attempt);
+    if (attempt && attempt.xpAwarded > 0) {
+      onXpAwarded?.(attempt.xpAwarded);
+    }
   };
 
   const onRetry = () => {

@@ -11,6 +11,7 @@ import { createGraphQLContext, GraphQLContext } from "@graphql/context";
 import { prisma } from "@lib/prisma";
 import { apolloLoggingPlugin } from "@lib/apolloLoggingPlugin"; // Custom plugin that logs GraphQL request lifecycle + errors with context
 import logger from "@lib/logger"; // Centralized Pino logger (pretty in dev, JSON in prod)
+import { formatError } from "@lib/formatError";
 
 async function start() {
   const app = express();
@@ -44,16 +45,9 @@ async function start() {
       ApolloServerPluginDrainHttpServer({ httpServer }),
       apolloLoggingPlugin, // Enables structured logging for every GraphQL request + error
     ],
-    formatError: (formattedError) => {
-      // In production, hide stack traces and internal details from clients
-      if (process.env.NODE_ENV === "production") {
-        return {
-          message: formattedError.message,
-          extensions: { code: formattedError.extensions?.code },
-        };
-      }
-      return formattedError; // Full error details in development
-    },
+    // Hides internal error details (Prisma messages, stack traces) from clients
+    // in every environment; see src/lib/formatError.ts.
+    formatError,
   });
 
   await server.start();

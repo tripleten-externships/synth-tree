@@ -58,6 +58,12 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
+export type CompleteNodeProgressPayload = {
+  __typename?: 'CompleteNodeProgressPayload';
+  progress?: Maybe<UserNodeProgress>;
+  xpAwarded?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ContentType =
   | 'EMBED'
   | 'HTML'
@@ -250,6 +256,7 @@ export type CourseProgress = {
   inProgressNodes?: Maybe<Scalars['Int']['output']>;
   notStartedNodes?: Maybe<Scalars['Int']['output']>;
   totalNodes?: Maybe<Scalars['Int']['output']>;
+  xpEarned?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CourseScalarFieldEnum =
@@ -1147,7 +1154,7 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNodeProgress?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<CompleteNodeProgressPayload>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -2034,7 +2041,6 @@ export type QuizAttemptsArgs = {
 
 export type QuizQuestionsArgs = {
   cursor?: InputMaybe<QuizQuestionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizQuestionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizQuestionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -2057,6 +2063,7 @@ export type QuizAttempt = {
   takenAt: Scalars['DateTime']['output'];
   user: User;
   userId: Scalars['String']['output'];
+  xpAwarded: Scalars['Int']['output'];
 };
 
 
@@ -3063,7 +3070,6 @@ export type QuizOrderByWithAggregationInput = {
 };
 
 export type QuizOrderByWithRelationInput = {
-  attempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   deletedAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
@@ -3104,7 +3110,6 @@ export type QuizQuestionAnswersArgs = {
 
 export type QuizQuestionOptionsArgs = {
   cursor?: InputMaybe<QuizOptionWhereUniqueInput>;
-  distinct?: InputMaybe<Array<QuizOptionScalarFieldEnum>>;
   orderBy?: InputMaybe<Array<QuizOptionOrderByWithRelationInput>>;
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
@@ -3283,7 +3288,6 @@ export type QuizQuestionOrderByWithAggregationInput = {
   _min?: InputMaybe<QuizQuestionMinOrderByAggregateInput>;
   _sum?: InputMaybe<QuizQuestionSumOrderByAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
-  explanation?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   order?: InputMaybe<SortOrder>;
   prompt?: InputMaybe<SortOrder>;
@@ -3293,9 +3297,7 @@ export type QuizQuestionOrderByWithAggregationInput = {
 };
 
 export type QuizQuestionOrderByWithRelationInput = {
-  answers?: InputMaybe<QuizAttemptAnswerOrderByRelationAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
-  explanation?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   options?: InputMaybe<QuizOptionOrderByRelationAggregateInput>;
   order?: InputMaybe<SortOrder>;
@@ -3492,9 +3494,7 @@ export type QuizQuestionWhereInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  explanation?: InputMaybe<StringNullableFilter>;
   id?: InputMaybe<UuidFilter>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
   order?: InputMaybe<IntFilter>;
@@ -3509,9 +3509,7 @@ export type QuizQuestionWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizQuestionWhereInput>>;
   NOT?: InputMaybe<Array<QuizQuestionWhereInput>>;
   OR?: InputMaybe<Array<QuizQuestionWhereInput>>;
-  answers?: InputMaybe<QuizAttemptAnswerListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
-  explanation?: InputMaybe<StringNullableFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
   options?: InputMaybe<QuizOptionListRelationFilter>;
   order?: InputMaybe<IntFilter>;
@@ -3666,7 +3664,6 @@ export type QuizWhereInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<UuidFilter>;
@@ -3682,7 +3679,6 @@ export type QuizWhereUniqueInput = {
   AND?: InputMaybe<Array<QuizWhereInput>>;
   NOT?: InputMaybe<Array<QuizWhereInput>>;
   OR?: InputMaybe<Array<QuizWhereInput>>;
-  attempts?: InputMaybe<QuizAttemptListRelationFilter>;
   createdAt?: InputMaybe<DateTimeFilter>;
   deletedAt?: InputMaybe<DateTimeNullableFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
@@ -3702,6 +3698,7 @@ export type SkillNode = {
   __typename?: 'SkillNode';
   createdAt: Scalars['DateTime']['output'];
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  derivedStatus: UnlockedStatus;
   id: Scalars['ID']['output'];
   lessons: Array<LessonBlocks>;
   orderInStep: Scalars['Int']['output'];
@@ -5114,6 +5111,12 @@ export type TransactionIsolationLevel =
   | 'RepeatableRead'
   | 'Serializable';
 
+export type UnlockedStatus =
+  | 'COMPLETED'
+  | 'IN_PROGRESS'
+  | 'LOCKED'
+  | 'UNLOCKED';
+
 export type UpdateCourseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<CourseStatus>;
@@ -5137,19 +5140,19 @@ export type User = {
   createdAt: Scalars['DateTime']['output'];
   dailyGoalMinutes?: Maybe<Scalars['Int']['output']>;
   dailyQuests: Array<UserDailyQuest>;
-  email: Scalars['String']['output'];
+  email?: Maybe<Scalars['String']['output']>;
   hearts?: Maybe<UserHearts>;
   id: Scalars['ID']['output'];
   interests: Array<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   nodeProgress: Array<UserNodeProgress>;
-  onboardingComplete: Scalars['Boolean']['output'];
+  onboardingComplete?: Maybe<Scalars['Boolean']['output']>;
   photoUrl?: Maybe<Scalars['String']['output']>;
   quizAttempts: Array<QuizAttempt>;
   recommendedNext?: Maybe<Array<SkillNode>>;
   role: Role;
   streak?: Maybe<UserStreak>;
-  timezone: Scalars['String']['output'];
+  timezone?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['DateTime']['output'];
   xp?: Maybe<UserXp>;
   xpEvents: Array<XpEvent>;
@@ -6326,7 +6329,6 @@ export type UserOrderByWithRelationInput = {
   nodeProgress?: InputMaybe<UserNodeProgressOrderByRelationAggregateInput>;
   onboardingComplete?: InputMaybe<SortOrder>;
   photoUrl?: InputMaybe<SortOrder>;
-  quizAttempts?: InputMaybe<QuizAttemptOrderByRelationAggregateInput>;
   role?: InputMaybe<SortOrder>;
   streak?: InputMaybe<UserStreakOrderByWithRelationInput>;
   timezone?: InputMaybe<SortOrder>;
@@ -6925,7 +6927,6 @@ export type UserWhereInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
@@ -6950,7 +6951,6 @@ export type UserWhereUniqueInput = {
   nodeProgress?: InputMaybe<UserNodeProgressListRelationFilter>;
   onboardingComplete?: InputMaybe<BoolFilter>;
   photoUrl?: InputMaybe<StringNullableFilter>;
-  quizAttempts?: InputMaybe<QuizAttemptListRelationFilter>;
   role?: InputMaybe<EnumRoleFilter>;
   streak?: InputMaybe<UserStreakWhereInput>;
   timezone?: InputMaybe<StringFilter>;
@@ -7572,7 +7572,7 @@ export type CompleteNodeProgressMutationVariables = Exact<{
 }>;
 
 
-export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'CompleteNodeProgressPayload', xpAwarded?: number | null, progress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7587,7 +7587,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, xpAwarded: number, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type UpdateOnboardingMutationVariables = Exact<{
   interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -7601,7 +7601,14 @@ export type CompleteOnboardingMutationVariables = Exact<{
 }>;
 
 
-export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete: boolean } | null };
+export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
+
+export type CourseDetailProgressQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, inProgressNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
 
 export type CurrentUserStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -7614,14 +7621,21 @@ export type SyncCurrentUserMutationVariables = Exact<{
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email: string, name?: string | null, photoUrl?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
+
+export type HomeXpWidgetsQueryVariables = Exact<{
+  since: Scalars['DateTime']['input'];
+}>;
+
+
+export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone?: string | null, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
 }>;
 
 
-export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
+export type LearnerCourseTreeQuery = { __typename?: 'Query', courseForLearner?: { __typename?: 'Course', id: string, title: string, description?: string | null, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, posX?: number | null, posY?: number | null, derivedStatus: UnlockedStatus, prerequisites: Array<{ __typename?: 'SkillNodePrerequisite', dependsOnNodeId: string }>, progressForViewer?: { __typename?: 'UserNodeProgress', status: ProgressStatus, completedAt?: any | null, updatedAt: any } | null }> }> } | null };
 
 export type LessonBlocksByNodeQueryVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7638,7 +7652,7 @@ export type MyProgressQuery = { __typename?: 'Query', myProgress?: Array<{ __typ
 export type OnboardingStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete: boolean } | null };
+export type OnboardingStatusQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, onboardingComplete?: boolean | null } | null };
 
 export type SavedInterestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8303,8 +8317,11 @@ export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLe
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
-    id
-    status
+    progress {
+      id
+      status
+    }
+    xpAwarded
   }
 }
     `;
@@ -8367,6 +8384,7 @@ export const SubmitQuizAttemptDocument = gql`
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    xpAwarded
     answers {
       id
       questionId
@@ -8475,6 +8493,45 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
+export const CourseDetailProgressDocument = gql`
+    query CourseDetailProgress($courseId: ID!) {
+  courseProgress(courseId: $courseId) {
+    courseId
+    totalNodes
+    inProgressNodes
+    completedNodes
+    completionPercentage
+    xpEarned
+  }
+}
+    `;
+
+/**
+ * __useCourseDetailProgressQuery__
+ *
+ * To run a query within a React component, call `useCourseDetailProgressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCourseDetailProgressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCourseDetailProgressQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useCourseDetailProgressQuery(baseOptions: ApolloReactHooks.QueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables> & ({ variables: CourseDetailProgressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+      }
+export function useCourseDetailProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+        }
+export type CourseDetailProgressQueryHookResult = ReturnType<typeof useCourseDetailProgressQuery>;
+export type CourseDetailProgressLazyQueryHookResult = ReturnType<typeof useCourseDetailProgressLazyQuery>;
 export const CurrentUserStatsDocument = gql`
     query CurrentUserStats {
   currentUser {
@@ -8549,6 +8606,51 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const HomeXpWidgetsDocument = gql`
+    query HomeXpWidgets($since: DateTime!) {
+  currentUser {
+    id
+    dailyGoalMinutes
+    timezone
+    streak {
+      currentDays
+      lastActive
+    }
+    xpEvents(where: {createdAt: {gte: $since}}) {
+      id
+      amount
+      createdAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useHomeXpWidgetsQuery__
+ *
+ * To run a query within a React component, call `useHomeXpWidgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeXpWidgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHomeXpWidgetsQuery({
+ *   variables: {
+ *      since: // value for 'since'
+ *   },
+ * });
+ */
+export function useHomeXpWidgetsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables> & ({ variables: HomeXpWidgetsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+      }
+export function useHomeXpWidgetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+        }
+export type HomeXpWidgetsQueryHookResult = ReturnType<typeof useHomeXpWidgetsQuery>;
+export type HomeXpWidgetsLazyQueryHookResult = ReturnType<typeof useHomeXpWidgetsLazyQuery>;
 export const LearnerCourseTreeDocument = gql`
     query LearnerCourseTree($courseId: ID!) {
   courseForLearner(id: $courseId) {
@@ -8565,6 +8667,7 @@ export const LearnerCourseTreeDocument = gql`
         orderInStep
         posX
         posY
+        derivedStatus
         prerequisites {
           dependsOnNodeId
         }

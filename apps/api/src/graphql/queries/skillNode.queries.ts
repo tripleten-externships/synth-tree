@@ -1,4 +1,6 @@
 import { builder } from "@graphql/builder";
+import { visibleNodeWhere } from "@graphql/auth/visibility";
+import { isUuid } from "@lib/uuid";
 
 // get all users for admin
 // At least one root level query is required.
@@ -11,10 +13,14 @@ builder.queryFields((t) => ({
     args: {
       id: t.arg.id({ required: true }),
     },
-    resolve: (_query, _parent, { id }, context) => {
+    resolve: (query, _parent, { id }, context) => {
       context.auth.requireAuth();
-      return context.prisma.skillNode.findUniqueOrThrow({
-        where: { id },
+      // A malformed id can't match any node; don't let Postgres reject it.
+      if (!isUuid(id)) return null;
+
+      return context.prisma.skillNode.findFirst({
+        ...query,
+        where: { id, ...visibleNodeWhere(context) },
       });
     },
   }),
@@ -42,6 +48,7 @@ builder.queryFields((t) => ({
 
       return context.prisma.skillNode.findMany({
         ...query,
+        where: visibleNodeWhere(context),
         skip: offset,
         take: limit,
         orderBy: {
@@ -55,9 +62,12 @@ builder.queryFields((t) => ({
     args: {
       treeId: t.arg.id({ required: true }),
     },
-    resolve: async (_query, _parent, { treeId }, context) => {
+    resolve: async (query, _parent, { treeId }, context) => {
+      if (!isUuid(treeId)) return [];
+
       return context.prisma.skillNode.findMany({
-        where: { treeId },
+        ...query,
+        where: { treeId, ...visibleNodeWhere(context) },
         orderBy: [{ step: "asc" }, { orderInStep: "asc" }],
       });
     },
