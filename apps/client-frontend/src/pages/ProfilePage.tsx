@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { SYNC_CURRENT_USER } from "../graphql/queries/currentUser";
 import type { SyncCurrentUserResponse } from "../graphql/queries/currentUser";
+import { MY_PROGRESS_QUERY } from "../graphql/queries/myProgress";
 import { MY_ACHIEVEMENTS_QUERY } from "../graphql/queries/myAchievements";
 import type { MyAchievementsResponse } from "../graphql/queries/myAchievements";
 import useAuth from "../hooks/useAuth";
@@ -29,11 +30,24 @@ interface User {
   email: string;
   photoUrl: string;
   role: string;
-  stats?: {
-    courses: number;
-    nodes: number;
-    quizzes: number;
-  };
+  quizAttempts: {
+    id: string;
+    quizId: string;
+  }[];
+}
+
+interface MyProgressData {
+  myProgress: {
+    id: string;
+    status: string;
+    node: {
+      tree: {
+        course: {
+          id: string;
+        };
+      };
+    };
+  }[];
 }
 
 const achievementIcons: Record<string, LucideIcon> = {
@@ -59,6 +73,7 @@ export default function ProfilePage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"profile" | "achievements">("profile");
+
   // ------------------------------------------------------------
   // 1) Apollo mutation used for BOTH loading and saving the user
   //    Your backend does not have GET_CURRENT_USER, so this is
@@ -68,20 +83,15 @@ export default function ProfilePage() {
     useMutation<SyncCurrentUserResponse>(SYNC_CURRENT_USER);
 
   // ------------------------------------------------------------
-  // 2) Mock fallback data (used until backend returns real data)
+  // 2) Load real learner progress for profile stats
   // ------------------------------------------------------------
-  const mockUser: User = {
-    id: "mock",
-    name: "Jane Doe",
-    email: "jane@example.com",
-    photoUrl: "", // empty string so avatar initial fallback shows
-    role: "Student",
-    stats: {
-      courses: 3,
-      nodes: 42,
-      quizzes: 12,
-    },
-  };
+  const {
+    data: progressData,
+    loading: progressLoading,
+    error: progressError,
+  } = useQuery<MyProgressData>(MY_PROGRESS_QUERY, {
+    fetchPolicy: "network-only",
+  });
 
   // ------------------------------------------------------------
   // 3) Load the user on first render
@@ -107,18 +117,20 @@ export default function ProfilePage() {
       // Firebase has finished checking — user logged in or not
       setFirebaseLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
+
   // ------------------------------------------------------------
-  // 4) Real user or fallback
+  // 4) Use the real synced user
   // ------------------------------------------------------------
-  const user: User = data?.syncCurrentUser || mockUser;
+  const user: User | undefined = data?.syncCurrentUser;
 
   // ------------------------------------------------------------
   // 5) Editable fields (name + photo)
   // ------------------------------------------------------------
-  const [name, setName] = useState(user.name ?? "");
-  const [photoUrl, setPhotoUrl] = useState(user.photoUrl ?? "");
+  const [name, setName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
 
   // ------------------------------------------------------------
   // 6) When real data arrives, update the form fields
@@ -135,19 +147,21 @@ export default function ProfilePage() {
   // ------------------------------------------------------------
   const handleSave = () => {
     const currentUser = auth.currentUser;
+
     if (!currentUser) {
       // No Firebase session — send them to login via the router (origin-agnostic,
       // so it works in any deployed environment, not just local dev).
       navigate("/auth/login", { replace: true });
       return;
     }
+
     syncUser({ variables: { name, photoUrl } });
   };
 
   // ------------------------------------------------------------
   // 8) Loading + Error states
   // ------------------------------------------------------------
-  if (firebaseLoading || (loading && !data)) {
+  if (firebaseLoading || (loading && !data) || (progressLoading && !progressData)) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-muted-foreground">Loading profile...</p>
@@ -155,7 +169,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (error) {
+  if (error || progressError || !user) {
     return (
       <div className="min-h-screen p-8">
         <p className="text-destructive">Error loading profile.</p>
@@ -164,7 +178,20 @@ export default function ProfilePage() {
   }
 
   // ------------------------------------------------------------
-  // 9) Main UI
+  // 9) Calculate real profile stats
+  // ------------------------------------------------------------
+  const progress = progressData?.myProgress ?? [];
+
+  const coursesStarted = new Set(progress.map((item) => item.node.tree.course.id)).size;
+
+  const nodesCompleted = progress.filter((item) => item.status === "COMPLETED").length;
+
+  // quizAttempts is already filtered to passed attempts, one per quiz;
+  // count distinct quizIds so retakes never double-count.
+  const quizzesPassed = new Set(user.quizAttempts.map((attempt) => attempt.quizId)).size;
+
+  // ------------------------------------------------------------
+  // 10) Main UI
   // ------------------------------------------------------------
   return (
     <div className="min-h-screen">
@@ -198,6 +225,7 @@ export default function ProfilePage() {
         {activeTab === "profile" ? (
           <section id="profile-panel" role="tabpanel" aria-labelledby="profile-tab">
             <p className="mt-4">Manage your profile and account settings</p>
+
             {/* User Info */}
             <section className="flex items-center gap-6 mt-6">
               {photoUrl ? (
@@ -213,6 +241,7 @@ export default function ProfilePage() {
                     "?"}
                 </div>
               )}
+
               <div>
                 <h2 className="text-2xl font-semibold">{user.name}</h2>
                 <p className="text-muted-foreground">{user.email}</p>
@@ -227,8 +256,8 @@ export default function ProfilePage() {
               <label className="block">
                 <span className="text-foreground">Name</span>
                 {/* defaultValue + key so input resets when real data loads.
-                onFocus selects all text for easy replacement.
-                onBlur updates state only when user leaves the field. */}
+                    onFocus selects all text for easy replacement.
+                    onBlur updates state only when user leaves the field. */}
                 <input
                   type="text"
                   defaultValue={name}
@@ -242,8 +271,8 @@ export default function ProfilePage() {
               <label className="block">
                 <span className="text-foreground">Photo URL</span>
                 {/* Same pattern as name — onBlur prevents avatar flickering
-                while typing/deleting a long URL. onFocus selects all
-                so user can replace the whole URL in one click + type. */}
+                    while typing/deleting a long URL. onFocus selects all
+                    so user can replace the whole URL in one click + type. */}
                 <input
                   type="text"
                   defaultValue={photoUrl}
@@ -265,17 +294,17 @@ export default function ProfilePage() {
             {/* Stats */}
             <section className="grid grid-cols-3 gap-4 mt-6">
               <div className="bg-card p-4 rounded shadow text-center">
-                <p className="text-2xl font-bold">{user.stats?.courses ?? 0}</p>
+                <p className="text-2xl font-bold">{coursesStarted}</p>
                 <p className="text-muted-foreground">Courses</p>
               </div>
 
               <div className="bg-card p-4 rounded shadow text-center">
-                <p className="text-2xl font-bold">{user.stats?.nodes ?? 0}</p>
+                <p className="text-2xl font-bold">{nodesCompleted}</p>
                 <p className="text-muted-foreground">Nodes</p>
               </div>
 
               <div className="bg-card p-4 rounded shadow text-center">
-                <p className="text-2xl font-bold">{user.stats?.quizzes ?? 0}</p>
+                <p className="text-2xl font-bold">{quizzesPassed}</p>
                 <p className="text-muted-foreground">Quizzes</p>
               </div>
             </section>

@@ -230,3 +230,77 @@ describe("updateOnboarding (signup step 3 - daily goal)", () => {
     expect(row?.onboardingComplete).toBe(false);
   });
 });
+
+// Same selection the client ProfilePage uses for its "Quizzes passed" stat.
+const SYNC_PASSED_QUIZZES = `
+  mutation SyncCurrentUser {
+    syncCurrentUser {
+      id
+      quizAttempts(where: { passed: { equals: true } }, distinct: [quizId]) {
+        id
+        quizId
+      }
+    }
+  }
+`;
+
+describe("syncCurrentUser passed-quiz stats", () => {
+  let server: ApolloServer<GraphQLContext>;
+
+  beforeAll(async () => {
+    server = await getTestServer();
+    await seedUsers(prisma);
+  });
+
+  afterAll(async () => {
+    await cleanAll(prisma);
+    await stopTestServer();
+    await prisma.$disconnect();
+  });
+
+  it("returns one passed attempt per quiz, ignoring retakes and failed attempts", async () => {
+    const course = await prisma.course.create({
+      data: { title: "Stats Course", status: "DRAFT", authorId: REGULAR_USER_ID },
+    });
+    const tree = await prisma.skillTree.create({
+      data: { courseId: course.id, title: "Stats Tree" },
+    });
+    // A node holds at most one quiz, so give each quiz its own node.
+    const makeQuiz = async (title: string, orderInStep: number) => {
+      const node = await prisma.skillNode.create({
+        data: { treeId: tree.id, title: `${title} Node`, step: 1, orderInStep, posX: orderInStep },
+      });
+      return prisma.quiz.create({ data: { nodeId: node.id, title } });
+    };
+    const quizA = await makeQuiz("Quiz A", 0);
+    const quizB = await makeQuiz("Quiz B", 1);
+    const quizC = await makeQuiz("Quiz C", 2);
+
+    await prisma.quizAttempt.createMany({
+      data: [
+        // Quiz A passed twice (a retake) - must count once.
+        { quizId: quizA.id, userId: REGULAR_USER_ID, passed: true },
+        { quizId: quizA.id, userId: REGULAR_USER_ID, passed: true },
+        // Quiz B failed then passed.
+        { quizId: quizB.id, userId: REGULAR_USER_ID, passed: false },
+        { quizId: quizB.id, userId: REGULAR_USER_ID, passed: true },
+        // Quiz C only failed - must not count.
+        { quizId: quizC.id, userId: REGULAR_USER_ID, passed: false },
+        // Another user's pass must not leak in.
+        { quizId: quizC.id, userId: SECOND_REGULAR_USER_ID, passed: true },
+      ],
+    });
+
+    const res = singleResult(
+      await server.executeOperation(
+        { query: SYNC_PASSED_QUIZZES },
+        { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+      ),
+    );
+
+    expect(res.errors).toBeUndefined();
+    const quizIds = res.data.syncCurrentUser.quizAttempts.map((a: { quizId: string }) => a.quizId);
+    expect(quizIds).toHaveLength(2);
+    expect(new Set(quizIds)).toEqual(new Set([quizA.id, quizB.id]));
+  });
+});

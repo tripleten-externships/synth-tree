@@ -43,6 +43,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link to="/courses" className="font-medium">
             Courses
           </Link>
+          <Link to="/analytics" className="font-medium">
+            Analytics
+          </Link>
 
           {/* Color mode toggle */}
           <button
