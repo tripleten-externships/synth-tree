@@ -8016,11 +8016,11 @@ export type MyProgressQuery = {
     createdAt: string;
     updatedAt: string;
     node?: {
-      __typename?: "SkillNode";
-      id: string;
-      title: string;
-      description?: string | null;
-    } | null;
+  __typename?: "SkillNode";
+  id: string;
+  title: string;
+  treeId: string;
+} | null;
   }> | null;
 };
 
@@ -8034,10 +8034,10 @@ export const MyProgressDocument = gql`
       completedAt
       createdAt
       updatedAt
-      node {
-        id
-        title
-        description
+     node {
+      id
+      title
+      treeId
       }
     }
   }

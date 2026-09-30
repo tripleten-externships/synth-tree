@@ -1,17 +1,58 @@
-import { useMemo, useState } from "react";
-import { usePublicGetAllCoursesQuery } from "@synth-tree/api-types";
+import { useEffect, useMemo, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  useMyProgressQuery,
+  usePublicGetAllCoursesQuery,
+} from "@synth-tree/api-types";
 import CourseCard from "../components/CourseCard";
 
 type CatalogTab = "all" | "enrolled";
 
+function useFirebaseUid() {
+  const [uid, setUid] = useState<string | null>(
+    () => getAuth().currentUser?.uid ?? null,
+  );
+
+  useEffect(() => {
+    return onAuthStateChanged(getAuth(), (user) => {
+      setUid(user?.uid ?? null);
+    });
+  }, []);
+
+  return uid;
+}
+
 export default function CatalogPage() {
-  const { data, loading, error } = usePublicGetAllCoursesQuery();
+  const uid = useFirebaseUid();
+  const {
+    data,
+    loading: coursesLoading,
+    error: coursesError,
+  } = usePublicGetAllCoursesQuery();
+  const {
+    data: progressData,
+    loading: progressLoading,
+    error: progressError,
+  } = useMyProgressQuery({
+    variables: uid ? { userId: uid } : undefined,
+    skip: !uid,
+  });
+
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<CatalogTab>("all");
- // const { data, loading, error } = useMyProgressQuery();
- // const progress = data?.myProgress ?? [];
 
   const courses = data?.publicGetAllCourses ?? [];
+  const progress = progressData?.myProgress ?? [];
+
+  const enrolledTreeIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const row of progress) {
+      const treeId = row.node?.treeId;
+      if (treeId) ids.add(treeId);
+      console.log("Enrolled");
+    }
+    return ids;
+  }, [progress]);
 
   const filteredCourses = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -22,13 +63,15 @@ export default function CatalogPage() {
         course.title.toLowerCase().includes(q) ||
         (course.description ?? "").toLowerCase().includes(q);
 
-      const matchesTab =
-        tab === "all" ||
-        Boolean((course as { isEnrolled?: boolean }).isEnrolled);
+      const enrolled = course.trees.some((tree) => enrolledTreeIds.has(tree.id));
+      const matchesTab = tab === "all" || enrolled;
 
       return matchesQuery && matchesTab;
     });
-  }, [courses, query, tab]);
+  }, [courses, query, tab, enrolledTreeIds]);
+
+  const loading = coursesLoading || (!!uid && progressLoading);
+  const error = coursesError ?? progressError;
 
   if (loading) {
     return (
