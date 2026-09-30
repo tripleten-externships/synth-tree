@@ -67,6 +67,7 @@ const SUBMIT_ATTEMPT = `
     submitQuizAttempt(quizId: $quizId, answers: $answers) {
       id
       passed
+      xpAwarded
     }
   }
 `;
@@ -475,6 +476,64 @@ describe("Quiz flow", () => {
 
       expect(res.errors).toBeUndefined();
       expect(res.data.submitQuizAttempt.passed).toBe(true);
+    });
+
+    // SYN-61: the lesson-finish screen shows the XP a quiz pass granted, so
+    // xpAwarded must count only XP granted by that attempt.
+    it("reports quiz-pass xpAwarded on the first pass only", async () => {
+      const { node } = await seedNode();
+      const quiz = await prisma.quiz.create({
+        data: { nodeId: node.id, title: "XP Quiz", required: true },
+      });
+      const question = await prisma.quizQuestion.create({
+        data: { quizId: quiz.id, type: "SINGLE_CHOICE", prompt: "something?" },
+      });
+      const correctOption = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "A", isCorrect: true },
+      });
+      const wrongOption = await prisma.quizOption.create({
+        data: { questionId: question.id, text: "B", isCorrect: false },
+      });
+
+      await prisma.userNodeProgress.create({
+        data: { userId: REGULAR_USER_ID, nodeId: node.id, status: "IN_PROGRESS" },
+      });
+
+      const submit = async (optionId: string) =>
+        singleResult(
+          await server.executeOperation(
+            {
+              query: SUBMIT_ATTEMPT,
+              variables: {
+                quizId: quiz.id,
+                answers: [{ questionId: question.id, selectedOptionIds: [optionId] }],
+              },
+            },
+            { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+          ),
+        );
+
+      const failed = await submit(wrongOption.id);
+      expect(failed.errors).toBeUndefined();
+      expect(failed.data.submitQuizAttempt.passed).toBe(false);
+      expect(failed.data.submitQuizAttempt.xpAwarded).toBe(0);
+
+      const firstPass = await submit(correctOption.id);
+      expect(firstPass.errors).toBeUndefined();
+      expect(firstPass.data.submitQuizAttempt.passed).toBe(true);
+      expect(firstPass.data.submitQuizAttempt.xpAwarded).toBe(100);
+
+      const repeatPass = await submit(correctOption.id);
+      expect(repeatPass.errors).toBeUndefined();
+      expect(repeatPass.data.submitQuizAttempt.passed).toBe(true);
+      expect(repeatPass.data.submitQuizAttempt.xpAwarded).toBe(0);
+
+      // Only the first pass granted XP.
+      const events = await prisma.xpEvent.findMany({
+        where: { userId: REGULAR_USER_ID, reason: "quiz_pass", rewardKey: quiz.id },
+      });
+      expect(events).toHaveLength(1);
+      expect(events[0].amount).toBe(100);
     });
 
     it("fail when a SINGLE_CHOICE answer is wrong", async () => {

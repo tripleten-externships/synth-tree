@@ -58,6 +58,12 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
+export type CompleteNodeProgressPayload = {
+  __typename?: 'CompleteNodeProgressPayload';
+  progress?: Maybe<UserNodeProgress>;
+  xpAwarded?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ContentType =
   | 'EMBED'
   | 'HTML'
@@ -1148,7 +1154,7 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNodeProgress?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<CompleteNodeProgressPayload>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -2057,6 +2063,7 @@ export type QuizAttempt = {
   takenAt: Scalars['DateTime']['output'];
   user: User;
   userId: Scalars['String']['output'];
+  xpAwarded: Scalars['Int']['output'];
 };
 
 
@@ -7565,7 +7572,7 @@ export type CompleteNodeProgressMutationVariables = Exact<{
 }>;
 
 
-export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'CompleteNodeProgressPayload', xpAwarded?: number | null, progress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7580,7 +7587,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, xpAwarded: number, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type UpdateOnboardingMutationVariables = Exact<{
   interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -8305,8 +8312,11 @@ export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLe
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
-    id
-    status
+    progress {
+      id
+      status
+    }
+    xpAwarded
   }
 }
     `;
@@ -8369,6 +8379,7 @@ export const SubmitQuizAttemptDocument = gql`
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    xpAwarded
     answers {
       id
       questionId

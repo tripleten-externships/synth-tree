@@ -5,6 +5,7 @@ export const SUBMIT_QUIZ_ATTEMPT = gql`
     submitQuizAttempt(quizId: $quizId, answers: $answers) {
       id
       passed
+      xpAwarded
       answers {
         id
         questionId
