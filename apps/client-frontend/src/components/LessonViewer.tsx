@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
-import { useCompleteNodeProgressMutation, useLessonBlocksByNodeQuery } from "@synth-tree/api-types";
+import {
+  CurrentUserStatsDocument,
+  useCompleteNodeProgressMutation,
+  useLessonBlocksByNodeQuery,
+} from "@synth-tree/api-types";
 import { Button, toast } from "@synth-tree/ui";
 import { START_NODE_PROGRESS } from "../graphql/mutations/startNodeProgress";
 import { splitLessonPages } from "../lib/splitLessonPages";
@@ -21,7 +25,11 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({ nodeId, quiz, onNext
   });
 
   const [startNodeProgress] = useMutation(START_NODE_PROGRESS);
-  const [completeNodeProgress] = useCompleteNodeProgressMutation();
+  const [completeNodeProgress] = useCompleteNodeProgressMutation({
+    // Refresh navbar XP/streak in the background; not awaited so a failed
+    // stats refetch can't reject (and falsely fail) the mutation itself.
+    refetchQueries: [CurrentUserStatsDocument],
+  });
 
   const [finishing, setFinishing] = useState(false);
   // When set, the lesson is complete and we show the finish screen (SYN-61)

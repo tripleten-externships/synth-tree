@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CurrentUserStatsDocument } from "@synth-tree/api-types";
 import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
 import QuizSingle from "./QuizSingle";
@@ -125,8 +126,11 @@ export default function QuizRunner({
     isTextAnswer(q.type) ? !!text[q.id]?.trim() : (choice[q.id] ?? []).length > 0,
   );
 
-  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
-
+  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT, {
+    // Refresh navbar XP/streak in the background; not awaited so a failed
+    // stats refetch can't reject (and falsely fail) the mutation itself.
+    refetchQueries: [CurrentUserStatsDocument],
+  });
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {
       const cur = prev[qId] ?? [];
