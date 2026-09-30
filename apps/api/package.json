@@ -19,6 +19,8 @@
     "refresh:token": "ts-node -r tsconfig-paths/register scripts/refreshLocalToken.ts",
     "db:seed:local-users": "ts-node -r tsconfig-paths/register scripts/seedLocalUsers.ts",
     "db:seed:demo": "ts-node -r tsconfig-paths/register scripts/seedDemoContent.ts",
+    "db:seed:analytics": "ts-node scripts/analyticsDemo.ts seed",
+    "db:cleanup:analytics": "ts-node scripts/analyticsDemo.ts cleanup",
     "db:seed:leaderboard": "ts-node -r tsconfig-paths/register prisma/seed.ts",
     "test": "jest",
     "test:integration": "jest --testPathPattern=integration",

@@ -3,6 +3,7 @@
 import "./course.admin.queries";
 import "./course.owner.queries";
 import "./course.public.queries";
+import "./analytics.admin.queries";
 import "./dailyQuest.queries";
 import "./leaderboard.query";
 import "./lessonBlock.queries";
