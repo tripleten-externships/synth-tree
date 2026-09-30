@@ -132,7 +132,12 @@ function Step1Credentials({
   syncUser,
 }: {
   onSuccess: () => void;
-  syncUser: (variables: { variables: { name: string } }) => Promise<unknown>;
+  syncUser: (variables: {
+    variables: {
+      name: string;
+      timezone: string;
+    };
+  }) => Promise<unknown>;
 }) {
   const [fields, setFields] = useState<Step1Fields>({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -174,7 +179,12 @@ function Step1Credentials({
       firebaseUserCreated = true;
       accountCreatedHere.current = true;
       await updateProfile(auth.currentUser!, { displayName: fields.name.trim() });
-      await syncUser({ variables: { name: fields.name.trim() } });
+      await syncUser({
+        variables: {
+          name: fields.name.trim(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      });
       onSuccess();
     } catch (err: unknown) {
       if (err instanceof FirebaseError) {

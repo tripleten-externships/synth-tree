@@ -1359,6 +1359,7 @@ export type MutationSubmitQuizAttemptArgs = {
 export type MutationSyncCurrentUserArgs = {
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -7729,10 +7730,11 @@ export type CurrentUserStatsQuery = { __typename?: 'Query', currentUser?: { __ty
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role, quizAttempts: Array<{ __typename?: 'QuizAttempt', id: string, quizId: string }> } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, timezone?: string | null, role: Role, quizAttempts: Array<{ __typename?: 'QuizAttempt', id: string, quizId: string }> } | null };
 
 export type HomeXpWidgetsQueryVariables = Exact<{
   since: Scalars['DateTime']['input'];
@@ -8862,12 +8864,13 @@ export function useCurrentUserStatsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type CurrentUserStatsQueryHookResult = ReturnType<typeof useCurrentUserStatsQuery>;
 export type CurrentUserStatsLazyQueryHookResult = ReturnType<typeof useCurrentUserStatsLazyQuery>;
 export const SyncCurrentUserDocument = gql`
-    mutation SyncCurrentUser($name: String, $photoUrl: String) {
-  syncCurrentUser(name: $name, photoUrl: $photoUrl) {
+    mutation SyncCurrentUser($name: String, $photoUrl: String, $timezone: String) {
+  syncCurrentUser(name: $name, photoUrl: $photoUrl, timezone: $timezone) {
     id
     email
     name
     photoUrl
+    timezone
     role
     quizAttempts(where: {passed: {equals: true}}, distinct: [quizId]) {
       id
@@ -8892,6 +8895,7 @@ export const SyncCurrentUserDocument = gql`
  *   variables: {
  *      name: // value for 'name'
  *      photoUrl: // value for 'photoUrl'
+ *      timezone: // value for 'timezone'
  *   },
  * });
  */

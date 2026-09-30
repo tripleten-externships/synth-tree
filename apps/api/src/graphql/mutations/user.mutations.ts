@@ -25,6 +25,17 @@ const ALLOWED_DAILY_GOALS = new Set<number>([5, 15, 30, 60]);
 // Sync current User.
 // A token will be sent in the headers of the Apollo Client from the frontend when a User signs up through the firebase sdk
 // This function creates a user in our postgres database and hence makes it an official prisma model.
+function isValidTimezone(timezone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 builder.mutationFields((t) => ({
   syncCurrentUser: t.prismaField({
@@ -33,6 +44,7 @@ builder.mutationFields((t) => ({
       // Allow the user to send in name and photoUrl from frontend.
       name: t.arg.string(),
       photoUrl: t.arg.string(),
+      timezone: t.arg.string(),
     },
     resolve: async (query, _parent, args, context) => {
       const firebaseUid = context.auth.requireAuth();
@@ -46,6 +58,12 @@ builder.mutationFields((t) => ({
           { extensions: { code: "UNAUTHENTICATED" } },
         );
       }
+
+      // Only a valid IANA zone counts as supplied. A missing or invalid one never
+      // overwrites a saved zone on update (profile re-syncs omit it); new users
+      // fall back to UTC.
+      const suppliedTimezone =
+        args.timezone && isValidTimezone(args.timezone) ? args.timezone : null;
 
       const existingByEmail = await context.prisma.user.findUnique({
         where: { email },
@@ -65,6 +83,7 @@ builder.mutationFields((t) => ({
           email,
           name: args.name ?? null,
           photoUrl: args.photoUrl ?? null,
+          timezone: suppliedTimezone ?? "UTC",
           role: PrismaRole.USER, // use Prisma enum
         },
         update: {
@@ -73,6 +92,7 @@ builder.mutationFields((t) => ({
           ...(args.photoUrl !== null && args.photoUrl !== undefined
             ? { photoUrl: args.photoUrl }
             : {}),
+          ...(suppliedTimezone !== null ? { timezone: suppliedTimezone } : {}),
         },
       });
 

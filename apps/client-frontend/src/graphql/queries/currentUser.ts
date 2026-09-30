@@ -15,12 +15,13 @@ export const CURRENT_USER_STATS_QUERY = gql`
 `;
 
 export const SYNC_CURRENT_USER = gql`
-  mutation SyncCurrentUser($name: String, $photoUrl: String) {
-    syncCurrentUser(name: $name, photoUrl: $photoUrl) {
+  mutation SyncCurrentUser($name: String, $photoUrl: String, $timezone: String) {
+    syncCurrentUser(name: $name, photoUrl: $photoUrl, timezone: $timezone) {
       id
       email
       name
       photoUrl
+      timezone
       role
       # One passed attempt per quiz, so retakes aren't double-counted.
       quizAttempts(where: { passed: { equals: true } }, distinct: [quizId]) {
@@ -37,6 +38,7 @@ export interface SyncCurrentUserResponse {
     email: string;
     name: string;
     photoUrl: string;
+    timezone: string;
     role: string;
     quizAttempts: {
       id: string;
