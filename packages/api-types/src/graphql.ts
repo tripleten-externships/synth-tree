@@ -8000,6 +8000,62 @@ export const RecommendedNextDocument = gql`
 }
     `;
 
+    export type MyProgressQueryVariables = Exact<{
+  userId?: InputMaybe<Scalars["ID"]["input"]>;
+}>;
+
+export type MyProgressQuery = {
+  __typename?: "Query";
+  myProgress?: Array<{
+    __typename?: "UserNodeProgress";
+    id: string;
+    userId: string;
+    nodeId: string;
+    status: ProgressStatus;
+    completedAt?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    node?: {
+      __typename?: "SkillNode";
+      id: string;
+      title: string;
+      description?: string | null;
+    } | null;
+  }> | null;
+};
+
+export const MyProgressDocument = gql`
+  query MyProgress($userId: ID) {
+    myProgress(userId: $userId) {
+      id
+      userId
+      nodeId
+      status
+      completedAt
+      createdAt
+      updatedAt
+      node {
+        id
+        title
+        description
+      }
+    }
+  }
+`;
+
+export function useMyProgressQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    MyProgressQuery,
+    MyProgressQueryVariables
+  >
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return ApolloReactHooks.useQuery<MyProgressQuery, MyProgressQueryVariables>(
+    MyProgressDocument,
+    options
+  );
+}
+
 /**
  * __useRecommendedNextQuery__
  *
