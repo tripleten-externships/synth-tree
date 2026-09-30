@@ -20,16 +20,25 @@
  *     with progress, quiz attempts, XP, streaks and achievements, so the
  *     leaderboard has a field;
  *   - if learner@local.dev exists: progress across all three published courses,
- *     250 XP, a 4-day streak and matching achievements. Its XP, streak and
- *     achievements are RESET on every run. Atoms & Bonding is left without a
- *     quiz pass, so passing that quiz in a demo still awards +100 XP, extends
- *     the streak and moves the learner up a rank.
+ *     250 XP (rank #5 of 8), a 4-day streak ending yesterday and matching
+ *     achievements. Its XP, streak, achievements and timezone are RESET on
+ *     every run. Atoms & Bonding is left without a quiz pass, so the live demo
+ *     flow still pays out: finishing Functional Groups (+50) and passing the
+ *     Atoms & Bonding quiz (+100) takes the learner to 400 XP, rank #3 and a
+ *     5-day streak, and a perfect retry earns Perfect Quiz.
+ *
+ * The learner's timezone is set to America/New_York (the presenter's) and its
+ * activity days are calendar days there, at noon local time. "Yesterday" is
+ * therefore yesterday in New York whatever the UTC hour of the run, so the
+ * streak survives until midnight New York time on the day of the seed and a
+ * live XP award that day extends it. Re-seed on the demo day.
  *
  * Achievements: the catalog (src/services/achievementDefinitions.ts, shared with
  * `pnpm prisma:seed:achievements`) is upserted, so definition edits propagate.
  * Each seeded user is then awarded what their seeded history would have earned
- * (seedUserAchievements). Achievements carry no XP, so XP and ranks are
- * unaffected.
+ * (seedUserAchievements), except that the learner is held back from Perfect
+ * Quiz so the demo can earn it live. Achievements carry no XP, so XP and ranks
+ * are unaffected.
  */
 
 import "dotenv/config";
@@ -408,6 +417,10 @@ type ActivityPlan = {
   streak: number;
   longestStreak: number;
   lastActiveDaysAgo: number;
+  // Count days as calendar days in this IANA zone, at noon local time, to
+  // match the user's saved timezone (the API's streak rule). Without it, days
+  // are UTC days at 16:00, which is what classmates use.
+  timeZone?: string;
 };
 
 // Synthetic classmates (no Firebase accounts; they only appear on the
@@ -517,6 +530,10 @@ const DEMO_CLASSMATES: { slug: string; name: string; interests: string[]; plan: 
   },
 ];
 
+// The presenter's timezone. Saved on the learner so the API counts its streak
+// in New York days (apps/api/src/services/xp.ts), and used for its seeded days.
+const LEARNER_TIMEZONE = "America/New_York";
+
 // The local learner: 250 XP across all three published courses and a 4-day
 // streak last extended yesterday, with Functional Groups in progress (the
 // Continue card). Atoms & Bonding is complete but its quiz has no attempt, so
@@ -532,15 +549,64 @@ const LEARNER_PLAN: ActivityPlan = {
   streak: 4,
   longestStreak: 9,
   lastActiveDaysAgo: 1,
+  timeZone: LEARNER_TIMEZONE,
 };
+
+// The learner's seeded Kinematics pass is all correct, which would earn
+// Perfect Quiz. It's held back so the demo can earn it live: a perfect retry
+// of the Atoms & Bonding quiz awards it (checkAndAwardAchievements, quizPerfect).
+const LEARNER_HELD_BACK_ACHIEVEMENTS = ["perfect-quiz"];
+
+const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
 // Mid-afternoon UTC `daysAgo` days back; "today" is a few minutes ago.
 function dayAt(daysAgo: number): Date {
-  if (daysAgo <= 0) return new Date(Date.now() - 5 * 60 * 1000);
+  if (daysAgo <= 0) return new Date(Date.now() - FIVE_MINUTES_MS);
   const d = new Date();
   d.setUTCDate(d.getUTCDate() - daysAgo);
   d.setUTCHours(16, 0, 0, 0);
   return d;
+}
+
+// Wall-clock parts of `date` in `timeZone`.
+function zonedParts(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  }).formatToParts(date);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value);
+  return {
+    year: get("year"),
+    month: get("month"),
+    day: get("day"),
+    hour: get("hour"),
+    minute: get("minute"),
+    second: get("second"),
+  };
+}
+
+// Noon on the calendar day `daysAgo` days before today in `timeZone`, as a UTC
+// instant; "today" is a few minutes ago. Noon is hours away from any DST
+// switch, so the zone's offset at noon UTC on that date is the right one.
+function zonedDayAt(daysAgo: number, timeZone: string): Date {
+  if (daysAgo <= 0) return new Date(Date.now() - FIVE_MINUTES_MS);
+  const today = zonedParts(new Date(), timeZone);
+  const noonAsUtc = Date.UTC(today.year, today.month - 1, today.day - daysAgo, 12);
+  const wall = zonedParts(new Date(noonAsUtc), timeZone);
+  const offsetMs =
+    Date.UTC(wall.year, wall.month - 1, wall.day, wall.hour, wall.minute, wall.second) - noonAsUtc;
+  return new Date(noonAsUtc - offsetMs);
+}
+
+function planDayAt(plan: ActivityPlan, daysAgo: number): Date {
+  return plan.timeZone ? zonedDayAt(daysAgo, plan.timeZone) : dayAt(daysAgo);
 }
 
 // Same bucketing as awardXp (apps/api/src/services/xp.ts): Monday, UTC.
@@ -572,7 +638,7 @@ async function seedUserActivity(userId: string, plan: ActivityPlan, content: See
     const daysAgo =
       plan.lastActiveDaysAgo +
       (fromNewest < streakRun ? fromNewest : streakRun + (fromNewest - streakRun + 1) * 2);
-    const at = dayAt(daysAgo);
+    const at = planDayAt(plan, daysAgo);
 
     await prisma.userNodeProgress.create({
       data: {
@@ -631,7 +697,7 @@ async function seedUserActivity(userId: string, plan: ActivityPlan, content: See
   }
 
   for (const { course, node: title } of plan.inProgress ?? []) {
-    const at = dayAt(plan.lastActiveDaysAgo);
+    const at = planDayAt(plan, plan.lastActiveDaysAgo);
     await prisma.userNodeProgress.create({
       data: {
         userId,
@@ -645,6 +711,8 @@ async function seedUserActivity(userId: string, plan: ActivityPlan, content: See
 
   if (events.length === 0) return 0;
 
+  // todayXp and the weeklyXp buckets use UTC days and UTC Monday weeks, as in
+  // awardXp; only the streak follows the user's timezone.
   const today = new Date().toISOString().slice(0, 10);
   const weeklyXp: Record<string, number> = {};
   for (const e of events) weeklyXp[weekKey(e.at)] = (weeklyXp[weekKey(e.at)] ?? 0) + e.amount;
@@ -679,8 +747,12 @@ async function seedUserActivity(userId: string, plan: ActivityPlan, content: See
 // apps/api/src/services/achievements.ts, but treats the count and streak
 // thresholds as "reached at some point" (>=) rather than "hit exactly now"
 // (===), and uses the longest streak since the seed has no day-by-day history.
-// earnedAt is when the threshold was crossed. No XP is attached.
-async function seedUserAchievements(userId: string): Promise<string[]> {
+// earnedAt is when the threshold was crossed. No XP is attached. Ids in
+// `heldBack` are skipped even if earned.
+async function seedUserAchievements(
+  userId: string,
+  heldBack: readonly string[] = [],
+): Promise<string[]> {
   const [completions, attempts, streak, quizCount] = await Promise.all([
     prisma.userNodeProgress.findMany({
       where: { userId, status: ProgressStatus.COMPLETED },
@@ -746,7 +818,9 @@ async function seedUserAchievements(userId: string): Promise<string[]> {
     }
   }
 
-  const awards = ACHIEVEMENT_DEFINITIONS.filter((a) => earned.has(a.trigger));
+  const awards = ACHIEVEMENT_DEFINITIONS.filter(
+    (a) => earned.has(a.trigger) && !heldBack.includes(a.id),
+  );
   await prisma.userAchievement.createMany({
     data: awards.map((a) => ({ userId, achievementId: a.id, earnedAt: earned.get(a.trigger) })),
     skipDuplicates: true,
@@ -801,11 +875,12 @@ async function seedDemoActivity(content: SeededContent) {
       interests: ["Chemistry", "Physics", "Biology"],
       dailyGoalMinutes: 15,
       onboardingComplete: true,
+      timezone: LEARNER_TIMEZONE,
     },
   });
 
   const xp = await seedUserActivity(learner.id, LEARNER_PLAN, content);
-  const achievements = await seedUserAchievements(learner.id);
+  const achievements = await seedUserAchievements(learner.id, LEARNER_HELD_BACK_ACHIEVEMENTS);
   console.log(
     `   • ${LEARNER_EMAIL}: ${xp} XP, ${LEARNER_PLAN.streak}-day streak, ${describeAchievements(achievements)}`,
   );
