@@ -1,11 +1,14 @@
 import { builder } from "@graphql/builder";
+import { visibleNodeWhere } from "@graphql/auth/visibility";
+import { isUuid } from "@lib/uuid";
 
 /**
  * Quiz Queries
  *
  * Auth rules:
  * - All queries require authentication
- * - Students can only see quizzes from published courses
+ * - Students can only see quizzes from published courses, or courses they authored
+ *   (nothing soft-deleted; see visibleNodeWhere)
  * - Admins can see all quizzes
  */
 
@@ -22,32 +25,16 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, { id }, ctx) => {
       ctx.auth.requireAuth();
-
-      const isAdmin = ctx.auth.isAdmin();
-
-      // Build where clause based on user role
-      const whereClause: any = {
-        id,
-        deletedAt: null,
-      };
-
-      // Students can only see quizzes from published courses
-      if (!isAdmin) {
-        whereClause.node = {
-          deletedAt: null,
-          tree: {
-            deletedAt: null,
-            course: {
-              deletedAt: null,
-              status: "PUBLISHED",
-            },
-          },
-        };
-      }
+      // A malformed id can't match any quiz; don't let Postgres reject it.
+      if (!isUuid(id)) return null;
 
       const quiz = await ctx.prisma.quiz.findFirst({
         ...query,
-        where: whereClause,
+        where: {
+          id,
+          deletedAt: null,
+          node: visibleNodeWhere(ctx),
+        },
         include: {
           questions: {
             orderBy: { order: "asc" },
@@ -73,32 +60,15 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, { nodeId }, ctx) => {
       ctx.auth.requireAuth();
-
-      const isAdmin = ctx.auth.isAdmin();
-
-      // Build where clause based on user role
-      const whereClause: any = {
-        nodeId,
-        deletedAt: null,
-      };
-
-      // Students can only see quizzes from published courses
-      if (!isAdmin) {
-        whereClause.node = {
-          deletedAt: null,
-          tree: {
-            deletedAt: null,
-            course: {
-              deletedAt: null,
-              status: "PUBLISHED",
-            },
-          },
-        };
-      }
+      if (!isUuid(nodeId)) return [];
 
       return ctx.prisma.quiz.findMany({
         ...query,
-        where: whereClause,
+        where: {
+          nodeId,
+          deletedAt: null,
+          node: visibleNodeWhere(ctx),
+        },
         include: {
           questions: {
             orderBy: { order: "asc" },
@@ -122,32 +92,18 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _root, { treeId }, ctx) => {
       ctx.auth.requireAuth();
-
-      const isAdmin = ctx.auth.isAdmin();
-
-      // Build where clause based on user role
-      const whereClause: any = {
-        deletedAt: null,
-        node: {
-          treeId,
-          deletedAt: null,
-        },
-      };
-
-      // Students can only see quizzes from published courses
-      if (!isAdmin) {
-        whereClause.node.tree = {
-          deletedAt: null,
-          course: {
-            deletedAt: null,
-            status: "PUBLISHED",
-          },
-        };
-      }
+      if (!isUuid(treeId)) return [];
 
       return ctx.prisma.quiz.findMany({
         ...query,
-        where: whereClause,
+        where: {
+          deletedAt: null,
+          node: {
+            treeId,
+            deletedAt: null,
+            ...visibleNodeWhere(ctx),
+          },
+        },
         include: {
           questions: {
             orderBy: { order: "asc" },

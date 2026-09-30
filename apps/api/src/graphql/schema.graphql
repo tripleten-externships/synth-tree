@@ -1,3 +1,23 @@
+type AnalyticsMetric {
+  current: Float
+  percentChange: Float
+  previous: Float
+}
+
+enum AnalyticsRange {
+  ALL
+  NINETY_DAYS
+  SEVEN_DAYS
+  THIRTY_DAYS
+}
+
+type AnalyticsSummary {
+  activeLearners: AnalyticsMetric!
+  avgSessionMinutes: AnalyticsMetric!
+  courseCompletionRate: AnalyticsMetric!
+  lessonsCompleted: AnalyticsMetric!
+}
+
 """Batch payloads from prisma."""
 type BatchPayload {
   """Prisma Batch Payload"""
@@ -32,6 +52,11 @@ input BoolWithAggregatesFilter {
   _min: NestedBoolFilter
   equals: Boolean
   not: NestedBoolWithAggregatesFilter
+}
+
+type CompleteNodeProgressPayload {
+  progress: UserNodeProgress
+  xpAwarded: Int
 }
 
 enum ContentType {
@@ -215,6 +240,7 @@ type CourseProgress {
   inProgressNodes: Int
   notStartedNodes: Int
   totalNodes: Int
+  xpEarned: Int
 }
 
 enum CourseScalarFieldEnum {
@@ -1118,7 +1144,7 @@ enum LessonStatus {
 }
 
 type Mutation {
-  completeNodeProgress(nodeId: ID!): UserNodeProgress
+  completeNodeProgress(nodeId: ID!): CompleteNodeProgressPayload
   createCourse(input: CreateCourseInput!): Course
   createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
@@ -1140,6 +1166,7 @@ type Mutation {
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
+  saveQuiz(input: SaveQuizInput!, nodeId: ID!): Quiz
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt
@@ -1570,6 +1597,7 @@ enum ProgressStatus {
 }
 
 type Query {
+  adminAnalytics(range: AnalyticsRange! = SEVEN_DAYS): AnalyticsSummary!
   adminCourse(id: ID!): Course
   adminGetAllCourses(limit: Int, page: Int, search: String, status: CourseStatus): [Course!]
   adminMyCourse(id: ID!): Course
@@ -1644,6 +1672,7 @@ type QuizAttempt {
   takenAt: DateTime!
   user: User!
   userId: String!
+  xpAwarded: Int!
 }
 
 type QuizAttemptAnswer {
@@ -2401,16 +2430,22 @@ type QuizOption {
   createdAt: DateTime!
   id: ID!
   isCorrect: Boolean
+  order: Int!
   question: QuizQuestion!
   questionId: String!
   text: String!
   updatedAt: DateTime!
 }
 
+input QuizOptionAvgOrderByAggregateInput {
+  order: SortOrder
+}
+
 input QuizOptionCountOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2420,6 +2455,7 @@ input QuizOptionCreateInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   question: QuizQuestionCreateNestedOneWithoutOptionsInput!
   text: String!
   updatedAt: DateTime
@@ -2429,6 +2465,7 @@ input QuizOptionCreateManyInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   questionId: String!
   text: String!
   updatedAt: DateTime
@@ -2438,6 +2475,7 @@ input QuizOptionCreateManyQuestionInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   text: String!
   updatedAt: DateTime
 }
@@ -2463,6 +2501,7 @@ input QuizOptionCreateWithoutQuestionInput {
   createdAt: DateTime
   id: String
   isCorrect: Boolean
+  order: Int
   text: String!
   updatedAt: DateTime
 }
@@ -2477,6 +2516,7 @@ input QuizOptionMaxOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2486,6 +2526,7 @@ input QuizOptionMinOrderByAggregateInput {
   createdAt: SortOrder
   id: SortOrder
   isCorrect: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2496,11 +2537,14 @@ input QuizOptionOrderByRelationAggregateInput {
 }
 
 input QuizOptionOrderByWithAggregationInput {
+  _avg: QuizOptionAvgOrderByAggregateInput
   _count: QuizOptionCountOrderByAggregateInput
   _max: QuizOptionMaxOrderByAggregateInput
   _min: QuizOptionMinOrderByAggregateInput
+  _sum: QuizOptionSumOrderByAggregateInput
   createdAt: SortOrder
   id: SortOrder
+  order: SortOrder
   questionId: SortOrder
   text: SortOrder
   updatedAt: SortOrder
@@ -2509,6 +2553,7 @@ input QuizOptionOrderByWithAggregationInput {
 input QuizOptionOrderByWithRelationInput {
   createdAt: SortOrder
   id: SortOrder
+  order: SortOrder
   question: QuizQuestionOrderByWithRelationInput
   questionId: SortOrder
   text: SortOrder
@@ -2519,6 +2564,7 @@ enum QuizOptionScalarFieldEnum {
   createdAt
   id
   isCorrect
+  order
   questionId
   text
   updatedAt
@@ -2531,6 +2577,7 @@ input QuizOptionScalarWhereInput {
   createdAt: DateTimeFilter
   id: UuidFilter
   isCorrect: BoolFilter
+  order: IntFilter
   questionId: UuidFilter
   text: StringFilter
   updatedAt: DateTimeFilter
@@ -2543,15 +2590,21 @@ input QuizOptionScalarWhereWithAggregatesInput {
   createdAt: DateTimeWithAggregatesFilter
   id: UuidWithAggregatesFilter
   isCorrect: BoolWithAggregatesFilter
+  order: IntWithAggregatesFilter
   questionId: UuidWithAggregatesFilter
   text: StringWithAggregatesFilter
   updatedAt: DateTimeWithAggregatesFilter
+}
+
+input QuizOptionSumOrderByAggregateInput {
+  order: SortOrder
 }
 
 input QuizOptionUpdateInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   question: QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
@@ -2561,6 +2614,7 @@ input QuizOptionUpdateManyMutationInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
@@ -2593,6 +2647,7 @@ input QuizOptionUpdateWithoutQuestionInput {
   createdAt: DateTimeFieldUpdateOperationsInput
   id: StringFieldUpdateOperationsInput
   isCorrect: BoolFieldUpdateOperationsInput
+  order: IntFieldUpdateOperationsInput
   text: StringFieldUpdateOperationsInput
   updatedAt: DateTimeFieldUpdateOperationsInput
 }
@@ -2609,6 +2664,7 @@ input QuizOptionWhereInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: UuidFilter
+  order: IntFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -2621,6 +2677,7 @@ input QuizOptionWhereUniqueInput {
   OR: [QuizOptionWhereInput!]
   createdAt: DateTimeFilter
   id: String
+  order: IntFilter
   question: QuizQuestionWhereInput
   questionId: UuidFilter
   text: StringFilter
@@ -3246,6 +3303,26 @@ input QuizWhereUniqueInput {
 enum Role {
   ADMIN
   USER
+}
+
+input SaveQuizInput {
+  questions: [SaveQuizQuestionInput!]!
+  required: Boolean!
+}
+
+input SaveQuizOptionInput {
+  id: ID
+  isCorrect: Boolean!
+  text: String!
+}
+
+input SaveQuizQuestionInput {
+  canonicalAnswer: String
+  explanation: String
+  id: ID
+  options: [SaveQuizOptionInput!]!
+  prompt: String!
+  type: QuestionType!
 }
 
 type SkillNode {

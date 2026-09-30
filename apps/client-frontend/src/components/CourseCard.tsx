@@ -1,5 +1,5 @@
 // Importing pre-built Card pieces from the shared UI library (@synth-tree/ui)
-import { Card, CardContent, CardTitle, CardDescription } from "@synth-tree/ui";
+import { Card, CardContent, CardTitle, CardDescription, Progress } from "@synth-tree/ui";
 // ReactNode is a TypeScript type that means "anything React can render" —
 // a component, a string, a <div>, etc. We use it so TypeScript knows the
 // icon prop can hold any kind of renderable React content.
@@ -40,7 +40,16 @@ function formatLearners(count: number): string {
 // Destructuring pulls each prop out of the props object so we can use them by name below.
 // The optional props (icon, chapters, hours, learners, progress) won't be passed by every
 // caller — when they're left out, they'll just be undefined and we skip rendering that section.
-export default function CourseCard({ id, title, description, icon, chapters, hours, learners, progress }: CourseCardProps) {
+export default function CourseCard({
+  id,
+  title,
+  description,
+  icon,
+  chapters,
+  hours,
+  learners,
+  progress,
+}: CourseCardProps) {
   // navigate() is the function we call to send the user to a new page
   const navigate = useNavigate();
 
@@ -87,17 +96,12 @@ export default function CourseCard({ id, title, description, icon, chapters, hou
           </div>
         )}
 
-        {/* Progress bar — only shown when a progress prop is passed (meaning the user is enrolled).
-            progress is a number from 0 to 100. The inner bar's width is set as a percentage
-            using an inline style, so progress={42} makes it fill 42% of the track. */}
+        {/* Progress bar — only shown when a progress prop is passed (meaning the user has
+            started the course). progress is a number from 0 to 100, e.g. progress={42}
+            fills 42% of the shared Progress track. */}
         {progress != null && (
-          <div>
-            <div className="w-full h-1.5 bg-muted rounded-full mb-1">
-              <div
-                className="h-1.5 bg-primary rounded-full"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+          <div className="mt-4">
+            <Progress value={progress} className="mb-1" aria-label={`${title} progress`} />
             <p className="text-sm text-muted-foreground">{progress}% complete</p>
           </div>
         )}

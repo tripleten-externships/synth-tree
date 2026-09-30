@@ -1,6 +1,14 @@
 import { useUpdateSkillNodeMutation } from "@synth-tree/api-types";
-import { toast } from "@synth-tree/ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  toast,
+} from "@synth-tree/ui";
+import { MoreHorizontal } from "lucide-react";
 import { useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { useNodeDrag } from "../../hooks/useNodeDrag";
 import { SkillNodeChip } from "./SkillNodeChip";
@@ -25,37 +33,57 @@ interface SkillNodeCanvasProps {
   nodes: CanvasNode[];
 }
 
-const posOf = (n: CanvasNode) => ({ posX: n.posX ?? 0, posY: n.posY ?? 0 });
+const posOf = (n: CanvasNode) => ({
+  posX: n.posX ?? 0,
+  posY: n.posY ?? 0,
+});
+
 const cellKey = (x: number, y: number) => `${x},${y}`;
 
 // Find the nearest free grid cell to (x, y) via an outward ring search, so a
 // node dropped onto an occupied cell nudges to a neighbour instead of hitting
 // the DB's @@unique([treeId, posX, posY]) constraint.
-function findFreeCell(x: number, y: number, occupied: Set<string>): { x: number; y: number } {
+function findFreeCell(
+  x: number,
+  y: number,
+  occupied: Set<string>,
+): { x: number; y: number } {
   if (!occupied.has(cellKey(x, y))) return { x, y };
+
   for (let r = GRID_STEP; r <= 100; r += GRID_STEP) {
     for (let dx = -r; dx <= r; dx += GRID_STEP) {
       for (let dy = -r; dy <= r; dy += GRID_STEP) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; // ring edge only
+
         const nx = x + dx;
         const ny = y + dy;
+
         if (nx < 0 || nx > 100 || ny < 0 || ny > 100) continue;
-        if (!occupied.has(cellKey(nx, ny))) return { x: nx, y: ny };
+
+        if (!occupied.has(cellKey(nx, ny))) {
+          return { x: nx, y: ny };
+        }
       }
     }
   }
+
   return { x, y }; // canvas full — let the persist fail and revert
 }
 
 export function SkillNodeCanvas({ nodes }: SkillNodeCanvasProps) {
+  const navigate = useNavigate();
   const [updateSkillNode] = useUpdateSkillNodeMutation();
 
-  const nodesById = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+  const nodesById = useMemo(
+    () => new Map(nodes.map((n) => [n.id, n])),
+    [nodes],
+  );
 
   const handleDrop = useCallback(
     (id: string, rawX: number, rawY: number) => {
       const node = nodesById.get(id);
       if (!node) return;
+
       const { posX: curX, posY: curY } = posOf(node);
 
       const occupied = new Set(
@@ -66,27 +94,54 @@ export function SkillNodeCanvas({ nodes }: SkillNodeCanvasProps) {
             return cellKey(p.posX, p.posY);
           }),
       );
-      const { x: posX, y: posY } = findFreeCell(rawX, rawY, occupied);
+
+      const { x: posX, y: posY } = findFreeCell(
+        rawX,
+        rawY,
+        occupied,
+      );
+
       if (posX === curX && posY === curY) return; // no-op
 
       updateSkillNode({
-        variables: { id, input: { posX, posY } },
+        variables: {
+          id,
+          input: {
+            posX,
+            posY,
+          },
+        },
         optimisticResponse: {
-          updateSkillNode: { __typename: "SkillNode", id, posX, posY },
+          updateSkillNode: {
+            __typename: "SkillNode",
+            id,
+            posX,
+            posY,
+          },
         },
       }).catch((err) => {
         // Apollo auto-reverts the optimistic position; just notify.
         toast.error("Couldn't move node", {
           description: "That spot may be taken. Try another position.",
         });
+
         console.error("updateSkillNode failed:", err);
       });
     },
     [nodes, nodesById, updateSkillNode],
   );
 
-  const { canvasRef, drag, onPointerDown, onPointerMove, onPointerUp, onPointerCancel } =
-    useNodeDrag({ gridStep: GRID_STEP, onDrop: handleDrop });
+  const {
+    canvasRef,
+    drag,
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel,
+  } = useNodeDrag({
+    gridStep: GRID_STEP,
+    onDrop: handleDrop,
+  });
 
   if (nodes.length === 0) {
     return (
@@ -106,20 +161,69 @@ export function SkillNodeCanvas({ nodes }: SkillNodeCanvasProps) {
       {nodes.map((node) => {
         const stored = posOf(node);
         const isDragging = drag?.id === node.id;
-        const pos = isDragging ? { posX: drag.posX, posY: drag.posY } : stored;
+
+        const pos = isDragging
+          ? {
+              posX: drag.posX,
+              posY: drag.posY,
+            }
+          : stored;
+
         return (
           <div
             key={node.id}
             className={`absolute -translate-x-1/2 -translate-y-1/2 touch-none ${
-              isDragging ? "z-10 cursor-grabbing" : "cursor-grab"
+              isDragging
+                ? "z-10 cursor-grabbing"
+                : "cursor-grab"
             }`}
-            style={{ left: `${pos.posX}%`, top: `${pos.posY}%` }}
-            onPointerDown={(e) => onPointerDown(e, { id: node.id, ...stored })}
+            style={{
+              left: `${pos.posX}%`,
+              top: `${pos.posY}%`,
+            }}
+            onPointerDown={(e) =>
+              onPointerDown(e, {
+                id: node.id,
+                ...stored,
+              })
+            }
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerCancel}
           >
-            <SkillNodeChip title={node.title} dragging={isDragging} />
+            <div className="relative">
+              <SkillNodeChip
+                title={node.title}
+                dragging={isDragging}
+              />
+
+              <div
+                className="absolute -right-2 -top-2"
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex h-6 w-6 items-center justify-center rounded-full border bg-card shadow-sm hover:bg-accent"
+                      aria-label={`Actions for ${node.title}`}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate(`/lessons/${node.id}/edit`)
+                      }
+                    >
+                      Edit lesson
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
         );
       })}

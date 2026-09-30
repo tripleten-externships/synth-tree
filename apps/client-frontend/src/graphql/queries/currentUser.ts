@@ -1,5 +1,19 @@
 import { gql } from "@apollo/client";
 
+export const CURRENT_USER_STATS_QUERY = gql`
+  query CurrentUserStats {
+    currentUser {
+      id
+      xp {
+        totalXp
+      }
+      streak {
+        currentDays
+      }
+    }
+  }
+`;
+
 export const SYNC_CURRENT_USER = gql`
   mutation SyncCurrentUser($name: String, $photoUrl: String, $timezone: String) {
     syncCurrentUser(name: $name, photoUrl: $photoUrl, timezone: $timezone) {
@@ -9,12 +23,11 @@ export const SYNC_CURRENT_USER = gql`
       photoUrl
       timezone
       role
-      # stats will work once backend supports it
-      # stats {
-      #   courses
-      #   nodes
-      #   quizzes
-      # }
+      # One passed attempt per quiz, so retakes aren't double-counted.
+      quizAttempts(where: { passed: { equals: true } }, distinct: [quizId]) {
+        id
+        quizId
+      }
     }
   }
 `;
@@ -27,10 +40,9 @@ export interface SyncCurrentUserResponse {
     photoUrl: string;
     timezone: string;
     role: string;
-    stats?: {
-      courses: number;
-      nodes: number;
-      quizzes: number;
-    };
+    quizAttempts: {
+      id: string;
+      quizId: string;
+    }[];
   };
 }

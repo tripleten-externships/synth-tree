@@ -116,7 +116,8 @@ const COURSES: CourseSeed[] = [
               {
                 type: QuestionType.SINGLE_CHOICE,
                 prompt: "How many covalent bonds does a neutral carbon atom form?",
-                explanation: "A neutral carbon atom has four valence electrons and typically forms four covalent bonds to complete its valence shell.",
+                explanation:
+                  "A neutral carbon atom has four valence electrons and typically forms four covalent bonds to complete its valence shell.",
                 options: [{ text: "2" }, { text: "4", isCorrect: true }, { text: "6" }],
               },
               {
@@ -804,10 +805,11 @@ async function main() {
           let correctOptionIds: string[] = [];
           if (q.options?.length) {
             const options = await prisma.quizOption.createManyAndReturn({
-              data: q.options.map((o) => ({
+              data: q.options.map((o, oi) => ({
                 questionId: question.id,
                 text: o.text,
                 isCorrect: o.isCorrect ?? false,
+                order: oi,
               })),
             });
             correctOptionIds = options.filter((o) => o.isCorrect).map((o) => o.id);

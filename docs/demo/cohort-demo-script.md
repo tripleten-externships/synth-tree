@@ -111,7 +111,7 @@ Transition: _"Let's start where every learner starts."_
 3. **Step 3, daily goal.** Pick **15 minutes a day** and finish signup. You land on Home. (#121)
    - _"A brand-new learner has no progress yet,"_ so there's no Continue card. Point out the
      **Browse catalog** button and the published course grid.
-4. Click **Browse catalog** to show the catalog grid.
+4. Click **Browse catalog** to show the catalog grid (the top-nav _Catalog_ link goes there too).
 5. _Optional:_ if a learner leaves partway through signup, they're sent back to finish it the next
    time they sign in. (#121)
 
@@ -165,7 +165,7 @@ This is the core of the demo, and everything in it is new since the last one.
 7. **Profile.** Edit the display name → **Save**. Stay on light mode. If you want to show dark mode,
    toggle it on Home or the leaderboard.
 8. _Optional, mobile:_ press Cmd+Shift+M in DevTools. Show the hamburger menu and the bottom tab
-   bar (Home / Profile).
+   bar (Home / Catalog / Profile); tap **Catalog** to open the course grid.
 
 **Answer key: Atoms & Bonding quick check**
 
@@ -197,8 +197,8 @@ Transition: _"That's the learner side. Here's how an instructor builds it."_
    - In Tab B, reopen _Functional Groups_ from the tree. The learner sees the change immediately.
 5. _Optional:_ **admin leaderboard.** Type `/leaderboard` into the admin URL. It shows the same XP
    data from the admin side.
-6. _Optional:_ **theme.** Toggle dark mode and density **on the Course Builder**, not the Courses
-   list, then switch back.
+6. _Optional:_ **theme.** Toggle dark mode and density on the Course Builder or the Courses list,
+   then switch back.
 
 ---
 
@@ -241,8 +241,6 @@ Narrate this, or use a slide. The dev GraphQL sandbox needs a Firebase token, so
 
 **Learner app**
 
-- **Nav stubs:** **Dashboard**, **Lessons** and **Skill Trees** in the top nav are placeholders.
-  The mobile **Catalog** tab also opens a placeholder. (SYN-132)
 - **Isomerism quiz:** it's an open-response question that waits for manual review, which doesn't
   exist yet. There's no retry.
 - **Profile stat tiles:** they don't show real numbers yet. (SYN-134)
@@ -250,13 +248,11 @@ Narrate this, or use a slide. The dev GraphQL sandbox needs a Firebase token, so
 
 **Admin**
 
-- **Avatar → Profile:** opens a blank page. (SYN-135)
 - **Clicking nodes in the Course Builder:** does nothing yet. The **Inspector** pane is static text.
 - **Lesson editor on Atoms & Bonding:** it hides that lesson's image, page break and video. Stick to
   _Functional Groups_.
 - **Disabled block types:** Heading, Image, Video, Embed and **Preview** are disabled "coming soon"
   buttons.
-- **Courses list in dark mode:** looks rough. (SYN-137)
 - **Deleting a seeded course:** there's no restore UI, so you'd need to re-seed.
   **Also don't unpublish Organic Chemistry.**
 - **Google sign-in on admin:** new Google users get the learner role and can't load courses.

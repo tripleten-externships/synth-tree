@@ -21,6 +21,27 @@ export type Scalars = {
   NEVER: { input: any; output: any; }
 };
 
+export type AnalyticsMetric = {
+  __typename?: 'AnalyticsMetric';
+  current?: Maybe<Scalars['Float']['output']>;
+  percentChange?: Maybe<Scalars['Float']['output']>;
+  previous?: Maybe<Scalars['Float']['output']>;
+};
+
+export type AnalyticsRange =
+  | 'ALL'
+  | 'NINETY_DAYS'
+  | 'SEVEN_DAYS'
+  | 'THIRTY_DAYS';
+
+export type AnalyticsSummary = {
+  __typename?: 'AnalyticsSummary';
+  activeLearners: AnalyticsMetric;
+  avgSessionMinutes: AnalyticsMetric;
+  courseCompletionRate: AnalyticsMetric;
+  lessonsCompleted: AnalyticsMetric;
+};
+
 /** Batch payloads from prisma. */
 export type BatchPayload = {
   __typename?: 'BatchPayload';
@@ -56,6 +77,12 @@ export type BoolWithAggregatesFilter = {
   _min?: InputMaybe<NestedBoolFilter>;
   equals?: InputMaybe<Scalars['Boolean']['input']>;
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
+};
+
+export type CompleteNodeProgressPayload = {
+  __typename?: 'CompleteNodeProgressPayload';
+  progress?: Maybe<UserNodeProgress>;
+  xpAwarded?: Maybe<Scalars['Int']['output']>;
 };
 
 export type ContentType =
@@ -250,6 +277,7 @@ export type CourseProgress = {
   inProgressNodes?: Maybe<Scalars['Int']['output']>;
   notStartedNodes?: Maybe<Scalars['Int']['output']>;
   totalNodes?: Maybe<Scalars['Int']['output']>;
+  xpEarned?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CourseScalarFieldEnum =
@@ -1147,7 +1175,7 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNodeProgress?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<CompleteNodeProgressPayload>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -1169,6 +1197,7 @@ export type Mutation = {
   publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   reorderLessonBlocks?: Maybe<Array<LessonBlocks>>;
+  saveQuiz?: Maybe<Quiz>;
   setUserRole?: Maybe<User>;
   startNodeProgress?: Maybe<UserNodeProgress>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1301,6 +1330,12 @@ export type MutationPublishLessonBlockArgs = {
 export type MutationReorderLessonBlocksArgs = {
   nodeId: Scalars['ID']['input'];
   orderedBlockIds: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationSaveQuizArgs = {
+  input: SaveQuizInput;
+  nodeId: Scalars['ID']['input'];
 };
 
 
@@ -1793,6 +1828,7 @@ export type ProgressStatus =
 
 export type Query = {
   __typename?: 'Query';
+  adminAnalytics: AnalyticsSummary;
   adminCourse?: Maybe<Course>;
   adminGetAllCourses?: Maybe<Array<Course>>;
   adminMyCourse?: Maybe<Course>;
@@ -1825,6 +1861,11 @@ export type Query = {
   skillNode?: Maybe<SkillNode>;
   skillNodes?: Maybe<Array<SkillNode>>;
   skillNodesByTree?: Maybe<Array<SkillNode>>;
+};
+
+
+export type QueryAdminAnalyticsArgs = {
+  range?: AnalyticsRange;
 };
 
 
@@ -2057,6 +2098,7 @@ export type QuizAttempt = {
   takenAt: Scalars['DateTime']['output'];
   user: User;
   userId: Scalars['String']['output'];
+  xpAwarded: Scalars['Int']['output'];
 };
 
 
@@ -2824,16 +2866,22 @@ export type QuizOption = {
   createdAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   isCorrect?: Maybe<Scalars['Boolean']['output']>;
+  order: Scalars['Int']['output'];
   question: QuizQuestion;
   questionId: Scalars['String']['output'];
   text: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
 };
 
+export type QuizOptionAvgOrderByAggregateInput = {
+  order?: InputMaybe<SortOrder>;
+};
+
 export type QuizOptionCountOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2843,6 +2891,7 @@ export type QuizOptionCreateInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   question: QuizQuestionCreateNestedOneWithoutOptionsInput;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -2852,6 +2901,7 @@ export type QuizOptionCreateManyInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   questionId: Scalars['String']['input'];
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -2861,6 +2911,7 @@ export type QuizOptionCreateManyQuestionInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2886,6 +2937,7 @@ export type QuizOptionCreateWithoutQuestionInput = {
   createdAt?: InputMaybe<Scalars['DateTime']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   isCorrect?: InputMaybe<Scalars['Boolean']['input']>;
+  order?: InputMaybe<Scalars['Int']['input']>;
   text: Scalars['String']['input'];
   updatedAt?: InputMaybe<Scalars['DateTime']['input']>;
 };
@@ -2900,6 +2952,7 @@ export type QuizOptionMaxOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2909,6 +2962,7 @@ export type QuizOptionMinOrderByAggregateInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
   isCorrect?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2919,11 +2973,14 @@ export type QuizOptionOrderByRelationAggregateInput = {
 };
 
 export type QuizOptionOrderByWithAggregationInput = {
+  _avg?: InputMaybe<QuizOptionAvgOrderByAggregateInput>;
   _count?: InputMaybe<QuizOptionCountOrderByAggregateInput>;
   _max?: InputMaybe<QuizOptionMaxOrderByAggregateInput>;
   _min?: InputMaybe<QuizOptionMinOrderByAggregateInput>;
+  _sum?: InputMaybe<QuizOptionSumOrderByAggregateInput>;
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
   updatedAt?: InputMaybe<SortOrder>;
@@ -2932,6 +2989,7 @@ export type QuizOptionOrderByWithAggregationInput = {
 export type QuizOptionOrderByWithRelationInput = {
   createdAt?: InputMaybe<SortOrder>;
   id?: InputMaybe<SortOrder>;
+  order?: InputMaybe<SortOrder>;
   question?: InputMaybe<QuizQuestionOrderByWithRelationInput>;
   questionId?: InputMaybe<SortOrder>;
   text?: InputMaybe<SortOrder>;
@@ -2942,6 +3000,7 @@ export type QuizOptionScalarFieldEnum =
   | 'createdAt'
   | 'id'
   | 'isCorrect'
+  | 'order'
   | 'questionId'
   | 'text'
   | 'updatedAt';
@@ -2953,6 +3012,7 @@ export type QuizOptionScalarWhereInput = {
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
   isCorrect?: InputMaybe<BoolFilter>;
+  order?: InputMaybe<IntFilter>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
   updatedAt?: InputMaybe<DateTimeFilter>;
@@ -2965,15 +3025,21 @@ export type QuizOptionScalarWhereWithAggregatesInput = {
   createdAt?: InputMaybe<DateTimeWithAggregatesFilter>;
   id?: InputMaybe<UuidWithAggregatesFilter>;
   isCorrect?: InputMaybe<BoolWithAggregatesFilter>;
+  order?: InputMaybe<IntWithAggregatesFilter>;
   questionId?: InputMaybe<UuidWithAggregatesFilter>;
   text?: InputMaybe<StringWithAggregatesFilter>;
   updatedAt?: InputMaybe<DateTimeWithAggregatesFilter>;
+};
+
+export type QuizOptionSumOrderByAggregateInput = {
+  order?: InputMaybe<SortOrder>;
 };
 
 export type QuizOptionUpdateInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   question?: InputMaybe<QuizQuestionUpdateOneRequiredWithoutOptionsNestedInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
@@ -2983,6 +3049,7 @@ export type QuizOptionUpdateManyMutationInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
@@ -3015,6 +3082,7 @@ export type QuizOptionUpdateWithoutQuestionInput = {
   createdAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
   id?: InputMaybe<StringFieldUpdateOperationsInput>;
   isCorrect?: InputMaybe<BoolFieldUpdateOperationsInput>;
+  order?: InputMaybe<IntFieldUpdateOperationsInput>;
   text?: InputMaybe<StringFieldUpdateOperationsInput>;
   updatedAt?: InputMaybe<DateTimeFieldUpdateOperationsInput>;
 };
@@ -3031,6 +3099,7 @@ export type QuizOptionWhereInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<UuidFilter>;
+  order?: InputMaybe<IntFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
@@ -3043,6 +3112,7 @@ export type QuizOptionWhereUniqueInput = {
   OR?: InputMaybe<Array<QuizOptionWhereInput>>;
   createdAt?: InputMaybe<DateTimeFilter>;
   id?: InputMaybe<Scalars['String']['input']>;
+  order?: InputMaybe<IntFilter>;
   question?: InputMaybe<QuizQuestionWhereInput>;
   questionId?: InputMaybe<UuidFilter>;
   text?: InputMaybe<StringFilter>;
@@ -3686,6 +3756,26 @@ export type QuizWhereUniqueInput = {
 export type Role =
   | 'ADMIN'
   | 'USER';
+
+export type SaveQuizInput = {
+  questions: Array<SaveQuizQuestionInput>;
+  required: Scalars['Boolean']['input'];
+};
+
+export type SaveQuizOptionInput = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  isCorrect: Scalars['Boolean']['input'];
+  text: Scalars['String']['input'];
+};
+
+export type SaveQuizQuestionInput = {
+  canonicalAnswer?: InputMaybe<Scalars['String']['input']>;
+  explanation?: InputMaybe<Scalars['String']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  options: Array<SaveQuizOptionInput>;
+  prompt: Scalars['String']['input'];
+  type: QuestionType;
+};
 
 export type SkillNode = {
   __typename?: 'SkillNode';
@@ -7434,6 +7524,21 @@ export type XpEventWhereUniqueInput = {
   userId_reason_rewardKey?: InputMaybe<XpEventUserIdReasonRewardKeyCompoundUniqueInput>;
 };
 
+export type SaveQuizMutationVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+  input: SaveQuizInput;
+}>;
+
+
+export type SaveQuizMutation = { __typename?: 'Mutation', saveQuiz?: { __typename?: 'Quiz', id: string, title?: string | null, required: boolean, questions: Array<{ __typename?: 'QuizQuestion', id: string, type: QuestionType, prompt: string, explanation?: string | null, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> }> } | null };
+
+export type DeleteQuizMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteQuizMutation = { __typename?: 'Mutation', deleteQuiz?: { __typename?: 'Quiz', id: string } | null };
+
 export type UpdateCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateCourseInput;
@@ -7450,6 +7555,13 @@ export type UpdateSkillNodeMutationVariables = Exact<{
 
 export type UpdateSkillNodeMutation = { __typename?: 'Mutation', updateSkillNode?: { __typename?: 'SkillNode', id: string, posX?: number | null, posY?: number | null } | null };
 
+export type AdminAnalyticsQueryVariables = Exact<{
+  range: AnalyticsRange;
+}>;
+
+
+export type AdminAnalyticsQuery = { __typename?: 'Query', adminAnalytics: { __typename?: 'AnalyticsSummary', activeLearners: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, lessonsCompleted: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, avgSessionMinutes: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null }, courseCompletionRate: { __typename?: 'AnalyticsMetric', current?: number | null, previous?: number | null, percentChange?: number | null } } };
+
 export type AdminGetAllCoursesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -7461,6 +7573,13 @@ export type AdminCourseQueryVariables = Exact<{
 
 
 export type AdminCourseQuery = { __typename?: 'Query', adminCourse?: { __typename?: 'Course', id: string, title: string, description?: string | null, status: CourseStatus, trees: Array<{ __typename?: 'SkillTree', id: string, title: string, nodes: Array<{ __typename?: 'SkillNode', id: string, title: string, posX?: number | null, posY?: number | null }> }> } | null };
+
+export type AdminLessonQuizQueryVariables = Exact<{
+  nodeId: Scalars['ID']['input'];
+}>;
+
+
+export type AdminLessonQuizQuery = { __typename?: 'Query', adminSkillNode?: { __typename?: 'SkillNode', id: string, quiz?: { __typename?: 'Quiz', id: string, title?: string | null, required: boolean, questions: Array<{ __typename?: 'QuizQuestion', id: string, type: QuestionType, prompt: string, explanation?: string | null, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> }> } | null } | null };
 
 export type AdminLeaderboardQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -7565,7 +7684,7 @@ export type CompleteNodeProgressMutationVariables = Exact<{
 }>;
 
 
-export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'CompleteNodeProgressPayload', xpAwarded?: number | null, progress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7580,7 +7699,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, xpAwarded: number, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type UpdateOnboardingMutationVariables = Exact<{
   interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -7596,6 +7715,18 @@ export type CompleteOnboardingMutationVariables = Exact<{
 
 export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
 
+export type CourseDetailProgressQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, inProgressNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
+
+export type CurrentUserStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CurrentUserStatsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, xp?: { __typename?: 'UserXp', totalXp: number } | null, streak?: { __typename?: 'UserStreak', currentDays: number } | null } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -7603,7 +7734,14 @@ export type SyncCurrentUserMutationVariables = Exact<{
 }>;
 
 
-export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, timezone?: string | null, role: Role } | null };
+export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, timezone?: string | null, role: Role, quizAttempts: Array<{ __typename?: 'QuizAttempt', id: string, quizId: string }> } | null };
+
+export type HomeXpWidgetsQueryVariables = Exact<{
+  since: Scalars['DateTime']['input'];
+}>;
+
+
+export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone?: string | null, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
@@ -7654,6 +7792,81 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const SaveQuizDocument = gql`
+    mutation SaveQuiz($nodeId: ID!, $input: SaveQuizInput!) {
+  saveQuiz(nodeId: $nodeId, input: $input) {
+    id
+    title
+    required
+    questions(orderBy: [{order: asc}]) {
+      id
+      type
+      prompt
+      explanation
+      canonicalAnswer
+      options(orderBy: [{order: asc}]) {
+        id
+        text
+        isCorrect
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useSaveQuizMutation__
+ *
+ * To run a mutation, you first call `useSaveQuizMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveQuizMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveQuizMutation, { data, loading, error }] = useSaveQuizMutation({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSaveQuizMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveQuizMutation, SaveQuizMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<SaveQuizMutation, SaveQuizMutationVariables>(SaveQuizDocument, options);
+      }
+export type SaveQuizMutationHookResult = ReturnType<typeof useSaveQuizMutation>;
+export const DeleteQuizDocument = gql`
+    mutation DeleteQuiz($id: ID!) {
+  deleteQuiz(id: $id) {
+    id
+  }
+}
+    `;
+
+/**
+ * __useDeleteQuizMutation__
+ *
+ * To run a mutation, you first call `useDeleteQuizMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteQuizMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteQuizMutation, { data, loading, error }] = useDeleteQuizMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteQuizMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteQuizMutation, DeleteQuizMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteQuizMutation, DeleteQuizMutationVariables>(DeleteQuizDocument, options);
+      }
+export type DeleteQuizMutationHookResult = ReturnType<typeof useDeleteQuizMutation>;
 export const UpdateCourseDocument = gql`
     mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
   updateCourse(id: $id, input: $input) {
@@ -7721,6 +7934,59 @@ export function useUpdateSkillNodeMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<UpdateSkillNodeMutation, UpdateSkillNodeMutationVariables>(UpdateSkillNodeDocument, options);
       }
 export type UpdateSkillNodeMutationHookResult = ReturnType<typeof useUpdateSkillNodeMutation>;
+export const AdminAnalyticsDocument = gql`
+    query AdminAnalytics($range: AnalyticsRange!) {
+  adminAnalytics(range: $range) {
+    activeLearners {
+      current
+      previous
+      percentChange
+    }
+    lessonsCompleted {
+      current
+      previous
+      percentChange
+    }
+    avgSessionMinutes {
+      current
+      previous
+      percentChange
+    }
+    courseCompletionRate {
+      current
+      previous
+      percentChange
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminAnalyticsQuery__
+ *
+ * To run a query within a React component, call `useAdminAnalyticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminAnalyticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminAnalyticsQuery({
+ *   variables: {
+ *      range: // value for 'range'
+ *   },
+ * });
+ */
+export function useAdminAnalyticsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminAnalyticsQuery, AdminAnalyticsQueryVariables> & ({ variables: AdminAnalyticsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>(AdminAnalyticsDocument, options);
+      }
+export function useAdminAnalyticsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminAnalyticsQuery, AdminAnalyticsQueryVariables>(AdminAnalyticsDocument, options);
+        }
+export type AdminAnalyticsQueryHookResult = ReturnType<typeof useAdminAnalyticsQuery>;
+export type AdminAnalyticsLazyQueryHookResult = ReturnType<typeof useAdminAnalyticsLazyQuery>;
 export const AdminGetAllCoursesDocument = gql`
     query AdminGetAllCourses {
   adminGetAllCourses {
@@ -7808,6 +8074,57 @@ export function useAdminCourseLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
         }
 export type AdminCourseQueryHookResult = ReturnType<typeof useAdminCourseQuery>;
 export type AdminCourseLazyQueryHookResult = ReturnType<typeof useAdminCourseLazyQuery>;
+export const AdminLessonQuizDocument = gql`
+    query AdminLessonQuiz($nodeId: ID!) {
+  adminSkillNode(id: $nodeId) {
+    id
+    quiz {
+      id
+      title
+      required
+      questions(orderBy: [{order: asc}]) {
+        id
+        type
+        prompt
+        explanation
+        canonicalAnswer
+        options(orderBy: [{order: asc}]) {
+          id
+          text
+          isCorrect
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAdminLessonQuizQuery__
+ *
+ * To run a query within a React component, call `useAdminLessonQuizQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAdminLessonQuizQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAdminLessonQuizQuery({
+ *   variables: {
+ *      nodeId: // value for 'nodeId'
+ *   },
+ * });
+ */
+export function useAdminLessonQuizQuery(baseOptions: ApolloReactHooks.QueryHookOptions<AdminLessonQuizQuery, AdminLessonQuizQueryVariables> & ({ variables: AdminLessonQuizQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>(AdminLessonQuizDocument, options);
+      }
+export function useAdminLessonQuizLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<AdminLessonQuizQuery, AdminLessonQuizQueryVariables>(AdminLessonQuizDocument, options);
+        }
+export type AdminLessonQuizQueryHookResult = ReturnType<typeof useAdminLessonQuizQuery>;
+export type AdminLessonQuizLazyQueryHookResult = ReturnType<typeof useAdminLessonQuizLazyQuery>;
 export const AdminLeaderboardDocument = gql`
     query AdminLeaderboard($limit: Int = 100) {
   leaderboard(limit: $limit) {
@@ -8292,8 +8609,11 @@ export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLe
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
-    id
-    status
+    progress {
+      id
+      status
+    }
+    xpAwarded
   }
 }
     `;
@@ -8356,6 +8676,7 @@ export const SubmitQuizAttemptDocument = gql`
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    xpAwarded
     answers {
       id
       questionId
@@ -8367,7 +8688,7 @@ export const SubmitQuizAttemptDocument = gql`
         explanation
         type
         canonicalAnswer
-        options {
+        options(orderBy: [{order: asc}]) {
           id
           text
           isCorrect
@@ -8464,6 +8785,84 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
+export const CourseDetailProgressDocument = gql`
+    query CourseDetailProgress($courseId: ID!) {
+  courseProgress(courseId: $courseId) {
+    courseId
+    totalNodes
+    inProgressNodes
+    completedNodes
+    completionPercentage
+    xpEarned
+  }
+}
+    `;
+
+/**
+ * __useCourseDetailProgressQuery__
+ *
+ * To run a query within a React component, call `useCourseDetailProgressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCourseDetailProgressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCourseDetailProgressQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useCourseDetailProgressQuery(baseOptions: ApolloReactHooks.QueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables> & ({ variables: CourseDetailProgressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+      }
+export function useCourseDetailProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+        }
+export type CourseDetailProgressQueryHookResult = ReturnType<typeof useCourseDetailProgressQuery>;
+export type CourseDetailProgressLazyQueryHookResult = ReturnType<typeof useCourseDetailProgressLazyQuery>;
+export const CurrentUserStatsDocument = gql`
+    query CurrentUserStats {
+  currentUser {
+    id
+    xp {
+      totalXp
+    }
+    streak {
+      currentDays
+    }
+  }
+}
+    `;
+
+/**
+ * __useCurrentUserStatsQuery__
+ *
+ * To run a query within a React component, call `useCurrentUserStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentUserStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrentUserStatsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCurrentUserStatsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>(CurrentUserStatsDocument, options);
+      }
+export function useCurrentUserStatsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CurrentUserStatsQuery, CurrentUserStatsQueryVariables>(CurrentUserStatsDocument, options);
+        }
+export type CurrentUserStatsQueryHookResult = ReturnType<typeof useCurrentUserStatsQuery>;
+export type CurrentUserStatsLazyQueryHookResult = ReturnType<typeof useCurrentUserStatsLazyQuery>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String, $timezone: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl, timezone: $timezone) {
@@ -8473,6 +8872,10 @@ export const SyncCurrentUserDocument = gql`
     photoUrl
     timezone
     role
+    quizAttempts(where: {passed: {equals: true}}, distinct: [quizId]) {
+      id
+      quizId
+    }
   }
 }
     `;
@@ -8501,6 +8904,51 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const HomeXpWidgetsDocument = gql`
+    query HomeXpWidgets($since: DateTime!) {
+  currentUser {
+    id
+    dailyGoalMinutes
+    timezone
+    streak {
+      currentDays
+      lastActive
+    }
+    xpEvents(where: {createdAt: {gte: $since}}) {
+      id
+      amount
+      createdAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useHomeXpWidgetsQuery__
+ *
+ * To run a query within a React component, call `useHomeXpWidgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeXpWidgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHomeXpWidgetsQuery({
+ *   variables: {
+ *      since: // value for 'since'
+ *   },
+ * });
+ */
+export function useHomeXpWidgetsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables> & ({ variables: HomeXpWidgetsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+      }
+export function useHomeXpWidgetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+        }
+export type HomeXpWidgetsQueryHookResult = ReturnType<typeof useHomeXpWidgetsQuery>;
+export type HomeXpWidgetsLazyQueryHookResult = ReturnType<typeof useHomeXpWidgetsLazyQuery>;
 export const LearnerCourseTreeDocument = gql`
     query LearnerCourseTree($courseId: ID!) {
   courseForLearner(id: $courseId) {
@@ -8732,11 +9180,11 @@ export const PublicCourseDocument = gql`
           id
           title
           required
-          questions {
+          questions(orderBy: [{order: asc}]) {
             id
             prompt
             type
-            options {
+            options(orderBy: [{order: asc}]) {
               id
               text
             }

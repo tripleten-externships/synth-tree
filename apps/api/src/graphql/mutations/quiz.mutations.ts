@@ -8,7 +8,12 @@ import { incrementDailyQuestProgress } from "src/services/dailyQuests";
 import { completeNodeForUser } from "src/services/progress";
 import { awardXp } from "../../services/xp";
 import logger from "@lib/logger"; // Structured logger used for tracking quiz-related events
-import { QuizAnswerInput } from "../inputs/quiz.inputs";
+import { QuizAnswerInput, SaveQuizInput } from "../inputs/quiz.inputs";
+import {
+  saveQuiz as saveQuizForNode,
+  validateSaveQuizInput,
+  type SaveQuizInputShape,
+} from "src/services/quiz/saveQuiz";
 
 // SYN-40: passing a quiz awards a dedicated, fixed XP amount (distinct from a
 // node's own completion reward).
@@ -113,6 +118,41 @@ builder.mutationFields((t) => ({
       */
 
       return deleted;
+    },
+  }),
+
+  /**
+   * SYN-72: saves an authored quiz for a node in one atomic call. The admin
+   * lesson editor sends the whole quiz, and rows are matched by id so editing
+   * keeps learners' existing answers. See services/quiz/saveQuiz.ts.
+   */
+  saveQuiz: t.prismaField({
+    type: "Quiz",
+    args: {
+      nodeId: t.arg.id({ required: true }),
+      input: t.arg({ type: SaveQuizInput, required: true }),
+    },
+    resolve: async (query, _root, { nodeId, input }, ctx) => {
+      ctx.auth.requireAuth();
+
+      await assertNodeOwnership(ctx, String(nodeId));
+
+      // Validate before opening the transaction so an invalid quiz costs
+      // nothing and never lands half-written.
+      const quizInput = input as unknown as SaveQuizInputShape;
+      validateSaveQuizInput(quizInput);
+
+      const quizId = await ctx.prisma.$transaction(
+        (tx) => saveQuizForNode(tx, String(nodeId), quizInput),
+        // A long quiz is a lot of statements, and the default 5s is tight for
+        // one on a loaded database.
+        { timeout: 15000 },
+      );
+
+      return ctx.prisma.quiz.findUniqueOrThrow({
+        ...query,
+        where: { id: quizId },
+      });
     },
   }),
 
@@ -299,6 +339,11 @@ builder.mutationFields((t) => ({
         data: {
           questionId: questionId,
           text: text,
+          // Append after the existing options so this mutation and saveQuiz
+          // agree on what `order` means. Taken from the highest order rather
+          // than the count, which would repeat a position after a delete.
+          order:
+            existing.options.reduce((highest, option) => Math.max(highest, option.order), -1) + 1,
           ...(isCorrect !== undefined && isCorrect !== null && { isCorrect }),
         },
       });
@@ -461,6 +506,9 @@ builder.mutationFields((t) => ({
         //   persisted) and feeds the LESSON_COMPLETED daily-quest hook.
         // - awardXp keeps its own idempotency guard (rewardKey), so repeat
         //   passes don't double-award.
+        // - attemptId tags the XP event with the attempt that earned it, so
+        //   QuizAttempt.xpAwarded reports only XP granted by this attempt; a
+        //   repeat pass creates no new event, so it reports 0 (SYN-61).
         if (summary.passed === true) {
           await completeNodeForUser(tx, userId, existing.nodeId);
 
@@ -469,7 +517,7 @@ builder.mutationFields((t) => ({
             userId,
             QUIZ_PASS_XP,
             "quiz_pass",
-            { quizId },
+            { quizId, attemptId: quizAttempt.id },
             tx,
           );
         }

@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const tabs = [
   { label: "Home", to: "/" },
-  { label: "Catalog", to: "/skill-trees" },
+  { label: "Catalog", to: "/catalog" },
   { label: "Profile", to: "/profile" },
 ];
 

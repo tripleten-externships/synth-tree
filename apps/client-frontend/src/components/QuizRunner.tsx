@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
+import { CurrentUserStatsDocument } from "@synth-tree/api-types";
 import { Input } from "@synth-tree/ui";
 import { SUBMIT_QUIZ_ATTEMPT } from "../graphql/mutations/submitQuizAttempt";
 import QuizSingle from "./QuizSingle";
@@ -42,6 +43,8 @@ type SubmittedAnswer = {
 type QuizAttemptResult = {
   id: string;
   passed: boolean | null;
+  // XP granted by this attempt (quiz-pass reward); 0 on a fail or repeat pass.
+  xpAwarded: number;
   answers: SubmittedAnswer[];
 };
 
@@ -102,7 +105,15 @@ function ResultSummary({ result }: { result: QuizAttemptResult }) {
   );
 }
 
-export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
+export default function QuizRunner({
+  quiz,
+  onXpAwarded,
+}: {
+  quiz: QuizForRunner;
+  // Reports XP granted by a submitted attempt, so the lesson-finish screen can
+  // include it (SYN-61). Only called when the attempt actually granted XP.
+  onXpAwarded?: (xp: number) => void;
+}) {
   const [choice, setChoice] = useState<Record<string, string[]>>({});
   const [text, setText] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizAttemptResult | null>(null);
@@ -115,8 +126,11 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
     isTextAnswer(q.type) ? !!text[q.id]?.trim() : (choice[q.id] ?? []).length > 0,
   );
 
-  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT);
-
+  const [submit, { loading, error }] = useMutation<SubmitResult>(SUBMIT_QUIZ_ATTEMPT, {
+    // Refresh navbar XP/streak in the background; not awaited so a failed
+    // stats refetch can't reject (and falsely fail) the mutation itself.
+    refetchQueries: [CurrentUserStatsDocument],
+  });
   const toggle = (qId: string, optId: string, multiple: boolean) =>
     setChoice((prev) => {
       const cur = prev[qId] ?? [];
@@ -159,7 +173,11 @@ export default function QuizRunner({ quiz }: { quiz: QuizForRunner }) {
       },
     });
 
-    setResult(res.data?.submitQuizAttempt ?? null);
+    const attempt = res.data?.submitQuizAttempt ?? null;
+    setResult(attempt);
+    if (attempt && attempt.xpAwarded > 0) {
+      onXpAwarded?.(attempt.xpAwarded);
+    }
   };
 
   const onRetry = () => {
