@@ -20,11 +20,14 @@ export const PUBLIC_COURSE_QUERY = gql`
             id
             title
             required
-            questions {
+            # Sorted explicitly: without an orderBy the rows come back in
+            # whatever order Postgres stores them, so an edited question or
+            # answer could move once an author changes it.
+            questions(orderBy: [{ order: asc }]) {
               id
               prompt
               type
-              options {
+              options(orderBy: [{ order: asc }]) {
                 id
                 text
               }
@@ -51,4 +54,3 @@ export const PUBLIC_GET_ALL_COURSES_QUERY = gql`
     }
   }
 `;
-
