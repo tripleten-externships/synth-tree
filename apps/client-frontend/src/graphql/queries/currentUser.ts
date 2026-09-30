@@ -22,12 +22,11 @@ export const SYNC_CURRENT_USER = gql`
       name
       photoUrl
       role
-      # stats will work once backend supports it
-      # stats {
-      #   courses
-      #   nodes
-      #   quizzes
-      # }
+      # One passed attempt per quiz, so retakes aren't double-counted.
+      quizAttempts(where: { passed: { equals: true } }, distinct: [quizId]) {
+        id
+        quizId
+      }
     }
   }
 `;
@@ -39,10 +38,9 @@ export interface SyncCurrentUserResponse {
     name: string;
     photoUrl: string;
     role: string;
-    stats?: {
-      courses: number;
-      nodes: number;
-      quizzes: number;
-    };
+    quizAttempts: {
+      id: string;
+      quizId: string;
+    }[];
   };
 }
