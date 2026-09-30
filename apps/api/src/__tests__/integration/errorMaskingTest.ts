@@ -4,8 +4,8 @@ import { PrismaClient } from "@prisma/client";
 import { GraphQLContext } from "@graphql/context";
 import { INTERNAL_ERROR_MESSAGE } from "@lib/formatError";
 import { getTestServer } from "./server";
-import { makeUserContext, makeUnauthContext } from "./context";
-import { seedUsers, cleanAll, REGULAR_USER_ID } from "./seed";
+import { makeAdminContext, makeUserContext, makeUnauthContext } from "./context";
+import { seedUsers, cleanAll, ADMIN_USER_ID, REGULAR_USER_ID } from "./seed";
 
 // Internal error text (Prisma messages, file paths, stack traces) must not
 // reach clients; intentional GraphQLError messages still do.
@@ -17,8 +17,17 @@ function singleResult(result: any) {
   return result.body.singleResult;
 }
 
-// lessonBlock(id) uses findUniqueOrThrow, so an unknown id makes Prisma throw
-// a PrismaClientKnownRequestError (P2025) from the resolver.
+// publishLessonBlock(id) calls prisma.lessonBlocks.update directly, so an
+// unknown id makes Prisma throw a PrismaClientKnownRequestError (P2025,
+// "record to update not found") from the resolver.
+const PUBLISH_LESSON_BLOCK = `
+  mutation PublishLessonBlock($id: ID!) {
+    publishLessonBlock(id: $id) {
+      id
+    }
+  }
+`;
+
 const LESSON_BLOCK = `
   query LessonBlock($id: ID!) {
     lessonBlock(id: $id) {
@@ -43,15 +52,15 @@ describe("error masking", () => {
   it("replaces a Prisma error with a generic message", async () => {
     const res = singleResult(
       await server.executeOperation(
-        { query: LESSON_BLOCK, variables: { id: randomUUID() } },
-        { contextValue: makeUserContext(prisma, REGULAR_USER_ID) },
+        { query: PUBLISH_LESSON_BLOCK, variables: { id: randomUUID() } },
+        { contextValue: makeAdminContext(prisma, ADMIN_USER_ID) },
       ),
     );
 
     expect(res.errors).toHaveLength(1);
     expect(res.errors[0].message).toBe(INTERNAL_ERROR_MESSAGE);
     expect(res.errors[0].extensions).toEqual({ code: "INTERNAL_SERVER_ERROR" });
-    expect(JSON.stringify(res.errors)).not.toMatch(/prisma|findUniqueOrThrow|\.ts:/i);
+    expect(JSON.stringify(res.errors)).not.toMatch(/prisma|lessonBlocks\.update|\.ts:/i);
   });
 
   it("keeps an intentional GraphQLError message, without a stack trace", async () => {

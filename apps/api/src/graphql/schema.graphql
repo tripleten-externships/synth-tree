@@ -229,6 +229,11 @@ input BoolWithAggregatesFilter {
   not: NestedBoolWithAggregatesFilter
 }
 
+type CompleteNodeProgressPayload {
+  progress: UserNodeProgress
+  xpAwarded: Int
+}
+
 enum ContentType {
   EMBED
   HTML
@@ -410,6 +415,7 @@ type CourseProgress {
   inProgressNodes: Int
   notStartedNodes: Int
   totalNodes: Int
+  xpEarned: Int
 }
 
 enum CourseScalarFieldEnum {
@@ -1313,7 +1319,7 @@ enum LessonStatus {
 }
 
 type Mutation {
-  completeNodeProgress(nodeId: ID!): UserNodeProgress
+  completeNodeProgress(nodeId: ID!): CompleteNodeProgressPayload
   createCourse(input: CreateCourseInput!): Course
   createFirstSkillNode(input: CreateFirstSkillNodeInput!): SkillNode
   createLessonBlock(input: LessonBlocksCreateInput!): LessonBlocks
@@ -1840,6 +1846,7 @@ type QuizAttempt {
   takenAt: DateTime!
   user: User!
   userId: String!
+  xpAwarded: Int!
 }
 
 type QuizAttemptAnswer {

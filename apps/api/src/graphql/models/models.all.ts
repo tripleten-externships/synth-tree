@@ -471,9 +471,39 @@ builder.prismaObject("QuizOption", {
     }),
   }),
 });
-builder.prismaObject("QuizAttempt", QuizAttemptObject);
+builder.prismaObject("QuizAttempt", {
+  ...QuizAttemptObject,
+  fields: (t) => ({
+    ...QuizAttemptObject.fields(t),
+
+    // SYN-61: XP granted by THIS attempt (the quiz-pass reward), so the
+    // lesson-finish screen can show it. submitQuizAttempt tags the quiz_pass
+    // XpEvent with the attemptId that earned it; awardXp is idempotent per quiz,
+    // so a repeat pass creates no new event and this resolves to 0.
+    xpAwarded: t.int({
+      nullable: false,
+      resolve: async (parent, _args, ctx) => {
+        const event = await ctx.prisma.xpEvent.findFirst({
+          where: {
+            userId: parent.userId,
+            reason: "quiz_pass",
+            rewardKey: parent.quizId,
+            metadata: { path: ["attemptId"], equals: parent.id },
+          },
+          select: { amount: true },
+        });
+        return event?.amount ?? 0;
+      },
+    }),
+  }),
+});
 builder.prismaObject("QuizAttemptAnswer", QuizAttemptAnswerObject);
-builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
+// Captured + exported (unlike the other prismaObject registrations) so the
+// completeNodeProgress payload type can reference UserNodeProgress as a nested
+// field. A plain objectRef can't reference a Prisma model by its string name —
+// it needs this ref handle. See CompleteNodeProgressPayload in
+// progress.mutations.ts (SYN-61).
+export const UserNodeProgressRef = builder.prismaObject("UserNodeProgress", UserNodeProgressObject);
 // XP / streak models (added in #75). The User object exposes relations to these,
 // so the schema build requires them to be implemented here.
 builder.prismaObject("UserXp", UserXpObject);
@@ -507,6 +537,7 @@ export type CourseProgressShape = {
   completedNodes: number;
   notStartedNodes: number;
   completionPercentage: number;
+  xpEarned: number;
 };
 
 export const CourseProgress = builder.objectRef<CourseProgressShape>("CourseProgress").implement({
@@ -517,5 +548,6 @@ export const CourseProgress = builder.objectRef<CourseProgressShape>("CourseProg
     completedNodes: t.exposeInt("completedNodes"),
     notStartedNodes: t.exposeInt("notStartedNodes"),
     completionPercentage: t.exposeInt("completionPercentage"),
+    xpEarned: t.exposeInt("xpEarned"),
   }),
 });

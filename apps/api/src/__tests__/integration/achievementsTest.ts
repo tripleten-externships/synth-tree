@@ -92,7 +92,8 @@ describe("achievements (resolver level)", () => {
     );
 
     expect(res.errors).toBeUndefined();
-    expect(res.data.completeNodeProgress.status).toBe("COMPLETED");
+    expect(res.data.completeNodeProgress.progress.status).toBe("COMPLETED");
+    expect(res.data.completeNodeProgress.xpAwarded).toBeGreaterThan(0);
 
     const earned = await prisma.userAchievement.findUnique({
       where: {
