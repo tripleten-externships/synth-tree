@@ -506,10 +506,20 @@ builder.mutationFields((t) => ({
         //   persisted) and feeds the LESSON_COMPLETED daily-quest hook.
         // - awardXp keeps its own idempotency guard (rewardKey), so repeat
         //   passes don't double-award.
+        // - attemptId tags the XP event with the attempt that earned it, so
+        //   QuizAttempt.xpAwarded reports only XP granted by this attempt; a
+        //   repeat pass creates no new event, so it reports 0 (SYN-61).
         if (summary.passed === true) {
           await completeNodeForUser(tx, userId, existing.nodeId);
 
-          await awardXp(ctx.prisma, userId, QUIZ_PASS_XP, "quiz_pass", { quizId }, tx);
+          await awardXp(
+            ctx.prisma,
+            userId,
+            QUIZ_PASS_XP,
+            "quiz_pass",
+            { quizId, attemptId: quizAttempt.id },
+            tx,
+          );
         }
 
         return {

@@ -58,6 +58,12 @@ export type BoolWithAggregatesFilter = {
   not?: InputMaybe<NestedBoolWithAggregatesFilter>;
 };
 
+export type CompleteNodeProgressPayload = {
+  __typename?: 'CompleteNodeProgressPayload';
+  progress?: Maybe<UserNodeProgress>;
+  xpAwarded?: Maybe<Scalars['Int']['output']>;
+};
+
 export type ContentType =
   | 'EMBED'
   | 'HTML'
@@ -250,6 +256,7 @@ export type CourseProgress = {
   inProgressNodes?: Maybe<Scalars['Int']['output']>;
   notStartedNodes?: Maybe<Scalars['Int']['output']>;
   totalNodes?: Maybe<Scalars['Int']['output']>;
+  xpEarned?: Maybe<Scalars['Int']['output']>;
 };
 
 export type CourseScalarFieldEnum =
@@ -1147,7 +1154,7 @@ export type LessonStatus =
 
 export type Mutation = {
   __typename?: 'Mutation';
-  completeNodeProgress?: Maybe<UserNodeProgress>;
+  completeNodeProgress?: Maybe<CompleteNodeProgressPayload>;
   createCourse?: Maybe<Course>;
   createFirstSkillNode?: Maybe<SkillNode>;
   createLessonBlock?: Maybe<LessonBlocks>;
@@ -2063,6 +2070,7 @@ export type QuizAttempt = {
   takenAt: Scalars['DateTime']['output'];
   user: User;
   userId: Scalars['String']['output'];
+  xpAwarded: Scalars['Int']['output'];
 };
 
 
@@ -7641,7 +7649,7 @@ export type CompleteNodeProgressMutationVariables = Exact<{
 }>;
 
 
-export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null };
+export type CompleteNodeProgressMutation = { __typename?: 'Mutation', completeNodeProgress?: { __typename?: 'CompleteNodeProgressPayload', xpAwarded?: number | null, progress?: { __typename?: 'UserNodeProgress', id: string, status: ProgressStatus } | null } | null };
 
 export type StartNodeProgressMutationVariables = Exact<{
   nodeId: Scalars['ID']['input'];
@@ -7656,7 +7664,7 @@ export type SubmitQuizAttemptMutationVariables = Exact<{
 }>;
 
 
-export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
+export type SubmitQuizAttemptMutation = { __typename?: 'Mutation', submitQuizAttempt?: { __typename?: 'QuizAttempt', id: string, passed?: boolean | null, xpAwarded: number, answers: Array<{ __typename?: 'QuizAttemptAnswer', id: string, questionId: string, answer?: any | null, isCorrect?: boolean | null, question: { __typename?: 'QuizQuestion', id: string, prompt: string, explanation?: string | null, type: QuestionType, canonicalAnswer?: string | null, options: Array<{ __typename?: 'QuizOption', id: string, text: string, isCorrect?: boolean | null }> } }> } | null };
 
 export type UpdateOnboardingMutationVariables = Exact<{
   interests: Array<Scalars['String']['input']> | Scalars['String']['input'];
@@ -7672,6 +7680,13 @@ export type CompleteOnboardingMutationVariables = Exact<{
 
 export type CompleteOnboardingMutation = { __typename?: 'Mutation', updateOnboarding?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, onboardingComplete?: boolean | null } | null };
 
+export type CourseDetailProgressQueryVariables = Exact<{
+  courseId: Scalars['ID']['input'];
+}>;
+
+
+export type CourseDetailProgressQuery = { __typename?: 'Query', courseProgress?: { __typename?: 'CourseProgress', courseId?: string | null, totalNodes?: number | null, inProgressNodes?: number | null, completedNodes?: number | null, completionPercentage?: number | null, xpEarned?: number | null } | null };
+
 export type SyncCurrentUserMutationVariables = Exact<{
   name?: InputMaybe<Scalars['String']['input']>;
   photoUrl?: InputMaybe<Scalars['String']['input']>;
@@ -7679,6 +7694,13 @@ export type SyncCurrentUserMutationVariables = Exact<{
 
 
 export type SyncCurrentUserMutation = { __typename?: 'Mutation', syncCurrentUser?: { __typename?: 'User', id: string, email?: string | null, name?: string | null, photoUrl?: string | null, role: Role } | null };
+
+export type HomeXpWidgetsQueryVariables = Exact<{
+  since: Scalars['DateTime']['input'];
+}>;
+
+
+export type HomeXpWidgetsQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', id: string, dailyGoalMinutes?: number | null, timezone?: string | null, streak?: { __typename?: 'UserStreak', currentDays: number, lastActive?: any | null } | null, xpEvents: Array<{ __typename?: 'XpEvent', id: string, amount: number, createdAt: any }> } | null };
 
 export type LearnerCourseTreeQueryVariables = Exact<{
   courseId: Scalars['ID']['input'];
@@ -8493,8 +8515,11 @@ export type GlobalLeaderboardLazyQueryHookResult = ReturnType<typeof useGlobalLe
 export const CompleteNodeProgressDocument = gql`
     mutation CompleteNodeProgress($nodeId: ID!) {
   completeNodeProgress(nodeId: $nodeId) {
-    id
-    status
+    progress {
+      id
+      status
+    }
+    xpAwarded
   }
 }
     `;
@@ -8557,6 +8582,7 @@ export const SubmitQuizAttemptDocument = gql`
   submitQuizAttempt(quizId: $quizId, answers: $answers) {
     id
     passed
+    xpAwarded
     answers {
       id
       questionId
@@ -8665,6 +8691,45 @@ export function useCompleteOnboardingMutation(baseOptions?: ApolloReactHooks.Mut
         return ApolloReactHooks.useMutation<CompleteOnboardingMutation, CompleteOnboardingMutationVariables>(CompleteOnboardingDocument, options);
       }
 export type CompleteOnboardingMutationHookResult = ReturnType<typeof useCompleteOnboardingMutation>;
+export const CourseDetailProgressDocument = gql`
+    query CourseDetailProgress($courseId: ID!) {
+  courseProgress(courseId: $courseId) {
+    courseId
+    totalNodes
+    inProgressNodes
+    completedNodes
+    completionPercentage
+    xpEarned
+  }
+}
+    `;
+
+/**
+ * __useCourseDetailProgressQuery__
+ *
+ * To run a query within a React component, call `useCourseDetailProgressQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCourseDetailProgressQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCourseDetailProgressQuery({
+ *   variables: {
+ *      courseId: // value for 'courseId'
+ *   },
+ * });
+ */
+export function useCourseDetailProgressQuery(baseOptions: ApolloReactHooks.QueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables> & ({ variables: CourseDetailProgressQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+      }
+export function useCourseDetailProgressLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<CourseDetailProgressQuery, CourseDetailProgressQueryVariables>(CourseDetailProgressDocument, options);
+        }
+export type CourseDetailProgressQueryHookResult = ReturnType<typeof useCourseDetailProgressQuery>;
+export type CourseDetailProgressLazyQueryHookResult = ReturnType<typeof useCourseDetailProgressLazyQuery>;
 export const SyncCurrentUserDocument = gql`
     mutation SyncCurrentUser($name: String, $photoUrl: String) {
   syncCurrentUser(name: $name, photoUrl: $photoUrl) {
@@ -8700,6 +8765,51 @@ export function useSyncCurrentUserMutation(baseOptions?: ApolloReactHooks.Mutati
         return ApolloReactHooks.useMutation<SyncCurrentUserMutation, SyncCurrentUserMutationVariables>(SyncCurrentUserDocument, options);
       }
 export type SyncCurrentUserMutationHookResult = ReturnType<typeof useSyncCurrentUserMutation>;
+export const HomeXpWidgetsDocument = gql`
+    query HomeXpWidgets($since: DateTime!) {
+  currentUser {
+    id
+    dailyGoalMinutes
+    timezone
+    streak {
+      currentDays
+      lastActive
+    }
+    xpEvents(where: {createdAt: {gte: $since}}) {
+      id
+      amount
+      createdAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useHomeXpWidgetsQuery__
+ *
+ * To run a query within a React component, call `useHomeXpWidgetsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHomeXpWidgetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHomeXpWidgetsQuery({
+ *   variables: {
+ *      since: // value for 'since'
+ *   },
+ * });
+ */
+export function useHomeXpWidgetsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables> & ({ variables: HomeXpWidgetsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+      }
+export function useHomeXpWidgetsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HomeXpWidgetsQuery, HomeXpWidgetsQueryVariables>(HomeXpWidgetsDocument, options);
+        }
+export type HomeXpWidgetsQueryHookResult = ReturnType<typeof useHomeXpWidgetsQuery>;
+export type HomeXpWidgetsLazyQueryHookResult = ReturnType<typeof useHomeXpWidgetsLazyQuery>;
 export const LearnerCourseTreeDocument = gql`
     query LearnerCourseTree($courseId: ID!) {
   courseForLearner(id: $courseId) {

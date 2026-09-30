@@ -15,8 +15,11 @@ function singleResult(result: any) {
 const COMPLETE_NODE = `
   mutation CompleteNodeProgress($nodeId: ID!) {
     completeNodeProgress(nodeId: $nodeId) {
-      id
-      status
+      progress {
+        id
+        status
+      }
+      xpAwarded
     }
   }
 `;
@@ -71,7 +74,7 @@ describe("Earn 50 XP daily quest", () => {
       ),
     );
     expect(res.errors).toBeUndefined();
-    expect(res.data.completeNodeProgress.status).toBe("COMPLETED");
+    expect(res.data.completeNodeProgress.progress.status).toBe("COMPLETED");
   }
 
   it("advances by awarded XP, accumulates, caps at 50 and completes once", async () => {

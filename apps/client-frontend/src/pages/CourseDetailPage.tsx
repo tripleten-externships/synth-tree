@@ -2,7 +2,7 @@
 // Loads when a learner clicks a course card. courseId comes from the URL.
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useLearnerCourseTreeQuery } from "@synth-tree/api-types";
+import { useCourseDetailProgressQuery, useLearnerCourseTreeQuery } from "@synth-tree/api-types";
 import { Button, Card, Hex, Progress } from "@synth-tree/ui";
 import CourseSkillTree from "../components/CourseSkillTree";
 import { deriveSkillTree, PLACEHOLDER_ICON } from "../lib/deriveSkillTree";
@@ -26,6 +26,13 @@ export default function CourseDetailPage() {
     // Refetch on every visit so node states reflect lessons finished since.
     fetchPolicy: "cache-and-network",
   });
+  // SYN-38: course-level aggregate (progress bar, chapters passed, XP earned)
+  // comes from the API rather than client-side counts.
+  const { data: progressData } = useCourseDetailProgressQuery({
+    variables: { courseId: courseId ?? "" },
+    skip: !courseId,
+    fetchPolicy: "cache-and-network",
+  });
 
   const course = data?.courseForLearner;
   const allNodes = useMemo(() => course?.trees.flatMap((t) => t.nodes) ?? [], [course]);
@@ -33,6 +40,14 @@ export default function CourseDetailPage() {
     () => summarizeCourseProgress(allNodes, deriveSkillTree(allNodes).nodes),
     [allNodes],
   );
+  // Server aggregate wins; the client-side numbers only fill in until it loads.
+  // summarizeCourseProgress is still used below for the Continue button, which
+  // needs per-node states.
+  const serverProgress = progressData?.courseProgress;
+  const percent = serverProgress?.completionPercentage ?? progress.percent;
+  const completed = serverProgress?.completedNodes ?? progress.completed;
+  const total = serverProgress?.totalNodes ?? progress.total;
+  const xpEarned = serverProgress?.xpEarned;
 
   if (loading && !course) return <div className="p-8">Loading…</div>;
   if (error && !course) return <div className="p-8">Error: {error.message}</div>;
@@ -63,17 +78,15 @@ export default function CourseDetailPage() {
           <div>
             <div className="mb-1.5 flex items-baseline justify-between">
               <span className="text-sm font-medium text-foreground">Course progress</span>
-              <span className="text-sm font-semibold tabular-nums text-primary">
-                {progress.percent}%
-              </span>
+              <span className="text-sm font-semibold tabular-nums text-primary">{percent}%</span>
             </div>
-            <Progress value={progress.percent} />
+            <Progress value={percent} />
           </div>
 
           <Card className="p-4">
-            <StatRow label="Chapters passed" value={`${progress.completed}/${progress.total}`} />
-            {/* XP and time per course aren't tracked yet (SYN-78). */}
-            <StatRow label="XP earned" value="—" />
+            <StatRow label="Chapters passed" value={`${completed}/${total}`} />
+            <StatRow label="XP earned" value={xpEarned === undefined ? "—" : String(xpEarned)} />
+            {/* Time per course isn't tracked yet (SYN-78). */}
             <StatRow label="Time spent" value="—" />
           </Card>
 
