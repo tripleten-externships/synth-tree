@@ -600,6 +600,11 @@ input EnumRoleWithAggregatesFilter {
   notIn: [Role!]
 }
 
+type ImageUploadUrlPayload {
+  objectUrl: String!
+  uploadUrl: String!
+}
+
 input IntFieldUpdateOperationsInput {
   decrement: Int
   divide: Int
@@ -1140,6 +1145,7 @@ type Mutation {
   publishCourse(id: ID!): Course
   publishLessonBlock(id: ID!): LessonBlocks
   reorderLessonBlocks(nodeId: ID!, orderedBlockIds: [ID!]!): [LessonBlocks!]
+  requestImageUploadUrl(contentType: String!, fileName: String!, fileSize: Int!): ImageUploadUrlPayload
   setUserRole(role: Role!, userId: ID!): User
   startNodeProgress(nodeId: ID!): UserNodeProgress
   submitQuizAttempt(answers: [QuizAnswerInput!]!, quizId: ID!): QuizAttempt

@@ -631,6 +631,12 @@ export type EnumRoleWithAggregatesFilter = {
   notIn?: InputMaybe<Array<Role>>;
 };
 
+export type ImageUploadUrlPayload = {
+  __typename?: 'ImageUploadUrlPayload';
+  objectUrl: Scalars['String']['output'];
+  uploadUrl: Scalars['String']['output'];
+};
+
 export type IntFieldUpdateOperationsInput = {
   decrement?: InputMaybe<Scalars['Int']['input']>;
   divide?: InputMaybe<Scalars['Int']['input']>;
@@ -1169,6 +1175,7 @@ export type Mutation = {
   publishCourse?: Maybe<Course>;
   publishLessonBlock?: Maybe<LessonBlocks>;
   reorderLessonBlocks?: Maybe<Array<LessonBlocks>>;
+  requestImageUploadUrl?: Maybe<ImageUploadUrlPayload>;
   setUserRole?: Maybe<User>;
   startNodeProgress?: Maybe<UserNodeProgress>;
   submitQuizAttempt?: Maybe<QuizAttempt>;
@@ -1301,6 +1308,13 @@ export type MutationPublishLessonBlockArgs = {
 export type MutationReorderLessonBlocksArgs = {
   nodeId: Scalars['ID']['input'];
   orderedBlockIds: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationRequestImageUploadUrlArgs = {
+  contentType: Scalars['String']['input'];
+  fileName: Scalars['String']['input'];
+  fileSize: Scalars['Int']['input'];
 };
 
 
@@ -7441,6 +7455,15 @@ export type XpEventWhereUniqueInput = {
   userId_reason_rewardKey?: InputMaybe<XpEventUserIdReasonRewardKeyCompoundUniqueInput>;
 };
 
+export type RequestImageUploadUrlMutationVariables = Exact<{
+  fileName: Scalars['String']['input'];
+  contentType: Scalars['String']['input'];
+  fileSize: Scalars['Int']['input'];
+}>;
+
+
+export type RequestImageUploadUrlMutation = { __typename?: 'Mutation', requestImageUploadUrl?: { __typename?: 'ImageUploadUrlPayload', uploadUrl: string, objectUrl: string } | null };
+
 export type UpdateCourseMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   input: UpdateCourseInput;
@@ -7521,7 +7544,7 @@ export type AdminLessonBlocksByNodeQueryVariables = Exact<{
 }>;
 
 
-export type AdminLessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null }> | null };
+export type AdminLessonBlocksByNodeQuery = { __typename?: 'Query', lessonBlocksByNode?: Array<{ __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null, url?: string | null }> | null };
 
 export type SaveLessonTitleMutationVariables = Exact<{
   updateSkillNodeId: Scalars['ID']['input'];
@@ -7536,7 +7559,7 @@ export type CreateLessonBlockMutationVariables = Exact<{
 }>;
 
 
-export type CreateLessonBlockMutation = { __typename?: 'Mutation', createLessonBlock?: { __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null } | null };
+export type CreateLessonBlockMutation = { __typename?: 'Mutation', createLessonBlock?: { __typename?: 'LessonBlocks', id: string, nodeId: string, order: number, caption?: string | null, type: ContentType, html?: string | null, url?: string | null } | null };
 
 export type UpdateLessonBlockMutationVariables = Exact<{
   input: LessonBlocksUpdateInput;
@@ -7660,6 +7683,43 @@ export type RecommendedNextQueryVariables = Exact<{
 export type RecommendedNextQuery = { __typename?: 'Query', currentUser?: { __typename?: 'User', recommendedNext?: Array<{ __typename?: 'SkillNode', id: string, title: string, step: number, orderInStep: number, tree: { __typename?: 'SkillTree', id: string, title: string, course: { __typename?: 'Course', id: string, title: string } } }> | null } | null };
 
 
+export const RequestImageUploadUrlDocument = gql`
+    mutation RequestImageUploadUrl($fileName: String!, $contentType: String!, $fileSize: Int!) {
+  requestImageUploadUrl(
+    fileName: $fileName
+    contentType: $contentType
+    fileSize: $fileSize
+  ) {
+    uploadUrl
+    objectUrl
+  }
+}
+    `;
+
+/**
+ * __useRequestImageUploadUrlMutation__
+ *
+ * To run a mutation, you first call `useRequestImageUploadUrlMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRequestImageUploadUrlMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [requestImageUploadUrlMutation, { data, loading, error }] = useRequestImageUploadUrlMutation({
+ *   variables: {
+ *      fileName: // value for 'fileName'
+ *      contentType: // value for 'contentType'
+ *      fileSize: // value for 'fileSize'
+ *   },
+ * });
+ */
+export function useRequestImageUploadUrlMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RequestImageUploadUrlMutation, RequestImageUploadUrlMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<RequestImageUploadUrlMutation, RequestImageUploadUrlMutationVariables>(RequestImageUploadUrlDocument, options);
+      }
+export type RequestImageUploadUrlMutationHookResult = ReturnType<typeof useRequestImageUploadUrlMutation>;
 export const UpdateCourseDocument = gql`
     mutation UpdateCourse($id: ID!, $input: UpdateCourseInput!) {
   updateCourse(id: $id, input: $input) {
@@ -8063,6 +8123,7 @@ export const AdminLessonBlocksByNodeDocument = gql`
     caption
     type
     html
+    url
   }
 }
     `;
@@ -8134,6 +8195,7 @@ export const CreateLessonBlockDocument = gql`
     caption
     type
     html
+    url
   }
 }
     `;

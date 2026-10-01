@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
+import { useRequestImageUploadUrlMutation } from "@synth-tree/api-types";
 import {closestCenter,DndContext,type DragEndEvent} from "@dnd-kit/core";
 import {arrayMove,SortableContext,useSortable,verticalListSortingStrategy} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -35,6 +36,7 @@ const GET_LESSON_BLOCK = gql`
       caption
       type
       html
+      url
     }
   }
 `;
@@ -57,6 +59,7 @@ const CREATE_LESSON_BLOCK = gql`
       caption
       type
       html
+      url
     }
   }
 `;
@@ -110,6 +113,7 @@ type GetLessonBlocksResponse = {
     caption?: string | null;
     type: string;
     html?: string | null;
+    url?: string | null;
   }[];
 };
 
@@ -142,11 +146,13 @@ function AddBlockMenu({
   openBlockId,
   onToggle,
   onAddText,
+  onAddImage,
 }: {
   controlKey: string;
   openBlockId: string | null;
   onToggle: (key: string) => void;
   onAddText: () => void;
+  onAddImage: () => void;
 }) {
   const comingSoonClass =
     "inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-muted-foreground opacity-50";
@@ -185,11 +191,10 @@ function AddBlockMenu({
             Heading
           </Button>
           <Button
-            disabled
-            title="Coming soon"
+            onClick={onAddImage}
             leftIcon={<Image />}
-            className={comingSoonClass}
-            aria-label="Add image block (coming soon)"
+            className="inline-flex items-center justify-center gap-2 whitespace-nowrap px-3 py-[7px] text-[13px] font-medium leading-none rounded-[10px] border border-transparent bg-transparent text-foreground transition-all duration-150"
+            aria-label="Add image block"
           >
             Image
           </Button>
@@ -258,6 +263,8 @@ function LessonEditor(){
     REORDER_LESSON_BLOCKS
   );
 
+  const [requestImageUploadUrl] = useRequestImageUploadUrlMutation();
+
   const handleAddButtonClick = (blockId: string) => {
     setOpenBlockId((currentBlockId) =>
       currentBlockId === blockId ? null : blockId,
@@ -306,6 +313,41 @@ function LessonEditor(){
     }));
   };
 
+  const handleAddImageBlock = (afterBlockId: string | null) => {
+    setOpenBlockId(null);
+
+    if (!nodeId) {
+      return;
+    }
+
+    const afterIndex = afterBlockId
+      ? lessonBlocks.findIndex((block) => block.id === afterBlockId)
+      : -1;
+
+    const insertionIndex = afterIndex >= 0 ? afterIndex + 1 : 0;
+
+    const newBlock: GetLessonBlocksResponse["lessonBlocksByNode"][number] = {
+      id: `temp-${crypto.randomUUID()}`,
+      nodeId,
+      order: insertionIndex,
+      caption: null,
+      type: "IMAGE",
+      html: null,
+      url: null,
+    };
+
+    const reorderedBlocks = [
+      ...lessonBlocks.slice(0, insertionIndex),
+      newBlock,
+      ...lessonBlocks.slice(insertionIndex),
+    ].map((block, index) => ({
+      ...block,
+      order: index,
+    }));
+
+    setLessonBlocks(reorderedBlocks);
+  };
+
   const handleSave = async () => {
     if (!nodeId) {
       return;
@@ -345,8 +387,17 @@ function LessonEditor(){
                 },
               },
               order: block.order,
-              type: "HTML",
-              html: DOMPurify.sanitize(textToSave[block.id] ?? ""),
+              type: block.type,
+              ...(block.type === "HTML"
+                ? {
+                    html: DOMPurify.sanitize(textToSave[block.id] ?? ""),
+                  }
+                : block.type === "IMAGE"
+                  ? {
+                      url: block.url,
+                      caption: block.caption,
+                    }
+                  : {}),
             },
           },
         });
@@ -370,6 +421,23 @@ function LessonEditor(){
                 input: {
                   id: { set: block.id },
                   html: { set: DOMPurify.sanitize(textToSave[block.id] ?? "") },
+                },
+              },
+            }),
+          ),
+      );
+
+      // Persist URL and caption edits for existing IMAGE blocks.
+      await Promise.all(
+        blocksToSave
+          .filter((block) => !block.id.startsWith("temp-") && block.type === "IMAGE")
+          .map((block) =>
+            updateLessonBlock({
+              variables: {
+                input: {
+                  id: { set: block.id },
+                  url: { set: block.url ?? null },
+                  caption: { set: block.caption ?? null },
                 },
               },
             }),
@@ -448,6 +516,98 @@ function LessonEditor(){
       [blockId]: newText,
     }));
   };
+
+  const handleCaptionChange = (blockId: string, caption: string) => {
+    setLessonBlocks((previousBlocks) =>
+      previousBlocks.map((block) =>
+        block.id === blockId
+          ? { ...block, caption }
+          : block
+      )
+    );
+  };
+
+  const handleImageSelect = async (
+    blockId: string,
+    file: File | undefined,
+  ) => {
+    if (!file) {
+      return;
+    }
+
+    const allowedImageTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif",
+    ];
+
+    if (!allowedImageTypes.includes(file.type)) {
+      toast("Invalid image type", {
+        description: "Please select a JPEG, PNG, WebP, or GIF image.",
+      });
+      return;
+    }
+
+    const maxFileSize = 5 * 1024 * 1024;
+
+    if (file.size > maxFileSize) {
+      toast("Image is too large", {
+        description: "Please select an image smaller than 5 MB.",
+      });
+      return;
+    }
+    try {
+      const { data } = await requestImageUploadUrl({
+        variables: {
+          fileName: file.name,
+          contentType: file.type,
+          fileSize: file.size,
+        },
+      });
+
+      if (!data?.requestImageUploadUrl) {
+        toast("Upload failed", {
+          description: "Could not prepare the image upload.",
+        });
+        return;
+      }
+
+      const { uploadUrl, objectUrl } = data.requestImageUploadUrl;
+
+      const uploadResponse = await fetch(
+        uploadUrl,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+          },
+          body: file,
+        },
+      );
+
+      if (!uploadResponse.ok) {
+        toast("Upload failed", {
+          description: "Could not upload the image.",
+        });
+        return;
+      }
+
+      setLessonBlocks((previousBlocks) =>
+        previousBlocks.map((block) =>
+          block.id === blockId
+            ? { ...block, url: objectUrl }
+            : block
+        )
+      );
+    } catch (error) {
+      console.error("Image upload failed:", error);
+
+      toast("Upload failed", {
+        description: "Something went wrong while uploading the image.",
+      });
+    }
+};
 
   const handleBlockDelete = (blockId: string) => {
     const remainingBlocks = lessonBlocks
@@ -533,13 +693,15 @@ function LessonEditor(){
       <Input value={title} onChange={(e) => setTitle(e.target.value)} type="text" aria-label="Lesson title"/>
       <div className="flex flex-col justify-center align-center">
         {(() => {
-          const htmlBlocks = lessonBlocks.filter((block) => block.type === "HTML");
+          const editableBlocks = lessonBlocks.filter(
+            (block) => block.type === "HTML" || block.type === "IMAGE"
+          );
 
           return (
             <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter} >
-              <SortableContext items={htmlBlocks.map((block) => block.id)} strategy={verticalListSortingStrategy}
+              <SortableContext items={editableBlocks.map((block) => block.id)} strategy={verticalListSortingStrategy}
               >
-                {htmlBlocks.length === 0 && (
+                {editableBlocks.length === 0 && (
                   <p className="mt-4 mb-2 text-center text-sm text-muted-foreground">
                     This lesson has no content yet. Add your first block below.
                   </p>
@@ -551,9 +713,10 @@ function LessonEditor(){
                   openBlockId={openBlockId}
                   onToggle={handleAddButtonClick}
                   onAddText={() => handleAddTextBlock(null)}
+                  onAddImage={() => handleAddImageBlock(null)}
                 />
 
-                {htmlBlocks.map((block) => {
+                {editableBlocks.map((block) => {
                   return (
                     <SortableLessonBlock  block={block} key={block.id} >
                       <Button
@@ -564,24 +727,76 @@ function LessonEditor(){
                       >
                         <Trash className="h-4 w-4"/>
                       </Button>
-                      <div
-                        contentEditable
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(blockText[block.id] ?? ""),
-                        }}
-                        onBlur={(e) => {
-                          handleBlockChange(
-                            block.id,
-                            e.currentTarget.innerHTML
-                          );
-                        }}
-                      >
-                      </div>
+                      {block.type === "HTML" && (
+                        <div
+                          contentEditable
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(blockText[block.id] ?? ""),
+                          }}
+                          onBlur={(e) => {
+                            handleBlockChange(
+                              block.id,
+                              e.currentTarget.innerHTML
+                            );
+                          }}
+                        >
+                        </div>
+                      )}
+                      {block.type === "IMAGE" && (
+                        <div className="w-full rounded-xl border border-dashed p-8 bg-[linear-gradient(135deg,hsl(var(--accent))_0%,hsl(var(--muted))_100%)]">
+                          <div className="flex flex-col items-center justify-center">
+                            <input
+                              id={`image-upload-${block.id}`}
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              className="hidden"
+                              onChange={(e) =>
+                                handleImageSelect(block.id, e.target.files?.[0])
+                              }
+                            />
+
+                            {block.url ? (
+                              <label
+                                htmlFor={`image-upload-${block.id}`}
+                                className="cursor-pointer"
+                              >
+                                <img
+                                  src={block.url}
+                                  alt={block.caption || "Lesson image"}
+                                  className="max-h-80 max-w-full rounded-xl object-contain"
+                                />
+                              </label>
+                            ) : (
+                              <label
+                                htmlFor={`image-upload-${block.id}`}
+                                className="flex cursor-pointer flex-col items-center justify-center"
+                              >
+                                <Image className="h-8 w-8 text-muted-foreground" />
+                                <p className="mt-6 text-lg font-medium">
+                                  Drop image or click to upload
+                                </p>
+                              </label>
+                            )}
+
+                            <Input
+                              type="text"
+                              value={block.caption ?? ""}
+                              onChange={(e) =>
+                                handleCaptionChange(block.id, e.target.value)
+                              }
+                              placeholder="Add a caption"
+                              className="mt-6 max-w-md rounded-xl text-center"
+                              aria-label="Image caption"
+                            />
+                          </div>
+                        </div>
+                      )}
                       <AddBlockMenu
                         controlKey={block.id}
                         openBlockId={openBlockId}
                         onToggle={handleAddButtonClick}
                         onAddText={() => handleAddTextBlock(block.id)}
+                        onAddImage={() => handleAddImageBlock(block.id)}
                       />
                     </SortableLessonBlock>)
                 })}

@@ -2,6 +2,7 @@
 // shared Pothos builder. Keep this list alphabetized by domain.
 import "./course.mutations";
 import "./lessonBlock.mutations";
+import "./media.mutations";
 import "./progress.mutations";
 import "./quiz.mutations";
 import "./skillNode.delete.advanced.mutations";

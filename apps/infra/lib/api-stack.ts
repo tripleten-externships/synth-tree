@@ -1,4 +1,7 @@
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as cloudfrontOrigins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as cdk from "aws-cdk-lib";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as ecs from "aws-cdk-lib/aws-ecs";
@@ -102,6 +105,43 @@ export class ApiStack extends cdk.Stack {
       emptyOnDelete: config.name !== "synth-tree-prod", // Clean up images when stack is deleted
       imageScanOnPush: true, // Enable vulnerability scanning
     });
+
+    // ========================================
+    // Lesson Assets S3 Bucket
+    // ========================================
+
+    const lessonAssetsBucket = new s3.Bucket(this, "LessonAssetsBucket", {
+      bucketName: `${config.name}-lesson-assets`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.PUT],
+          allowedOrigins:
+            config.name === "synth-tree-prod"
+              ? [`https://${config.adminDomain}`]
+              : [`https://${config.adminDomain}`, `http://localhost:5173`],
+          allowedHeaders: ["Content-Type"],
+        },
+      ],
+    });
+
+    const lessonAssetsDistribution = new cloudfront.Distribution(
+      this,
+      "LessonAssetsDistribution",
+      {
+        defaultBehavior: {
+          origin: cloudfrontOrigins.S3BucketOrigin.withOriginAccessControl(
+            lessonAssetsBucket,
+          ),
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
+          compress: true,
+        },
+      },
+    );
 
     // ========================================
     // SSL Certificate
@@ -303,6 +343,9 @@ export class ApiStack extends cdk.Stack {
     // Grant permissions to read database secret
     databaseSecret.grantRead(taskRole);
 
+    // Grant permission to upload lesson assets to S3
+    lessonAssetsBucket.grantWrite(taskRole);
+
     // Grant permissions to read parameters from Parameter Store
     taskRole.addToPolicy(
       new iam.PolicyStatement({
@@ -351,6 +394,9 @@ export class ApiStack extends cdk.Stack {
         DATABASE_HOST: databaseCluster.clusterEndpoint.hostname,
         DATABASE_PORT: databaseCluster.clusterEndpoint.port.toString(),
         DATABASE_NAME: config.database.databaseName,
+        LESSON_ASSETS_BUCKET_NAME: lessonAssetsBucket.bucketName,
+        LESSON_ASSETS_CLOUDFRONT_DOMAIN:
+          lessonAssetsDistribution.distributionDomainName,
       },
       secrets: {
         // Database credentials from Secrets Manager
